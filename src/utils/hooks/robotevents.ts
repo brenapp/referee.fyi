@@ -22,7 +22,7 @@ export function useEventTeams(
 ): UseQueryResult<robotevents.teams.Team[]> {
     return useQuery(["teams", event?.sku], async () => {
         if (!event) {
-            return { overall: [], grades: {} };
+            return [];
         }
 
         const teams = await event.teams({ registered: true });

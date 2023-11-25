@@ -7,13 +7,17 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Button, IconButton } from "./components/Button";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import clsx from "clsx";
-import { useEventTeams, useEventsToday } from "./utils/hooks/robotevents";
+import {
+  useEventMatches,
+  useEventTeams,
+  useEventsToday,
+} from "./utils/hooks/robotevents";
 import { type Event } from "robotevents/out/endpoints/events";
-import { Input } from "./components/Input";
 import { Spinner } from "./components/Spinner";
 import { Tabs } from "./components/Tabs";
+import { Match } from "robotevents/out/endpoints/matches";
 
 type EventPickerProps = {
   event: Event | null;
@@ -105,6 +109,59 @@ const EventTeamsTab: React.FC<MainTabProps> = ({ event }) => {
   );
 };
 
+const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "numeric",
+});
+
+const EventMatchesTab: React.FC<MainTabProps> = ({ event }) => {
+  const { data: matches, isLoading } = useEventMatches(event, 1);
+
+  function matchTime(match: Match) {
+    if (match.started) {
+      return dateFormatter.format(new Date(match.started));
+    }
+
+    return dateFormatter.format(new Date(match.scheduled));
+  }
+
+  return (
+    <section className="flex-1 flex flex-col gap-4">
+      <Spinner show={isLoading} />
+      <ul className="flex-1 overflow-y-auto">
+        {matches?.map((match) => (
+          <li
+            key={match.id}
+            className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
+          >
+            <div className="flex-1">
+              <p>{match.name}</p>
+              <p className="text-sm italic">{matchTime(match)}</p>
+            </div>
+            {match.alliances.map((alliance) => {
+              const color = {
+                red: "bg-red-400",
+                blue: "bg-blue-400",
+              }[alliance.color];
+
+              return (
+                <div
+                  key={alliance.color}
+                  className={clsx("w-20 text-center rounded-md", color)}
+                >
+                  {alliance.teams.map((team) => (
+                    <p key={team.team.name}>{team.team.name}</p>
+                  ))}
+                </div>
+              );
+            })}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+};
+
 function App() {
   const [event, setEvent] = useState<Event | null>(null);
 
@@ -118,7 +175,7 @@ function App() {
         <Tabs className="mt-4">
           {{
             Teams: <EventTeamsTab event={event} />,
-            Matches: <p className="text-zinc-50">Matches</p>,
+            Matches: <EventMatchesTab event={event} />,
           }}
         </Tabs>
       ) : null}

@@ -5,4 +5,5 @@
 body,
 html {
   background-color: theme("colors.zinc.800");
+  color: theme("colors.zinc.100");
 }

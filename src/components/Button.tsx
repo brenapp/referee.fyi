@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { Link, LinkProps } from "react-router-dom";
 
 type BaseButtonProps = React.DetailedHTMLProps<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -33,6 +34,22 @@ export const Button: React.FC<ButtonProps> = (props) => {
       className={clsx(
         props.className,
         "rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2",
+        "hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500"
+      )}
+    />
+  );
+};
+
+export type LinkButtonProps = LinkProps &
+  React.RefAttributes<HTMLAnchorElement>;
+
+export const LinkButton: React.FC<LinkButtonProps> = (props) => {
+  return (
+    <Link
+      {...props}
+      className={clsx(
+        props.className,
+        "inline-block rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2",
         "hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500"
       )}
     />

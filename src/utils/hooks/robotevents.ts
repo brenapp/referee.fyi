@@ -17,6 +17,16 @@ export function useEvent(sku: string) {
     });
 }
 
+export function useTeam(team: string) {
+    return useQuery(["team", team], async () => {
+        if (!team) {
+            return null;
+        }
+
+        return await robotevents.teams.get(team);
+    });
+
+}
 
 export function useEventTeams(
     event: robotevents.events.Event | null | undefined

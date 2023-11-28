@@ -8,6 +8,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { twMerge } from "tailwind-merge";
+import { Spinner } from "../components/Spinner";
 
 const EventPicker: React.FC = ({}) => {
   const [open, setOpen] = useState(false);
@@ -66,7 +67,7 @@ const EventPicker: React.FC = ({}) => {
 
 export const AppShell: React.FC = () => {
   const { sku } = useParams();
-  const { data: event } = useEvent(sku ?? "");
+  const { data: event, isLoading } = useEvent(sku ?? "");
 
   return (
     <main
@@ -82,6 +83,7 @@ export const AppShell: React.FC = () => {
           <BookOpenIcon height={24} />
         </LinkButton>
       </nav>
+      <Spinner show={isLoading} />
       <Outlet />
     </main>
   );

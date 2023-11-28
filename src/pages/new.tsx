@@ -3,11 +3,13 @@ import {
   useEvent,
   useEventMatches,
   useEventTeams,
-} from "../../utils/hooks/robotevents";
+} from "../utils/hooks/robotevents";
 import { Team } from "robotevents/out/endpoints/teams";
 import { Match } from "robotevents/out/endpoints/matches";
-import { Select } from "../../components/Input";
+import { Select } from "../components/Input";
 import { useCallback, useMemo, useState } from "react";
+import { Error, Warning } from "../components/Warning";
+import { Button } from "../components/Button";
 
 export type Incident = {
   team?: Team;
@@ -26,6 +28,17 @@ function getIssues(incident: Incident): Issue[] {
     issues.push({
       message: "Must select at least team or match",
       type: "error",
+    });
+  }
+
+  const hasTeam = incident.match?.alliances.some((a) =>
+    a.teams.some((t) => t.team.id === incident.team?.id)
+  );
+
+  if (!hasTeam && incident.team) {
+    issues.push({
+      message: "Team not in match",
+      type: "warning",
     });
   }
 
@@ -86,9 +99,17 @@ export const EventNewIncidentPage: React.FC<EventNewIncidentPageProps> = ({
   return (
     <section className="mt-4">
       <h1 className="text-emerald-400 text-lg">New Report</h1>
-      {issues.map((issue) => (
-        <p className="text-red-500">{issue.message}</p>
-      ))}
+      {issues.map((issue) =>
+        issue.type === "error" ? (
+          <Error message={issue.message} className="mt-4" key={issue.message} />
+        ) : (
+          <Warning
+            message={issue.message}
+            className="mt-4"
+            key={issue.message}
+          />
+        )
+      )}
       <label>
         <p className="mt-4">Team Number</p>
         <Select
@@ -96,7 +117,7 @@ export const EventNewIncidentPage: React.FC<EventNewIncidentPageProps> = ({
           onChange={onChangeIncidentTeam}
           className="max-w-full w-full"
         >
-          <option disabled>Pick A Team</option>
+          <option>Pick A Team</option>
           {teams?.map((team) => (
             <option value={team.number} key={team.id}>
               {team.number} - {team.team_name}
@@ -111,7 +132,7 @@ export const EventNewIncidentPage: React.FC<EventNewIncidentPageProps> = ({
           onChange={onChangeIncidentMatch}
           className="max-w-full w-full"
         >
-          <option disabled>Pick A Match</option>
+          <option>Pick A Match</option>
           {matches?.map((match) => (
             <option value={match.id} key={match.id}>
               {match.name}
@@ -119,6 +140,7 @@ export const EventNewIncidentPage: React.FC<EventNewIncidentPageProps> = ({
           ))}
         </Select>
       </label>
+      <Button className="w-full text-center mt-4">Submit</Button>
     </section>
   );
 };

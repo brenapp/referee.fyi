@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useTeam } from "../../utils/hooks/robotevents";
 import { Spinner } from "../../components/Spinner";
+import { useMemo } from "react";
 
 export type TeamPageParams = {
   sku: string;
@@ -10,6 +11,13 @@ export type TeamPageParams = {
 export const EventTeamsPage: React.FC = () => {
   const { number } = useParams<TeamPageParams>();
   const { data: team, isLoading } = useTeam(number ?? "");
+
+  const teamLocation = useMemo(() => {
+    if (!team) return null;
+    return [team?.location.city, team?.location.region, team?.location.country]
+      .filter(Boolean)
+      .join(", ");
+  }, [team?.location]);
 
   return (
     <section>
@@ -22,10 +30,7 @@ export const EventTeamsPage: React.FC = () => {
             <span>{team.team_name}</span>
           </h1>
 
-          <p className="italic">
-            {team?.location.city}, {team?.location.region},{" "}
-            {team?.location.country}
-          </p>
+          <p className="italic">{teamLocation}</p>
         </header>
       )}
     </section>

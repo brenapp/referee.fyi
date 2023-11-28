@@ -8,7 +8,7 @@ export const RulesPage: React.FC = () => {
   const programClassName: Record<ProgramAbbr, string> = {
     VRC: "bg-red-400",
     VIQRC: "bg-blue-400",
-    VEXU: "bg-black text-white",
+    VEXU: "bg-zinc-900 text-white",
     VAIC: "bg-zinc-300 text-black",
     WORKSHOP: "",
     NRL: "",

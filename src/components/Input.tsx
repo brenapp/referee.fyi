@@ -1,9 +1,7 @@
 import { twMerge } from "tailwind-merge";
+import { HTMLProps } from "../utils/types";
 
-export type InputBaseProps = React.DetailedHTMLProps<
-  React.InputHTMLAttributes<HTMLInputElement>,
-  HTMLInputElement
->;
+export type InputBaseProps = HTMLProps<HTMLInputElement>;
 
 export type InputProps = InputBaseProps & {};
 

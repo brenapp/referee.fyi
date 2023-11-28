@@ -1,10 +1,8 @@
 import { twMerge } from "tailwind-merge";
 import { Link, LinkProps } from "react-router-dom";
+import { HTMLProps } from "../utils/types";
 
-type BaseButtonProps = React.DetailedHTMLProps<
-  React.ButtonHTMLAttributes<HTMLButtonElement>,
-  HTMLButtonElement
->;
+type BaseButtonProps = HTMLProps<HTMLButtonElement>;
 
 export type IconButtonProps = BaseButtonProps & {
   icon: React.ReactNode;

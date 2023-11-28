@@ -66,10 +66,18 @@ const EventPicker: React.FC = ({}) => {
 
 export const AppShell: React.FC = () => {
   return (
-    <main className="p-4">
+    <main
+      className="p-4 w-full h-full grid"
+      style={{ gridTemplateRows: "4rem 1fr" }}
+    >
       <nav className="h-16 flex gap-4 max-w-full">
         <EventPicker />
-        <IconButton icon={<BookOpenIcon height={24} />} />
+        <LinkButton
+          to="/rules"
+          className="flex items-center aspect-square justify-center"
+        >
+          <BookOpenIcon height={24} />
+        </LinkButton>
       </nav>
       <Outlet />
     </main>

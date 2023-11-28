@@ -84,7 +84,7 @@ export const AppShell: React.FC = () => {
         </LinkButton>
       </nav>
       <Spinner show={isLoading} />
-      <Outlet />
+      {!isLoading && <Outlet />}
     </main>
   );
 };

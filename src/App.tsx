@@ -6,6 +6,7 @@ import { EventTeamsPage } from "./pages/events/team";
 import { EventNewIncidentPage } from "./pages/events/new";
 import { RulesPage } from "./pages/rules";
 import { RulesProgramPage } from "./pages/rules/program";
+import { EventDivisionPickerPage } from "./pages/events/division";
 
 function App() {
   return (
@@ -17,9 +18,13 @@ function App() {
             <Route path="/rules/:program" element={<RulesProgramPage />} />
           </Route>
           <Route path="/:sku">
-            <Route index path="/:sku" element={<EventPage />} />
+            <Route index path="/:sku" element={<EventDivisionPickerPage />} />
+            <Route path="/:sku/:division" element={<EventPage />} />
             <Route path="/:sku/team/:number" element={<EventTeamsPage />} />
-            <Route path="/:sku/new" element={<EventNewIncidentPage />} />
+            <Route
+              path="/:sku/:division/new"
+              element={<EventNewIncidentPage />}
+            />
           </Route>
         </Route>
       </Routes>

@@ -12,6 +12,7 @@ import { Tabs } from "../../components/Tabs";
 import { Event } from "robotevents/out/endpoints/events";
 import { LinkButton } from "../../components/Button";
 import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
+import { MatchContext } from "../../components/Context";
 
 export type MainTabProps = {
   event: Event;
@@ -81,23 +82,7 @@ const EventMatchesTab: React.FC<MainTabProps> = ({ event }) => {
               <p>{match.name}</p>
               <p className="text-sm italic">{matchTime(match)}</p>
             </div>
-            {match.alliances.map((alliance) => {
-              const color = {
-                red: "bg-red-400",
-                blue: "bg-blue-400",
-              }[alliance.color];
-
-              return (
-                <div
-                  key={alliance.color}
-                  className={twMerge("w-20 text-center rounded-md", color)}
-                >
-                  {alliance.teams.map((team) => (
-                    <p key={team.team.name}>{team.team.name}</p>
-                  ))}
-                </div>
-              );
-            })}
+            <MatchContext match={match} />
           </li>
         ))}
       </ul>

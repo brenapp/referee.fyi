@@ -7,7 +7,7 @@ import {
 import { Team } from "robotevents/out/endpoints/teams";
 import { Match } from "robotevents/out/endpoints/matches";
 import { Select } from "../../components/Input";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 export type Incident = {
   team?: Team;
@@ -51,13 +51,52 @@ export const EventNewIncidentPage: React.FC<EventNewIncidentPageProps> = ({
     team,
     match,
   });
+  const issues = useMemo(() => getIssues(incident), [incident]);
+
+  const setIncidentField = <T extends keyof Incident>(
+    key: T,
+    value: Incident[T]
+  ) => {
+    setIncident((i) => ({
+      ...i,
+      [key]: value,
+    }));
+  };
+
+  const onChangeIncidentTeam = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const team = teams?.find((t) => t.number === e.target.value);
+      if (!team) return;
+
+      setIncidentField("team", team);
+    },
+    [teams]
+  );
+
+  const onChangeIncidentMatch = useCallback(
+    (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const match = matches?.find((m) => m.id.toString() === e.target.value);
+      if (!match) return;
+
+      setIncidentField("match", match);
+    },
+    [matches]
+  );
 
   return (
     <section className="mt-4">
       <h1 className="text-emerald-400 text-lg">New Report</h1>
+      {issues.map((issue) => (
+        <p className="text-red-500">{issue.message}</p>
+      ))}
       <label>
         <p className="mt-4">Team Number</p>
-        <Select value={incident.team?.number} className="max-w-full w-full">
+        <Select
+          value={incident.team?.number}
+          onChange={onChangeIncidentTeam}
+          className="max-w-full w-full"
+        >
+          <option disabled>Pick A Team</option>
           {teams?.map((team) => (
             <option value={team.number} key={team.id}>
               {team.number} - {team.team_name}
@@ -67,7 +106,12 @@ export const EventNewIncidentPage: React.FC<EventNewIncidentPageProps> = ({
       </label>
       <label>
         <p className="mt-4">Match</p>
-        <Select value={incident.match?.id} className="max-w-full w-full">
+        <Select
+          value={incident.match?.id}
+          onChange={onChangeIncidentMatch}
+          className="max-w-full w-full"
+        >
+          <option disabled>Pick A Match</option>
           {matches?.map((match) => (
             <option value={match.id} key={match.id}>
               {match.name}

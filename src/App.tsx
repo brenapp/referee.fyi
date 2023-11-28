@@ -5,6 +5,7 @@ import { EventPage } from "./pages/events";
 import { EventTeamsPage } from "./pages/events/team";
 import { EventNewIncidentPage } from "./pages/events/new";
 import { RulesPage } from "./pages/rules";
+import { RulesProgramPage } from "./pages/rules/program";
 
 function App() {
   return (
@@ -12,10 +13,11 @@ function App() {
       <Routes>
         <Route path="/" element={<AppShell />}>
           <Route path="/rules">
-            <Route path="/rules" element={<RulesPage />} />
+            <Route index path="/rules" element={<RulesPage />} />
+            <Route path="/rules/:program" element={<RulesProgramPage />} />
           </Route>
           <Route path="/:sku">
-            <Route path="/:sku" element={<EventPage />} />
+            <Route index path="/:sku" element={<EventPage />} />
             <Route path="/:sku/team/:number" element={<EventTeamsPage />} />
             <Route path="/:sku/new" element={<EventNewIncidentPage />} />
           </Route>

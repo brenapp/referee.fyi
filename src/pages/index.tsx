@@ -7,7 +7,7 @@ import {
   ChevronDownIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import clsx from "clsx";
+import { twMerge } from "tailwind-merge";
 
 const EventPicker: React.FC = ({}) => {
   const [open, setOpen] = useState(false);
@@ -19,7 +19,7 @@ const EventPicker: React.FC = ({}) => {
   if (open) {
     return (
       <section
-        className={clsx(
+        className={twMerge(
           "fixed top-0 bottom-0 left-0 right-0 h-[100dvh] w-screen bg-zinc-700 flex flex-col p-2 gap-2"
         )}
       >
@@ -50,7 +50,7 @@ const EventPicker: React.FC = ({}) => {
   }
 
   return (
-    <Button className={clsx("flex-1")} onClick={() => setOpen(true)}>
+    <Button className={twMerge("flex-1")} onClick={() => setOpen(true)}>
       <div
         className="grid items-center gap-2"
         style={{ gridTemplateColumns: "1fr 1.25rem" }}
@@ -65,6 +65,9 @@ const EventPicker: React.FC = ({}) => {
 };
 
 export const AppShell: React.FC = () => {
+  const { sku } = useParams();
+  const { data: event } = useEvent(sku ?? "");
+
   return (
     <main
       className="p-4 w-full h-full grid"
@@ -73,7 +76,7 @@ export const AppShell: React.FC = () => {
       <nav className="h-16 flex gap-4 max-w-full">
         <EventPicker />
         <LinkButton
-          to="/rules"
+          to={`/rules/${event?.program.code ?? ""}`}
           className="flex items-center aspect-square justify-center"
         >
           <BookOpenIcon height={24} />

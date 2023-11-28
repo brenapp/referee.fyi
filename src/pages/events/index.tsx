@@ -5,13 +5,13 @@ import {
   useEventTeams,
 } from "../../utils/hooks/robotevents";
 import { Spinner } from "../../components/Spinner";
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { Match } from "robotevents/out/endpoints/matches";
-import clsx from "clsx";
+import { twMerge } from "tailwind-merge";
+
 import { Tabs } from "../../components/Tabs";
 import { Event } from "robotevents/out/endpoints/events";
 import { LinkButton } from "../../components/Button";
-import { FlagIcon } from "@heroicons/react/20/solid";
+import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
 
 export type MainTabProps = {
   event: Event;
@@ -90,7 +90,7 @@ const EventMatchesTab: React.FC<MainTabProps> = ({ event }) => {
               return (
                 <div
                   key={alliance.color}
-                  className={clsx("w-20 text-center rounded-md", color)}
+                  className={twMerge("w-20 text-center rounded-md", color)}
                 >
                   {alliance.teams.map((team) => (
                     <p key={team.team.name}>{team.team.name}</p>

@@ -1,5 +1,5 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
-import clsx from "clsx";
+import { twMerge } from "tailwind-merge";
 import React from "react";
 
 export type SpinnerProps = Omit<React.SVGProps<SVGSVGElement>, "ref"> & {
@@ -13,7 +13,10 @@ export const Spinner: React.FC<SpinnerProps> = ({ show, ...props }) => {
     <div className="flex justify-center my-4">
       <ArrowPathIcon
         {...props}
-        className={clsx("animate-spin h-6 w-6 text-zinc-100", props.className)}
+        className={twMerge(
+          "animate-spin h-6 w-6 text-zinc-100",
+          props.className
+        )}
       />
     </div>
   );

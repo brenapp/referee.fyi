@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export type InputBaseProps = React.DetailedHTMLProps<
   React.InputHTMLAttributes<HTMLInputElement>,
@@ -11,7 +11,7 @@ export const Input: React.FC<InputProps> = (props) => {
   return (
     <input
       {...props}
-      className={clsx(
+      className={twMerge(
         "rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2",
         "hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500",
         props.className
@@ -31,7 +31,7 @@ export const Select: React.FC<SelectBaseProps> = ({ children, ...props }) => {
   return (
     <select
       {...props}
-      className={clsx(
+      className={twMerge(
         "rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2",
         "hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500",
         props.className

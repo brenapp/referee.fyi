@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.0.18",
-    "clsx": "^2.0.0",
     "csv": "^6.3.5",
     "heroicons": "^2.0.18",
     "localforage": "^1.10.0",
@@ -21,7 +20,8 @@
     "react-query": "^3.39.3",
     "react-router-dom": "^6.20.0",
     "robotevents": "^3.1.0",
-    "sort-by": "^1.2.0"
+    "sort-by": "^1.2.0",
+    "tailwind-merge": "^2.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",

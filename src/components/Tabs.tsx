@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { twMerge } from "tailwind-merge";
 import React from "react";
 
 export type TabsProps = Omit<
@@ -24,7 +24,7 @@ export const Tabs: React.FC<TabsProps> = ({ children, ...props }) => {
             aria-selected={index === activeTab}
             aria-controls={`panel-${key}`}
             onClick={() => setActiveTab(index)}
-            className={clsx(
+            className={twMerge(
               "text-zinc-50 flex-1 text-center py-2 px-4",
               index === activeTab &&
                 "text-emerald-400 border-b border-b-emerald-400 "

@@ -61,11 +61,13 @@ export const MatchContext: React.FC<MatchContextProps> = ({
       .map((t) => t.team);
 
     return (
-      <AllianceList
-        teams={teams}
-        color="blue"
-        score={match.alliances[0].score}
-      />
+      <div {...props}>
+        <AllianceList
+          teams={teams}
+          color="blue"
+          score={match.alliances[0].score}
+        />
+      </div>
     );
   }
 

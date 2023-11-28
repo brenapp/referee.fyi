@@ -1,6 +1,5 @@
-import { useParams, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
-  useEvent,
   useEventMatch,
   useEventMatches,
   useEventTeams,
@@ -9,10 +8,11 @@ import {
 import { Team } from "robotevents/out/endpoints/teams";
 import { Match } from "robotevents/out/endpoints/matches";
 import { Select } from "../../components/Input";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Error, Warning } from "../../components/Warning";
 import { Button } from "../../components/Button";
 import { MatchContext } from "../../components/Context";
+import { useCurrentDivision, useCurrentEvent } from "../../utils/hooks/state";
 
 export type Incident = {
   team?: Team | null;
@@ -53,12 +53,13 @@ export type EventNewIncidentPageProps = {};
 export const EventNewIncidentPage: React.FC<
   EventNewIncidentPageProps
 > = ({}) => {
-  const { sku } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { data: event } = useEvent(sku ?? "");
+  const { data: event } = useCurrentEvent();
+  const division = useCurrentDivision();
+
   const { data: teams } = useEventTeams(event);
-  const { data: matches } = useEventMatches(event, 1);
+  const { data: matches } = useEventMatches(event, division);
 
   const { data: team } = useTeam(
     searchParams.get("team") ?? "",
@@ -74,6 +75,12 @@ export const EventNewIncidentPage: React.FC<
     team,
     match,
   });
+
+  useEffect(() => {
+    setIncidentField("team", team);
+    setIncidentField("match", match);
+  }, [team, match]);
+
   const issues = useMemo(() => getIssues(incident), [incident]);
 
   const setIncidentField = <T extends keyof Incident>(

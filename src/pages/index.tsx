@@ -92,8 +92,7 @@ const EventPicker: React.FC = ({}) => {
 };
 
 export const AppShell: React.FC = () => {
-  const { sku } = useParams();
-  const { data: event, isLoading } = useEvent(sku ?? "");
+  const { data: event, isLoading } = useCurrentEvent();
 
   return (
     <main

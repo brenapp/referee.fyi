@@ -1,18 +1,14 @@
-import { Link, useParams } from "react-router-dom";
-import {
-  useEvent,
-  useEventMatches,
-  useEventTeams,
-} from "../../utils/hooks/robotevents";
+import { Link } from "react-router-dom";
+import { useEventMatches, useEventTeams } from "../../utils/hooks/robotevents";
 import { Spinner } from "../../components/Spinner";
 import { Match } from "robotevents/out/endpoints/matches";
-import { twMerge } from "tailwind-merge";
 
 import { Tabs } from "../../components/Tabs";
 import { Event } from "robotevents/out/endpoints/events";
 import { LinkButton } from "../../components/Button";
 import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { MatchContext } from "../../components/Context";
+import { useCurrentDivision, useCurrentEvent } from "../../utils/hooks/state";
 
 export type MainTabProps = {
   event: Event;
@@ -59,7 +55,8 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 const EventMatchesTab: React.FC<MainTabProps> = ({ event }) => {
-  const { data: matches, isLoading } = useEventMatches(event, 1);
+  const division = useCurrentDivision();
+  const { data: matches, isLoading } = useEventMatches(event, division);
 
   function matchTime(match: Match) {
     if (match.started) {
@@ -95,13 +92,13 @@ export type EventPageParams = {
 };
 
 export const EventPage: React.FC = () => {
-  const { sku } = useParams<EventPageParams>();
-  const { data: event } = useEvent(sku ?? "");
+  const { data: event } = useCurrentEvent();
+  const division = useCurrentDivision();
 
   return event ? (
     <section className="mt-4">
       <LinkButton
-        to={`/${event.sku}/new`}
+        to={`/${event.sku}/${division}/new`}
         className="w-full text-center bg-emerald-600"
       >
         <FlagIcon height={20} className="inline mr-2 " />

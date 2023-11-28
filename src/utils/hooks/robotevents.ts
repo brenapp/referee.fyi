@@ -1,6 +1,10 @@
 import * as robotevents from "robotevents";
 import { UseQueryResult, useQuery } from "react-query";
 import { Round, type Match } from "robotevents/out/endpoints/matches";
+import { Year } from "robotevents/out/endpoints/seasons";
+import { ProgramAbbr } from "robotevents/out/endpoints/programs";
+
+import * as rules from "../../assets/rules.json";
 
 const ROBOTEVENTS_TOKEN =
     "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIzIiwianRpIjoiYjM5Y2I1NGNhMTk0OTM0ODNmNTc0MDQ2MTRhZDY0MDZjYTY1ZmQzMjAzNDlhMmM5YmUwOThlNmJjNzhhZWJmZmZjYzU0ZWY2MTQ2ZmQyYjEiLCJpYXQiOjE2ODc2NDIzODcuNTUwMjg4LCJuYmYiOjE2ODc2NDIzODcuNTUwMjkxMSwiZXhwIjoyNjM0NDE3MTg3LjUzNzIzNjIsInN1YiI6Ijk3MDY5Iiwic2NvcGVzIjpbXX0.k0DEt3QRKkgZnyV8X9mDf6VYyc8aOsIEfQbVN4Gi6Csr7O5ILLGFENXZouvplqbcMDdQ8gBMMLg5hIR38RmrTsKcWHMndq1T8wYkGZQfRhc_uZYLQhGQCaanf_F_-gnKocFwT1AKQJmAPkAbV-Itb2UzHeGpNuW8vV_TaNL3coaYvmM6rubwBuNYgyZhTHW_Mgvzh5-XBqqGpmQLm9TGl4gkeqnS-6a5PfoqRTc8v3CQWSCURFry5BA2oXz0lcWmq92FY5crr2KKv1O3chPr--oMba97elY0y9Dw0q2ipKcTm4pE7bbFP8t7-a_RKU4OyXuHRIQXjw3gEDCYXY5Hp22KMY0idnRIPhat6fybxcRfeyzUzdnubRBkDMNklwlgNCyeu2ROqEOYegtu5727Wwvy2I-xW-ZVoXg0rggVu7jVq6zmBqDFIcu50IS9R4P6a244pg2STlBaAGpzT2VfUqCBZrbtBOvdmdNzxSKIkl1AXeOIZOixo1186PX54p92ehXfCbcTgWrQSLuAAg_tBa6T7UFKFOGecVFo3v0vkmE__Q5-701f1qqcdDRNlOG-bzzFh9QLEdJWlpEajwYQ1ZjTAlbnBpKy3IrU0Aa-Jr0aqxtzgr5ZlghNtOcdYYRw5_BN0BOMmAnkvtm0_xzIJSsFbWJQJ8QpPk_n4zKZf-Y";
@@ -93,3 +97,34 @@ export function useEventsToday(): UseQueryResult<robotevents.events.Event[]> {
         return events.sort((a, b) => a.name.localeCompare(b.name));
     });
 }
+
+export type Rule = {
+    rule: string;
+    description: string;
+    link: string;
+}
+
+export type RuleGroup = {
+    name: string;
+    rules: Rule[];
+};
+
+export type Game = {
+    title: string;
+    season: Year;
+    programs: ProgramAbbr[];
+    ruleGroups: RuleGroup[];
+}
+
+export type Rules = {
+    games: Game[]
+}
+
+
+export function useGameRules(game: string): Game | undefined {
+    return rules.games.find(g => g.title === game) as Game | undefined;
+};
+
+export function useRulesForProgram(program: ProgramAbbr, year: Year = "2023-2024"): Game | undefined {
+    return rules.games.find(g => g.season === year && g.programs.includes(program)) as Game | undefined;
+};

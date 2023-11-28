@@ -1,0 +1,41 @@
+{
+  "games": [
+    {
+      "title": "Over Under",
+      "season": "2023-2024",
+      "programs": ["VRC", "VEXU", "VAIC"],
+      "ruleGroups": [
+        {
+          "name": "Scoring Rules",
+          "rules": [
+            {
+              "rule": "<SC1>",
+              "description": "All scoring statuses are evaluated immediately after the Match ends",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/SC1.html"
+            },
+            {
+              "rule": "<SC2>",
+              "description": "Scoring of the Autonomous Bonus is immediately after the Autonomous Period",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/SC2.html"
+            },
+            {
+              "rule": "<SC3>",
+              "description": "Scored in a Goal criteria",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/SC3.html"
+            },
+            {
+              "rule": "<SC4>",
+              "description": "Scored in an Offensive Zone criteria",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/SC4.html"
+            },
+            {
+              "rule": "<SC5>",
+              "description": "Alliance triballs",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/SC5.html"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

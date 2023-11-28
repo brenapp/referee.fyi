@@ -1,19 +1,22 @@
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import {
   useEvent,
+  useEventMatch,
   useEventMatches,
   useEventTeams,
-} from "../utils/hooks/robotevents";
+  useTeam,
+} from "../../utils/hooks/robotevents";
 import { Team } from "robotevents/out/endpoints/teams";
 import { Match } from "robotevents/out/endpoints/matches";
-import { Select } from "../components/Input";
+import { Select } from "../../components/Input";
 import { useCallback, useMemo, useState } from "react";
-import { Error, Warning } from "../components/Warning";
-import { Button } from "../components/Button";
+import { Error, Warning } from "../../components/Warning";
+import { Button } from "../../components/Button";
+import { MatchContext } from "../../components/Context";
 
 export type Incident = {
-  team?: Team;
-  match?: Match;
+  team?: Team | null;
+  match?: Match | null;
 };
 
 type Issue = {
@@ -45,20 +48,27 @@ function getIssues(incident: Incident): Issue[] {
   return issues;
 }
 
-export type EventNewIncidentPageProps = {
-  team?: Team;
-  match?: Match;
-};
+export type EventNewIncidentPageProps = {};
 
-export const EventNewIncidentPage: React.FC<EventNewIncidentPageProps> = ({
-  team,
-  match,
-}) => {
+export const EventNewIncidentPage: React.FC<
+  EventNewIncidentPageProps
+> = ({}) => {
   const { sku } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const { data: event } = useEvent(sku ?? "");
   const { data: teams } = useEventTeams(event);
   const { data: matches } = useEventMatches(event, 1);
+
+  const { data: team } = useTeam(
+    searchParams.get("team") ?? "",
+    event?.program.code
+  );
+  const { data: match } = useEventMatch(
+    event,
+    1,
+    Number.parseInt(searchParams.get("match") ?? "")
+  );
 
   const [incident, setIncident] = useState<Incident>({
     team,
@@ -140,6 +150,9 @@ export const EventNewIncidentPage: React.FC<EventNewIncidentPageProps> = ({
           ))}
         </Select>
       </label>
+      {incident.match && (
+        <MatchContext match={incident.match} className="mt-4 justify-between" />
+      )}
       <Button className="w-full text-center mt-4">Submit</Button>
     </section>
   );

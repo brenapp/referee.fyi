@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AppShell } from "./pages";
 import { EventPage } from "./pages/events";
 import { EventTeamsPage } from "./pages/events/team";
-import { EventNewIncidentPage } from "./pages/new";
+import { EventNewIncidentPage } from "./pages/events/new";
 import { RulesPage } from "./pages/rules";
 import { RulesProgramPage } from "./pages/rules/program";
 

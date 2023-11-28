@@ -4,12 +4,16 @@ import { AppShell } from "./pages";
 import { EventPage } from "./pages/events";
 import { EventTeamsPage } from "./pages/events/team";
 import { EventNewIncidentPage } from "./pages/events/new";
+import { RulesPage } from "./pages/rules";
 
 function App() {
   return (
-    <BrowserRouter basename="/anomaly">
+    <BrowserRouter basename="/">
       <Routes>
         <Route path="/" element={<AppShell />}>
+          <Route path="/rules">
+            <Route path="/rules" element={<RulesPage />} />
+          </Route>
           <Route path="/:sku">
             <Route path="/:sku" element={<EventPage />} />
             <Route path="/:sku/team/:number" element={<EventTeamsPage />} />

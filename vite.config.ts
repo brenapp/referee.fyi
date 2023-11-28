@@ -10,5 +10,5 @@ export default defineConfig({
     react(),
     nodePolyfills({ include: ["events"], protocolImports: true })
   ],
-  base: "/anomaly",
+  base: "/",
 })

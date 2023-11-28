@@ -23,45 +23,33 @@ export const AllianceList: React.FC<AllianceListProps> = ({
   return (
     <div
       className={twMerge(
-        "flex items-center justify-between",
+        "flex items-center justify-between w-28 px-1 rounded-md",
         reverse ? "flex-row-reverse" : "",
+        colorClass,
         props.className
       )}
       {...props}
     >
-      <ul
-        className={twMerge(
-          "rounded-md font-mono w-18 h-12 px-2",
-          reverse
-            ? "rounded-r-md rounded-l-none"
-            : "rounded-l-md rounded-r-none",
-          colorClass
-        )}
-      >
+      <ul className={twMerge("rounded-md font-mono w-16 h-12")}>
         {teams.map((team) => (
-          <li key={team.id} className="text-right">
-            {team.id}
+          <li key={team.id} className={reverse ? "text-right" : "text-left"}>
+            {team.name}
           </li>
         ))}
       </ul>
-      <p
-        className={twMerge(
-          "font-mono text-xl h-12 w-12 flex items-center justify-center px-2",
-          reverse ? "rounded-l-md" : "rounded-r-md",
-          colorClass
-        )}
-      >
-        {score}
-      </p>
+      <p className={twMerge("font-mono text-xl")}>{score}</p>
     </div>
   );
 };
 
 export type MatchContextProps = {
   match: Match;
-};
+} & HTMLProps<HTMLDivElement>;
 
-export const MatchContext: React.FC<MatchContextProps> = ({ match }) => {
+export const MatchContext: React.FC<MatchContextProps> = ({
+  match,
+  ...props
+}) => {
   const { data: event } = useEvent(match.event.code);
 
   if (!event) return null;
@@ -85,7 +73,7 @@ export const MatchContext: React.FC<MatchContextProps> = ({ match }) => {
   const blue = match.alliance("blue");
 
   return (
-    <div className="flex gap-2">
+    <div {...props} className={twMerge("flex gap-2", props.className)}>
       <AllianceList
         teams={red.teams.map((t) => t.team)}
         color="red"

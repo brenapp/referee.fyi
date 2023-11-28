@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useTeam } from "../../utils/hooks/robotevents";
+import { useEvent, useTeam } from "../../utils/hooks/robotevents";
 import { Spinner } from "../../components/Spinner";
 import { useMemo } from "react";
 
@@ -9,8 +9,9 @@ export type TeamPageParams = {
 };
 
 export const EventTeamsPage: React.FC = () => {
-  const { number } = useParams<TeamPageParams>();
-  const { data: team, isLoading } = useTeam(number ?? "");
+  const { number, sku } = useParams<TeamPageParams>();
+  const { data: event } = useEvent(sku ?? "");
+  const { data: team, isLoading } = useTeam(number ?? "", event?.program.code);
 
   const teamLocation = useMemo(() => {
     if (!team) return null;

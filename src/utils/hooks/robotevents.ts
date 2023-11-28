@@ -21,13 +21,13 @@ export function useEvent(sku: string) {
     });
 }
 
-export function useTeam(team: string) {
-    return useQuery(["team", team], async () => {
-        if (!team) {
+export function useTeam(numberOrID: string | number, program?: ProgramAbbr) {
+    return useQuery(["team", numberOrID], async () => {
+        if (!numberOrID) {
             return null;
         }
 
-        return await robotevents.teams.get(team);
+        return await robotevents.teams.get(numberOrID, program);
     });
 
 }
@@ -73,6 +73,18 @@ export function useEventMatches(
         return matches.array().sort((a, b) => logicalMatchComparison(a, b));
     });
 }
+
+export function useEventMatch(event: robotevents.events.Event | null | undefined,
+    division: number | null | undefined, match: number | null | undefined): UseQueryResult<Match | null> {
+    return useQuery(["match", event?.sku, division, match], async () => {
+        if (!event || !division || !match) {
+            return null;
+        }
+
+        const matches = await event.matches(division);
+        return matches.get(match);
+    });
+};
 
 
 export function useEventsToday(): UseQueryResult<robotevents.events.Event[]> {

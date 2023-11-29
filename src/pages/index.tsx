@@ -96,7 +96,7 @@ export const AppShell: React.FC = () => {
 
   return (
     <main
-      className="p-4 w-full h-full grid"
+      className="p-4 w-full min-h-full grid"
       style={{ gridTemplateRows: "4rem 1fr" }}
     >
       <nav className="h-16 flex gap-4 max-w-full">

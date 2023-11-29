@@ -18,7 +18,7 @@ export default defineConfig({
         "start_url": "/",
         "display": "standalone",
         "background_color": "#27272A",
-        "theme_color": "#34d399",
+        "theme_color": "#27272A",
         "description": "Helpful tools for VRC and VIQC Referees",
         "orientation": "portrait-primary",
         "icons": [

@@ -9,6 +9,9 @@ import { LinkButton } from "../../components/Button";
 import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { MatchContext } from "../../components/Context";
 import { useCurrentDivision, useCurrentEvent } from "../../utils/hooks/state";
+import { useEventIncidents } from "../../utils/hooks/incident";
+import { useMemo } from "react";
+import { IncidentOutcome } from "../../utils/data/incident";
 
 export type MainTabProps = {
   event: Event;
@@ -16,6 +19,38 @@ export type MainTabProps = {
 
 const EventTeamsTab: React.FC<MainTabProps> = ({ event }) => {
   const { data: teams, isLoading } = useEventTeams(event);
+
+  const { data: incidents } = useEventIncidents(event.sku);
+
+  const majorIncidents = useMemo(() => {
+    if (!incidents) return new Map<string, number>();
+
+    const grouped = new Map<string, number>();
+
+    for (const incident of incidents) {
+      if (incident.outcome !== IncidentOutcome.Major) continue;
+      const key = incident.team ?? "<none>";
+      const count = grouped.get(key) ?? 0;
+      grouped.set(key, count + 1);
+    }
+
+    return grouped;
+  }, [incidents]);
+
+  const minorIncidents = useMemo(() => {
+    if (!incidents) return new Map<string, number>();
+
+    const grouped = new Map<string, number>();
+
+    for (const incident of incidents) {
+      if (incident.outcome === IncidentOutcome.Major) continue;
+      const key = incident.team ?? "<none>";
+      const count = grouped.get(key) ?? 0;
+      grouped.set(key, count + 1);
+    }
+
+    return grouped;
+  }, [incidents]);
 
   return (
     <section className="flex-1 flex flex-col gap-4">
@@ -34,11 +69,15 @@ const EventTeamsTab: React.FC<MainTabProps> = ({ event }) => {
               <p className="h-full w-32 px-2 flex items-center">
                 <span className="text-red-400 mr-4">
                   <FlagIcon height={24} className="inline" />
-                  <span className="font-mono ml-2">0</span>
+                  <span className="font-mono ml-2">
+                    {majorIncidents.get(team.number) ?? 0}
+                  </span>
                 </span>
                 <span className="text-yellow-400">
                   <ExclamationTriangleIcon height={24} className="inline" />
-                  <span className="font-mono ml-2">0</span>
+                  <span className="font-mono ml-2">
+                    {minorIncidents.get(team.number) ?? 0}
+                  </span>
                 </span>
               </p>
             </Link>

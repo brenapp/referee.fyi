@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Rule,
   useEventMatch,
@@ -7,30 +7,25 @@ import {
   useRulesForProgram,
   useTeam,
 } from "../../utils/hooks/robotevents";
-import { Team } from "robotevents/out/endpoints/teams";
-import { Match } from "robotevents/out/endpoints/matches";
 import { Select, TextArea } from "../../components/Input";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Error, Warning } from "../../components/Warning";
 import { Button } from "../../components/Button";
 import { MatchContext } from "../../components/Context";
 import { useCurrentDivision, useCurrentEvent } from "../../utils/hooks/state";
-import { IncidentOutcome } from "../../utils/hooks/incident";
-
-export type IncidentState = {
-  team?: Team | null;
-  match?: Match | null;
-  rules: Rule[];
-  notes: string;
-  outcome: IncidentOutcome;
-};
+import {
+  IncidentOutcome,
+  RichIncident,
+  packIncident,
+} from "../../utils/data/incident";
+import { useNewIncident } from "../../utils/hooks/incident";
 
 type Issue = {
   message: string;
   type: "warning" | "error";
 };
 
-function getIssues(incident: IncidentState): Issue[] {
+function getIssues(incident: RichIncident): Issue[] {
   const issues: Issue[] = [];
 
   if (!incident.team && !incident.match) {
@@ -61,6 +56,9 @@ export const EventNewIncidentPage: React.FC<
   EventNewIncidentPageProps
 > = ({}) => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const { mutate } = useNewIncident();
 
   const { data: event } = useCurrentEvent();
   const division = useCurrentDivision();
@@ -80,7 +78,10 @@ export const EventNewIncidentPage: React.FC<
     Number.parseInt(searchParams.get("match") ?? "")
   );
 
-  const [incident, setIncident] = useState<IncidentState>({
+  const [incident, setIncident] = useState<RichIncident>({
+    time: new Date(),
+    division: division ?? 1,
+    event: event?.sku ?? "",
     team,
     match,
     rules: [],
@@ -98,9 +99,9 @@ export const EventNewIncidentPage: React.FC<
     return issues.every((i) => i.type === "warning");
   }, [issues]);
 
-  const setIncidentField = <T extends keyof IncidentState>(
+  const setIncidentField = <T extends keyof RichIncident>(
     key: T,
-    value: IncidentState[T]
+    value: RichIncident[T]
   ) => {
     setIncident((i) => ({
       ...i,
@@ -166,8 +167,26 @@ export const EventNewIncidentPage: React.FC<
     },
     []
   );
+
+  const onSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement> | React.MouseEvent) => {
+      e.preventDefault();
+      const packed = packIncident(incident);
+      mutate(packed, {
+        onSuccess: () => {
+          if (packed.team) {
+            navigate(`/${event?.sku}/team/${packed.team}`);
+          } else {
+            navigate(`/${event?.sku}/${division}/`);
+          }
+        },
+      });
+    },
+    [incident]
+  );
+
   return (
-    <section className="mt-4 relative">
+    <form className="mt-4 relative" onSubmit={onSubmit}>
       <h1 className="text-emerald-400 text-lg">New Report</h1>
       {issues.map((issue) =>
         issue.type === "error" ? (
@@ -267,9 +286,10 @@ export const EventNewIncidentPage: React.FC<
       <Button
         className="w-full text-center mt-4 bg-emerald-400 text-black"
         disabled={!canSave}
+        onClick={onSubmit}
       >
         Submit
       </Button>
-    </section>
+    </form>
   );
 };

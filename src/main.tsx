@@ -3,8 +3,11 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { initIncidentStore } from "./utils/data/incident.ts";
 
 const queryClient = new QueryClient();
+
+initIncidentStore();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

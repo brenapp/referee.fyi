@@ -14,7 +14,7 @@ export const IconButton: React.FC<IconButtonProps> = ({ icon, ...props }) => {
       {...props}
       className={twMerge(
         "rounded-md bg-zinc-700 aspect-square flex items-center justify-center text-zinc-100",
-        "hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500",
+        "hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500 disabled:bg-zinc-300 disabled:cursor-not-allowed",
         props.className
       )}
     >
@@ -31,7 +31,7 @@ export const Button: React.FC<ButtonProps> = (props) => {
       {...props}
       className={twMerge(
         "rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2",
-        "hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500",
+        "hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500 disabled:bg-zinc-300 disabled:cursor-not-allowed",
         props.className
       )}
     />
@@ -47,7 +47,7 @@ export const LinkButton: React.FC<LinkButtonProps> = (props) => {
       {...props}
       className={twMerge(
         "inline-block rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2",
-        "hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500",
+        "hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500 disabled:bg-zinc-300 disabled:cursor-not-allowed",
         props.className
       )}
     />

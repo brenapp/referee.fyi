@@ -7,7 +7,7 @@ export function useIncident(id: string | undefined | null) {
             return undefined;
         }
         return getIncident(id);
-    });
+    }, { cacheTime: 0 });
 };
 
 export function useNewIncident() {
@@ -20,7 +20,7 @@ export function useEventIncidents(sku: string | undefined | null) {
             return [];
         }
         return getIncidentsByEvent(sku);
-    });
+    }, { cacheTime: 0 });
 }
 
 export function useTeamIncidents(team: string | undefined | null) {
@@ -29,7 +29,7 @@ export function useTeamIncidents(team: string | undefined | null) {
             return [];
         }
         return getIncidentsByTeam(team);
-    });
+    }, { cacheTime: 0 });
 }
 
 export function useTeamIncidentsByEvent(team: string | undefined | null, sku: string | undefined | null) {
@@ -45,5 +45,5 @@ export function useTeamIncidentsByEvent(team: string | undefined | null, sku: st
         }
 
         return incidents.filter((incident) => incident.event === sku);
-    });
+    }, { cacheTime: 0 });
 };

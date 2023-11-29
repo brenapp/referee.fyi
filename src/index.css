@@ -13,3 +13,8 @@ html {
 #root {
   height: 100%;
 }
+
+dialog:modal {
+  max-width: 100dvw;
+  max-height: 100dvh;
+}

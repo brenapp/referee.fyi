@@ -17,7 +17,7 @@ const EventPicker: React.FC = ({}) => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
-  const { data: eventsToday } = useEventsToday();
+  const { data: eventsToday, isLoading } = useEventsToday();
   const { data: event } = useCurrentEvent();
   const division = useCurrentDivision();
 
@@ -37,30 +37,34 @@ const EventPicker: React.FC = ({}) => {
       <Dialog open={open} mode={DialogMode.Modal}>
         <DialogHeader title="Pick An Event" onClose={() => setOpen(false)} />
         <DialogBody>
-          <ul>
-            {eventsToday?.map((event) => (
-              <li key={event.id}>
-                <LinkButton
-                  to={`/${event.sku}`}
-                  onClick={() => {
-                    setOpen(false);
-                  }}
-                  className="w-full mt-2 bg-transparent"
-                >
-                  <p className=" text-sm whitespace-nowrap text-ellipsis overflow-hidden">
-                    <span className=" text-emerald-400 font-mono">
-                      {event.sku}
-                    </span>
-                    {" • "}
-                    <span>{event.location.venue}</span>
-                  </p>
-                  <p className="whitespace-nowrap text-ellipsis overflow-hidden">
-                    {event.name}
-                  </p>
-                </LinkButton>
-              </li>
-            ))}
-          </ul>
+          <Spinner show={isLoading} />
+          <section>
+            <h2 className="text-lg font-bold text-white mx-3">Events Today</h2>
+            <ul>
+              {eventsToday?.map((event) => (
+                <li key={event.id}>
+                  <LinkButton
+                    to={`/${event.sku}`}
+                    onClick={() => {
+                      setOpen(false);
+                    }}
+                    className="w-full mt-2 bg-transparent"
+                  >
+                    <p className="text-sm whitespace-nowrap text-ellipsis overflow-hidden">
+                      <span className=" text-emerald-400 font-mono">
+                        {event.sku}
+                      </span>
+                      {" • "}
+                      <span>{event.location.venue}</span>
+                    </p>
+                    <p className="whitespace-nowrap text-ellipsis overflow-hidden">
+                      {event.name}
+                    </p>
+                  </LinkButton>
+                </li>
+              ))}
+            </ul>
+          </section>
         </DialogBody>
       </Dialog>
       <Button className={twMerge("flex-1")} onClick={onClick}>

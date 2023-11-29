@@ -99,9 +99,9 @@ export function useEventsToday(): UseQueryResult<robotevents.events.Event[]> {
         const today = new Date();
 
         const yesterday = new Date(today);
-        yesterday.setDate(today.getDate() - 4);
+        yesterday.setDate(today.getDate() - 1);
         const tomorrow = new Date(today);
-        tomorrow.setDate(today.getDate() + 4);
+        tomorrow.setDate(today.getDate() + 1);
 
         const events = await robotevents.events.search({
             start: yesterday.toISOString(),
@@ -134,7 +134,6 @@ export type Game = {
 export type Rules = {
     games: Game[]
 }
-
 
 export function useGameRules(game: string): Game | undefined {
     return rules.games.find(g => g.title === game) as Game | undefined;

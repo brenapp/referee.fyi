@@ -140,6 +140,7 @@ export function useGameRules(game: string): Game | undefined {
     return rules.games.find(g => g.title === game) as Game | undefined;
 };
 
-export function useRulesForProgram(program: ProgramAbbr, year: Year = "2023-2024"): Game | undefined {
+export function useRulesForProgram(program?: ProgramAbbr, year: Year = "2023-2024"): Game | undefined {
+    if (!program) return undefined;
     return rules.games.find(g => g.season === year && g.programs.includes(program)) as Game | undefined;
 };

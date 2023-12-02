@@ -4,6 +4,20 @@ import { IconButton } from "./Button";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 import { useEffect, useRef } from "react";
 
+export type DialogCustomHeaderProps = {
+  children?: React.ReactNode;
+};
+
+export const DialogCustomHeader: React.FC<DialogCustomHeaderProps> = ({
+  children,
+}) => {
+  return (
+    <nav className="h-16 flex p-2 gap-2 items-center max-w-full">
+      {children}
+    </nav>
+  );
+};
+
 export type DialogHeaderProps = {
   title: string;
   onClose: () => void;
@@ -14,7 +28,7 @@ export const DialogHeader: React.FC<DialogHeaderProps> = ({
   onClose,
 }) => {
   return (
-    <nav className="h-16 flex p-2 gap-2 items-center max-w-full">
+    <DialogCustomHeader>
       <IconButton
         icon={<XMarkIcon height={24} />}
         onClick={onClose}
@@ -22,7 +36,7 @@ export const DialogHeader: React.FC<DialogHeaderProps> = ({
         autoFocus
       />
       <h1 className="text-xl text-white">{title}</h1>
-    </nav>
+    </DialogCustomHeader>
   );
 };
 
@@ -80,7 +94,7 @@ export const Dialog: React.FC<DialogProps> = ({
       {...props}
       ref={ref}
       className={twMerge(
-        "bg-zinc-900 flex-col p-2 gap-2 z-50 w-screen h-screen",
+        "bg-zinc-900 flex-col p-2 gap-2 z-50 w-screen h-screen overscroll-none",
         props.className,
         open ? "flex" : ""
       )}

@@ -1,17 +1,28 @@
 import { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import { useEventsToday } from "../utils/hooks/robotevents";
-import { Button, LinkButton } from "../components/Button";
-import { BookOpenIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+  Rule,
+  useEventsToday,
+  useRulesForProgram,
+} from "../utils/hooks/robotevents";
+import { Button, IconButton, LinkButton } from "../components/Button";
+import {
+  BookOpenIcon,
+  ChevronDownIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { twMerge } from "tailwind-merge";
 import { Spinner } from "../components/Spinner";
 import { useCurrentDivision, useCurrentEvent } from "../utils/hooks/state";
 import {
   Dialog,
   DialogBody,
+  DialogCustomHeader,
   DialogHeader,
   DialogMode,
 } from "../components/Dialog";
+import { ProgramAbbr } from "robotevents/out/endpoints/programs";
+import { RulesSelect, Select } from "../components/Input";
 
 const EventPicker: React.FC = ({}) => {
   const [open, setOpen] = useState(false);
@@ -85,8 +96,63 @@ const EventPicker: React.FC = ({}) => {
   );
 };
 
+const Rules: React.FC = () => {
+  const [open, setOpen] = useState(false);
+  const programs: ProgramAbbr[] = ["VRC", "VIQRC", "VEXU", "VAIC"];
+  const [program, setProgram] = useState<ProgramAbbr>("VRC");
+
+  const rules = useRulesForProgram(program);
+  const [rule, setRule] = useState<Rule | null>(null);
+
+  return (
+    <>
+      <Dialog open={open} mode={DialogMode.Modal}>
+        <DialogCustomHeader>
+          <IconButton
+            icon={<XMarkIcon height={24} />}
+            onClick={() => setOpen(false)}
+            className="bg-transparent "
+            autoFocus
+          />
+          <Select
+            value={program}
+            onChange={(e) => setProgram(e.target.value as ProgramAbbr)}
+            className="flex-1"
+          >
+            {programs.map((program) => (
+              <option key={program} value={program}>
+                {program}
+              </option>
+            ))}
+          </Select>
+        </DialogCustomHeader>
+        <DialogBody className="px-2 flex gap-5 flex-col">
+          <RulesSelect
+            game={rules}
+            rule={rule}
+            setRule={setRule}
+            className="w-full"
+          />
+          <section className="p-4 bg-white flex-1 rounded-md">
+            <iframe
+              src={rule?.link ?? "about:blank"}
+              className="w-full h-full"
+            ></iframe>
+          </section>
+        </DialogBody>
+      </Dialog>
+      <Button
+        onClick={() => setOpen(true)}
+        className="flex items-center aspect-square justify-center"
+      >
+        <BookOpenIcon height={24} />
+      </Button>
+    </>
+  );
+};
+
 export const AppShell: React.FC = () => {
-  const { data: event, isLoading } = useCurrentEvent();
+  const { isLoading } = useCurrentEvent();
 
   return (
     <main
@@ -95,12 +161,7 @@ export const AppShell: React.FC = () => {
     >
       <nav className="h-16 flex gap-4 max-w-full">
         <EventPicker />
-        <LinkButton
-          to={`/rules/${event?.program.code ?? ""}`}
-          className="flex items-center aspect-square justify-center"
-        >
-          <BookOpenIcon height={24} />
-        </LinkButton>
+        <Rules />
       </nav>
       <Spinner show={isLoading} />
       {!isLoading && <Outlet />}

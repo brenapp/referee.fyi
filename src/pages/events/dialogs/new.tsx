@@ -155,6 +155,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         ?.rules.find((r) => r.rule === e.target.value);
 
       if (!rule) return;
+      if (incident.rules.some((r) => r.rule === rule.rule)) return;
       setIncidentField("rules", [...incident.rules, rule]);
     },
     [rules, incident.rules]
@@ -270,7 +271,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
                     data-rulegroup={group.name}
                     key={rule.rule}
                   >
-                    {rule.rule}
+                    {rule.rule} - {rule.description}
                   </option>
                 ))}
               </optgroup>

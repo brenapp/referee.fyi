@@ -83,7 +83,7 @@ export const RulesSelect: React.FC<RulesSelectProps> = ({
       if (!rule) return;
       setRule(rule);
     },
-    []
+    [game]
   );
 
   return (
@@ -95,12 +95,12 @@ export const RulesSelect: React.FC<RulesSelectProps> = ({
     >
       <option>Pick A Rule</option>
       {game?.ruleGroups.map((group) => (
-        <optgroup label={group.name} key={group.name}>
+        <optgroup label={group.name} key={game.title + group.name}>
           {group.rules.map((rule) => (
             <option
               value={rule.rule}
               data-rulegroup={group.name}
-              key={rule.rule}
+              key={game.title + rule.rule}
             >
               {rule.rule}
             </option>

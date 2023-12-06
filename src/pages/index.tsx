@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import {
   Rule,
@@ -98,12 +98,26 @@ const EventPicker: React.FC = ({}) => {
 };
 
 const Rules: React.FC = () => {
+  const { data: event } = useCurrentEvent();
+
   const [open, setOpen] = useState(false);
   const programs: ProgramAbbr[] = ["VRC", "VIQRC", "VEXU", "VAIC"];
-  const [program, setProgram] = useState<ProgramAbbr>("VRC");
+  const [program, setProgram] = useState<ProgramAbbr>();
 
   const rules = useRulesForProgram(program);
   const [rule, setRule] = useState<Rule | null>(null);
+
+  useEffect(() => {
+    if (program) {
+      setRule(null);
+    }
+  }, [program]);
+
+  useEffect(() => {
+    if (event) {
+      setProgram(event.program.code);
+    }
+  }, [event]);
 
   return (
     <>
@@ -155,6 +169,7 @@ const Rules: React.FC = () => {
 export const AppShell: React.FC = () => {
   const { isLoading } = useCurrentEvent();
   const navigate = useNavigate();
+  const { data: event } = useCurrentEvent();
 
   return (
     <main
@@ -166,7 +181,7 @@ export const AppShell: React.FC = () => {
           <ChevronLeftIcon height={24} />
         </Button>
         <EventPicker />
-        <Rules />
+        <Rules initProgram={event?.program.code} />
       </nav>
       <Spinner show={isLoading} />
       {!isLoading && <Outlet />}

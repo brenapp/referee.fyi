@@ -1,6 +1,6 @@
 import { twMerge } from "tailwind-merge";
 import { HTMLProps } from "~utils/types";
-import { Game, Rule } from "~utils/hooks/robotevents";
+import { Game, Rule } from "~utils/hooks/rules";
 import { useCallback } from "react";
 
 export type InputBaseProps = HTMLProps<HTMLInputElement>;

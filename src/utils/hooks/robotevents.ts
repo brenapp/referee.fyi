@@ -1,10 +1,7 @@
 import * as robotevents from "robotevents";
 import { UseQueryResult, useQuery } from "react-query";
 import { Round, type Match, Color } from "robotevents/out/endpoints/matches";
-import { Year } from "robotevents/out/endpoints/seasons";
 import { ProgramAbbr } from "robotevents/out/endpoints/programs";
-
-import * as rules from "../../assets/rules.json";
 import { Team, TeamOptionsFromEvent } from "robotevents/out/endpoints/teams";
 
 const ROBOTEVENTS_TOKEN =
@@ -128,34 +125,3 @@ export function useEventsToday(): UseQueryResult<robotevents.events.Event[]> {
         return events.sort((a, b) => a.name.localeCompare(b.name));
     });
 }
-
-export type Rule = {
-    rule: string;
-    description: string;
-    link: string;
-}
-
-export type RuleGroup = {
-    name: string;
-    rules: Rule[];
-};
-
-export type Game = {
-    title: string;
-    season: Year;
-    programs: ProgramAbbr[];
-    ruleGroups: RuleGroup[];
-}
-
-export type Rules = {
-    games: Game[]
-}
-
-export function useGameRules(game: string): Game | undefined {
-    return rules.games.find(g => g.title === game) as Game | undefined;
-};
-
-export function useRulesForProgram(program?: ProgramAbbr, year: Year = "2023-2024"): Game | undefined {
-    if (!program) return undefined;
-    return rules.games.find(g => g.season === year && g.programs.includes(program)) as Game | undefined;
-};

@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import {
-  Rule,
-  useEventsToday,
-  useRulesForProgram,
-} from "~utils/hooks/robotevents";
+import { useEventsToday } from "~utils/hooks/robotevents";
 import { Button, IconButton, LinkButton } from "~components/Button";
 import {
   BookOpenIcon,
@@ -24,6 +20,7 @@ import {
 } from "~components/Dialog";
 import { ProgramAbbr } from "robotevents/out/endpoints/programs";
 import { RulesSelect, Select } from "~components/Input";
+import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 
 const EventPicker: React.FC = ({}) => {
   const [open, setOpen] = useState(false);

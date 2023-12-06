@@ -1,12 +1,11 @@
 import { useSearchParams } from "react-router-dom";
 import {
-  Rule,
   useEventMatch,
   useEventMatches,
   useEventTeams,
-  useRulesForProgram,
   useTeam,
 } from "~hooks/robotevents";
+import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 import { Select, TextArea } from "~components/Input";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Error, Warning } from "~components/Warning";

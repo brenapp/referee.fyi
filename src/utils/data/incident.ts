@@ -1,6 +1,6 @@
 import { get, set } from "idb-keyval";
 import { v1 as uuid } from "uuid";
-import { Rule } from "~hooks/robotevents";
+import { Rule } from "~hooks/rules";
 import { Match } from "robotevents/out/endpoints/matches";
 import { Team } from "robotevents/out/endpoints/teams";
 

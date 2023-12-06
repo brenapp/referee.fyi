@@ -20,7 +20,7 @@ import {
 } from "~components/Dialog";
 import { ProgramAbbr } from "robotevents/out/endpoints/programs";
 import { RulesSelect, Select } from "~components/Input";
-import { Rule, useRulesForProgram } from "~utils/hooks/rules";
+import { Rule, useRules, useRulesForProgram } from "~utils/hooks/rules";
 
 const EventPicker: React.FC = ({}) => {
   const [open, setOpen] = useState(false);

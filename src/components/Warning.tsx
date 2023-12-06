@@ -1,10 +1,9 @@
 import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
 import { twMerge } from "tailwind-merge";
-import { HTMLProps } from "~utils/types";
 
 export type WarningProps = {
   message: string;
-} & HTMLProps<HTMLDivElement>;
+} & React.HTMLProps<HTMLDivElement>;
 
 export const Warning: React.FC<WarningProps> = ({ message, ...props }) => {
   return (
@@ -23,7 +22,7 @@ export const Warning: React.FC<WarningProps> = ({ message, ...props }) => {
 
 export type ErrorProps = {
   message: string;
-} & HTMLProps<HTMLDivElement>;
+} & React.HTMLProps<HTMLDivElement>;
 
 export const Error: React.FC<ErrorProps> = ({ message, ...props }) => {
   return (

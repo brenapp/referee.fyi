@@ -2,14 +2,12 @@ import { Match } from "robotevents/out/endpoints/matches";
 import { useEvent } from "~utils/hooks/robotevents";
 import { twMerge } from "tailwind-merge";
 import { IdInfo } from "robotevents/out/endpoints";
-import { HTMLProps } from "~utils/types";
-
 export type AllianceListProps = {
   teams: IdInfo<string>[];
   color: "red" | "blue";
   reverse?: boolean;
   score?: number;
-} & HTMLProps<HTMLDivElement>;
+} & React.HTMLProps<HTMLDivElement>;
 
 export const AllianceList: React.FC<AllianceListProps> = ({
   teams,
@@ -45,7 +43,7 @@ export const AllianceList: React.FC<AllianceListProps> = ({
 export type MatchContextProps = {
   match: Match;
   allianceClassName?: string;
-} & HTMLProps<HTMLDivElement>;
+} & React.HTMLProps<HTMLDivElement>;
 
 export const MatchContext: React.FC<MatchContextProps> = ({
   match,

@@ -1,9 +1,8 @@
 import { twMerge } from "tailwind-merge";
-import { HTMLProps } from "~utils/types";
 import { Game, Rule } from "~utils/hooks/rules";
 import { useCallback } from "react";
 
-export type InputBaseProps = HTMLProps<HTMLInputElement>;
+export type InputBaseProps = React.HTMLProps<HTMLInputElement>;
 
 export type InputProps = InputBaseProps & {};
 
@@ -20,7 +19,7 @@ export const Input: React.FC<InputProps> = (props) => {
   );
 };
 
-export type TextAreaBaseProps = HTMLProps<HTMLTextAreaElement>;
+export type TextAreaBaseProps = React.HTMLProps<HTMLTextAreaElement>;
 
 export type TextAreaProps = TextAreaBaseProps & {};
 

@@ -1,5 +1,4 @@
 import { twMerge } from "tailwind-merge";
-import { HTMLProps } from "~utils/types";
 import { IconButton } from "./Button";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 import { useEffect, useRef } from "react";
@@ -40,7 +39,7 @@ export const DialogHeader: React.FC<DialogHeaderProps> = ({
   );
 };
 
-export type DialogBodyProps = HTMLProps<HTMLDivElement>;
+export type DialogBodyProps = React.HTMLProps<HTMLDivElement>;
 
 export const DialogBody: React.FC<DialogBodyProps> = ({
   children,
@@ -64,7 +63,7 @@ export enum DialogMode {
 export type DialogProps = {
   open: boolean;
   mode: DialogMode;
-} & Omit<HTMLProps<HTMLDialogElement>, "ref">;
+} & Omit<React.HTMLProps<HTMLDialogElement>, "ref">;
 
 export const Dialog: React.FC<DialogProps> = ({
   open,

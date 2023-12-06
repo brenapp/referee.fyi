@@ -9,10 +9,15 @@ import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
 import { useEventIncidents } from "~hooks/incident";
 import { useCallback, useMemo, useState } from "react";
-import { IncidentOutcome } from "~utils/data/incident";
+import {
+  IncidentOutcome,
+  deleteIncident,
+  getIncidentsByEvent,
+} from "~utils/data/incident";
 import { EventNewIncidentDialog } from "./dialogs/new";
 import { EventMatchDialog } from "./dialogs/match";
 import { ClickableMatch } from "~components/ClickableMatch";
+import { Dialog, DialogBody, DialogMode } from "~components/Dialog";
 
 export type MainTabProps = {
   event: Event;
@@ -127,8 +132,69 @@ const EventMatchesTab: React.FC<MainTabProps> = ({ event }) => {
   );
 };
 
-export type EventPageParams = {
-  sku: string;
+const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
+  const [deleteDataDialogOpen, setDeleteDataDialogOpen] = useState(false);
+
+  const onConfirmDeleteData = useCallback(async () => {
+    const incidents = await getIncidentsByEvent(event.sku);
+    for (const incident of incidents) {
+      await deleteIncident(incident.id);
+    }
+    setDeleteDataDialogOpen(false);
+  }, []);
+
+  return (
+    <>
+      <section>
+        <section className="mt-4">
+          <h2 className="font-bold">Preferred Rules</h2>
+          <p>
+            Select rules that can be quickly selected when creating a new entry
+            in the match anomaly log.
+          </p>
+        </section>
+        <section className="mt-4">
+          <h2 className="font-bold">Share Event Data</h2>
+          <p>Not currently implemented.</p>
+        </section>
+        <section className="mt-4 relative">
+          <h2 className="font-bold">Delete Event Data</h2>
+          <p>
+            This will delete all anomaly logs associated with this event. This
+            action cannot be undone.
+          </p>
+          <Button
+            className="w-full mt-4 bg-red-500 text-center"
+            onClick={() => setDeleteDataDialogOpen(true)}
+          >
+            Delete Event Data
+          </Button>
+          <Dialog
+            open={deleteDataDialogOpen}
+            mode={DialogMode.NonModal}
+            className="absolute w-full rounded-md h-min mt-4 bg-zinc-100 text-zinc-900"
+          >
+            <DialogBody>
+              <p>Really delete all event data? This action cannot be undone.</p>
+              <Button
+                className="w-full mt-4 bg-red-500 text-center"
+                onClick={onConfirmDeleteData}
+              >
+                Confirm Deletion
+              </Button>
+              <Button
+                className="w-full mt-4 text-center"
+                onClick={() => setDeleteDataDialogOpen(false)}
+                autoFocus
+              >
+                Cancel
+              </Button>
+            </DialogBody>
+          </Dialog>
+        </section>
+      </section>
+    </>
+  );
 };
 
 export const EventPage: React.FC = () => {
@@ -152,6 +218,7 @@ export const EventPage: React.FC = () => {
         {{
           Teams: <EventTeamsTab event={event} />,
           Matches: <EventMatchesTab event={event} />,
+          Manage: <EventManageTab event={event} />,
         }}
       </Tabs>
     </section>

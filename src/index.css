@@ -18,3 +18,7 @@ dialog:modal {
   max-width: 100dvw;
   max-height: 100dvh;
 }
+
+body:has(dialog[open]) {
+  overflow: hidden;
+}

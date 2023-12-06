@@ -9,6 +9,7 @@ import { Button, IconButton, LinkButton } from "../components/Button";
 import {
   BookOpenIcon,
   ChevronDownIcon,
+  ChevronLeftIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { twMerge } from "tailwind-merge";
@@ -111,7 +112,7 @@ const Rules: React.FC = () => {
           <IconButton
             icon={<XMarkIcon height={24} />}
             onClick={() => setOpen(false)}
-            className="bg-transparent "
+            className="bg-transparent"
             autoFocus
           />
           <Select
@@ -153,6 +154,7 @@ const Rules: React.FC = () => {
 
 export const AppShell: React.FC = () => {
   const { isLoading } = useCurrentEvent();
+  const navigate = useNavigate();
 
   return (
     <main
@@ -160,6 +162,9 @@ export const AppShell: React.FC = () => {
       style={{ gridTemplateRows: "4rem 1fr" }}
     >
       <nav className="h-16 flex gap-4 max-w-full">
+        <Button onClick={() => navigate(-1)} className="bg-transparent p-0">
+          <ChevronLeftIcon height={24} />
+        </Button>
         <EventPicker />
         <Rules />
       </nav>

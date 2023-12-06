@@ -169,7 +169,6 @@ const Rules: React.FC = () => {
 export const AppShell: React.FC = () => {
   const { isLoading } = useCurrentEvent();
   const navigate = useNavigate();
-  const { data: event } = useCurrentEvent();
 
   return (
     <main
@@ -181,7 +180,7 @@ export const AppShell: React.FC = () => {
           <ChevronLeftIcon height={24} />
         </Button>
         <EventPicker />
-        <Rules initProgram={event?.program.code} />
+        <Rules />
       </nav>
       <Spinner show={isLoading} />
       {!isLoading && <Outlet />}

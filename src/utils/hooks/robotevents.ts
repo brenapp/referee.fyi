@@ -79,13 +79,14 @@ export function useEventMatches(
 
 export function useEventMatch(event: robotevents.events.Event | null | undefined,
     division: number | null | undefined, match: number | null | undefined): UseQueryResult<Match | null> {
+    const matches = useEventMatches(event, division);
     return useQuery(["match", event?.sku, division, match], async () => {
         if (!event || !division || !match) {
             return null;
         }
 
-        const matches = await event.matches(division);
-        return matches.get(match);
+        const matchArray = matches.data ?? [];
+        return matchArray.find(m => m.id === match) ?? null;
     });
 };
 

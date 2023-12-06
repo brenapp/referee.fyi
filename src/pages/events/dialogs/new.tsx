@@ -270,7 +270,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
                     data-rulegroup={group.name}
                     key={rule.rule}
                   >
-                    {rule.rule} - {rule.description}
+                    {rule.rule} {rule.description}
                   </option>
                 ))}
               </optgroup>

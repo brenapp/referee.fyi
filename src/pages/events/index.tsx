@@ -147,13 +147,6 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
     <>
       <section>
         <section className="mt-4">
-          <h2 className="font-bold">Preferred Rules</h2>
-          <p>
-            Select rules that can be quickly selected when creating a new entry
-            in the match anomaly log.
-          </p>
-        </section>
-        <section className="mt-4">
           <h2 className="font-bold">Share Event Data</h2>
           <p>Not currently implemented.</p>
         </section>

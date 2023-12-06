@@ -4,8 +4,8 @@ import {
   Rule,
   useEventsToday,
   useRulesForProgram,
-} from "../utils/hooks/robotevents";
-import { Button, IconButton, LinkButton } from "../components/Button";
+} from "~utils/hooks/robotevents";
+import { Button, IconButton, LinkButton } from "~components/Button";
 import {
   BookOpenIcon,
   ChevronDownIcon,
@@ -13,17 +13,17 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { twMerge } from "tailwind-merge";
-import { Spinner } from "../components/Spinner";
-import { useCurrentDivision, useCurrentEvent } from "../utils/hooks/state";
+import { Spinner } from "~components/Spinner";
+import { useCurrentDivision, useCurrentEvent } from "~utils/hooks/state";
 import {
   Dialog,
   DialogBody,
   DialogCustomHeader,
   DialogHeader,
   DialogMode,
-} from "../components/Dialog";
+} from "~components/Dialog";
 import { ProgramAbbr } from "robotevents/out/endpoints/programs";
-import { RulesSelect, Select } from "../components/Input";
+import { RulesSelect, Select } from "~components/Input";
 
 const EventPicker: React.FC = ({}) => {
   const [open, setOpen] = useState(false);

@@ -1,5 +1,5 @@
 import { twMerge } from "tailwind-merge";
-import { HTMLProps } from "../utils/types";
+import { HTMLProps } from "~utils/types";
 import { IconButton } from "./Button";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 import { useEffect, useRef } from "react";

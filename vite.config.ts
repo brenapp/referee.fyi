@@ -3,6 +3,7 @@ import { defineConfig } from "vite"
 import react from "@vitejs/plugin-react-swc"
 import { nodePolyfills } from "vite-plugin-node-polyfills"
 import { VitePWA } from 'vite-plugin-pwa'
+import tsconfigPaths from 'vite-tsconfig-paths'
 
 
 // https://vitejs.dev/config/
@@ -10,6 +11,7 @@ export default defineConfig({
   plugins: [
     react(),
     nodePolyfills({ include: ["events"], protocolImports: true }),
+    tsconfigPaths({}),
     VitePWA({
       registerType: "autoUpdate",
       manifest: {

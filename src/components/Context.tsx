@@ -1,8 +1,8 @@
 import { Match } from "robotevents/out/endpoints/matches";
-import { useEvent } from "../utils/hooks/robotevents";
+import { useEvent } from "~utils/hooks/robotevents";
 import { twMerge } from "tailwind-merge";
 import { IdInfo } from "robotevents/out/endpoints";
-import { HTMLProps } from "../utils/types";
+import { HTMLProps } from "~utils/types";
 
 export type AllianceListProps = {
   teams: IdInfo<string>[];

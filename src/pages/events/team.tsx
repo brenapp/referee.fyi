@@ -1,9 +1,24 @@
 import { useParams } from "react-router-dom";
-import { useTeam } from "../../utils/hooks/robotevents";
-import { Spinner } from "../../components/Spinner";
+import { useTeam } from "~hooks/robotevents";
+import { Spinner } from "~components/Spinner";
 import { useMemo } from "react";
-import { useCurrentEvent } from "../../utils/hooks/state";
-import { useTeamIncidentsByEvent } from "../../utils/hooks/incident";
+import { useCurrentEvent } from "~hooks/state";
+import { useTeamIncidentsByEvent } from "~hooks/incident";
+import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
+
+const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
+  [IncidentOutcome.Minor]: "",
+  [IncidentOutcome.Major]: "",
+  [IncidentOutcome.Disabled]: "",
+};
+
+export type IncidentProps = {
+  incident: IncidentWithID;
+};
+
+export const Incident: React.FC<IncidentProps> = ({ incident }) => {
+  return <div></div>;
+};
 
 export const EventTeamsPage: React.FC = () => {
   const { number } = useParams();

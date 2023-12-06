@@ -1,6 +1,6 @@
 import { twMerge } from "tailwind-merge";
 import { Link, LinkProps } from "react-router-dom";
-import { HTMLProps } from "../utils/types";
+import { HTMLProps } from "~utils/types";
 
 type BaseButtonProps = HTMLProps<HTMLButtonElement>;
 

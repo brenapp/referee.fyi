@@ -6,28 +6,25 @@ import {
   useEventTeams,
   useRulesForProgram,
   useTeam,
-} from "../../../utils/hooks/robotevents";
-import { Select, TextArea } from "../../../components/Input";
+} from "~hooks/robotevents";
+import { Select, TextArea } from "~components/Input";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Error, Warning } from "../../../components/Warning";
-import { Button } from "../../../components/Button";
-import { MatchContext } from "../../../components/Context";
-import {
-  useCurrentDivision,
-  useCurrentEvent,
-} from "../../../utils/hooks/state";
+import { Error, Warning } from "~components/Warning";
+import { Button } from "~components/Button";
+import { MatchContext } from "~components/Context";
+import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
 import {
   IncidentOutcome,
   RichIncident,
   packIncident,
-} from "../../../utils/data/incident";
-import { useNewIncident } from "../../../utils/hooks/incident";
+} from "~utils/data/incident";
+import { useNewIncident } from "~hooks/incident";
 import {
   Dialog,
   DialogBody,
   DialogHeader,
   DialogMode,
-} from "../../../components/Dialog";
+} from "~components/Dialog";
 
 type Issue = {
   message: string;

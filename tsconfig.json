@@ -6,6 +6,8 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
+    "baseUrl": "./src",
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -18,7 +20,13 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    "paths": {
+      "~utils/*": ["./utils/*"],
+      "~hooks/*": ["./utils/hooks/*"],
+      "~components/*": ["./components/*"]
+    }
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]

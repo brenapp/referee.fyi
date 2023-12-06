@@ -1,24 +1,18 @@
-import {
-  useCurrentDivision,
-  useCurrentEvent,
-} from "../../../utils/hooks/state";
-import {
-  useEventMatch,
-  useEventMatches,
-} from "../../../utils/hooks/robotevents";
-import { Button } from "../../../components/Button";
+import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
+import { useEventMatch, useEventMatches } from "~hooks/robotevents";
+import { Button } from "~components/Button";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { useCallback, useMemo } from "react";
 import { twMerge } from "tailwind-merge";
-import { MatchContext } from "../../../components/Context";
-import { Spinner } from "../../../components/Spinner";
+import { MatchContext } from "~components/Context";
+import { Spinner } from "~components/Spinner";
 import {
   Dialog,
   DialogBody,
   DialogHeader,
   DialogMode,
-} from "../../../components/Dialog";
+} from "~components/Dialog";
 
 export type EventMatchDialogProps = {
   matchId: number;

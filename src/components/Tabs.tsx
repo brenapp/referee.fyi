@@ -1,6 +1,6 @@
 import { twMerge } from "tailwind-merge";
 import React from "react";
-import { HTMLProps } from "../utils/types";
+import { HTMLProps } from "~utils/types";
 
 export type TabsProps = Omit<HTMLProps<HTMLDivElement>, "children"> & {
   children: Record<string, React.ReactNode>;

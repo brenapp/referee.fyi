@@ -1,17 +1,17 @@
 import { Link } from "react-router-dom";
-import { useEventMatches, useEventTeams } from "../../utils/hooks/robotevents";
-import { Spinner } from "../../components/Spinner";
+import { useEventMatches, useEventTeams } from "~hooks/robotevents";
+import { Spinner } from "~components/Spinner";
 import { Match } from "robotevents/out/endpoints/matches";
 
-import { Tabs } from "../../components/Tabs";
+import { Tabs } from "~components/Tabs";
 import { Event } from "robotevents/out/endpoints/events";
-import { Button, ButtonMode } from "../../components/Button";
+import { Button, ButtonMode } from "~components/Button";
 import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
-import { MatchContext } from "../../components/Context";
-import { useCurrentDivision, useCurrentEvent } from "../../utils/hooks/state";
-import { useEventIncidents } from "../../utils/hooks/incident";
+import { MatchContext } from "~components/Context";
+import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
+import { useEventIncidents } from "~hooks/incident";
 import { useCallback, useId, useMemo, useState } from "react";
-import { IncidentOutcome } from "../../utils/data/incident";
+import { IncidentOutcome } from "~utils/data/incident";
 import { EventNewIncidentDialog } from "./dialogs/new";
 import { EventMatchDialog } from "./dialogs/match";
 

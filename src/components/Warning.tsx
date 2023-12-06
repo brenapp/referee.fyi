@@ -1,6 +1,6 @@
 import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
 import { twMerge } from "tailwind-merge";
-import { HTMLProps } from "../utils/types";
+import { HTMLProps } from "~utils/types";
 
 export type WarningProps = {
   message: string;

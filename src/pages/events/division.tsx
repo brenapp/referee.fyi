@@ -1,7 +1,7 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { LinkButton } from "../../components/Button";
-import { useCurrentEvent } from "../../utils/hooks/state";
+import { LinkButton } from "~components/Button";
+import { useCurrentEvent } from "~hooks/state";
 
 export const EventDivisionPickerPage: React.FC = () => {
   const { data: event } = useCurrentEvent();

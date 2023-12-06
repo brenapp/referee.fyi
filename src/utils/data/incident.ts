@@ -4,175 +4,186 @@ import { Rule } from "~hooks/rules";
 import { Match } from "robotevents/out/endpoints/matches";
 import { Team } from "robotevents/out/endpoints/teams";
 
-
 export enum IncidentOutcome {
-    Minor,
-    Major,
-    Disabled,
+  Minor,
+  Major,
+  Disabled,
 }
 
 export type Incident = {
-    time: Date;
+  time: Date;
 
-    event: string; // SKU
-    division: number; // division ID
+  event: string; // SKU
+  division: number; // division ID
 
-    match?: number; // match ID
-    team?: string; // team ID
+  match?: number; // match ID
+  team?: string; // team ID
 
-    outcome: IncidentOutcome;
-    rules: string[];
-    notes: string;
+  outcome: IncidentOutcome;
+  rules: string[];
+  notes: string;
 };
 
 export type IncidentWithID = Incident & {
-    id: string;
+  id: string;
 };
 
 export type IncidentIndex = {
-    [key: string]: string[];
+  [key: string]: string[];
 };
 
 export type RichIncident = {
-    time: Date;
+  time: Date;
 
-    event: string;
-    division: number;
+  event: string;
+  division: number;
 
-    match?: Match | null;
-    team?: Team | null;
+  match?: Match | null;
+  team?: Team | null;
 
-    outcome: IncidentOutcome;
-    rules: Rule[];
-    notes: string;
+  outcome: IncidentOutcome;
+  rules: Rule[];
+  notes: string;
 };
 
 export function packIncident(incident: RichIncident): Incident {
-    return {
-        ...incident,
-        match: incident.match?.id,
-        team: incident.team?.number,
-        rules: incident.rules.map((rule) => rule.rule),
-    };
-};
-
+  return {
+    ...incident,
+    match: incident.match?.id,
+    team: incident.team?.number,
+    rules: incident.rules.map((rule) => rule.rule),
+  };
+}
 
 export function generateIncidentId(): string {
-    return `incident_${uuid()}`;
+  return `incident_${uuid()}`;
 }
 
 export async function initIncidentStore() {
+  // All incidents
+  const incidents = await get<string[]>("incidents");
+  if (!incidents) {
+    await set("incidents", []);
+  }
 
-    // All incidents
-    const incidents = await get<string[]>("incidents");
-    if (!incidents) {
-        await set("incidents", []);
-    }
+  // Index by event
+  const eventsIndex = await get<IncidentIndex>("event_idx");
+  if (!eventsIndex) {
+    await set("event_idx", {});
+  }
 
-    // Index by event
-    const eventsIndex = await get<IncidentIndex>("event_idx");
-    if (!eventsIndex) {
-        await set("event_idx", {});
-    }
+  // Index by team
+  const teamsIndex = await get<IncidentIndex>("team_idx");
+  if (!teamsIndex) {
+    await set("team_idx", {});
+  }
+}
 
-    // Index by team
-    const teamsIndex = await get<IncidentIndex>("team_idx");
-    if (!teamsIndex) {
-        await set("team_idx", {});
-    }
-};
+export async function getIncident(
+  id: string
+): Promise<IncidentWithID | undefined> {
+  const value = await get<Incident>(id);
 
-export async function getIncident(id: string): Promise<IncidentWithID | undefined> {
-    const value = await get<Incident>(id);
+  if (!value) {
+    return undefined;
+  }
 
-    if (!value) {
-        return undefined;
-    }
-
-    return {
-        ...value,
-        id,
-    };
+  return {
+    ...value,
+    id,
+  };
 }
 
 export async function hasIncident(id: string): Promise<boolean> {
-    return get(id).then((incident) => incident !== undefined);
+  return get(id).then((incident) => incident !== undefined);
 }
 
-export async function setIncident(id: string, incident: Incident): Promise<void> {
-    return set(id, incident);
+export async function setIncident(
+  id: string,
+  incident: Incident
+): Promise<void> {
+  return set(id, incident);
 }
 
 export async function newIncident(incident: Incident): Promise<string> {
+  const id = generateIncidentId();
 
-    const id = generateIncidentId();
+  await setIncident(id, incident);
 
-    await setIncident(id, incident);
+  // Add to all indices
+  const eventsIndex = await get<IncidentIndex>("event_idx");
+  const teamsIndex = await get<IncidentIndex>("team_idx");
 
-    // Add to all indices
-    const eventsIndex = await get<IncidentIndex>("event_idx");
-    const teamsIndex = await get<IncidentIndex>("team_idx");
+  const eventIndex = eventsIndex?.[incident.event] ?? [];
+  const teamIndex = teamsIndex?.[incident.team ?? ""] ?? [];
 
-    const eventIndex = eventsIndex?.[incident.event] ?? [];
-    const teamIndex = teamsIndex?.[incident.team ?? ""] ?? [];
+  await set("event_idx", {
+    ...eventsIndex,
+    [incident.event]: [...eventIndex, id],
+  });
 
-    await set("event_idx", {
-        ...eventsIndex,
-        [incident.event]: [...eventIndex, id],
-    });
+  await set("team_idx", {
+    ...teamsIndex,
+    [incident.team ?? ""]: [...teamIndex, id],
+  });
 
-    await set("team_idx", {
-        ...teamsIndex,
-        [incident.team ?? ""]: [...teamIndex, id],
-    });
+  const all = (await get<string[]>("incidents")) ?? [];
+  await set("incidents", [...all, id]);
 
-    const all = await get<string[]>("incidents") ?? [];
-    await set("incidents", [...all, id]);
-
-    return id;
-};
+  return id;
+}
 
 export async function deleteIncident(id: string): Promise<void> {
-    const incident = await getIncident(id);
+  const incident = await getIncident(id);
 
-    if (!incident) {
-        return;
-    }
+  if (!incident) {
+    return;
+  }
 
-    // Remove from all indices
-    const eventsIndex = await get<IncidentIndex>("event_idx");
-    const teamsIndex = await get<IncidentIndex>("team_idx");
+  // Remove from all indices
+  const eventsIndex = await get<IncidentIndex>("event_idx");
+  const teamsIndex = await get<IncidentIndex>("team_idx");
 
-    const eventIndex = eventsIndex?.[incident.event] ?? [];
-    const teamIndex = teamsIndex?.[incident.team ?? ""] ?? [];
+  const eventIndex = eventsIndex?.[incident.event] ?? [];
+  const teamIndex = teamsIndex?.[incident.team ?? ""] ?? [];
 
-    await set("event_idx", {
-        ...eventsIndex,
-        [incident.event]: eventIndex.filter((i) => i !== id),
-    });
+  await set("event_idx", {
+    ...eventsIndex,
+    [incident.event]: eventIndex.filter((i) => i !== id),
+  });
 
-    await set("team_idx", {
-        ...teamsIndex,
-        [incident.team ?? ""]: teamIndex.filter((i) => i !== id),
-    });
+  await set("team_idx", {
+    ...teamsIndex,
+    [incident.team ?? ""]: teamIndex.filter((i) => i !== id),
+  });
 
-    const all = await get<string[]>("incidents");
-    await set("incidents", all?.filter((i) => i !== id) ?? []);
+  const all = await get<string[]>("incidents");
+  await set("incidents", all?.filter((i) => i !== id) ?? []);
 }
 
 export async function getAllIncidents(): Promise<IncidentWithID[]> {
-    const all = await get<string[]>("incidents");
-    return Promise.all(all?.map((id) => getIncident(id) as Promise<IncidentWithID>) ?? []);
+  const all = await get<string[]>("incidents");
+  return Promise.all(
+    all?.map((id) => getIncident(id) as Promise<IncidentWithID>) ?? []
+  );
 }
 
-export async function getIncidentsByEvent(event: string): Promise<IncidentWithID[]> {
-    const eventsIndex = await get<IncidentIndex>("event_idx");
-    const ids = eventsIndex?.[event] ?? [];
-    return Promise.all(ids.map((id) => getIncident(id) as Promise<IncidentWithID>));
+export async function getIncidentsByEvent(
+  event: string
+): Promise<IncidentWithID[]> {
+  const eventsIndex = await get<IncidentIndex>("event_idx");
+  const ids = eventsIndex?.[event] ?? [];
+  return Promise.all(
+    ids.map((id) => getIncident(id) as Promise<IncidentWithID>)
+  );
 }
 
-export async function getIncidentsByTeam(team: string): Promise<IncidentWithID[]> {
-    const teamsIndex = await get<IncidentIndex>("team_idx");
-    const ids = teamsIndex?.[team] ?? [];
-    return Promise.all(ids.map((id) => getIncident(id) as Promise<IncidentWithID>));
+export async function getIncidentsByTeam(
+  team: string
+): Promise<IncidentWithID[]> {
+  const teamsIndex = await get<IncidentIndex>("team_idx");
+  const ids = teamsIndex?.[team] ?? [];
+  return Promise.all(
+    ids.map((id) => getIncident(id) as Promise<IncidentWithID>)
+  );
 }

@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
   Rule,
   useEventMatch,
@@ -19,6 +19,12 @@ import {
   packIncident,
 } from "../../utils/data/incident";
 import { useNewIncident } from "../../utils/hooks/incident";
+import {
+  Dialog,
+  DialogBody,
+  DialogHeader,
+  DialogMode,
+} from "../../components/Dialog";
 
 type Issue = {
   message: string;
@@ -50,13 +56,16 @@ function getIssues(incident: RichIncident): Issue[] {
   return issues;
 }
 
-export type EventNewIncidentPageProps = {};
+export type EventNewIncidentDialogProps = {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+};
 
-export const EventNewIncidentPage: React.FC<
-  EventNewIncidentPageProps
-> = ({}) => {
+export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
+  open,
+  setOpen,
+}) => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
 
   const { mutate } = useNewIncident();
 
@@ -174,11 +183,7 @@ export const EventNewIncidentPage: React.FC<
       const packed = packIncident(incident);
       mutate(packed, {
         onSuccess: () => {
-          if (packed.team) {
-            navigate(`/${event?.sku}/team/${packed.team}`);
-          } else {
-            navigate(`/${event?.sku}/${division}/`);
-          }
+          setOpen(false);
         },
       });
     },
@@ -186,110 +191,120 @@ export const EventNewIncidentPage: React.FC<
   );
 
   return (
-    <form className="mt-4 relative" onSubmit={onSubmit}>
-      <h1 className="text-emerald-400 text-lg">New Report</h1>
-      {issues.map((issue) =>
-        issue.type === "error" ? (
-          <Error message={issue.message} className="mt-4" key={issue.message} />
-        ) : (
-          <Warning
-            message={issue.message}
-            className="mt-4"
-            key={issue.message}
+    <Dialog className="mt-4 relative" open={open} mode={DialogMode.Modal}>
+      <DialogHeader title="New Report" onClose={() => setOpen(false)} />
+      <DialogBody>
+        {issues.map((issue) =>
+          issue.type === "error" ? (
+            <Error
+              message={issue.message}
+              className="mt-4"
+              key={issue.message}
+            />
+          ) : (
+            <Warning
+              message={issue.message}
+              className="mt-4"
+              key={issue.message}
+            />
+          )
+        )}
+        <label>
+          <p className="mt-4">Team Number</p>
+          <Select
+            value={incident.team?.number}
+            onChange={onChangeIncidentTeam}
+            className="max-w-full w-full"
+          >
+            <option>Pick A Team</option>
+            {teams?.map((team) => (
+              <option value={team.number} key={team.id}>
+                {team.number} - {team.team_name}
+              </option>
+            ))}
+          </Select>
+        </label>
+        <label>
+          <p className="mt-4">Match</p>
+          <Select
+            value={incident.match?.id}
+            onChange={onChangeIncidentMatch}
+            className="max-w-full w-full"
+          >
+            <option>Pick A Match</option>
+            {matches?.map((match) => (
+              <option value={match.id} key={match.id}>
+                {match.name}
+              </option>
+            ))}
+          </Select>
+        </label>
+        {incident.match && (
+          <MatchContext
+            match={incident.match}
+            className="mt-4 justify-between"
+            allianceClassName="w-full"
           />
-        )
-      )}
-      <label>
-        <p className="mt-4">Team Number</p>
-        <Select
-          value={incident.team?.number}
-          onChange={onChangeIncidentTeam}
-          className="max-w-full w-full"
-        >
-          <option>Pick A Team</option>
-          {teams?.map((team) => (
-            <option value={team.number} key={team.id}>
-              {team.number} - {team.team_name}
-            </option>
+        )}
+        <label>
+          <p className="mt-4">Outcome</p>
+          <Select
+            value={incident.outcome}
+            onChange={onChangeIncidentOutcome}
+            className="max-w-full w-full"
+          >
+            <option value={IncidentOutcome.Minor}>Minor</option>
+            <option value={IncidentOutcome.Major}>Major</option>
+            <option value={IncidentOutcome.Disabled}>Disabled</option>
+          </Select>
+        </label>
+        <label>
+          <p className="mt-4">Associated Rules</p>
+          <Select className="w-full py-4" value={""} onChange={onAddRule}>
+            <option>Pick A Rule</option>
+            {rules?.ruleGroups.map((group) => (
+              <optgroup label={group.name} key={group.name}>
+                {group.rules.map((rule) => (
+                  <option
+                    value={rule.rule}
+                    data-rulegroup={group.name}
+                    key={rule.rule}
+                  >
+                    {rule.rule}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </Select>
+        </label>
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {incident.rules.map((rule) => (
+            <li key={rule.rule}>
+              <Button
+                className="text-red-400 font-mono"
+                onClick={() => onRemoveRule(rule)}
+              >
+                {rule.rule}
+              </Button>
+            </li>
           ))}
-        </Select>
-      </label>
-      <label>
-        <p className="mt-4">Match</p>
-        <Select
-          value={incident.match?.id}
-          onChange={onChangeIncidentMatch}
-          className="max-w-full w-full"
+        </ul>
+        <label>
+          <p className="mt-4">Notes</p>
+          <TextArea
+            className="w-full mt-2 h-32"
+            value={incident.notes}
+            onChange={onChangeIncidentNotes}
+          />
+        </label>
+        <Button
+          className="w-full text-center mt-4 bg-emerald-400 text-black"
+          disabled={!canSave}
+          onClick={onSubmit}
         >
-          <option>Pick A Match</option>
-          {matches?.map((match) => (
-            <option value={match.id} key={match.id}>
-              {match.name}
-            </option>
-          ))}
-        </Select>
-      </label>
-      {incident.match && (
-        <MatchContext match={incident.match} className="mt-4 justify-between" />
-      )}
-      <label>
-        <p className="mt-4">Outcome</p>
-        <Select
-          value={incident.outcome}
-          onChange={onChangeIncidentOutcome}
-          className="max-w-full w-full"
-        >
-          <option value={IncidentOutcome.Minor}>Minor</option>
-          <option value={IncidentOutcome.Major}>Major</option>
-          <option value={IncidentOutcome.Disabled}>Disabled</option>
-        </Select>
-      </label>
-      <label>
-        <p className="mt-4">Associated Rules</p>
-        <Select className="w-full py-4" value={""} onChange={onAddRule}>
-          <option>Pick A Rule</option>
-          {rules?.ruleGroups.map((group) => (
-            <optgroup label={group.name} key={group.name}>
-              {group.rules.map((rule) => (
-                <option
-                  value={rule.rule}
-                  data-rulegroup={group.name}
-                  key={rule.rule}
-                >
-                  {rule.rule}
-                </option>
-              ))}
-            </optgroup>
-          ))}
-        </Select>
-      </label>
-      <ul className="mt-4 flex flex-wrap gap-2">
-        {incident.rules.map((rule) => (
-          <li key={rule.rule}>
-            <Button
-              className="text-red-400 font-mono"
-              onClick={() => onRemoveRule(rule)}
-            >
-              {rule.rule}
-            </Button>
-          </li>
-        ))}
-      </ul>
-      <label>
-        <p className="mt-4">Notes</p>
-        <TextArea
-          className="w-full mt-2 h-32"
-          value={incident.notes}
-          onChange={onChangeIncidentNotes}
-        />
-      </label>
-      <Button
-        className="w-full text-center mt-4 bg-emerald-400 text-black"
-        disabled={!canSave}
-        onClick={onSubmit}
-      >
-        Submit
-      </Button>
-    </form>
+          Submit
+        </Button>
+      </DialogBody>
+    </Dialog>
   );
 };

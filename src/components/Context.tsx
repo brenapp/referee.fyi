@@ -22,13 +22,13 @@ export const AllianceList: React.FC<AllianceListProps> = ({
 
   return (
     <div
+      {...props}
       className={twMerge(
         "flex items-center justify-between w-28 px-1 rounded-md",
         reverse ? "flex-row-reverse" : "",
         colorClass,
         props.className
       )}
-      {...props}
     >
       <ul className={twMerge("rounded-md font-mono w-16 h-12")}>
         {teams.map((team) => (
@@ -44,6 +44,7 @@ export const AllianceList: React.FC<AllianceListProps> = ({
 
 export type MatchContextProps = {
   match: Match;
+  allianceClassName?: string;
 } & HTMLProps<HTMLDivElement>;
 
 export const MatchContext: React.FC<MatchContextProps> = ({
@@ -79,12 +80,14 @@ export const MatchContext: React.FC<MatchContextProps> = ({
       <AllianceList
         teams={red.teams.map((t) => t.team)}
         color="red"
+        className={props.allianceClassName}
         score={red.score}
       />
       <AllianceList
         teams={blue.teams.map((t) => t.team)}
         color="blue"
         reverse
+        className={props.allianceClassName}
         score={blue.score}
       />
     </div>

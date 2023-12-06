@@ -5,13 +5,14 @@ import { Match } from "robotevents/out/endpoints/matches";
 
 import { Tabs } from "../../components/Tabs";
 import { Event } from "robotevents/out/endpoints/events";
-import { LinkButton } from "../../components/Button";
+import { Button } from "../../components/Button";
 import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { MatchContext } from "../../components/Context";
 import { useCurrentDivision, useCurrentEvent } from "../../utils/hooks/state";
 import { useEventIncidents } from "../../utils/hooks/incident";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { IncidentOutcome } from "../../utils/data/incident";
+import { EventNewIncidentDialog } from "./new";
 
 export type MainTabProps = {
   event: Event;
@@ -114,10 +115,13 @@ const EventMatchesTab: React.FC<MainTabProps> = ({ event }) => {
             key={match.id}
             className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
           >
-            <div className="flex-1">
+            <Link
+              to={`/${event.sku}/${division}/match/${match.id}`}
+              className="flex-1"
+            >
               <p>{match.name}</p>
               <p className="text-sm italic">{matchTime(match)}</p>
-            </div>
+            </Link>
             <MatchContext match={match} />
           </li>
         ))}
@@ -132,17 +136,21 @@ export type EventPageParams = {
 
 export const EventPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
-  const division = useCurrentDivision();
+  const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
 
   return event ? (
     <section className="mt-4">
-      <LinkButton
-        to={`/${event.sku}/${division}/new`}
+      <Button
+        onClick={() => setIncidentDialogOpen(true)}
         className="w-full text-center bg-emerald-600"
       >
         <FlagIcon height={20} className="inline mr-2 " />
         New Entry
-      </LinkButton>
+      </Button>
+      <EventNewIncidentDialog
+        open={incidentDialogOpen}
+        setOpen={setIncidentDialogOpen}
+      />
       <Tabs className="mt-4">
         {{
           Teams: <EventTeamsTab event={event} />,

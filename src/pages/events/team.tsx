@@ -1,15 +1,42 @@
 import { useParams } from "react-router-dom";
-import { useTeam } from "~hooks/robotevents";
+import {
+  useEvent,
+  useEventMatch,
+  useEventMatchesForTeam,
+  useTeam,
+} from "~hooks/robotevents";
 import { Spinner } from "~components/Spinner";
 import { useMemo } from "react";
 import { useCurrentEvent } from "~hooks/state";
 import { useTeamIncidentsByEvent } from "~hooks/incident";
 import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
+import { twMerge } from "tailwind-merge";
+import { Tabs } from "~components/Tabs";
+import { Event } from "robotevents/out/endpoints/events";
+import { Team } from "robotevents/out/endpoints/teams";
+import { ClickableMatch } from "~components/ClickableMatch";
+
+type EventTeamsTabProps = {
+  event: Event | null | undefined;
+  team: Team | null | undefined;
+};
+
+const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({ event, team }) => {
+  const { data: matches } = useEventMatchesForTeam(event, team);
+
+  return (
+    <ul>
+      {matches?.map((match) => (
+        <ClickableMatch match={match} onClick={() => {}} />
+      ))}
+    </ul>
+  );
+};
 
 const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
-  [IncidentOutcome.Minor]: "",
-  [IncidentOutcome.Major]: "",
-  [IncidentOutcome.Disabled]: "",
+  [IncidentOutcome.Minor]: "bg-yellow-400",
+  [IncidentOutcome.Major]: "bg-red-400",
+  [IncidentOutcome.Disabled]: "bg-zinc-900",
 };
 
 export type IncidentProps = {
@@ -17,16 +44,55 @@ export type IncidentProps = {
 };
 
 export const Incident: React.FC<IncidentProps> = ({ incident }) => {
-  return <div></div>;
+  const { data: event } = useEvent(incident.event);
+  const { data: match } = useEventMatch(
+    event,
+    incident.division,
+    incident.match
+  );
+
+  return (
+    <div
+      className={twMerge(
+        IncidentOutcomeClasses[incident.outcome],
+        "px-4 py-2 rounded-md mt-2"
+      )}
+    >
+      <p className="text-sm">
+        {[incident.team, match?.name, IncidentOutcome[incident.outcome]].join(
+          " • "
+        )}
+      </p>
+      <p>{incident.notes}</p>
+      <ul>
+        {incident.rules.map((r) => (
+          <li key={r} className="text-sm font-mono">
+            {r}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+const EventTeamsIncidents: React.FC<EventTeamsTabProps> = ({ team, event }) => {
+  const { data: incidents, isLoading: isIncidentsLoading } =
+    useTeamIncidentsByEvent(team?.number, event?.sku);
+
+  return (
+    <ul>
+      <Spinner show={isIncidentsLoading} />
+      {incidents?.map((incident) => (
+        <Incident incident={incident} key={incident.id} />
+      ))}
+    </ul>
+  );
 };
 
 export const EventTeamsPage: React.FC = () => {
   const { number } = useParams();
   const { data: event } = useCurrentEvent();
   const { data: team, isLoading } = useTeam(number ?? "", event?.program.code);
-
-  const { data: incidents, isLoading: isIncidentsLoading } =
-    useTeamIncidentsByEvent(number, event?.sku);
 
   const teamLocation = useMemo(() => {
     if (!team) return null;
@@ -36,10 +102,10 @@ export const EventTeamsPage: React.FC = () => {
   }, [team?.location]);
 
   return (
-    <section className="p-4">
-      <Spinner show={isLoading || isIncidentsLoading} />
+    <section>
+      <Spinner show={isLoading} />
       {team && (
-        <header>
+        <header className="p-4">
           <h1 className="text-xl">
             <span className="font-mono text-emerald-400">{team?.number}</span>
             {" • "}
@@ -49,15 +115,13 @@ export const EventTeamsPage: React.FC = () => {
           <p className="italic">{teamLocation}</p>
         </header>
       )}
-      <section className="mt-4">
-        <h2 className="text-lg">Incidents</h2>
-        <ul className="mt-2">
-          {incidents?.map((incident) => (
-            <li key={incident.id}>
-              <p>{incident.rules}</p>
-            </li>
-          ))}
-        </ul>
+      <section>
+        <Tabs>
+          {{
+            Schedule: <EventTeamsMatches event={event} team={team} />,
+            Incidents: <EventTeamsIncidents event={event} team={team} />,
+          }}
+        </Tabs>
       </section>
     </section>
   );

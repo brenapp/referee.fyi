@@ -1,11 +1,11 @@
 import * as robotevents from "robotevents";
 import { UseQueryResult, useQuery } from "react-query";
-import { Round, type Match } from "robotevents/out/endpoints/matches";
+import { Round, type Match, Color } from "robotevents/out/endpoints/matches";
 import { Year } from "robotevents/out/endpoints/seasons";
 import { ProgramAbbr } from "robotevents/out/endpoints/programs";
 
 import * as rules from "../../assets/rules.json";
-import { TeamOptionsFromEvent } from "robotevents/out/endpoints/teams";
+import { Team, TeamOptionsFromEvent } from "robotevents/out/endpoints/teams";
 
 const ROBOTEVENTS_TOKEN =
     "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIzIiwianRpIjoiYjM5Y2I1NGNhMTk0OTM0ODNmNTc0MDQ2MTRhZDY0MDZjYTY1ZmQzMjAzNDlhMmM5YmUwOThlNmJjNzhhZWJmZmZjYzU0ZWY2MTQ2ZmQyYjEiLCJpYXQiOjE2ODc2NDIzODcuNTUwMjg4LCJuYmYiOjE2ODc2NDIzODcuNTUwMjkxMSwiZXhwIjoyNjM0NDE3MTg3LjUzNzIzNjIsInN1YiI6Ijk3MDY5Iiwic2NvcGVzIjpbXX0.k0DEt3QRKkgZnyV8X9mDf6VYyc8aOsIEfQbVN4Gi6Csr7O5ILLGFENXZouvplqbcMDdQ8gBMMLg5hIR38RmrTsKcWHMndq1T8wYkGZQfRhc_uZYLQhGQCaanf_F_-gnKocFwT1AKQJmAPkAbV-Itb2UzHeGpNuW8vV_TaNL3coaYvmM6rubwBuNYgyZhTHW_Mgvzh5-XBqqGpmQLm9TGl4gkeqnS-6a5PfoqRTc8v3CQWSCURFry5BA2oXz0lcWmq92FY5crr2KKv1O3chPr--oMba97elY0y9Dw0q2ipKcTm4pE7bbFP8t7-a_RKU4OyXuHRIQXjw3gEDCYXY5Hp22KMY0idnRIPhat6fybxcRfeyzUzdnubRBkDMNklwlgNCyeu2ROqEOYegtu5727Wwvy2I-xW-ZVoXg0rggVu7jVq6zmBqDFIcu50IS9R4P6a244pg2STlBaAGpzT2VfUqCBZrbtBOvdmdNzxSKIkl1AXeOIZOixo1186PX54p92ehXfCbcTgWrQSLuAAg_tBa6T7UFKFOGecVFo3v0vkmE__Q5-701f1qqcdDRNlOG-bzzFh9QLEdJWlpEajwYQ1ZjTAlbnBpKy3IrU0Aa-Jr0aqxtzgr5ZlghNtOcdYYRw5_BN0BOMmAnkvtm0_xzIJSsFbWJQJ8QpPk_n4zKZf-Y";
@@ -19,7 +19,7 @@ export function useEvent(sku: string) {
         }
 
         return await robotevents.events.get(sku);
-    });
+    }, { cacheTime: 1000 * 60 * 60 });
 }
 
 export function useTeam(numberOrID: string | number, program?: ProgramAbbr) {
@@ -73,14 +73,29 @@ export function useEventMatches(
         }
         const matches = await event.matches(division);
 
-        return matches.array().sort((a, b) => logicalMatchComparison(a, b));
+        return matches.array().sort(logicalMatchComparison);
     });
 }
+
+export function useEventMatchesForTeam(event: robotevents.events.Event | null | undefined, team: Team | null | undefined, color?: Color) {
+    return useQuery(["team_matches", event?.sku, team?.number], async () => {
+        if (!event || !team) {
+            return null;
+        }
+        let matches = (await team.matches({ event: [event.id] })).array();
+
+        if (color) {
+            matches = matches.filter(match => match.alliance(color).teams.some(t => t.team.id === team.id));
+        };
+
+        return matches.sort(logicalMatchComparison);
+    });
+};
 
 export function useEventMatch(event: robotevents.events.Event | null | undefined,
     division: number | null | undefined, match: number | null | undefined): UseQueryResult<Match | null> {
     const matches = useEventMatches(event, division);
-    return useQuery(["match", event?.sku, division, match], async () => {
+    return useQuery(["match", event?.sku, matches, division, match], async () => {
         if (!event || !division || !match) {
             return null;
         }

@@ -5,14 +5,15 @@ import { Match } from "robotevents/out/endpoints/matches";
 
 import { Tabs } from "../../components/Tabs";
 import { Event } from "robotevents/out/endpoints/events";
-import { Button } from "../../components/Button";
+import { Button, ButtonMode } from "../../components/Button";
 import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { MatchContext } from "../../components/Context";
 import { useCurrentDivision, useCurrentEvent } from "../../utils/hooks/state";
 import { useEventIncidents } from "../../utils/hooks/incident";
-import { useMemo, useState } from "react";
+import { useCallback, useId, useMemo, useState } from "react";
 import { IncidentOutcome } from "../../utils/data/incident";
-import { EventNewIncidentDialog } from "./new";
+import { EventNewIncidentDialog } from "./dialogs/new";
+import { EventMatchDialog } from "./dialogs/match";
 
 export type MainTabProps = {
   event: Event;
@@ -54,9 +55,9 @@ const EventTeamsTab: React.FC<MainTabProps> = ({ event }) => {
   }, [incidents]);
 
   return (
-    <section className="flex-1 flex flex-col gap-4">
+    <section>
       <Spinner show={isLoading} />
-      <ul className="flex-1 overflow-y-auto">
+      <ul>
         {teams?.map((team) => (
           <li key={team.number}>
             <Link
@@ -94,39 +95,78 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   minute: "numeric",
 });
 
+function matchTime(match: Match) {
+  if (match.started) {
+    return <span>{dateFormatter.format(new Date(match.started))}</span>;
+  }
+
+  return (
+    <span className="italic">
+      {dateFormatter.format(new Date(match.scheduled))}
+    </span>
+  );
+}
+
+type EventMatchProps = {
+  match: Match;
+  onClick: React.EventHandler<React.MouseEvent<HTMLButtonElement>>;
+};
+
+const EventMatch: React.FC<EventMatchProps> = ({ match, onClick }) => {
+  const id = useId();
+  return (
+    <li
+      key={match.id}
+      className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
+    >
+      <Button
+        mode={ButtonMode.None}
+        data-matchid={match.id}
+        onClick={onClick}
+        className="flex-1"
+        id={id}
+      >
+        <p>{match.name}</p>
+        <p className="text-sm">{matchTime(match)}</p>
+      </Button>
+      <label htmlFor={id}>
+        <MatchContext match={match} />
+      </label>
+    </li>
+  );
+};
+
 const EventMatchesTab: React.FC<MainTabProps> = ({ event }) => {
   const division = useCurrentDivision();
   const { data: matches, isLoading } = useEventMatches(event, division);
 
-  function matchTime(match: Match) {
-    if (match.started) {
-      return dateFormatter.format(new Date(match.started));
-    }
+  const [open, setOpen] = useState(false);
+  const [matchId, setMatchId] = useState<number>(0);
 
-    return dateFormatter.format(new Date(match.scheduled));
-  }
+  const onClickMatch = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    const matchId = parseInt(e.currentTarget.dataset.matchid ?? "NaN");
+    if (isNaN(matchId)) return;
+    setMatchId(matchId);
+    setOpen(true);
+  }, []);
 
   return (
-    <section className="flex-1 flex flex-col gap-4">
-      <Spinner show={isLoading} />
-      <ul className="flex-1 overflow-y-auto">
-        {matches?.map((match) => (
-          <li
-            key={match.id}
-            className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
-          >
-            <Link
-              to={`/${event.sku}/${division}/match/${match.id}`}
-              className="flex-1"
-            >
-              <p>{match.name}</p>
-              <p className="text-sm italic">{matchTime(match)}</p>
-            </Link>
-            <MatchContext match={match} />
-          </li>
-        ))}
-      </ul>
-    </section>
+    <>
+      <EventMatchDialog
+        matchId={matchId}
+        setMatchId={setMatchId}
+        open={open}
+        setOpen={setOpen}
+      />
+      <section>
+        <Spinner show={isLoading} />
+        <ul className="flex-1">
+          {matches?.map((match) => (
+            <EventMatch match={match} onClick={onClickMatch} key={match.id} />
+          ))}
+        </ul>
+      </section>
+    </>
   );
 };
 

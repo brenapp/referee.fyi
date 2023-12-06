@@ -4,7 +4,6 @@ import { AppShell } from "./pages";
 import { EventPage } from "./pages/events";
 import { EventTeamsPage } from "./pages/events/team";
 import { EventDivisionPickerPage } from "./pages/events/division";
-import { EventMatchPage } from "./pages/events/match";
 
 function App() {
   return (
@@ -15,10 +14,6 @@ function App() {
             <Route index path="/:sku" element={<EventDivisionPickerPage />} />
             <Route path="/:sku/:division" element={<EventPage />} />
             <Route path="/:sku/team/:number" element={<EventTeamsPage />} />
-            <Route
-              path="/:sku/:division/match/:matchId"
-              element={<EventMatchPage />}
-            />
           </Route>
         </Route>
       </Routes>

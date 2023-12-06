@@ -49,6 +49,7 @@ export type MatchContextProps = {
 
 export const MatchContext: React.FC<MatchContextProps> = ({
   match,
+  allianceClassName,
   ...props
 }) => {
   const { data: event } = useEvent(match.event.code);
@@ -80,14 +81,14 @@ export const MatchContext: React.FC<MatchContextProps> = ({
       <AllianceList
         teams={red.teams.map((t) => t.team)}
         color="red"
-        className={props.allianceClassName}
+        className={allianceClassName}
         score={red.score}
       />
       <AllianceList
         teams={blue.teams.map((t) => t.team)}
         color="blue"
         reverse
-        className={props.allianceClassName}
+        className={allianceClassName}
         score={blue.score}
       />
     </div>

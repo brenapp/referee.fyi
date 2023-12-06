@@ -23,15 +23,31 @@ export const IconButton: React.FC<IconButtonProps> = ({ icon, ...props }) => {
   );
 };
 
-export type ButtonProps = BaseButtonProps;
+export enum ButtonMode {
+  Normal,
+  None,
+}
 
-export const Button: React.FC<ButtonProps> = (props) => {
+const ButtonClasses: { [K in ButtonMode]: string } = {
+  [ButtonMode.Normal]: "",
+  [ButtonMode.None]: "bg-transparent",
+};
+
+export type ButtonProps = BaseButtonProps & {
+  mode?: ButtonMode;
+};
+
+export const Button: React.FC<ButtonProps> = ({
+  mode = ButtonMode.Normal,
+  ...props
+}) => {
   return (
     <button
       {...props}
       className={twMerge(
         "rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2",
         "hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500 disabled:bg-zinc-300 disabled:cursor-not-allowed",
+        ButtonClasses[mode],
         props.className
       )}
     />

@@ -37,9 +37,9 @@ export const EventTeamsPage: React.FC = () => {
       <section className="mt-4">
         <h2 className="text-lg">Incidents</h2>
         <ul className="mt-2">
-          {incidents?.map((i) => (
-            <li key={i.id}>
-              <p>{i.notes}</p>
+          {incidents?.map((incident) => (
+            <li key={incident.id}>
+              <p>{incident.rules}</p>
             </li>
           ))}
         </ul>

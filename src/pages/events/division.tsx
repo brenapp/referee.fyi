@@ -7,7 +7,7 @@ export const EventDivisionPickerPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
 
   if (event?.divisions.length === 1) {
-    return <Navigate to={`/${event.sku}/${event.divisions[0].id}`} />;
+    return <Navigate to={`/${event.sku}/${event.divisions[0].id}`} replace />;
   }
 
   return (

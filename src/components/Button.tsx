@@ -1,5 +1,6 @@
 import { twMerge } from "tailwind-merge";
 import { Link, LinkProps } from "react-router-dom";
+import { ButtonMode } from "./constants";
 
 type BaseButtonProps = React.DetailedHTMLProps<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -24,11 +25,6 @@ export const IconButton: React.FC<IconButtonProps> = ({ icon, ...props }) => {
     </button>
   );
 };
-
-export enum ButtonMode {
-  Normal,
-  None,
-}
 
 const ButtonClasses: { [K in ButtonMode]: string } = {
   [ButtonMode.Normal]: "",

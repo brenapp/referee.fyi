@@ -66,6 +66,7 @@ export const MatchContext: React.FC<MatchContextProps> = ({
           teams={teams}
           color="blue"
           score={match.alliances[0].score}
+          className={allianceClassName}
         />
       </div>
     );

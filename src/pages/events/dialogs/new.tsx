@@ -214,21 +214,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             />
           )
         )}
-        <label>
-          <p className="mt-4">Team Number</p>
-          <Select
-            value={incident.team?.number ?? "None"}
-            onChange={onChangeIncidentTeam}
-            className="max-w-full w-full"
-          >
-            <option value="None">Pick A Team</option>
-            {teams?.map((team) => (
-              <option value={team.number} key={team.id}>
-                {team.number} - {team.team_name}
-              </option>
-            ))}
-          </Select>
-        </label>
+
         <label>
           <p className="mt-4">Match</p>
           <Select
@@ -251,6 +237,23 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             allianceClassName="w-full"
           />
         )}
+        <label>
+          <p className="mt-4">Team</p>
+          <Select
+            value={incident.team?.number ?? -1}
+            onChange={onChangeIncidentTeam}
+            className="max-w-full w-full"
+          >
+            <option value={-1}>Pick A Team</option>
+            {match?.alliances.map((alliance) => (
+              <optgroup label={alliance.color.toUpperCase()}>
+                {alliance.teams.map(({ team }) => (
+                  <option value={team.name}>{team.name}</option>
+                ))}
+              </optgroup>
+            ))}
+          </Select>
+        </label>
         <label>
           <p className="mt-4">Outcome</p>
           <Select

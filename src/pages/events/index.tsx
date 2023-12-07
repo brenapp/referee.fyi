@@ -17,7 +17,8 @@ import {
 import { EventNewIncidentDialog } from "./dialogs/new";
 import { EventMatchDialog } from "./dialogs/match";
 import { ClickableMatch } from "~components/ClickableMatch";
-import { Dialog, DialogBody, DialogMode } from "~components/Dialog";
+import { Dialog, DialogBody } from "~components/Dialog";
+import { DialogMode } from "~components/constants";
 
 export type MainTabProps = {
   event: Event;

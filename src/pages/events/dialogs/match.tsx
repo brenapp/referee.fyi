@@ -7,15 +7,11 @@ import { useCallback, useMemo, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { MatchContext } from "~components/Context";
 import { Spinner } from "~components/Spinner";
-import {
-  Dialog,
-  DialogBody,
-  DialogHeader,
-  DialogMode,
-} from "~components/Dialog";
+import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
 import { IncidentOutcome } from "~utils/data/incident";
+import { DialogMode } from "~components/constants";
 
 export type EventMatchDialogProps = {
   matchId: number;

@@ -23,7 +23,7 @@ export function useEvent(sku: string) {
   );
 }
 
-export function useTeam(numberOrID: string | number, program?: ProgramAbbr) {
+export function useTeam(numberOrID: string | number | null | undefined, program?: ProgramAbbr) {
   return useQuery(["team", numberOrID], async () => {
     if (!numberOrID) {
       return null;

@@ -34,8 +34,8 @@ const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({ event, team }) => {
 };
 
 const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
-  [IncidentOutcome.Minor]: "bg-yellow-400",
-  [IncidentOutcome.Major]: "bg-red-400",
+  [IncidentOutcome.Minor]: "bg-yellow-400 text-yellow-900",
+  [IncidentOutcome.Major]: "bg-red-400 text-red-900",
   [IncidentOutcome.Disabled]: "bg-zinc-900",
 };
 

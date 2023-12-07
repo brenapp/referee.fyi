@@ -1,4 +1,3 @@
-import { useSearchParams } from "react-router-dom";
 import {
   useEventMatch,
   useEventMatches,
@@ -24,6 +23,8 @@ import {
   DialogHeader,
   DialogMode,
 } from "~components/Dialog";
+import { Team } from "robotevents/out/endpoints/teams";
+import { Match } from "robotevents/out/endpoints/matches";
 
 type Issue = {
   message: string;
@@ -33,9 +34,9 @@ type Issue = {
 function getIssues(incident: RichIncident): Issue[] {
   const issues: Issue[] = [];
 
-  if (!incident.team && !incident.match) {
+  if (!incident.team || !incident.match) {
     issues.push({
-      message: "Must select at least team or match",
+      message: "Must select at least team and match",
       type: "error",
     });
     return issues;
@@ -58,14 +59,16 @@ function getIssues(incident: RichIncident): Issue[] {
 export type EventNewIncidentDialogProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
+  initialTeam?: Team | null;
+  initialMatch?: Match | null;
 };
 
 export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   open,
   setOpen,
+  initialMatch,
+  initialTeam,
 }) => {
-  const [searchParams] = useSearchParams();
-
   const { mutate } = useNewIncident();
 
   const { data: event } = useCurrentEvent();
@@ -76,15 +79,8 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const { data: teams } = useEventTeams(event);
   const { data: matches } = useEventMatches(event, division);
 
-  const { data: team } = useTeam(
-    searchParams.get("team") ?? "",
-    event?.program.code
-  );
-  const { data: match } = useEventMatch(
-    event,
-    1,
-    Number.parseInt(searchParams.get("match") ?? "")
-  );
+  const { data: team } = useTeam(initialTeam?.id, event?.program.code);
+  const { data: match } = useEventMatch(event, division, initialMatch?.id);
 
   const [incident, setIncident] = useState<RichIncident>({
     time: new Date(),
@@ -101,6 +97,15 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     setIncidentField("team", team);
     setIncidentField("match", match);
   }, [team, match]);
+
+  useEffect(() => {
+    if (initialMatch) {
+      setIncidentField("match", initialMatch);
+    }
+    if (initialTeam) {
+      setIncidentField("team", initialTeam);
+    }
+  }, [initialMatch, initialTeam]);
 
   const issues = useMemo(() => getIssues(incident), [incident]);
   const canSave = useMemo(() => {
@@ -212,11 +217,11 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         <label>
           <p className="mt-4">Team Number</p>
           <Select
-            value={incident.team?.number}
+            value={incident.team?.number ?? "None"}
             onChange={onChangeIncidentTeam}
             className="max-w-full w-full"
           >
-            <option>Pick A Team</option>
+            <option value="None">Pick A Team</option>
             {teams?.map((team) => (
               <option value={team.number} key={team.id}>
                 {team.number} - {team.team_name}
@@ -227,11 +232,11 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         <label>
           <p className="mt-4">Match</p>
           <Select
-            value={incident.match?.id}
+            value={incident.match?.id ?? -1}
             onChange={onChangeIncidentMatch}
             className="max-w-full w-full"
           >
-            <option>Pick A Match</option>
+            <option value={-1}>Pick A Match</option>
             {matches?.map((match) => (
               <option value={match.id} key={match.id}>
                 {match.name}

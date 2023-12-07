@@ -7,7 +7,7 @@ import {
   newIncident,
 } from "../data/incident";
 import { UseQueryResult, useMutation, useQuery } from "react-query";
-import { Match } from "robotevents/out/endpoints/matches";
+import { Alliance, Match } from "robotevents/out/endpoints/matches";
 import { queryClient } from "~utils/data/query";
 
 export function useIncident(id: string | undefined | null) {
@@ -86,7 +86,8 @@ export type TeamIncidentsByMatch = {
 
 export function useTeamIncidentsByMatch(match: Match | undefined | null): UseQueryResult<TeamIncidentsByMatch> {
   return useQuery(["incidents", "match", match?.id], async () => {
-    const teams = match?.alliances.map((a) => a.teams.map((t) => t.team.name)).flat() ?? [];
+    const alliances = [match?.alliance("red"), match?.alliance("blue")].filter(r => !!r) as Alliance[]
+    const teams = alliances.map((a) => a.teams.map((t) => t.team.name)).flat() ?? [];
 
     const incidentsByTeam: TeamIncidentsByMatch = [];
 

@@ -5,7 +5,7 @@ import "./index.css";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { initIncidentStore } from "./utils/data/incident.ts";
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 initIncidentStore();
 

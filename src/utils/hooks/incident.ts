@@ -1,3 +1,4 @@
+import { queryClient } from "main";
 import {
   Incident,
   IncidentWithID,
@@ -22,7 +23,11 @@ export function useIncident(id: string | undefined | null) {
 }
 
 export function useNewIncident() {
-  return useMutation((incident: Incident) => newIncident(incident));
+  return useMutation(async (incident: Incident) => {
+    const id = await newIncident(incident);
+    await queryClient.invalidateQueries("incidents");
+    return id;
+  });
 }
 
 export function useEventIncidents(sku: string | undefined | null) {

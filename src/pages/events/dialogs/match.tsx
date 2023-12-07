@@ -74,7 +74,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
         onClose={() => setOpen(false)}
       >
         <DialogHeader title="Matches" onClose={() => setOpen(false)} />
-        <DialogBody className="p-4">
+        <DialogBody>
           <nav className="flex items-center">
             <Button
               onClick={onClickPrevMatch}
@@ -130,15 +130,19 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                             {incidents.length > 0 ? (
                               incidents.map((incident) => (
                                 <>
-                                  {incident.rules.map((r) => (
-                                    <li
-                                      className={twMerge(
-                                        outcomeColors[incident.outcome]
-                                      )}
-                                    >
-                                      {r}
-                                    </li>
-                                  ))}
+                                  {incident.rules.length > 0 ? (
+                                    incident.rules.map((r) => (
+                                      <li
+                                        className={twMerge(
+                                          outcomeColors[incident.outcome]
+                                        )}
+                                      >
+                                        {r}
+                                      </li>
+                                    ))
+                                  ) : (
+                                    <li>{IncidentOutcome[incident.outcome]}</li>
+                                  )}
                                 </>
                               ))
                             ) : (

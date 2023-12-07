@@ -18,6 +18,7 @@ import { EventNewIncidentDialog } from "./dialogs/new";
 import { EventMatchDialog } from "./dialogs/match";
 import { ClickableMatch } from "~components/ClickableMatch";
 import { Dialog, DialogBody, DialogMode } from "~components/Dialog";
+import { useNewEventShare } from "~utils/hooks/share";
 
 export type MainTabProps = {
   event: Event;
@@ -145,12 +146,29 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
     setDeleteDataDialogOpen(false);
   }, []);
 
+  const { mutateAsync: createShare } = useNewEventShare();
+
+  const onClickShare = useCallback(async () => {
+    const incidents = await getIncidentsByEvent(event.sku);
+
+    const result = await createShare({
+      initial: { owner: { name: "BREN" }, sku: event.sku, incidents },
+    });
+
+    console.log(result);
+  }, [createShare]);
+
   return (
     <>
       <section>
         <section className="mt-4">
           <h2 className="font-bold">Share Event Data</h2>
-          <p>Not currently implemented.</p>
+          <Button
+            className="w-full mt-4 bg-emerald-500 text-center"
+            onClick={onClickShare}
+          >
+            Begin Sharing
+          </Button>
         </section>
         <section className="mt-4 relative">
           <h2 className="font-bold">Delete Event Data</h2>

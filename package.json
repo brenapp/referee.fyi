@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
+    "dev:frontend": "vite --host --port 3000",
+    "dev": "wrangler pages dev --port 5173 --proxy 3000 --kv=INCIDENTS -- npm run dev:frontend",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
     "preview": "vite preview"
@@ -24,9 +25,11 @@
     "robotevents": "^3.1.0",
     "sort-by": "^1.2.0",
     "tailwind-merge": "^2.0.0",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20231121.0",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
@@ -42,11 +45,12 @@
     "postcss": "^8.4.24",
     "prettier": "^3.1.0",
     "tailwindcss": "^3.3.2",
-    "typescript": "^5.2.2",
+    "typescript": "^5.3.3",
     "vite": "^5.0.0",
     "vite-plugin-node-polyfills": "^0.16.0",
     "vite-plugin-pwa": "^0.17.2",
-    "vite-tsconfig-paths": "^4.2.1"
+    "vite-tsconfig-paths": "^4.2.1",
+    "wrangler": "^3.19.0"
   },
   "overrides": {
     "vite-plugin-node-polyfills": {

@@ -31,7 +31,7 @@ export function useRules(): UseQueryResult<Rules> {
       return { games: [] };
     }
     return response.json() as Promise<Rules>;
-  });
+  }, { staleTime: 1000 * 60 * 60 * 6 });
 }
 
 export function useGameRules(game: string): Game | undefined {

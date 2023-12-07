@@ -29,5 +29,6 @@
     }
   },
   "include": ["src", "node_modules/vite-plugin-pwa/client.d.ts"],
+  "exclude": ["functions/**/*"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

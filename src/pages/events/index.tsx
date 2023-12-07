@@ -70,7 +70,9 @@ const EventTeamsTab: React.FC<MainTabProps> = ({ event }) => {
             >
               <div className="flex-1">
                 <p className="text-emerald-400 font-mono">{team.number}</p>
-                <p>{team.team_name}</p>
+                <p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose">
+                  {team.team_name}
+                </p>
               </div>
               <p className="h-full w-32 px-2 flex items-center">
                 <span className="text-red-400 mr-4">

@@ -106,10 +106,10 @@ export const EventTeamsPage: React.FC = () => {
       <Spinner show={isLoading} />
       {team && (
         <header className="p-4">
-          <h1 className="text-xl">
+          <h1 className="text-xl overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose">
             <span className="font-mono text-emerald-400">{team?.number}</span>
             {" • "}
-            <span>{team.team_name}</span>
+            <span className="">{team.team_name}</span>
           </h1>
 
           <p className="italic">{teamLocation}</p>

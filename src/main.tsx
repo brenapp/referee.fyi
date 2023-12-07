@@ -2,10 +2,9 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import { QueryClient, QueryClientProvider } from "react-query";
-import { initIncidentStore } from "./utils/data/incident.ts";
-
-export const queryClient = new QueryClient();
+import { QueryClientProvider } from "react-query";
+import { initIncidentStore } from "./utils/data/incident";
+import { queryClient } from "~utils/data/query";
 
 initIncidentStore();
 
@@ -14,5 +13,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <QueryClientProvider client={queryClient}>
       <App />
     </QueryClientProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

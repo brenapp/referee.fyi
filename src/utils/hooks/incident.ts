@@ -1,4 +1,3 @@
-import { queryClient } from "main";
 import {
   Incident,
   IncidentWithID,
@@ -7,7 +6,9 @@ import {
   getIncidentsByTeam,
   newIncident,
 } from "../data/incident";
-import { useMutation, useQuery } from "react-query";
+import { UseQueryResult, useMutation, useQuery } from "react-query";
+import { Match } from "robotevents/out/endpoints/matches";
+import { queryClient } from "~utils/data/query";
 
 export function useIncident(id: string | undefined | null) {
   return useQuery<Incident | undefined>(
@@ -77,3 +78,24 @@ export function useTeamIncidentsByEvent(
     { cacheTime: 0 }
   );
 }
+
+export type TeamIncidentsByMatch = {
+  team: string;
+  incidents: IncidentWithID[]
+}[]
+
+export function useTeamIncidentsByMatch(match: Match | undefined | null): UseQueryResult<TeamIncidentsByMatch> {
+  return useQuery(["incidents", "match", match?.id], async () => {
+    const teams = match?.alliances.map((a) => a.teams.map((t) => t.team.name)).flat() ?? [];
+
+    const incidentsByTeam: TeamIncidentsByMatch = [];
+
+    for (const team of teams) {
+      const incidents = (await getIncidentsByTeam(team)).filter(i => i.event === match?.event.code);
+
+      incidentsByTeam.push({ team, incidents });
+    };
+
+    return incidentsByTeam;
+  });
+};

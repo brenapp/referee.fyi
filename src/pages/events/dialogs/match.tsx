@@ -118,17 +118,21 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                         [IncidentOutcome.Disabled]: "",
                       };
                       return (
-                        <div className="flex-1 flex items-center flex-col rounded-md">
+                        <div
+                          key={team}
+                          className="flex-1 flex items-center flex-col rounded-md"
+                        >
                           <h3 className="font-mono text-center text-emerald-400">
                             {team}
                           </h3>
                           <ul className="text-center font-mono italic flex-1">
                             {incidents.length > 0 ? (
                               incidents.map((incident) => (
-                                <>
+                                <div key={incident.id}>
                                   {incident.rules.length > 0 ? (
-                                    incident.rules.map((r) => (
+                                    incident.rules.map((r, index) => (
                                       <li
+                                        key={index}
                                         className={twMerge(
                                           outcomeColors[incident.outcome]
                                         )}
@@ -139,7 +143,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                                   ) : (
                                     <li>{IncidentOutcome[incident.outcome]}</li>
                                   )}
-                                </>
+                                </div>
                               ))
                             ) : (
                               <li>None</li>

@@ -27,7 +27,7 @@ const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({ event, team }) => {
   return (
     <ul>
       {matches?.map((match) => (
-        <ClickableMatch match={match} onClick={() => {}} />
+        <ClickableMatch match={match} key={match.id} onClick={() => {}} />
       ))}
     </ul>
   );

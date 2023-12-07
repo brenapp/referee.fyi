@@ -45,13 +45,13 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
     if (prevMatch) {
       setMatchId(prevMatch.id);
     }
-  }, [prevMatch]);
+  }, [prevMatch, setMatchId]);
 
   const onClickNextMatch = useCallback(() => {
     if (nextMatch) {
       setMatchId(nextMatch.id);
     }
-  }, [nextMatch]);
+  }, [nextMatch, setMatchId]);
 
   const { data: incidentsByTeam } = useTeamIncidentsByMatch(match);
 

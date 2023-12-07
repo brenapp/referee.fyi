@@ -99,7 +99,7 @@ export const EventTeamsPage: React.FC = () => {
     return [team?.location.city, team?.location.region, team?.location.country]
       .filter(Boolean)
       .join(", ");
-  }, [team?.location]);
+  }, [team]);
 
   return (
     <section>

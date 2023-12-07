@@ -188,7 +188,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         },
       });
     },
-    [incident]
+    [incident, mutate, setOpen]
   );
 
   return (

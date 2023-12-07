@@ -144,7 +144,7 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
       await deleteIncident(incident.id);
     }
     setDeleteDataDialogOpen(false);
-  }, []);
+  }, [event.sku]);
 
   return (
     <>

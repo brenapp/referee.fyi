@@ -55,7 +55,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
   }, [nextMatch]);
 
   return (
-    <Dialog open={open} mode={DialogMode.Modal}>
+    <Dialog open={open} mode={DialogMode.Modal} onClose={() => setOpen(false)}>
       <DialogHeader title="Matches" onClose={() => setOpen(false)} />
       <DialogBody>
         <nav className="flex items-center">

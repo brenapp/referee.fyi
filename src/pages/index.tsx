@@ -22,7 +22,7 @@ import { ProgramAbbr } from "robotevents/out/endpoints/programs";
 import { RulesSelect, Select } from "~components/Input";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 
-const EventPicker: React.FC = ({}) => {
+const EventPicker: React.FC = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -43,7 +43,11 @@ const EventPicker: React.FC = ({}) => {
 
   return (
     <>
-      <Dialog open={open} mode={DialogMode.Modal}>
+      <Dialog
+        open={open}
+        mode={DialogMode.Modal}
+        onClose={() => setOpen(false)}
+      >
         <DialogHeader title="Pick An Event" onClose={() => setOpen(false)} />
         <DialogBody>
           <Spinner show={isLoading} />
@@ -118,7 +122,11 @@ const Rules: React.FC = () => {
 
   return (
     <>
-      <Dialog open={open} mode={DialogMode.Modal}>
+      <Dialog
+        open={open}
+        mode={DialogMode.Modal}
+        onClose={() => setOpen(false)}
+      >
         <DialogCustomHeader>
           <IconButton
             icon={<XMarkIcon height={24} />}

@@ -166,6 +166,7 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
             open={deleteDataDialogOpen}
             mode={DialogMode.NonModal}
             className="absolute w-full rounded-md h-min mt-4 bg-zinc-100 text-zinc-900"
+            onClose={() => setDeleteDataDialogOpen(false)}
           >
             <DialogBody>
               <p>Really delete all event data? This action cannot be undone.</p>

@@ -191,7 +191,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   );
 
   return (
-    <Dialog open={open} mode={DialogMode.Modal}>
+    <Dialog open={open} mode={DialogMode.Modal} onClose={() => setOpen(false)}>
       <DialogHeader title="New Report" onClose={() => setOpen(false)} />
       <DialogBody>
         {issues.map((issue) =>

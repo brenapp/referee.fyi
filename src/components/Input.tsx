@@ -4,7 +4,7 @@ import { useCallback } from "react";
 
 export type InputBaseProps = React.HTMLProps<HTMLInputElement>;
 
-export type InputProps = InputBaseProps & {};
+export type InputProps = InputBaseProps;
 
 export const Input: React.FC<InputProps> = (props) => {
   return (
@@ -21,7 +21,7 @@ export const Input: React.FC<InputProps> = (props) => {
 
 export type TextAreaBaseProps = React.HTMLProps<HTMLTextAreaElement>;
 
-export type TextAreaProps = TextAreaBaseProps & {};
+export type TextAreaProps = TextAreaBaseProps;
 
 export const TextArea: React.FC<TextAreaProps> = (props) => {
   return (
@@ -41,7 +41,7 @@ export type SelectBaseProps = React.DetailedHTMLProps<
   HTMLSelectElement
 >;
 
-export type SelectProps = SelectBaseProps & {};
+export type SelectProps = SelectBaseProps;
 
 export const Select: React.FC<SelectBaseProps> = ({ children, ...props }) => {
   return (
@@ -82,7 +82,7 @@ export const RulesSelect: React.FC<RulesSelectProps> = ({
       if (!rule) return;
       setRule(rule);
     },
-    [game]
+    [game, setRule]
   );
 
   return (

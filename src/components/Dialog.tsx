@@ -62,6 +62,7 @@ export enum DialogMode {
 
 export type DialogProps = {
   open: boolean;
+  onClose: () => void;
   mode: DialogMode;
 } & Omit<React.HTMLProps<HTMLDialogElement>, "ref">;
 
@@ -69,6 +70,7 @@ export const Dialog: React.FC<DialogProps> = ({
   open,
   mode,
   children,
+  onClose,
   ...props
 }) => {
   const ref = useRef<HTMLDialogElement>(null);
@@ -86,12 +88,13 @@ export const Dialog: React.FC<DialogProps> = ({
     } else {
       ref.current?.close();
     }
-  }, [open]);
+  }, [open, mode]);
 
   return (
     <dialog
       {...props}
       ref={ref}
+      onClose={onClose}
       className={twMerge(
         "bg-zinc-900 flex-col p-2 gap-2 z-50 w-screen h-screen overscroll-none text-zinc-100",
         props.className,

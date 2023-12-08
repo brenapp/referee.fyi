@@ -31,8 +31,8 @@ function getIssues(incident: RichIncident): Issue[] {
 
   if (!incident.team || !incident.match) {
     issues.push({
-      message: "Must select at least team and match",
-      type: "error",
+      message: "Please select team and match",
+      type: "warning",
     });
     return issues;
   }
@@ -43,8 +43,8 @@ function getIssues(incident: RichIncident): Issue[] {
 
   if (!hasTeam && incident.match && incident.team) {
     issues.push({
-      message: "Team not in match",
-      type: "warning",
+      message: "Team not in selected match",
+      type: "error",
     });
   }
 

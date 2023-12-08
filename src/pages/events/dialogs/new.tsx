@@ -98,6 +98,17 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     setMatch(match);
   }, [team, match]);
 
+  useEffect(() => {
+    if (initialMatch) {
+      setIncidentField("match", initialMatch);
+      setMatch(initialMatch);
+    }
+    if (initialTeam) {
+      setIncidentField("team", initialTeam);
+      setTeam(initialTeam);
+    }
+  }, [initialMatch, initialTeam]);
+
   const issues = useMemo(() => getIssues(incident), [incident]);
   const canSave = useMemo(() => {
     return issues.every((i) => i.type === "warning");
@@ -183,11 +194,10 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       const packed = packIncident(incident);
       mutate(packed, {
         onSuccess: () => {
-          setMatch(null);
+          // Do not reset match, for ease of use.
           setTeam(null);
 
           setIncidentField("team", null);
-          setIncidentField("match", null);
           setIncidentField("notes", "");
           setIncidentField("rules", []);
           setIncidentField("outcome", IncidentOutcome.Minor);

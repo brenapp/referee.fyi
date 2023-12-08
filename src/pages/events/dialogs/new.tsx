@@ -1,9 +1,4 @@
-import {
-  useEventMatch,
-  useEventMatches,
-  useEventTeams,
-  useTeam,
-} from "~hooks/robotevents";
+import { useEventMatches, useEventTeams } from "~hooks/robotevents";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 import { Select, TextArea } from "~components/Input";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -36,8 +31,8 @@ function getIssues(incident: RichIncident): Issue[] {
 
   if (!incident.team || !incident.match) {
     issues.push({
-      message: "Must select at least team and match",
-      type: "error",
+      message: "Please select team and match",
+      type: "warning",
     });
     return issues;
   }
@@ -48,8 +43,8 @@ function getIssues(incident: RichIncident): Issue[] {
 
   if (!hasTeam && incident.match && incident.team) {
     issues.push({
-      message: "Team not in match",
-      type: "warning",
+      message: "Team not in selected match",
+      type: "error",
     });
   }
 
@@ -76,11 +71,13 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 
   const rules = useRulesForProgram(event?.program.code);
 
+  // Find all teams and matches at the event
   const { data: teams } = useEventTeams(event);
   const { data: matches } = useEventMatches(event, division);
 
-  const { data: team } = useTeam(initialTeam?.id, event?.program.code);
-  const { data: match } = useEventMatch(event, division, initialMatch?.id);
+  // Initialise current team and match
+  const [team, setTeam] = useState(initialTeam);
+  const [match, setMatch] = useState(initialMatch);
 
   const [incident, setIncident] = useState<RichIncident>({
     time: new Date(),
@@ -95,15 +92,20 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 
   useEffect(() => {
     setIncidentField("team", team);
+    setTeam(team);
+
     setIncidentField("match", match);
+    setMatch(match);
   }, [team, match]);
 
   useEffect(() => {
     if (initialMatch) {
       setIncidentField("match", initialMatch);
+      setMatch(initialMatch);
     }
     if (initialTeam) {
       setIncidentField("team", initialTeam);
+      setTeam(initialTeam);
     }
   }, [initialMatch, initialTeam]);
 
@@ -124,20 +126,24 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 
   const onChangeIncidentTeam = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const team = teams?.find((t) => t.number === e.target.value);
-      if (!team) return;
+      const newTeam = teams?.find((t) => t.number === e.target.value);
+      if (!newTeam) return;
 
-      setIncidentField("team", team);
+      setIncidentField("team", newTeam);
+      setTeam(newTeam);
     },
     [teams]
   );
 
   const onChangeIncidentMatch = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const match = matches?.find((m) => m.id.toString() === e.target.value);
-      if (!match) return;
+      const newMatch = matches?.find((m) => m.id.toString() === e.target.value);
+      if (!newMatch) return;
 
-      setIncidentField("match", match);
+      setIncidentField("match", newMatch);
+      setMatch(newMatch);
+      // Reset the selected team if a new match is selected
+      setTeam(null);
     },
     [matches]
   );
@@ -188,6 +194,13 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       const packed = packIncident(incident);
       mutate(packed, {
         onSuccess: () => {
+          // Do not reset match, for ease of use.
+          setTeam(null);
+
+          setIncidentField("team", null);
+          setIncidentField("notes", "");
+          setIncidentField("rules", []);
+          setIncidentField("outcome", IncidentOutcome.Minor);
           setOpen(false);
         },
       });

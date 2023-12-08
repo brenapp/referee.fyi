@@ -183,6 +183,14 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       const packed = packIncident(incident);
       mutate(packed, {
         onSuccess: () => {
+          setMatch(null);
+          setTeam(null);
+
+          setIncidentField("team", null);
+          setIncidentField("match", null);
+          setIncidentField("notes", "");
+          setIncidentField("rules", []);
+          setIncidentField("outcome", IncidentOutcome.Minor);
           setOpen(false);
         },
       });

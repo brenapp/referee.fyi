@@ -212,8 +212,8 @@ export const EventPage: React.FC = () => {
       />
       <Tabs className="mt-4">
         {{
-          Teams: <EventTeamsTab event={event} />,
           Matches: <EventMatchesTab event={event} />,
+          Teams: <EventTeamsTab event={event} />,
           Manage: <EventManageTab event={event} />,
         }}
       </Tabs>

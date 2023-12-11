@@ -261,7 +261,9 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             {match?.alliances.map((alliance) => (
               <optgroup label={alliance.color.toUpperCase()}>
                 {alliance.teams.map(({ team }) => (
-                  <option value={team.name}>{team.name}</option>
+                  <option value={team.name} key={team.id}>
+                    {team.name}
+                  </option>
                 ))}
               </optgroup>
             ))}

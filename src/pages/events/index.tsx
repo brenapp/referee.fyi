@@ -73,7 +73,12 @@ const EventTeamsTab: React.FC<MainTabProps> = ({ event }) => {
             itemSize={64}
           >
             {({ index, style }) => {
-              const team = teams?.[index]!;
+              const team = teams?.[index];
+
+              if (!team) {
+                return <div style={style} key={index}></div>;
+              }
+
               return (
                 <div style={style} key={team.id}>
                   <Link
@@ -149,7 +154,12 @@ const EventMatchesTab: React.FC<MainTabProps> = ({ event }) => {
               itemSize={64}
             >
               {({ index, style }) => {
-                const match = matches?.[index]!;
+                const match = matches?.[index];
+
+                if (!match) {
+                  return <div style={style} key={index}></div>;
+                }
+
                 return (
                   <div style={style}>
                     <ClickableMatch

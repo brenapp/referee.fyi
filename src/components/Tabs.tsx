@@ -8,7 +8,10 @@ export const Tabs: React.FC<TabsProps> = ({ children, ...props }) => {
   const [activeTab, setActiveTab] = React.useState(0);
 
   return (
-    <div {...props}>
+    <div
+      {...props}
+      className={twMerge("flex flex-col flex-1", props.className)}
+    >
       <nav role="tablist" className="flex gap-4 max-w-full py-2">
         {Object.keys(children).map((key, index) => (
           <button
@@ -27,7 +30,7 @@ export const Tabs: React.FC<TabsProps> = ({ children, ...props }) => {
           </button>
         ))}
       </nav>
-      <div role="tabpanel" className="mt-4">
+      <div role="tabpanel" className="flex-1 flex flex-col">
         {Object.values(children)[activeTab]}
       </div>
     </div>

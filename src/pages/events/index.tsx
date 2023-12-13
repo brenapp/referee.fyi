@@ -17,7 +17,8 @@ import {
 import { EventNewIncidentDialog } from "./dialogs/new";
 import { EventMatchDialog } from "./dialogs/match";
 import { ClickableMatch } from "~components/ClickableMatch";
-import { Dialog, DialogBody, DialogMode } from "~components/Dialog";
+import { Dialog, DialogBody } from "~components/Dialog";
+import { DialogMode } from "~components/constants";
 
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -177,7 +178,7 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
       await deleteIncident(incident.id);
     }
     setDeleteDataDialogOpen(false);
-  }, []);
+  }, [event.sku]);
 
   return (
     <>

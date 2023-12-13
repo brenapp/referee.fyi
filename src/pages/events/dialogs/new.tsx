@@ -12,12 +12,8 @@ import {
   packIncident,
 } from "~utils/data/incident";
 import { useNewIncident } from "~hooks/incident";
-import {
-  Dialog,
-  DialogBody,
-  DialogHeader,
-  DialogMode,
-} from "~components/Dialog";
+import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
+import { DialogMode } from "~components/constants";
 import { Team } from "robotevents/out/endpoints/teams";
 import { Match } from "robotevents/out/endpoints/matches";
 
@@ -205,7 +201,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         },
       });
     },
-    [incident]
+    [incident, mutate, setOpen]
   );
 
   return (
@@ -259,7 +255,10 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
           >
             <option value={-1}>Pick A Team</option>
             {match?.alliances.map((alliance) => (
-              <optgroup label={alliance.color.toUpperCase()}>
+              <optgroup
+                key={alliance.color.toUpperCase()}
+                label={alliance.color.toUpperCase()}
+              >
                 {alliance.teams.map(({ team }) => (
                   <option value={team.name} key={team.id}>
                     {team.name}

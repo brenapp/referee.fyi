@@ -2,6 +2,7 @@ import { twMerge } from "tailwind-merge";
 import { IconButton } from "./Button";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 import { useEffect, useRef } from "react";
+import { DialogMode } from "./constants";
 
 export type DialogCustomHeaderProps = {
   children?: React.ReactNode;
@@ -54,11 +55,6 @@ export const DialogBody: React.FC<DialogBodyProps> = ({
     </div>
   );
 };
-
-export enum DialogMode {
-  Modal,
-  NonModal,
-}
 
 export type DialogProps = {
   open: boolean;

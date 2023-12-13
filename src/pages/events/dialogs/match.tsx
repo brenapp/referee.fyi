@@ -7,15 +7,11 @@ import { useCallback, useMemo, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { MatchContext } from "~components/Context";
 import { Spinner } from "~components/Spinner";
-import {
-  Dialog,
-  DialogBody,
-  DialogHeader,
-  DialogMode,
-} from "~components/Dialog";
+import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
 import { IncidentOutcome } from "~utils/data/incident";
+import { DialogMode } from "~components/constants";
 
 export type EventMatchDialogProps = {
   matchId: number;
@@ -49,13 +45,13 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
     if (prevMatch) {
       setMatchId(prevMatch.id);
     }
-  }, [prevMatch]);
+  }, [prevMatch, setMatchId]);
 
   const onClickNextMatch = useCallback(() => {
     if (nextMatch) {
       setMatchId(nextMatch.id);
     }
-  }, [nextMatch]);
+  }, [nextMatch, setMatchId]);
 
   const { data: incidentsByTeam } = useTeamIncidentsByMatch(match);
 
@@ -122,17 +118,21 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                         [IncidentOutcome.Disabled]: "",
                       };
                       return (
-                        <div className="flex-1 flex items-center flex-col rounded-md">
+                        <div
+                          key={team}
+                          className="flex-1 flex items-center flex-col rounded-md"
+                        >
                           <h3 className="font-mono text-center text-emerald-400">
                             {team}
                           </h3>
                           <ul className="text-center font-mono italic flex-1">
                             {incidents.length > 0 ? (
                               incidents.map((incident) => (
-                                <>
+                                <div key={incident.id}>
                                   {incident.rules.length > 0 ? (
-                                    incident.rules.map((r) => (
+                                    incident.rules.map((r, index) => (
                                       <li
+                                        key={index}
                                         className={twMerge(
                                           outcomeColors[incident.outcome]
                                         )}
@@ -143,7 +143,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                                   ) : (
                                     <li>{IncidentOutcome[incident.outcome]}</li>
                                   )}
-                                </>
+                                </div>
                               ))
                             ) : (
                               <li>None</li>

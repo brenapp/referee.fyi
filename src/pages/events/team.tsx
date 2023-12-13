@@ -27,7 +27,7 @@ const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({ event, team }) => {
   return (
     <ul>
       {matches?.map((match) => (
-        <ClickableMatch match={match} onClick={() => {}} />
+        <ClickableMatch match={match} key={match.id} onClick={() => {}} />
       ))}
     </ul>
   );
@@ -99,7 +99,7 @@ export const EventTeamsPage: React.FC = () => {
     return [team?.location.city, team?.location.region, team?.location.country]
       .filter(Boolean)
       .join(", ");
-  }, [team?.location]);
+  }, [team]);
 
   return (
     <section>

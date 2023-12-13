@@ -16,8 +16,8 @@ import {
   DialogBody,
   DialogCustomHeader,
   DialogHeader,
-  DialogMode,
 } from "~components/Dialog";
+import { DialogMode } from "~components/constants";
 import { ProgramAbbr } from "robotevents/out/endpoints/programs";
 import { Input, RulesSelect, Select } from "~components/Input";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";

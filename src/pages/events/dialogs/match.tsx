@@ -16,6 +16,7 @@ import {
 import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
 import { IncidentOutcome } from "~utils/data/incident";
+import { shortMatchName } from "~utils/data/match";
 
 export type EventMatchDialogProps = {
   matchId: number;
@@ -128,23 +129,31 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                           </h3>
                           <ul className="text-center font-mono italic flex-1">
                             {incidents.length > 0 ? (
-                              incidents.map((incident) => (
-                                <>
-                                  {incident.rules.length > 0 ? (
-                                    incident.rules.map((r) => (
-                                      <li
-                                        className={twMerge(
-                                          outcomeColors[incident.outcome]
-                                        )}
-                                      >
-                                        {r}
+                              incidents.map((incident) => {
+                                const match = matches?.find(
+                                  (v) => incident.match === v.id
+                                );
+                                return (
+                                  <>
+                                    {incident.rules.length > 0 ? (
+                                      incident.rules.map((r) => (
+                                        <li
+                                          className={twMerge(
+                                            outcomeColors[incident.outcome]
+                                          )}
+                                        >
+                                          {match ? shortMatchName(match) : null}{" "}
+                                          {r.replace(/[<>]/g, "")}
+                                        </li>
+                                      ))
+                                    ) : (
+                                      <li>
+                                        {IncidentOutcome[incident.outcome]}
                                       </li>
-                                    ))
-                                  ) : (
-                                    <li>{IncidentOutcome[incident.outcome]}</li>
-                                  )}
-                                </>
-                              ))
+                                    )}
+                                  </>
+                                );
+                              })
                             ) : (
                               <li>None</li>
                             )}

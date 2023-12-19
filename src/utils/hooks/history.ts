@@ -40,7 +40,7 @@ export function useRecentRules(limit?: number) {
     return useQuery("recent_rules", async () => {
         const rules = await getRecentRules();
         return rules.slice(0, limit);
-    }, { cacheTime: 0 });
+    }, { cacheTime: 0, staleTime: 0, refetchOnMount: "always" });
 };
 
 export function useAddEventVisited() {

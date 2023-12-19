@@ -17,7 +17,11 @@ import {
 import { EventNewIncidentDialog } from "./dialogs/new";
 import { EventMatchDialog } from "./dialogs/match";
 import { ClickableMatch } from "~components/ClickableMatch";
-import { Dialog, DialogBody, DialogMode } from "~components/Dialog";
+import { Dialog, DialogBody } from "~components/Dialog";
+import { DialogMode } from "~components/constants";
+
+import { FixedSizeList as List } from "react-window";
+import AutoSizer from "react-virtualized-auto-sizer";
 
 export type MainTabProps = {
   event: Event;
@@ -59,39 +63,61 @@ const EventTeamsTab: React.FC<MainTabProps> = ({ event }) => {
   }, [incidents]);
 
   return (
-    <section>
+    <section className="flex-1">
       <Spinner show={isLoading} />
-      <ul>
-        {teams?.map((team) => (
-          <li key={team.number}>
-            <Link
-              to={`/${event.sku}/team/${team.number}`}
-              className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
-            >
-              <div className="flex-1">
-                <p className="text-emerald-400 font-mono">{team.number}</p>
-                <p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose">
-                  {team.team_name}
-                </p>
-              </div>
-              <p className="h-full w-32 px-2 flex items-center">
-                <span className="text-red-400 mr-4">
-                  <FlagIcon height={24} className="inline" />
-                  <span className="font-mono ml-2">
-                    {majorIncidents.get(team.number) ?? 0}
-                  </span>
-                </span>
-                <span className="text-yellow-400">
-                  <ExclamationTriangleIcon height={24} className="inline" />
-                  <span className="font-mono ml-2">
-                    {minorIncidents.get(team.number) ?? 0}
-                  </span>
-                </span>
-              </p>
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <AutoSizer>
+        {(size) => (
+          <List
+            width={size.width}
+            height={size.height}
+            itemCount={teams?.length ?? 0}
+            itemSize={64}
+          >
+            {({ index, style }) => {
+              const team = teams?.[index];
+
+              if (!team) {
+                return <div style={style} key={index}></div>;
+              }
+
+              return (
+                <div style={style} key={team.id}>
+                  <Link
+                    to={`/${event.sku}/team/${team.number}`}
+                    className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
+                  >
+                    <div className="flex-1">
+                      <p className="text-emerald-400 font-mono">
+                        {team.number}
+                      </p>
+                      <p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose">
+                        {team.team_name}
+                      </p>
+                    </div>
+                    <p className="h-full w-32 px-2 flex items-center">
+                      <span className="text-red-400 mr-4">
+                        <FlagIcon height={24} className="inline" />
+                        <span className="font-mono ml-2">
+                          {majorIncidents.get(team.number) ?? 0}
+                        </span>
+                      </span>
+                      <span className="text-yellow-400">
+                        <ExclamationTriangleIcon
+                          height={24}
+                          className="inline"
+                        />
+                        <span className="font-mono ml-2">
+                          {minorIncidents.get(team.number) ?? 0}
+                        </span>
+                      </span>
+                    </p>
+                  </Link>
+                </div>
+              );
+            }}
+          </List>
+        )}
+      </AutoSizer>
     </section>
   );
 };
@@ -118,17 +144,36 @@ const EventMatchesTab: React.FC<MainTabProps> = ({ event }) => {
         open={open}
         setOpen={setOpen}
       />
-      <section>
+      <section className="flex-1">
         <Spinner show={isLoading} />
-        <ul className="flex-1">
-          {matches?.map((match) => (
-            <ClickableMatch
-              match={match}
-              onClick={onClickMatch}
-              key={match.id}
-            />
-          ))}
-        </ul>
+        <AutoSizer>
+          {(size) => (
+            <List
+              width={size.width}
+              height={size.height}
+              itemCount={matches?.length ?? 0}
+              itemSize={64}
+            >
+              {({ index, style }) => {
+                const match = matches?.[index];
+
+                if (!match) {
+                  return <div style={style} key={index}></div>;
+                }
+
+                return (
+                  <div style={style}>
+                    <ClickableMatch
+                      match={match}
+                      onClick={onClickMatch}
+                      key={match.id}
+                    />
+                  </div>
+                );
+              }}
+            </List>
+          )}
+        </AutoSizer>
       </section>
     </>
   );
@@ -143,7 +188,7 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
       await deleteIncident(incident.id);
     }
     setDeleteDataDialogOpen(false);
-  }, []);
+  }, [event.sku]);
 
   return (
     <>
@@ -198,7 +243,7 @@ export const EventPage: React.FC = () => {
   const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
 
   return event ? (
-    <section className="mt-4">
+    <section className="mt-4 flex flex-col">
       <Button
         onClick={() => setIncidentDialogOpen(true)}
         className="w-full text-center bg-emerald-600"
@@ -210,7 +255,7 @@ export const EventPage: React.FC = () => {
         open={incidentDialogOpen}
         setOpen={setIncidentDialogOpen}
       />
-      <Tabs className="mt-4">
+      <Tabs className="flex-1">
         {{
           Matches: <EventMatchesTab event={event} />,
           Teams: <EventTeamsTab event={event} />,

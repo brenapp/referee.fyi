@@ -8,12 +8,7 @@ import { useCallback, useMemo, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { MatchContext } from "~components/Context";
 import { Spinner } from "~components/Spinner";
-import {
-  Dialog,
-  DialogBody,
-  DialogHeader,
-  DialogMode,
-} from "~components/Dialog";
+import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
 import { IncidentOutcome } from "~utils/data/incident";
@@ -38,6 +33,7 @@ export function useMatchTeams(match?: Match | null) {
     );
   });
 }
+import { DialogMode } from "~components/constants";
 
 export type EventMatchDialogProps = {
   matchId: number;
@@ -75,13 +71,13 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
     if (prevMatch) {
       setMatchId(prevMatch.id);
     }
-  }, [prevMatch]);
+  }, [prevMatch, setMatchId]);
 
   const onClickNextMatch = useCallback(() => {
     if (nextMatch) {
       setMatchId(nextMatch.id);
     }
-  }, [nextMatch]);
+  }, [nextMatch, setMatchId]);
 
   const onClickTeam = useCallback(
     async (number: string) => {
@@ -188,6 +184,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                                   </>
                                 );
                               })
+
                             ) : (
                               <li>None</li>
                             )}

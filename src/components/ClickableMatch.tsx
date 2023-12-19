@@ -1,7 +1,8 @@
 import { useId } from "react";
 import { Match } from "robotevents/out/endpoints/matches";
 import { MatchContext } from "./Context";
-import { Button, ButtonMode } from "./Button";
+import { Button } from "./Button";
+import { ButtonMode } from "./constants";
 
 const dateFormatter = new Intl.DateTimeFormat(navigator.language, {
   hour: "numeric",

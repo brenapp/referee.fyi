@@ -2,7 +2,8 @@ import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
 import { useEventMatch, useEventMatches } from "~hooks/robotevents";
 import { Button } from "~components/Button";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
-import { ArrowRightIcon, FlagIcon } from "@heroicons/react/24/outline";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import { FlagIcon } from "@heroicons/react/20/solid";
 import { useCallback, useMemo, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { MatchContext } from "~components/Context";
@@ -11,6 +12,27 @@ import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
 import { IncidentOutcome } from "~utils/data/incident";
+import { shortMatchName } from "~utils/data/match";
+import { Team } from "robotevents/out/endpoints/teams";
+import * as robotevents from "robotevents";
+import { useQuery } from "react-query";
+import { Match } from "robotevents/out/endpoints/matches";
+
+export function useMatchTeams(match?: Match | null) {
+  return useQuery(["match_teams", match?.id], async () => {
+    if (!match) {
+      return null;
+    }
+
+    const teams = match.alliances
+      .map((alliance) => alliance.teams.map((t) => t.team.id))
+      .flat();
+
+    return Promise.all(
+      teams.map((id) => robotevents.teams.get(id) as Promise<Team>)
+    );
+  });
+}
 import { DialogMode } from "~components/constants";
 
 export type EventMatchDialogProps = {
@@ -33,6 +55,10 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
   const { data: matches } = useEventMatches(event, division);
   const { data: match } = useEventMatch(event, division, matchId);
 
+  const { data: matchTeams } = useMatchTeams(match);
+
+  const [initialTeam, setInitialTeam] = useState<Team | undefined>(undefined);
+
   const prevMatch = useMemo(() => {
     return matches?.find((_, i) => matches[i + 1]?.id === match?.id);
   }, [matches, match]);
@@ -53,6 +79,17 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
     }
   }, [nextMatch, setMatchId]);
 
+  const onClickTeam = useCallback(
+    async (number: string) => {
+      const team = matchTeams?.find((t) => t.number === number);
+      setInitialTeam(team ?? undefined);
+      setTimeout(() => {
+        setIncidentDialogOpen(true);
+      }, 0);
+    },
+    [matchTeams]
+  );
+
   const { data: incidentsByTeam } = useTeamIncidentsByMatch(match);
 
   const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
@@ -63,6 +100,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
         open={incidentDialogOpen}
         setOpen={setIncidentDialogOpen}
         initialMatch={match}
+        initialTeam={initialTeam}
       />
       <Dialog
         open={open}
@@ -101,13 +139,6 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                   className="w-full"
                   allianceClassName="w-full"
                 />
-                <Button
-                  onClick={() => setIncidentDialogOpen(true)}
-                  className="w-full text-center bg-emerald-600 mt-4"
-                >
-                  <FlagIcon height={20} className="inline mr-2 " />
-                  New Entry
-                </Button>
                 <section className="mt-4">
                   <h2 className="text-center">Previous Violations</h2>
                   <div className="flex gap-2 mt-4 items-stretch">
@@ -118,33 +149,42 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                         [IncidentOutcome.Disabled]: "",
                       };
                       return (
-                        <div
-                          key={team}
-                          className="flex-1 flex items-center flex-col rounded-md"
-                        >
-                          <h3 className="font-mono text-center text-emerald-400">
+                        <div className="flex-1 flex items-center flex-col rounded-md">
+                          <Button
+                            className="font-mono text-center bg-emerald-600 mb-2"
+                            onClick={() => onClickTeam(team)}
+                          >
+                            <FlagIcon height={16} className="inline mr-2 " />
                             {team}
-                          </h3>
+                          </Button>
                           <ul className="text-center font-mono italic flex-1">
                             {incidents.length > 0 ? (
-                              incidents.map((incident) => (
-                                <div key={incident.id}>
-                                  {incident.rules.length > 0 ? (
-                                    incident.rules.map((r, index) => (
-                                      <li
-                                        key={index}
-                                        className={twMerge(
-                                          outcomeColors[incident.outcome]
-                                        )}
-                                      >
-                                        {r}
+                              incidents.map((incident) => {
+                                const match = matches?.find(
+                                  (v) => incident.match === v.id
+                                );
+                                return (
+                                  <>
+                                    {incident.rules.length > 0 ? (
+                                      incident.rules.map((r) => (
+                                        <li
+                                          className={twMerge(
+                                            outcomeColors[incident.outcome]
+                                          )}
+                                        >
+                                          {match ? shortMatchName(match) : null}{" "}
+                                          {r.replace(/[<>]/g, "")}
+                                        </li>
+                                      ))
+                                    ) : (
+                                      <li>
+                                        {IncidentOutcome[incident.outcome]}
                                       </li>
-                                    ))
-                                  ) : (
-                                    <li>{IncidentOutcome[incident.outcome]}</li>
-                                  )}
-                                </div>
-                              ))
+                                    )}
+                                  </>
+                                );
+                              })
+
                             ) : (
                               <li>None</li>
                             )}

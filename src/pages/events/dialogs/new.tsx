@@ -25,9 +25,9 @@ type Issue = {
 function getIssues(incident: RichIncident): Issue[] {
   const issues: Issue[] = [];
 
-  if (!incident.team || !incident.match) {
+  if (!incident.team && !incident.match) {
     issues.push({
-      message: "Please select team and match",
+      message: "Please select team or match",
       type: "warning",
     });
     return issues;
@@ -266,6 +266,12 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
                 ))}
               </optgroup>
             ))}
+            {!match &&
+              teams?.map((team) => (
+                <option value={team.number} key={team.id}>
+                  {team.number}
+                </option>
+              ))}
           </Select>
         </label>
         <label>

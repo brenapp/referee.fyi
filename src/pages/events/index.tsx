@@ -257,8 +257,8 @@ export const EventPage: React.FC = () => {
       />
       <Tabs className="flex-1">
         {{
-          Teams: <EventTeamsTab event={event} />,
           Matches: <EventMatchesTab event={event} />,
+          Teams: <EventTeamsTab event={event} />,
           Manage: <EventManageTab event={event} />,
         }}
       </Tabs>

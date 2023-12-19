@@ -42,7 +42,6 @@ export type ShareNewResponseData = {
     code: string;
 };
 
-
 export function shareResponse<T>(data: ShareResponse<T>, init?: ResponseInit) {
 
     const headers = new Headers(init?.headers);

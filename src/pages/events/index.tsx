@@ -18,7 +18,7 @@ import { EventNewIncidentDialog } from "./dialogs/new";
 import { EventMatchDialog } from "./dialogs/match";
 import { ClickableMatch } from "~components/ClickableMatch";
 import { Dialog, DialogBody, DialogMode } from "~components/Dialog";
-import { useNewEventShare } from "~utils/hooks/share";
+import { useNewEventShare, useShareCode } from "~utils/hooks/share";
 
 export type MainTabProps = {
   event: Event;
@@ -146,16 +146,19 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
     setDeleteDataDialogOpen(false);
   }, []);
 
+  const { data: shareCode } = useShareCode(event.sku);
+  const isSharing = useMemo(() => {
+    return !!shareCode;
+  }, [shareCode]);
+
   const { mutateAsync: createShare } = useNewEventShare();
 
   const onClickShare = useCallback(async () => {
     const incidents = await getIncidentsByEvent(event.sku);
 
-    const result = await createShare({
+    await createShare({
       initial: { owner: { name: "BREN" }, sku: event.sku, incidents },
     });
-
-    console.log(result);
   }, [createShare]);
 
   return (
@@ -163,12 +166,25 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
       <section>
         <section className="mt-4">
           <h2 className="font-bold">Share Event Data</h2>
-          <Button
-            className="w-full mt-4 bg-emerald-500 text-center"
-            onClick={onClickShare}
-          >
-            Begin Sharing
-          </Button>
+          {isSharing ? (
+            <section>
+              <p>
+                Use this QR Code to give read and write access to incidents for
+                this event.
+              </p>
+              <img
+                src={`/share/qrcode?code=${shareCode}`}
+                className="w-full aspect-square rounded-md mt-4"
+              />
+            </section>
+          ) : (
+            <Button
+              className="w-full mt-4 bg-emerald-500 text-center"
+              onClick={onClickShare}
+            >
+              Begin Sharing
+            </Button>
+          )}
         </section>
         <section className="mt-4 relative">
           <h2 className="font-bold">Delete Event Data</h2>

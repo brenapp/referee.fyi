@@ -151,11 +151,11 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                       return (
                         <div className="flex-1 flex items-center flex-col rounded-md">
                           <Button
-                            className="font-mono text-center bg-emerald-600 mb-2"
+                            className="font-mono text-center bg-emerald-600 mb-2 w-full"
                             onClick={() => onClickTeam(team)}
                           >
                             <FlagIcon height={16} className="inline mr-2 " />
-                            {team}
+                            <p>{team}</p>
                           </Button>
                           <ul className="text-center font-mono italic flex-1">
                             {incidents.length > 0 ? (
@@ -184,7 +184,6 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                                   </>
                                 );
                               })
-
                             ) : (
                               <li>None</li>
                             )}

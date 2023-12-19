@@ -31,7 +31,15 @@ function getIssues(incident: RichIncident): Issue[] {
   if (!incident.team && !incident.match) {
     issues.push({
       message: "Please select team or match",
-      type: "warning",
+      type: "error",
+    });
+    return issues;
+  }
+
+  if (incident.match && !incident.team) {
+    issues.push({
+      message: "Pick a team",
+      type: "error",
     });
     return issues;
   }

@@ -41,6 +41,7 @@ export type EventMatchDialogProps = {
 
   open: boolean;
   setOpen: (open: boolean) => void;
+  division?: number;
 };
 
 export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
@@ -48,9 +49,10 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
   setMatchId,
   open,
   setOpen,
+  division: defaultDivision,
 }) => {
   const { data: event } = useCurrentEvent();
-  const division = useCurrentDivision();
+  const division = useCurrentDivision(defaultDivision);
 
   const { data: matches } = useEventMatches(event, division);
   const { data: match } = useEventMatch(event, division, matchId);

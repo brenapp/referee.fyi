@@ -8,7 +8,7 @@ import { Button } from "~components/Button";
 import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
 import { useEventIncidents } from "~hooks/incident";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   IncidentOutcome,
   deleteIncident,
@@ -22,6 +22,7 @@ import { DialogMode } from "~components/constants";
 
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
+import { useAddEventVisited } from "~utils/hooks/history";
 
 export type MainTabProps = {
   event: Event;
@@ -241,6 +242,14 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
 export const EventPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
   const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
+
+  const { mutateAsync: addEvent, isSuccess } = useAddEventVisited();
+
+  useEffect(() => {
+    if (event && !isSuccess) {
+      addEvent(event);
+    }
+  }, [event, isSuccess]);
 
   return event ? (
     <section className="mt-4 flex flex-col">

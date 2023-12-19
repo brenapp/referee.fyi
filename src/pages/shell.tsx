@@ -92,7 +92,9 @@ const EventPicker: React.FC = () => {
           </section>
           <p className="italic text-center py-4">Or</p>
           <section>
-            <h2 className="text-lg font-bold text-white mx-2">Events Today</h2>
+            <h2 className="text-lg font-bold text-white mx-2">
+              Ongoing Events
+            </h2>
             <ul>
               {eventsToday?.map((event) => (
                 <li key={event.id}>

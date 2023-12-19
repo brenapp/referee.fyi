@@ -6,8 +6,8 @@ export function useCurrentEvent() {
   return useEvent(sku ?? "");
 }
 
-export function useCurrentDivision() {
+export function useCurrentDivision(def?: number) {
   const { division } = useParams();
-  if (!division) return undefined;
+  if (!division) return def;
   return Number.parseInt(division);
 }

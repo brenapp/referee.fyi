@@ -6,7 +6,7 @@ import {
   useTeam,
 } from "~hooks/robotevents";
 import { Spinner } from "~components/Spinner";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useCurrentEvent } from "~hooks/state";
 import { useTeamIncidentsByEvent } from "~hooks/incident";
 import {
@@ -22,6 +22,8 @@ import { ClickableMatch } from "~components/ClickableMatch";
 import { IconButton } from "~components/Button";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { queryClient } from "~utils/data/query";
+import { EventMatchDialog } from "./dialogs/match";
+import { Match } from "robotevents/out/endpoints/matches";
 
 type EventTeamsTabProps = {
   event: Event | null | undefined;
@@ -31,12 +33,37 @@ type EventTeamsTabProps = {
 const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({ event, team }) => {
   const { data: matches } = useEventMatchesForTeam(event, team);
 
+  const [matchId, setMatchId] = useState<number>(0);
+  const [division, setDivision] = useState(1);
+  const [matchDialogOpen, setMatchDialogOpen] = useState(false);
+
+  const onClickMatch = useCallback((match: Match) => {
+    setMatchId(match.id);
+    setDivision(match.division.id);
+    setTimeout(() => {
+      setMatchDialogOpen(true);
+    }, 0);
+  }, []);
+
   return (
-    <ul>
-      {matches?.map((match) => (
-        <ClickableMatch match={match} key={match.id} onClick={() => {}} />
-      ))}
-    </ul>
+    <>
+      <EventMatchDialog
+        matchId={matchId}
+        setMatchId={setMatchId}
+        open={matchDialogOpen}
+        setOpen={setMatchDialogOpen}
+        division={division}
+      />
+      <ul>
+        {matches?.map((match) => (
+          <ClickableMatch
+            match={match}
+            key={match.id}
+            onClick={() => onClickMatch(match)}
+          />
+        ))}
+      </ul>
+    </>
   );
 };
 

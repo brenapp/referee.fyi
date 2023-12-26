@@ -3,7 +3,7 @@ import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 import { Select, TextArea } from "~components/Input";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Error, Warning } from "~components/Warning";
-import { Button } from "~components/Button";
+import { Button, IconButton } from "~components/Button";
 import { MatchContext } from "~components/Context";
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
 import {
@@ -16,6 +16,9 @@ import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { DialogMode } from "~components/constants";
 import { Team } from "robotevents/out/endpoints/teams";
 import { Match } from "robotevents/out/endpoints/matches";
+import { TrashIcon } from "@heroicons/react/24/outline";
+import { useAddRecentRules, useRecentRules } from "~utils/hooks/history";
+import { twMerge } from "tailwind-merge";
 
 type Issue = {
   message: string;
@@ -25,10 +28,18 @@ type Issue = {
 function getIssues(incident: RichIncident): Issue[] {
   const issues: Issue[] = [];
 
-  if (!incident.team || !incident.match) {
+  if (!incident.team && !incident.match) {
     issues.push({
-      message: "Please select team and match",
-      type: "warning",
+      message: "Please select team or match",
+      type: "error",
+    });
+    return issues;
+  }
+
+  if (incident.match && !incident.team) {
+    issues.push({
+      message: "Pick a team",
+      type: "error",
     });
     return issues;
   }
@@ -66,6 +77,8 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const division = useCurrentDivision();
 
   const rules = useRulesForProgram(event?.program.code);
+  const { data: recentRules } = useRecentRules(4);
+  const { mutateAsync: addRecentRules } = useAddRecentRules();
 
   // Find all teams and matches at the event
   const { data: teams } = useEventTeams(event);
@@ -93,6 +106,17 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     setIncidentField("match", match);
     setMatch(match);
   }, [team, match]);
+
+  useEffect(() => {
+    if (initialMatch) {
+      setIncidentField("match", initialMatch);
+      setMatch(initialMatch);
+    }
+    if (initialTeam) {
+      setIncidentField("team", initialTeam);
+      setTeam(initialTeam);
+    }
+  }, [initialMatch, initialTeam]);
 
   const issues = useMemo(() => getIssues(incident), [incident]);
   const canSave = useMemo(() => {
@@ -141,6 +165,14 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   );
 
   const onAddRule = useCallback(
+    (rule: Rule) => {
+      if (incident.rules.some((r) => r.rule === rule.rule)) return;
+      setIncidentField("rules", [...incident.rules, rule]);
+    },
+    [rules, incident.rules]
+  );
+
+  const onPickOtherRule = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const group = e.target.selectedOptions[0].dataset.rulegroup;
       if (!group) return;
@@ -179,15 +211,14 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       const packed = packIncident(incident);
       mutate(packed, {
         onSuccess: () => {
-          setMatch(null);
+          // Do not reset match, for ease of use.
           setTeam(null);
 
           setIncidentField("team", null);
-          setIncidentField("match", null);
           setIncidentField("notes", "");
           setIncidentField("rules", []);
           setIncidentField("outcome", IncidentOutcome.Minor);
-
+          addRecentRules(incident.rules);
           setOpen(false);
         },
       });
@@ -251,12 +282,18 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
                 label={alliance.color.toUpperCase()}
               >
                 {alliance.teams.map(({ team }) => (
-                  <option key={team.name} value={team.name}>
+                  <option value={team.name} key={team.id}>
                     {team.name}
                   </option>
                 ))}
               </optgroup>
             ))}
+            {!match &&
+              teams?.map((team) => (
+                <option value={team.number} key={team.id}>
+                  {team.number}
+                </option>
+              ))}
           </Select>
         </label>
         <label>
@@ -273,32 +310,58 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         </label>
         <label>
           <p className="mt-4">Associated Rules</p>
-          <Select className="w-full py-4" value={""} onChange={onAddRule}>
-            <option>Pick A Rule</option>
-            {rules?.ruleGroups.map((group) => (
-              <optgroup label={group.name} key={group.name}>
-                {group.rules.map((rule) => (
-                  <option
-                    value={rule.rule}
-                    data-rulegroup={group.name}
-                    key={rule.rule}
-                  >
-                    {rule.rule} {rule.description}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </Select>
-        </label>
-        <ul className="mt-4 flex flex-wrap gap-2">
-          {incident.rules.map((rule) => (
-            <li key={rule.rule}>
+          <div className="flex mt-2 gap-2">
+            {recentRules?.map((rule) => (
               <Button
-                className="text-red-400 font-mono"
-                onClick={() => onRemoveRule(rule)}
+                className={twMerge(
+                  "text-emerald-400 font-mono",
+                  incident.rules.some((r) => r.rule === rule.rule)
+                    ? "bg-emerald-600 text-zinc-50"
+                    : ""
+                )}
+                onClick={() => onAddRule(rule)}
+                key={rule.rule}
               >
                 {rule.rule}
               </Button>
+            ))}
+            <Select
+              className="w-full py-4"
+              value={""}
+              onChange={onPickOtherRule}
+            >
+              <option>Pick Rule</option>
+              {rules?.ruleGroups.map((group) => (
+                <optgroup label={group.name} key={group.name}>
+                  {group.rules.map((rule) => (
+                    <option
+                      value={rule.rule}
+                      data-rulegroup={group.name}
+                      key={rule.rule}
+                    >
+                      {rule.rule} {rule.description}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </Select>
+          </div>
+        </label>
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {incident.rules.map((rule) => (
+            <li
+              key={rule.rule}
+              className="p-2 flex w-full items-center bg-zinc-800 rounded-md"
+            >
+              <p className="flex-1 mr-1">
+                <strong className="font-mono mr-2">{rule.rule}</strong>
+                <span>{rule.description}</span>
+              </p>
+              <IconButton
+                className="bg-transparent"
+                icon={<TrashIcon height={24} />}
+                onClick={() => onRemoveRule(rule)}
+              ></IconButton>
             </li>
           ))}
         </ul>

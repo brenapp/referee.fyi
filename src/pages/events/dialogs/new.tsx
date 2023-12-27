@@ -164,6 +164,17 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     []
   );
 
+  const onToggleRule = useCallback(
+    (rule: Rule) => {
+      if (incident.rules.some((r) => r.rule === rule.rule)) {
+        onRemoveRule(rule);
+      } else {
+        onAddRule(rule);
+      }
+    },
+    [rules, incident.rules]
+  );
+
   const onAddRule = useCallback(
     (rule: Rule) => {
       if (incident.rules.some((r) => r.rule === rule.rule)) return;
@@ -308,23 +319,23 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             <option value={IncidentOutcome.Disabled}>Disabled</option>
           </Select>
         </label>
-        <label>
-          <p className="mt-4">Associated Rules</p>
-          <div className="flex mt-2 gap-2">
-            {recentRules?.map((rule) => (
-              <Button
-                className={twMerge(
-                  "text-emerald-400 font-mono",
-                  incident.rules.some((r) => r.rule === rule.rule)
-                    ? "bg-emerald-600 text-zinc-50"
-                    : ""
-                )}
-                onClick={() => onAddRule(rule)}
-                key={rule.rule}
-              >
-                {rule.rule}
-              </Button>
-            ))}
+        <p className="mt-4">Associated Rules</p>
+        <div className="flex mt-2 gap-2">
+          {recentRules?.map((rule) => (
+            <Button
+              className={twMerge(
+                "text-emerald-400 font-mono",
+                incident.rules.some((r) => r.rule === rule.rule)
+                  ? "bg-emerald-600 text-zinc-50"
+                  : ""
+              )}
+              onClick={() => onToggleRule(rule)}
+              key={rule.rule}
+            >
+              {rule.rule}
+            </Button>
+          ))}
+          <label>
             <Select
               className="w-full py-4"
               value={""}
@@ -345,8 +356,8 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
                 </optgroup>
               ))}
             </Select>
-          </div>
-        </label>
+          </label>
+        </div>
         <ul className="mt-4 flex flex-wrap gap-2">
           {incident.rules.map((rule) => (
             <li

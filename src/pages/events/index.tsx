@@ -23,7 +23,11 @@ import { DialogMode } from "~components/constants";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { useAddEventVisited } from "~utils/hooks/history";
-import { useNewEventShare, useShareCode } from "~utils/hooks/share";
+import {
+  useNewEventShare,
+  useShareCode,
+  useStopEventShare,
+} from "~utils/hooks/share";
 
 export type MainTabProps = {
   event: Event;
@@ -198,6 +202,7 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
   }, [shareCode]);
 
   const { mutateAsync: createShare } = useNewEventShare();
+  const { mutateAsync: stopSharing } = useStopEventShare();
 
   const onClickShare = useCallback(async () => {
     const incidents = await getIncidentsByEvent(event.sku);
@@ -206,6 +211,21 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
       initial: { owner: { name: "BREN" }, sku: event.sku, incidents },
     });
   }, [createShare]);
+
+  const onClickShareImage = useCallback(async () => {
+    const url = new URL(`/join/${shareCode}`, location.href);
+    const shareData = {
+      url: url.href,
+    };
+
+    if (navigator.share && navigator.canShare(shareData)) {
+      navigator.share(shareData);
+    }
+  }, [shareCode]);
+
+  const onClickStopSharing = useCallback(async () => {
+    await stopSharing(event.sku);
+  }, [event.sku]);
 
   return (
     <>
@@ -221,7 +241,14 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
               <img
                 src={`/share/qrcode?code=${shareCode}`}
                 className="w-full aspect-square rounded-md mt-4"
+                onClick={onClickShareImage}
               />
+              <Button
+                className="w-full mt-4 bg-red-500 text-center"
+                onClick={onClickStopSharing}
+              >
+                Stop Sharing
+              </Button>
             </section>
           ) : (
             <Button

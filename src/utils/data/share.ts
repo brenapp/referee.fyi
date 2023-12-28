@@ -6,20 +6,20 @@
 import { IncidentWithID } from "./incident";
 
 export type ShareResponseSuccess<T> = {
-    success: true;
-    data: T;
-}
+  success: true;
+  data: T;
+};
 
 export type ShareResponseFailureReason =
-    "bad_request" |
-    "server_error" |
-    "incorrect_code"
+  | "bad_request"
+  | "server_error"
+  | "incorrect_code";
 
 export type ShareResponseFailure = {
-    success: false;
-    reason: ShareResponseFailureReason;
-    details: string;
-}
+  success: false;
+  reason: ShareResponseFailureReason;
+  details: string;
+};
 
 export type ShareResponse<T> = ShareResponseSuccess<T> | ShareResponseFailure;
 
@@ -27,42 +27,38 @@ export type ShareResponse<T> = ShareResponseSuccess<T> | ShareResponseFailure;
 
 // GET share/get
 export type ShareGetResponseData = {
-    sku: string;
-    owner: {
-        name: string;
-    }
-    incidents: IncidentWithID[]
+  sku: string;
+  owner: {
+    name: string;
+  };
+  incidents: IncidentWithID[];
 };
 
 // PUT share/net
 export type ShareNewRequestData = {
-    initial: ShareGetResponseData;
+  initial: ShareGetResponseData;
 };
 export type ShareNewResponseData = {
-    code: string;
+  code: string;
 };
 
 // PUT share/add
 export type ShareAddRequestData = {
-    incident: IncidentWithID;
-}
+  incident: IncidentWithID;
+};
 
-export type ShareAddResponseData = {
-
-}
-
+export type ShareAddResponseData = undefined;
 
 export function shareResponse<T>(data: ShareResponse<T>, init?: ResponseInit) {
+  const headers = new Headers(init?.headers);
+  headers.set("Content-Type", "application/json");
 
-    const headers = new Headers(init?.headers);
-    headers.set("Content-Type", "application/json");
+  let status = 200;
+  if (data.success) {
+    status = 200;
+  } else {
+    status = 400;
+  }
 
-    let status = 200;
-    if (data.success) {
-        status = 200;
-    } else {
-        status = 400;
-    }
-
-    return new Response(JSON.stringify(data), { status, ...init, headers })
-};
+  return new Response(JSON.stringify(data), { status, ...init, headers });
+}

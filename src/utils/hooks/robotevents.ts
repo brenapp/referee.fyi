@@ -23,7 +23,10 @@ export function useEvent(sku: string) {
   );
 }
 
-export function useTeam(numberOrID: string | number | null | undefined, program?: ProgramAbbr) {
+export function useTeam(
+  numberOrID: string | number | null | undefined,
+  program?: ProgramAbbr
+) {
   return useQuery(["team", numberOrID], async () => {
     if (!numberOrID) {
       return null;
@@ -138,6 +141,6 @@ export function useEventsToday(): UseQueryResult<robotevents.events.Event[]> {
       season: currentSeasons,
     });
 
-    return events.sort((a, b) => a.name.localeCompare(b.name));
+    return events.filter(e => e.ongoing).sort((a, b) => a.name.localeCompare(b.name));
   });
 }

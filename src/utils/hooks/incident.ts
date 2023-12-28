@@ -81,22 +81,29 @@ export function useTeamIncidentsByEvent(
 
 export type TeamIncidentsByMatch = {
   team: string;
-  incidents: IncidentWithID[]
-}[]
+  incidents: IncidentWithID[];
+}[];
 
-export function useTeamIncidentsByMatch(match: Match | undefined | null): UseQueryResult<TeamIncidentsByMatch> {
+export function useTeamIncidentsByMatch(
+  match: Match | undefined | null
+): UseQueryResult<TeamIncidentsByMatch> {
   return useQuery(["incidents", "match", match?.id], async () => {
-    const alliances = [match?.alliance("red"), match?.alliance("blue")].filter(r => !!r) as Alliance[]
-    const teams = alliances.map((a) => a.teams.map((t) => t.team.name)).flat() ?? [];
+    const alliances = [match?.alliance("red"), match?.alliance("blue")].filter(
+      (r) => !!r
+    ) as Alliance[];
+    const teams =
+      alliances.map((a) => a.teams.map((t) => t.team.name)).flat() ?? [];
 
     const incidentsByTeam: TeamIncidentsByMatch = [];
 
     for (const team of teams) {
-      const incidents = (await getIncidentsByTeam(team)).filter(i => i.event === match?.event.code);
+      const incidents = (await getIncidentsByTeam(team)).filter(
+        (i) => i.event === match?.event.code
+      );
 
       incidentsByTeam.push({ team, incidents });
-    };
+    }
 
     return incidentsByTeam;
   });
-};
+}

@@ -1,14 +1,9 @@
-import {
-  useEventMatch,
-  useEventMatches,
-  useEventTeams,
-  useTeam,
-} from "~hooks/robotevents";
+import { useEventMatches, useEventTeams } from "~hooks/robotevents";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 import { Select, TextArea } from "~components/Input";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Error, Warning } from "~components/Warning";
-import { Button } from "~components/Button";
+import { Button, IconButton } from "~components/Button";
 import { MatchContext } from "~components/Context";
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
 import {
@@ -17,14 +12,13 @@ import {
   packIncident,
 } from "~utils/data/incident";
 import { useNewIncident } from "~hooks/incident";
-import {
-  Dialog,
-  DialogBody,
-  DialogHeader,
-  DialogMode,
-} from "~components/Dialog";
+import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
+import { DialogMode } from "~components/constants";
 import { Team } from "robotevents/out/endpoints/teams";
 import { Match } from "robotevents/out/endpoints/matches";
+import { TrashIcon } from "@heroicons/react/24/outline";
+import { useAddRecentRules, useRecentRules } from "~utils/hooks/history";
+import { twMerge } from "tailwind-merge";
 
 type Issue = {
   message: string;
@@ -34,9 +28,17 @@ type Issue = {
 function getIssues(incident: RichIncident): Issue[] {
   const issues: Issue[] = [];
 
-  if (!incident.team || !incident.match) {
+  if (!incident.team && !incident.match) {
     issues.push({
-      message: "Must select at least team and match",
+      message: "Please select team or match",
+      type: "error",
+    });
+    return issues;
+  }
+
+  if (incident.match && !incident.team) {
+    issues.push({
+      message: "Pick a team",
       type: "error",
     });
     return issues;
@@ -48,8 +50,8 @@ function getIssues(incident: RichIncident): Issue[] {
 
   if (!hasTeam && incident.match && incident.team) {
     issues.push({
-      message: "Team not in match",
-      type: "warning",
+      message: "Team not in selected match",
+      type: "error",
     });
   }
 
@@ -75,12 +77,16 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const division = useCurrentDivision();
 
   const rules = useRulesForProgram(event?.program.code);
+  const { data: recentRules } = useRecentRules(4);
+  const { mutateAsync: addRecentRules } = useAddRecentRules();
 
+  // Find all teams and matches at the event
   const { data: teams } = useEventTeams(event);
   const { data: matches } = useEventMatches(event, division);
 
-  const { data: team } = useTeam(initialTeam?.id, event?.program.code);
-  const { data: match } = useEventMatch(event, division, initialMatch?.id);
+  // Initialise current team and match
+  const [team, setTeam] = useState(initialTeam);
+  const [match, setMatch] = useState(initialMatch);
 
   const [incident, setIncident] = useState<RichIncident>({
     time: new Date(),
@@ -95,15 +101,20 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 
   useEffect(() => {
     setIncidentField("team", team);
+    setTeam(team);
+
     setIncidentField("match", match);
+    setMatch(match);
   }, [team, match]);
 
   useEffect(() => {
     if (initialMatch) {
       setIncidentField("match", initialMatch);
+      setMatch(initialMatch);
     }
     if (initialTeam) {
       setIncidentField("team", initialTeam);
+      setTeam(initialTeam);
     }
   }, [initialMatch, initialTeam]);
 
@@ -124,20 +135,24 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 
   const onChangeIncidentTeam = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const team = teams?.find((t) => t.number === e.target.value);
-      if (!team) return;
+      const newTeam = teams?.find((t) => t.number === e.target.value);
+      if (!newTeam) return;
 
-      setIncidentField("team", team);
+      setIncidentField("team", newTeam);
+      setTeam(newTeam);
     },
     [teams]
   );
 
   const onChangeIncidentMatch = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const match = matches?.find((m) => m.id.toString() === e.target.value);
-      if (!match) return;
+      const newMatch = matches?.find((m) => m.id.toString() === e.target.value);
+      if (!newMatch) return;
 
-      setIncidentField("match", match);
+      setIncidentField("match", newMatch);
+      setMatch(newMatch);
+      // Reset the selected team if a new match is selected
+      setTeam(null);
     },
     [matches]
   );
@@ -150,6 +165,14 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   );
 
   const onAddRule = useCallback(
+    (rule: Rule) => {
+      if (incident.rules.some((r) => r.rule === rule.rule)) return;
+      setIncidentField("rules", [...incident.rules, rule]);
+    },
+    [rules, incident.rules]
+  );
+
+  const onPickOtherRule = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const group = e.target.selectedOptions[0].dataset.rulegroup;
       if (!group) return;
@@ -188,11 +211,19 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       const packed = packIncident(incident);
       mutate(packed, {
         onSuccess: () => {
+          // Do not reset match, for ease of use.
+          setTeam(null);
+
+          setIncidentField("team", null);
+          setIncidentField("notes", "");
+          setIncidentField("rules", []);
+          setIncidentField("outcome", IncidentOutcome.Minor);
+          addRecentRules(incident.rules);
           setOpen(false);
         },
       });
     },
-    [incident]
+    [incident, mutate, setOpen]
   );
 
   return (
@@ -246,12 +277,23 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
           >
             <option value={-1}>Pick A Team</option>
             {match?.alliances.map((alliance) => (
-              <optgroup label={alliance.color.toUpperCase()}>
+              <optgroup
+                key={alliance.color.toUpperCase()}
+                label={alliance.color.toUpperCase()}
+              >
                 {alliance.teams.map(({ team }) => (
-                  <option value={team.name}>{team.name}</option>
+                  <option value={team.name} key={team.id}>
+                    {team.name}
+                  </option>
                 ))}
               </optgroup>
             ))}
+            {!match &&
+              teams?.map((team) => (
+                <option value={team.number} key={team.id}>
+                  {team.number}
+                </option>
+              ))}
           </Select>
         </label>
         <label>
@@ -268,32 +310,58 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         </label>
         <label>
           <p className="mt-4">Associated Rules</p>
-          <Select className="w-full py-4" value={""} onChange={onAddRule}>
-            <option>Pick A Rule</option>
-            {rules?.ruleGroups.map((group) => (
-              <optgroup label={group.name} key={group.name}>
-                {group.rules.map((rule) => (
-                  <option
-                    value={rule.rule}
-                    data-rulegroup={group.name}
-                    key={rule.rule}
-                  >
-                    {rule.rule} {rule.description}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </Select>
-        </label>
-        <ul className="mt-4 flex flex-wrap gap-2">
-          {incident.rules.map((rule) => (
-            <li key={rule.rule}>
+          <div className="flex mt-2 gap-2">
+            {recentRules?.map((rule) => (
               <Button
-                className="text-red-400 font-mono"
-                onClick={() => onRemoveRule(rule)}
+                className={twMerge(
+                  "text-emerald-400 font-mono",
+                  incident.rules.some((r) => r.rule === rule.rule)
+                    ? "bg-emerald-600 text-zinc-50"
+                    : ""
+                )}
+                onClick={() => onAddRule(rule)}
+                key={rule.rule}
               >
                 {rule.rule}
               </Button>
+            ))}
+            <Select
+              className="w-full py-4"
+              value={""}
+              onChange={onPickOtherRule}
+            >
+              <option>Pick Rule</option>
+              {rules?.ruleGroups.map((group) => (
+                <optgroup label={group.name} key={group.name}>
+                  {group.rules.map((rule) => (
+                    <option
+                      value={rule.rule}
+                      data-rulegroup={group.name}
+                      key={rule.rule}
+                    >
+                      {rule.rule} {rule.description}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </Select>
+          </div>
+        </label>
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {incident.rules.map((rule) => (
+            <li
+              key={rule.rule}
+              className="p-2 flex w-full items-center bg-zinc-800 rounded-md"
+            >
+              <p className="flex-1 mr-1">
+                <strong className="font-mono mr-2">{rule.rule}</strong>
+                <span>{rule.description}</span>
+              </p>
+              <IconButton
+                className="bg-transparent"
+                icon={<TrashIcon height={24} />}
+                onClick={() => onRemoveRule(rule)}
+              ></IconButton>
             </li>
           ))}
         </ul>

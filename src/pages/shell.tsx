@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import { useEventsToday } from "~utils/hooks/robotevents";
+import { useEvent, useEventsToday } from "~utils/hooks/robotevents";
 import { Button, IconButton, LinkButton } from "~components/Button";
 import {
   BookOpenIcon,
@@ -16,15 +16,19 @@ import {
   DialogBody,
   DialogCustomHeader,
   DialogHeader,
-  DialogMode,
 } from "~components/Dialog";
+import { DialogMode } from "~components/constants";
 import { ProgramAbbr } from "robotevents/out/endpoints/programs";
-import { RulesSelect, Select } from "~components/Input";
+import { Input, RulesSelect, Select } from "~components/Input";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 
 const EventPicker: React.FC = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+
+  const [sku, setSKU] = useState("");
+  const { data: eventFromSKU, isLoading: isLoadingEventFromSKU } =
+    useEvent(sku);
 
   const { data: eventsToday, isLoading } = useEventsToday();
   const { data: event } = useCurrentEvent();
@@ -52,7 +56,45 @@ const EventPicker: React.FC = () => {
         <DialogBody>
           <Spinner show={isLoading} />
           <section>
-            <h2 className="text-lg font-bold text-white mx-3">Events Today</h2>
+            <h2 className="text-lg font-bold text-white mx-2">Event Code</h2>
+            <Input
+              type="text"
+              pattern="RE-(VRC|VIQRC|VEXU|VIQC)-[0-9]{2}-[0-9]{4}"
+              placeholder="SKU"
+              className="font-mono px-4 py-4 rounded-md invalid:bg-red-500 w-full"
+              value={sku}
+              onChange={(e) => setSKU(e.currentTarget.value)}
+            />
+            <Spinner show={isLoadingEventFromSKU} />
+            {eventFromSKU && (
+              <>
+                <div className="p-2 pt-4">
+                  <p className="text-sm whitespace-nowrap text-ellipsis overflow-hidden">
+                    <span className=" text-emerald-400 font-mono">
+                      {eventFromSKU.sku}
+                    </span>
+                    {" • "}
+                    <span>{eventFromSKU.location.venue}</span>
+                  </p>
+                  <p className="whitespace-nowrap text-ellipsis overflow-hidden">
+                    {eventFromSKU.name}
+                  </p>
+                </div>
+                <LinkButton
+                  to={`/${eventFromSKU.sku}`}
+                  onClick={() => setOpen(false)}
+                  className="mt-4 bg-emerald-600 w-full text-center"
+                >
+                  Go
+                </LinkButton>
+              </>
+            )}
+          </section>
+          <p className="italic text-center py-4">Or</p>
+          <section>
+            <h2 className="text-lg font-bold text-white mx-2">
+              Ongoing Events
+            </h2>
             <ul>
               {eventsToday?.map((event) => (
                 <li key={event.id}>

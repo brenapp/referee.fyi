@@ -42,6 +42,16 @@ export type ShareNewResponseData = {
     code: string;
 };
 
+// PUT share/add
+export type ShareAddRequestData = {
+    incident: IncidentWithID;
+}
+
+export type ShareAddResponseData = {
+
+}
+
+
 export function shareResponse<T>(data: ShareResponse<T>, init?: ResponseInit) {
 
     const headers = new Headers(init?.headers);

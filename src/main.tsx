@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { QueryClientProvider } from "react-query";
-import { initIncidentStore } from "./utils/data/incident";
+import { initIncidentStore } from "./utils/data/incident.ts";
 import { queryClient } from "~utils/data/query";
 import { registerSW } from "virtual:pwa-register";
 

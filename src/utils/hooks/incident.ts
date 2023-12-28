@@ -5,6 +5,7 @@ import {
   getIncidentsByEvent,
   getIncidentsByTeam,
   newIncident,
+  updateFromRemote,
 } from "../data/incident";
 import { UseQueryResult, useMutation, useQuery } from "react-query";
 import { Alliance, Match } from "robotevents/out/endpoints/matches";
@@ -34,13 +35,14 @@ export function useNewIncident() {
 export function useEventIncidents(sku: string | undefined | null) {
   return useQuery<IncidentWithID[]>(
     ["incidents", "event", sku],
-    () => {
+    async () => {
       if (!sku) {
         return [];
       }
+      await updateFromRemote(sku);
       return getIncidentsByEvent(sku);
     },
-    { cacheTime: 0 }
+    { cacheTime: 0, staleTime: 1000 * 10 }
   );
 }
 

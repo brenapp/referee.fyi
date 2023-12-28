@@ -3,6 +3,7 @@ import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
 import { Match } from "robotevents/out/endpoints/matches";
 import { Team } from "robotevents/out/endpoints/teams";
+import { ShareGetResponseData } from "./share";
 
 export enum IncidentOutcome {
   Minor,
@@ -105,7 +106,7 @@ export async function setIncident(
   return set(id, incident);
 }
 
-export async function newIncident(incident: Incident): Promise<string> {
+export async function newIncident(incident: Incident, updateRemote: boolean = true): Promise<string> {
   const id = generateIncidentId();
 
   await setIncident(id, incident);
@@ -130,10 +131,19 @@ export async function newIncident(incident: Incident): Promise<string> {
   const all = (await get<string[]>("incidents")) ?? [];
   await set("incidents", [...all, id]);
 
+  // If sharing is enabled, then submit
+  const code = await get<string>(`share_${incident.event}`);
+  if (code && updateRemote) {
+    await fetch(`/share/add?code=${code}&sku=${incident.event}`, {
+      method: "PUT",
+      body: JSON.stringify({ id, ...incident }),
+    });
+  }
+
   return id;
 }
 
-export async function deleteIncident(id: string): Promise<void> {
+export async function deleteIncident(id: string, updateRemote: boolean = true): Promise<void> {
   const incident = await getIncident(id);
 
   if (!incident) {
@@ -159,6 +169,40 @@ export async function deleteIncident(id: string): Promise<void> {
 
   const all = await get<string[]>("incidents");
   await set("incidents", all?.filter((i) => i !== id) ?? []);
+
+  // If sharing is enabled, then submit
+  const code = await get<string>(`share_${incident.event}`);
+  if (code && updateRemote) {
+    await fetch(`/share/delete?code=${code}&sku=${incident.event}&id=${id}`, {
+      method: "DELETE",
+    });
+  }
+}
+
+export async function updateFromRemote(sku: string) {
+  const code = await get<string>(`share_${sku}`);
+  if (!code) return;
+
+  const resp = await fetch(`/share/get?sku=${sku}&code=${code}`);
+  if (!resp.ok) return;
+
+  const data = await resp.json() as ShareGetResponseData;
+
+  const incidents = new Set<string>();
+
+  // Update incident
+  for (const { id, ...incident } of data.incidents) {
+    incidents.add(id);
+    await setIncident(id, incident);
+  }
+
+  const eventsIndex = (await get<IncidentIndex>("event_idx"));
+  const list = eventsIndex?.[sku] ?? [];
+
+  for (const id of list) {
+    if (incidents.has(id)) { continue };
+    await deleteIncident(id, false);
+  }
 }
 
 export async function getAllIncidents(): Promise<IncidentWithID[]> {

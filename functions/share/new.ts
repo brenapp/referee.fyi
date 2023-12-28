@@ -29,7 +29,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         };
 
         await context.env.INCIDENTS.get(`${sku}#${code}`);
-        await context.env.INCIDENTS.put(`${sku}#${code}`, JSON.stringify(body), { expirationTtl: 60 * 60 * 24 });
+        await context.env.INCIDENTS.put(`${sku}#${code}`, JSON.stringify(body.initial), { expirationTtl: 60 * 60 * 24 });
 
         return shareResponse<ShareNewResponseData>({
             success: true,

@@ -7,6 +7,7 @@
     "dev:frontend": "vite -c frontend.config.ts --host --port 3000",
     "build:frontend": "tsc && vite -c frontend.config.ts build",
     "build:backend": "rollup --config backend.config.ts --configPlugin typescript",
+    "build": "npm run build:frontend && npm run build:backend",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix"
   },
   "dependencies": {

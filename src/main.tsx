@@ -1,12 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
+import App from "./App";
 import "./index.css";
 import { QueryClientProvider } from "react-query";
-import { initIncidentStore } from "./utils/data/incident.ts";
+import { initIncidentStore } from "./utils/data/incident";
 import { queryClient } from "~utils/data/query";
 import { registerSW } from "virtual:pwa-register";
-import { initHistoryStore } from "~utils/hooks/history.ts";
+import { initHistoryStore } from "~utils/hooks/history";
 
 registerSW({ immediate: true });
 

@@ -19,7 +19,7 @@ export function useEvent(sku: string) {
 
       return await robotevents.events.get(sku);
     },
-    { cacheTime: 1000 * 60 * 60 }
+    { staleTime: 1000 * 60 * 60 }
   );
 }
 
@@ -33,7 +33,7 @@ export function useTeam(
     }
 
     return await robotevents.teams.get(numberOrID, program);
-  });
+  }, { staleTime: 1000 * 60 * 60 });
 }
 
 export function useEventTeams(

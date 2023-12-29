@@ -142,7 +142,6 @@ export function useEventsToday(): UseQueryResult<robotevents.events.Event[]> {
     });
 
     return events
-      .filter((e) => e.ongoing)
       .sort((a, b) => a.name.localeCompare(b.name));
   });
 }

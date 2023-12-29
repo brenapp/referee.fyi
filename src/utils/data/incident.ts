@@ -3,7 +3,7 @@ import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
 import { Match } from "robotevents/out/endpoints/matches";
 import { Team } from "robotevents/out/endpoints/teams";
-import { ShareGetResponseData } from "./share";
+import { ShareGetResponseData, ShareResponse } from "./share";
 
 export enum IncidentOutcome {
   Minor,
@@ -106,9 +106,7 @@ export async function setIncident(
   return set(id, incident);
 }
 
-export async function newIncident(incident: Incident, updateRemote: boolean = true): Promise<string> {
-  const id = generateIncidentId();
-
+export async function newIncident(incident: Incident, updateRemote: boolean = true, id = generateIncidentId()): Promise<string> {
   await setIncident(id, incident);
 
   // Add to all indices
@@ -136,7 +134,7 @@ export async function newIncident(incident: Incident, updateRemote: boolean = tr
   if (code && updateRemote) {
     await fetch(`/share/add?code=${code}&sku=${incident.event}`, {
       method: "PUT",
-      body: JSON.stringify({ id, ...incident }),
+      body: JSON.stringify({ incident: { id, ...incident } }),
     });
   }
 
@@ -186,14 +184,16 @@ export async function updateFromRemote(sku: string) {
   const resp = await fetch(`/share/get?sku=${sku}&code=${code}`);
   if (!resp.ok) return;
 
-  const data = await resp.json() as ShareGetResponseData;
-
+  const data = await resp.json() as ShareResponse<ShareGetResponseData>;
   const incidents = new Set<string>();
 
+  if (!data.success) { return; }
+
   // Update incident
-  for (const { id, ...incident } of data.incidents) {
-    incidents.add(id);
-    await setIncident(id, incident);
+  for (const { id, ...incident } of data.data.incidents) {
+    if (!hasIncident(id)) {
+      await newIncident(incident, false, id);
+    }
   }
 
   const eventsIndex = (await get<IncidentIndex>("event_idx"));

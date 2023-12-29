@@ -5,7 +5,6 @@ import {
   getIncidentsByEvent,
   getIncidentsByTeam,
   newIncident,
-  updateFromRemote,
 } from "../data/incident";
 import { UseQueryResult, useMutation, useQuery } from "react-query";
 import { Alliance, Match } from "robotevents/out/endpoints/matches";
@@ -39,10 +38,9 @@ export function useEventIncidents(sku: string | undefined | null) {
       if (!sku) {
         return [];
       }
-      await updateFromRemote(sku);
       return getIncidentsByEvent(sku);
     },
-    { cacheTime: 0, staleTime: 1000 * 10 }
+    { cacheTime: 0 }
   );
 }
 

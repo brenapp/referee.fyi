@@ -13,6 +13,7 @@ import {
   IncidentOutcome,
   deleteIncident,
   getIncidentsByEvent,
+  updateFromRemote,
 } from "~utils/data/incident";
 import { EventNewIncidentDialog } from "./dialogs/new";
 import { EventMatchDialog } from "./dialogs/match";
@@ -344,6 +345,16 @@ export const EventPage: React.FC = () => {
       addEvent(event);
     }
   }, [event, isSuccess]);
+
+  // Periodically update
+  useEffect(() => {
+    const timer = setInterval(async () => {
+      if (!event) return;
+      await updateFromRemote(event.sku);
+    }, 10 * 1000);
+
+    return () => clearInterval(timer);
+  }, [event]);
 
   return event ? (
     <section className="mt-4 flex flex-col">

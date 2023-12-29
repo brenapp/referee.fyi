@@ -39,8 +39,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
             })
         };
 
-        data.incidents.push(body.incident);
-        await context.env.INCIDENTS.put(`${sku}#${code}`, JSON.stringify(data), { expirationTtl: 60 * 60 * 24 });
+        const incidents = [...data.incidents, body.incident].filter(v => !!v && v.id)
+
+        const updated = JSON.stringify({ ...data, incidents });
+        await context.env.INCIDENTS.put(`${sku}#${code}`, updated, { expirationTtl: 60 * 60 * 24 });
 
         return shareResponse<ShareAddResponseData>({
             success: true,

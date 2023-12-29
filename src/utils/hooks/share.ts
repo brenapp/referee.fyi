@@ -1,5 +1,6 @@
 import { get, set, del } from "idb-keyval";
 import { UseQueryOptions, UseQueryResult, useMutation, useQuery } from "react-query";
+import { updateFromRemote } from "~utils/data/incident";
 import { queryClient } from "~utils/data/query";
 import {
   ShareGetResponseData,
@@ -70,6 +71,7 @@ export type JoinShareOptions = {
 export function useJoinShare(onSuccess?: () => void) {
   return useMutation(async ({ sku, code }: JoinShareOptions) => {
     await set(`share_${sku}`, code);
+    await updateFromRemote(sku);
     queryClient.invalidateQueries({ queryKey: ["share_code"] });
   }, { onSuccess });
 };

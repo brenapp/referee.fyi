@@ -235,14 +235,12 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
           {isSharing ? (
             <section>
               <p>
-                Use this QR Code to give read and write access to incidents for
-                this event.
+                Use this share code to give read and write access to other
+                devices.
               </p>
-              <img
-                src={`/share/qrcode?code=${shareCode}`}
-                className="w-full aspect-square rounded-md mt-4"
-                onClick={onClickShareImage}
-              />
+              <Button className="w-full font-mono text-5xl mt-4 text-center">
+                {shareCode}
+              </Button>
               <Button
                 className="w-full mt-4 bg-red-500 text-center"
                 onClick={onClickStopSharing}

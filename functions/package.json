@@ -8,8 +8,8 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {},
-  "devDependencies": {
-    "@types/qr-image": "^3.2.9"
-  }
+  "dependencies": {
+    "yaqrcode": "^0.2.1"
+  },
+  "devDependencies": {}
 }

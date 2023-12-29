@@ -4,6 +4,12 @@ interface Env {
     INCIDENTS: KVNamespace;
 }
 
+function generateCode() {
+    const base = crypto.randomUUID();
+
+    return base.slice(0, 3).toUpperCase() + "-" + base.slice(3, 6).toUpperCase();;
+};
+
 export const onRequest: PagesFunction<Env> = async (context) => {
 
     if (context.request.method !== "PUT") {
@@ -17,7 +23,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     try {
         const body = await context.request.json<ShareNewRequestData>()
 
-        const code = crypto.randomUUID();
+        const code = generateCode();
         const sku = body?.initial.sku;
 
         if (!sku) {

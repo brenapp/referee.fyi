@@ -34,7 +34,7 @@ export function useNewIncident() {
 export function useEventIncidents(sku: string | undefined | null) {
   return useQuery<IncidentWithID[]>(
     ["incidents", "event", sku],
-    () => {
+    async () => {
       if (!sku) {
         return [];
       }

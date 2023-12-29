@@ -25,13 +25,17 @@ export type Rules = {
 };
 
 export function useRules(): UseQueryResult<Rules> {
-  return useQuery(["rules"], async () => {
-    const response = await fetch("/rules.json");
-    if (!response.ok) {
-      return { games: [] };
-    }
-    return response.json() as Promise<Rules>;
-  });
+  return useQuery(
+    ["rules"],
+    async () => {
+      const response = await fetch("/rules.json");
+      if (!response.ok) {
+        return { games: [] };
+      }
+      return response.json() as Promise<Rules>;
+    },
+    { staleTime: 1000 * 60 * 60 * 6 }
+  );
 }
 
 export function useGameRules(game: string): Game | undefined {

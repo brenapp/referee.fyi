@@ -4,7 +4,7 @@ import { Spinner } from "~components/Spinner";
 
 import { Tabs } from "~components/Tabs";
 import { Event } from "robotevents/out/endpoints/events";
-import { Button } from "~components/Button";
+import { Button, LinkButton } from "~components/Button";
 import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
 import { useEventIncidents } from "~hooks/incident";
@@ -13,6 +13,7 @@ import {
   IncidentOutcome,
   deleteIncident,
   getIncidentsByEvent,
+  updateFromRemote,
 } from "~utils/data/incident";
 import { EventNewIncidentDialog } from "./dialogs/new";
 import { EventMatchDialog } from "./dialogs/match";
@@ -23,6 +24,13 @@ import { DialogMode } from "~components/constants";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { useAddEventVisited } from "~utils/hooks/history";
+import {
+  useNewEventShare,
+  useOwnerCode,
+  useShareCode,
+  useShareData,
+  useStopEventShare,
+} from "~utils/hooks/share";
 
 export type MainTabProps = {
   event: Event;
@@ -191,12 +199,99 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
     setDeleteDataDialogOpen(false);
   }, [event.sku]);
 
+  const { data: shareCode } = useShareCode(event.sku);
+  const isSharing = useMemo(() => {
+    return !!shareCode;
+  }, [shareCode]);
+
+  const { data: shareData } = useShareData(event.sku, shareCode ?? "", {
+    enabled: isSharing,
+  });
+
+  const { data: ownerCode } = useOwnerCode();
+
+  const isOwner = useMemo(() => {
+    if (!shareData?.success) {
+      return false;
+    }
+
+    return shareData.data.owner === ownerCode;
+  }, [ownerCode, shareData]);
+
+  const { mutateAsync: createShare } = useNewEventShare();
+  const { mutateAsync: stopSharing } = useStopEventShare();
+  const { data: owner } = useOwnerCode();
+
+  const onClickShare = useCallback(async () => {
+    if (!owner) return;
+    const incidents = await getIncidentsByEvent(event.sku);
+
+    await createShare({
+      initial: { owner, sku: event.sku, incidents },
+    });
+  }, [createShare, owner]);
+
+  const onClickShareCode = useCallback(async () => {
+    const url = new URL(`/${event.sku}/join?code=${shareCode}`, location.href);
+    const shareData = {
+      url: url.href,
+    };
+
+    if (navigator.share && navigator.canShare(shareData)) {
+      navigator.share(shareData);
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(url.href);
+    }
+  }, [shareCode]);
+
+  const onClickStopSharing = useCallback(async () => {
+    await stopSharing(event.sku);
+  }, [event.sku]);
+
   return (
     <>
       <section>
         <section className="mt-4">
           <h2 className="font-bold">Share Event Data</h2>
-          <p>Not currently implemented.</p>
+          {isSharing ? (
+            <section>
+              <p>
+                Use this share code to give read and write access to other
+                devices. Treat this code with caution!
+              </p>
+              <Button
+                className="w-full font-mono text-5xl mt-4 text-center"
+                onClick={onClickShareCode}
+              >
+                {shareCode}
+              </Button>
+              <Button
+                className="w-full mt-4 bg-red-500 text-center"
+                onClick={onClickStopSharing}
+              >
+                {isOwner ? "Stop Sharing" : "Leave Share"}
+              </Button>
+            </section>
+          ) : (
+            <>
+              <p>
+                Sharing allows other devices to work from the same list of
+                incidents by syncing them over the internet.
+              </p>
+              <Button
+                className="w-full mt-4 bg-emerald-500 text-center"
+                onClick={onClickShare}
+              >
+                Share My Incidents
+              </Button>
+              <LinkButton
+                className="w-full mt-4 text-center"
+                to={`/${event.sku}/join`}
+              >
+                Enter A Code
+              </LinkButton>
+            </>
+          )}
         </section>
         <section className="mt-4 relative">
           <h2 className="font-bold">Delete Event Data</h2>
@@ -250,6 +345,16 @@ export const EventPage: React.FC = () => {
       addEvent(event);
     }
   }, [event, isSuccess]);
+
+  // Periodically update
+  useEffect(() => {
+    const timer = setInterval(async () => {
+      if (!event) return;
+      await updateFromRemote(event.sku);
+    }, 10 * 1000);
+
+    return () => clearInterval(timer);
+  }, [event]);
 
   return event ? (
     <section className="mt-4 flex flex-col">

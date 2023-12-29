@@ -5,6 +5,7 @@ import { EventPage } from "./pages/events";
 import { EventTeamsPage } from "./pages/events/team";
 import { EventDivisionPickerPage } from "./pages/events/division";
 import { HomePage } from "./pages/home";
+import { EventJoinPage } from "pages/events/join";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           <Route path="/:sku">
             <Route index path="/:sku" element={<EventDivisionPickerPage />} />
             <Route path="/:sku/:division" element={<EventPage />} />
+            <Route path="/:sku/join" element={<EventJoinPage />} />
             <Route path="/:sku/team/:number" element={<EventTeamsPage />} />
           </Route>
         </Route>

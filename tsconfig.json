@@ -10,7 +10,6 @@
 
     /* Bundler mode */
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
@@ -29,5 +28,5 @@
     }
   },
   "include": ["src", "node_modules/vite-plugin-pwa/client.d.ts"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "exclude": ["backend/**/*"]
 }

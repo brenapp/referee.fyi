@@ -1,4 +1,4 @@
-import { imageSync } from "qr-image";
+import { imageSync } from "../utils/qr-image/lib/qr"
 
 interface Env {
     INCIDENTS: KVNamespace;

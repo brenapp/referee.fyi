@@ -1,3 +1,7 @@
+.markdown {
+  max-height: 100svh;
+}
+
 .markdown h1 {
   font-size: 2em;
   font-weight: bold;

@@ -1,0 +1,16 @@
+.markdown h1 {
+  font-size: 2em;
+  font-weight: bold;
+}
+.markdown h2 {
+  font-size: 1.5em;
+  margin-bottom: 0.5rem;
+}
+.markdown h3 {
+  font-size: 1.25em;
+  margin-bottom: 1rem;
+}
+.markdown ul {
+  list-style: unset;
+  padding-left: 1rem;
+}

@@ -28,9 +28,7 @@ export type ShareResponse<T> = ShareResponseSuccess<T> | ShareResponseFailure;
 // GET share/get
 export type ShareGetResponseData = {
   sku: string;
-  owner: {
-    name: string;
-  };
+  owner: string; // owner code
   incidents: IncidentWithID[];
 };
 

@@ -4,7 +4,7 @@ import { Spinner } from "~components/Spinner";
 
 import { Tabs } from "~components/Tabs";
 import { Event } from "robotevents/out/endpoints/events";
-import { Button } from "~components/Button";
+import { Button, LinkButton } from "~components/Button";
 import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
 import { useEventIncidents } from "~hooks/incident";
@@ -25,7 +25,9 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import { useAddEventVisited } from "~utils/hooks/history";
 import {
   useNewEventShare,
+  useOwnerCode,
   useShareCode,
+  useShareData,
   useStopEventShare,
 } from "~utils/hooks/share";
 
@@ -201,25 +203,43 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
     return !!shareCode;
   }, [shareCode]);
 
+  const { data: shareData } = useShareData(event.sku, shareCode ?? "", {
+    enabled: isSharing,
+  });
+
+  const { data: ownerCode } = useOwnerCode();
+
+  const isOwner = useMemo(() => {
+    if (!shareData?.success) {
+      return false;
+    }
+
+    return shareData.data.owner === ownerCode;
+  }, [ownerCode, shareData]);
+
   const { mutateAsync: createShare } = useNewEventShare();
   const { mutateAsync: stopSharing } = useStopEventShare();
+  const { data: owner } = useOwnerCode();
 
   const onClickShare = useCallback(async () => {
+    if (!owner) return;
     const incidents = await getIncidentsByEvent(event.sku);
 
     await createShare({
-      initial: { owner: { name: "BREN" }, sku: event.sku, incidents },
+      initial: { owner, sku: event.sku, incidents },
     });
-  }, [createShare]);
+  }, [createShare, owner]);
 
-  const onClickShareImage = useCallback(async () => {
-    const url = new URL(`/join/${shareCode}`, location.href);
+  const onClickShareCode = useCallback(async () => {
+    const url = new URL(`/${event.sku}/join?code=${shareCode}`, location.href);
     const shareData = {
       url: url.href,
     };
 
     if (navigator.share && navigator.canShare(shareData)) {
       navigator.share(shareData);
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(url.href);
     }
   }, [shareCode]);
 
@@ -236,25 +256,40 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
             <section>
               <p>
                 Use this share code to give read and write access to other
-                devices.
+                devices. Treat this code with caution!
               </p>
-              <Button className="w-full font-mono text-5xl mt-4 text-center">
+              <Button
+                className="w-full font-mono text-5xl mt-4 text-center"
+                onClick={onClickShareCode}
+              >
                 {shareCode}
               </Button>
               <Button
                 className="w-full mt-4 bg-red-500 text-center"
                 onClick={onClickStopSharing}
               >
-                Stop Sharing
+                {isOwner ? "Stop Sharing" : "Leave Share"}
               </Button>
             </section>
           ) : (
-            <Button
-              className="w-full mt-4 bg-emerald-500 text-center"
-              onClick={onClickShare}
-            >
-              Begin Sharing
-            </Button>
+            <>
+              <p>
+                Sharing allows other devices to work from the same list of
+                incidents by syncing them over the internet.
+              </p>
+              <Button
+                className="w-full mt-4 bg-emerald-500 text-center"
+                onClick={onClickShare}
+              >
+                Share My Incidents
+              </Button>
+              <LinkButton
+                className="w-full mt-4 text-center"
+                to={`/${event.sku}/join`}
+              >
+                Enter A Code
+              </LinkButton>
+            </>
           )}
         </section>
         <section className="mt-4 relative">

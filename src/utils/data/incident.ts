@@ -191,7 +191,9 @@ export async function updateFromRemote(sku: string) {
 
   // Update incident
   for (const { id, ...incident } of data.data.incidents) {
-    if (!hasIncident(id)) {
+    const exists = await hasIncident(id);
+    incidents.add(id);
+    if (!exists) {
       await newIncident(incident, false, id);
     }
   }

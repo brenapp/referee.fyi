@@ -131,9 +131,9 @@ export function useEventsToday(): UseQueryResult<robotevents.events.Event[]> {
     const today = new Date();
 
     const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
+    yesterday.setDate(today.getDate() - 3);
     const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
+    tomorrow.setDate(today.getDate() + 3);
 
     const events = await robotevents.events.search({
       start: yesterday.toISOString(),

@@ -1,4 +1,8 @@
-import { useEventMatches, useEventTeams } from "~hooks/robotevents";
+import {
+  useEventMatches,
+  useEventTeams,
+  useEventMatchesForTeam,
+} from "~hooks/robotevents";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 import { Select, TextArea } from "~components/Input";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -88,6 +92,8 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const [team, setTeam] = useState(initialTeam);
   const [match, setMatch] = useState(initialMatch);
 
+  const { data: teamMatches } = useEventMatchesForTeam(event, team);
+
   const [incident, setIncident] = useState<RichIncident>({
     time: new Date(),
     division: division ?? 1,
@@ -136,6 +142,11 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const onChangeIncidentTeam = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const newTeam = teams?.find((t) => t.number === e.target.value);
+      if (e.target.value === "-1") {
+        setMatch(null);
+        setTeam(null);
+      }
+
       if (!newTeam) return;
 
       setIncidentField("team", newTeam);
@@ -147,12 +158,16 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const onChangeIncidentMatch = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const newMatch = matches?.find((m) => m.id.toString() === e.target.value);
+
+      if (e.target.value === "-1") {
+        setMatch(null);
+        setTeam(null);
+      }
+
       if (!newMatch) return;
 
       setIncidentField("match", newMatch);
       setMatch(newMatch);
-      // Reset the selected team if a new match is selected
-      setTeam(null);
     },
     [matches]
   );
@@ -265,11 +280,18 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             className="max-w-full w-full"
           >
             <option value={-1}>Pick A Match</option>
-            {matches?.map((match) => (
-              <option value={match.id} key={match.id}>
-                {match.name}
-              </option>
-            ))}
+            {team &&
+              teamMatches?.map((match) => (
+                <option value={match.id} key={match.id}>
+                  {match.name}
+                </option>
+              ))}
+            {!team &&
+              matches?.map((match) => (
+                <option value={match.id} key={match.id}>
+                  {match.name}
+                </option>
+              ))}
           </Select>
         </label>
         {incident.match && (

@@ -1,8 +1,6 @@
-# Update 0.0.0
+## Update 0.0.0
 
 ### Initial release
-
-## What's new!
 
 - Select your event from the list of events on today, or enter the SKU directly from RobotEvents.
 - Once Tournament manager has set up the match schedule, you will be able to see each of the matches in a list, and can select the teams in that match to record violations.

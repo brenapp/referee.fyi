@@ -1,6 +1,8 @@
 import { LinkButton } from "~components/Button";
 import { useRecentEvents } from "~utils/hooks/history";
 import { useEffect, useState } from "react";
+import { Dialog, DialogHeader, DialogBody } from "~components/Dialog";
+import { DialogMode } from "~components/constants";
 import Markdown from "react-markdown";
 import pjson from "../../package.json";
 import "./markdown.css";
@@ -9,10 +11,7 @@ export const HomePage: React.FC = () => {
   const { data: recentEvents } = useRecentEvents(5);
 
   const [markdownContent, setMarkdownContent] = useState<string>("");
-
-  const dialog = document.getElementById(
-    "markdown-dialog"
-  ) as HTMLDialogElement;
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
 
   useEffect(() => {
     // Fetch the update notes as a markdown file
@@ -32,20 +31,18 @@ export const HomePage: React.FC = () => {
     const userVersion = localStorage.getItem("version");
 
     if (userVersion && userVersion !== latestVersion) {
-      if (dialog) {
-        dialog.show();
-      }
+      setUpdateDialogOpen(true);
     }
     localStorage.setItem("version", latestVersion);
   }, []); // Run this effect only once, when the component mounts
 
   return (
     <>
-      <main>
+      <div>
         <aside className="text-right">
           <button
             className="bg-cyan-900 text-right ml-auto mt-2 py-1 px-3 rounded-md"
-            onClick={() => dialog.show()}
+            onClick={() => setUpdateDialogOpen(true)}
           >
             View Update Notes
           </button>
@@ -65,19 +62,21 @@ export const HomePage: React.FC = () => {
             </LinkButton>
           ))}
         </section>
-      </main>
-      <dialog
-        className="markdown absolute overflow-y-auto text-white absolute top-0 left-1/2 rounded-b-md p-4 bg-slate-800 -translate-x-1/2 w-11/12"
-        id="markdown-dialog"
+      </div>
+      <Dialog
+        className="markdown"
+        open={updateDialogOpen}
+        mode={DialogMode.Modal}
+        onClose={() => setUpdateDialogOpen(false)}
       >
-        <div
-          className=" sticky w-fit top-0 ml-auto mr-1 p-2 bg-slate-800 cursor-pointer rounded-md -mt-12"
-          onClick={() => dialog.close()}
-        >
-          &#10006; {/* Unicode character for X */}
-        </div>
-        <Markdown>{markdownContent}</Markdown>
-      </dialog>
+        <DialogHeader
+          title="What's New"
+          onClose={() => setUpdateDialogOpen(false)}
+        />
+        <DialogBody>
+          <Markdown>{markdownContent}</Markdown>
+        </DialogBody>
+      </Dialog>
     </>
   );
 };

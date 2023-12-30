@@ -41,7 +41,7 @@ export const HomePage: React.FC = () => {
       <div>
         <aside className="text-right">
           <button
-            className="bg-cyan-900 text-right ml-auto mt-2 py-1 px-3 rounded-md"
+            className="bg-emerald-900 text-right ml-auto mt-4 py-1 px-3 rounded-md"
             onClick={() => setUpdateDialogOpen(true)}
           >
             View Update Notes

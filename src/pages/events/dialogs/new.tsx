@@ -136,7 +136,10 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const onChangeIncidentTeam = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const newTeam = teams?.find((t) => t.number === e.target.value);
-      if (!newTeam) return;
+      if (e.target.value === "-1") {
+        setMatch(null);
+        setTeam(null);
+      }
 
       setIncidentField("team", newTeam);
       setTeam(newTeam);
@@ -147,12 +150,14 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const onChangeIncidentMatch = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const newMatch = matches?.find((m) => m.id.toString() === e.target.value);
-      if (!newMatch) return;
+
+      if (e.target.value === "-1") {
+        setMatch(null);
+        setTeam(null);
+      }
 
       setIncidentField("match", newMatch);
       setMatch(newMatch);
-      // Reset the selected team if a new match is selected
-      setTeam(null);
     },
     [matches]
   );

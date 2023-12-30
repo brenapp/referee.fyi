@@ -17,6 +17,7 @@ import { Team } from "robotevents/out/endpoints/teams";
 import * as robotevents from "robotevents";
 import { useQuery } from "react-query";
 import { Match } from "robotevents/out/endpoints/matches";
+import { DialogMode } from "~components/constants";
 
 export function useMatchTeams(match?: Match | null) {
   return useQuery(["match_teams", match?.id], async () => {
@@ -33,7 +34,6 @@ export function useMatchTeams(match?: Match | null) {
     );
   });
 }
-import { DialogMode } from "~components/constants";
 
 export type EventMatchDialogProps = {
   matchId: number;

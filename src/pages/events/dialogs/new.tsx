@@ -159,9 +159,6 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const newMatch = matches?.find((m) => m.id.toString() === e.target.value);
 
-      console.log(e.target.value);
-      console.log("newmatch", newMatch);
-
       if (e.target.value === "-1") {
         setMatch(null);
         setTeam(null);

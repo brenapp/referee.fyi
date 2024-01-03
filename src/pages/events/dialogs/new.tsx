@@ -23,6 +23,7 @@ import { Match } from "robotevents/out/endpoints/matches";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { useAddRecentRules, useRecentRules } from "~utils/hooks/history";
 import { twMerge } from "tailwind-merge";
+import { toast } from "~components/Toast";
 
 type Issue = {
   message: string;
@@ -246,6 +247,10 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
           setIncidentField("outcome", IncidentOutcome.Minor);
           addRecentRules(incident.rules);
           setOpen(false);
+          toast({ type: "info", message: "Created Entry" });
+        },
+        onError: (error) => {
+          toast({ type: "error", message: `${error}` });
         },
       });
     },

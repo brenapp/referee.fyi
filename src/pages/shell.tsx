@@ -21,6 +21,7 @@ import { DialogMode } from "~components/constants";
 import { ProgramAbbr } from "robotevents/out/endpoints/programs";
 import { Input, RulesSelect, Select } from "~components/Input";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
+import { Toaster } from "react-hot-toast";
 
 const EventPicker: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -222,6 +223,7 @@ export const AppShell: React.FC = () => {
       className="p-4 w-screen h-screen grid"
       style={{ gridTemplateRows: "4rem 1fr" }}
     >
+      <Toaster />
       <nav className="h-16 flex gap-4 max-w-full">
         <Button onClick={() => navigate(-1)} className="bg-transparent p-0">
           <ChevronLeftIcon height={24} />

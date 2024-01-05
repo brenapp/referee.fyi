@@ -106,7 +106,11 @@ export async function setIncident(
   return set(id, incident);
 }
 
-export async function newIncident(incident: Incident, updateRemote: boolean = true, id = generateIncidentId()): Promise<string> {
+export async function newIncident(
+  incident: Incident,
+  updateRemote: boolean = true,
+  id = generateIncidentId()
+): Promise<string> {
   await setIncident(id, incident);
 
   // Add to all indices
@@ -141,7 +145,10 @@ export async function newIncident(incident: Incident, updateRemote: boolean = tr
   return id;
 }
 
-export async function deleteIncident(id: string, updateRemote: boolean = true): Promise<void> {
+export async function deleteIncident(
+  id: string,
+  updateRemote: boolean = true
+): Promise<void> {
   const incident = await getIncident(id);
 
   if (!incident) {
@@ -184,10 +191,12 @@ export async function updateFromRemote(sku: string) {
   const resp = await fetch(`/share/get?sku=${sku}&code=${code}`);
   if (!resp.ok) return;
 
-  const data = await resp.json() as ShareResponse<ShareGetResponseData>;
+  const data = (await resp.json()) as ShareResponse<ShareGetResponseData>;
   const incidents = new Set<string>();
 
-  if (!data.success) { return; }
+  if (!data.success) {
+    return;
+  }
 
   // Update incident
   for (const { id, ...incident } of data.data.incidents) {
@@ -198,11 +207,13 @@ export async function updateFromRemote(sku: string) {
     }
   }
 
-  const eventsIndex = (await get<IncidentIndex>("event_idx"));
+  const eventsIndex = await get<IncidentIndex>("event_idx");
   const list = eventsIndex?.[sku] ?? [];
 
   for (const id of list) {
-    if (incidents.has(id)) { continue };
+    if (incidents.has(id)) {
+      continue;
+    }
     await deleteIncident(id, false);
   }
 }

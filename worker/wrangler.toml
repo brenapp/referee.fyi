@@ -1,0 +1,19 @@
+name = "referee-fyi"
+compatibility_date = "2024-01-01"
+main = "./src/index.ts"
+
+kv_namespaces = [
+    { binding = "SHARES", id = "667b3f219f284aa7b4a88d37044ae9d9" }
+]
+
+[[durable_objects.bindings]]
+name = "INCIDENTS"
+class_name = "EventIncidents"
+
+[[rules]]
+type = "ESModule"
+globs = ["**/*.ts"]
+
+[[migrations]]
+tag = "v1"
+new_classes = ["EventIncidents"]

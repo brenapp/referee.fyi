@@ -27,6 +27,6 @@ export type ShareUser = {
 
 export type EventIncidents = {
     sku: string;
-    owner: ShareUser;
+    owner?: ShareUser;
     incidents: Incident[]
 }

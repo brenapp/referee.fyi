@@ -1,14 +1,13 @@
 import { get, set, del } from "idb-keyval";
 import { UseQueryOptions, UseQueryResult, useMutation, useQuery } from "react-query";
-import { updateFromRemote } from "~utils/data/incident";
 import { queryClient } from "~utils/data/query";
 import {
-  ShareGetResponseData,
-  ShareNewRequestData,
-  ShareNewResponseData,
   ShareResponse,
+  CreateShareRequest,
+
   ShareResponseFailure,
-} from "~utils/data/share";
+} from "~share/api";
+import { createShare } from "~utils/data/share";
 
 export function useOwnerCode() {
   return useQuery(["owner_code"], async () => {
@@ -39,18 +38,12 @@ export function useShareCode(sku: string) {
 }
 
 export function useNewEventShare() {
-  return useMutation(async (body: ShareNewRequestData) => {
+  return useMutation(async (body: CreateShareRequest) => {
     try {
-      const response = await fetch("/share/new", {
-        method: "PUT",
-        body: JSON.stringify(body),
-      });
-
-      const resp =
-        (await response.json()) as ShareResponse<ShareNewResponseData>;
+      const resp = await createShare(body)
 
       if (resp.success) {
-        await set(`share_${body.initial.sku}`, resp.data.code);
+        await set(`share_${body.sku}`, resp.data.code);
         queryClient.invalidateQueries({ queryKey: ["share_code"] });
       }
     } catch (e) {

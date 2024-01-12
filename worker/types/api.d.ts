@@ -1,5 +1,7 @@
 import { EventIncidents, Incident, ShareUser } from "./EventIncidents";
 
+export * from "./EventIncidents";
+
 export type ShareResponseSuccess<T> = {
     success: true;
     data: T;
@@ -19,8 +21,14 @@ export type ShareResponseFailure = {
 export type ShareResponse<T> = ShareResponseSuccess<T> | ShareResponseFailure;
 
 // /api/create/:sku
+export type CreateShareRequest = EventIncidents;
+
 export type CreateShareResponse = {
     code: string;
+}
+
+export type WebSocketMessageData = {
+    [T in WebSocketMessage["type"]]: Omit<WebSocketMessage & { type: T }, "type">
 }
 
 // WebSocket communications

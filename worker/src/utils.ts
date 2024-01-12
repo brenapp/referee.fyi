@@ -8,7 +8,20 @@ export function response<T>(data: ShareResponse<T>, init?: ResponseInit) {
     if (data.success) {
         status = 200;
     } else {
-        status = 400;
+        switch (data.reason) {
+            case "bad_request": {
+                status = 400;
+                break;
+            }
+            case "server_error": {
+                status = 500;
+                break;
+            }
+            case "incorrect_code": {
+                status = 400;
+                break;
+            }
+        }
     }
 
     return new Response(JSON.stringify(data), { status, ...init, headers });

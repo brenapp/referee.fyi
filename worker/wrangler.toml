@@ -1,5 +1,5 @@
 name = "referee-fyi"
-compatibility_date = "2024-01-01"
+compatibility_date = "2023-12-18"
 main = "./src/index.ts"
 
 kv_namespaces = [

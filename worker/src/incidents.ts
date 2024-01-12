@@ -11,7 +11,7 @@ export type SessionClient = {
 }
 
 export interface Env {
-
+    SHARES: KVNamespace;
 };
 
 export class EventIncidents implements DurableObject {
@@ -25,6 +25,7 @@ export class EventIncidents implements DurableObject {
         this.env = env
         this.router
             .get("/join", this.handleWebsocket.bind(this))
+            .post("/init", this.handleInit.bind(this))
             .all("*", () => response({ success: false, reason: "bad_request", details: "unknown action" }))
     }
 
@@ -67,9 +68,55 @@ export class EventIncidents implements DurableObject {
         })
     }
 
+    async getIncident(id: string) {
+        return this.state.storage.get<Incident>(id);
+    };
+
+    async getIncidentList() {
+        return await this.state.storage.get<string[]>("incidents") ?? [];
+    };
+
+    async getAllIncidents(): Promise<Incident[]> {
+        const ids = await this.getIncidentList();
+        const incidents = await Promise.all(ids.map(id => this.getIncident(id)));
+        return incidents.filter(i => !!i) as Incident[]
+    };
+
+    async getData(): Promise<EventIncidentsData> {
+        const sku = await this.getSKU();
+        const owner = await this.getOwner();
+        const incidents = await this.getAllIncidents();
+
+        return { sku: sku ?? "", owner, incidents };
+    };
+
+    async createServerShareMessage(): Promise<WebSocketServerMessage> {
+        const data = await this.getData();
+        return {
+            type: "server_share_info",
+            users: this.clients.map(client => client.user.name),
+            data: { ...data, owner: data.owner?.name ?? "" },
+        }
+    };
+
+    createPayload<T extends WebSocketMessage = WebSocketMessage>(message: T, sender: WebSocketSender): WebSocketPayload<T> {
+        return { ...message, sender, date: new Date().toISOString() }
+    };
+
     async fetch(request: Request) {
         return this.router.handle(request)
     }
+
+    async handleInit(request: Request) {
+        const data = await request.json<EventIncidentsData>();
+
+        await this.setOwner(data.owner!);
+        await this.setSKU(data.sku);
+
+        for (const incident of data.incidents) {
+            await this.addIncident(incident);
+        };
+    };
 
     async handleWebsocket(request: Request) {
         const ip = request.headers.get("CF-Connecting-IP") ?? "0.0.0.0"
@@ -81,8 +128,6 @@ export class EventIncidents implements DurableObject {
 
             const name = search.get("name");
             const id = search.get("id");
-
-            console.log(request.url);
 
             if (!name || !id) {
                 return response({ success: false, reason: "bad_request", details: "Must specify a user name and user id" });
@@ -133,7 +178,6 @@ export class EventIncidents implements DurableObject {
                         await this.deleteIncident(data.id);
                         this.broadcast({ type: "remove_incident", id: data.id }, { type: "client", name: client.user.name });
                         break;
-                        break;
                     }
                     case "message": {
                         this.broadcast({ type: "message", message: data.message }, { type: "client", name: client.user.name })
@@ -147,16 +191,8 @@ export class EventIncidents implements DurableObject {
             }
         });
 
-        const owner = await this.getOwner();
-        const sku = await this.getSKU();
-
-        const payload: WebSocketPayload<WebSocketServerMessage> = {
-            type: "server_share_info",
-            users: this.clients.map(client => client.user.name),
-            data: { owner: owner?.name ?? "?", sku: sku ?? "", incidents: [] },
-            date: new Date().toISOString(),
-            sender: { type: "server" }
-        }
+        const state = await this.createServerShareMessage();
+        const payload = this.createPayload(state, { type: "server" });
 
         await socket.send(JSON.stringify(payload));
         await this.broadcast({ type: "server_user_add", user: user.name }, { type: "server" })
@@ -175,9 +211,9 @@ export class EventIncidents implements DurableObject {
     }
 
     async broadcast<T extends WebSocketMessage>(message: T, sender: WebSocketSender) {
-        const payload: WebSocketPayload<T> = { ...message, date: new Date().toISOString(), sender }
+        const payload: WebSocketPayload<T> = this.createPayload(message, sender);
 
-        const clientLefts: SessionClient[] = []
+        const clientLefts: SessionClient[] = [];
 
         this.clients = this.clients.filter((client) => {
             try {
@@ -194,10 +230,22 @@ export class EventIncidents implements DurableObject {
 
         clientLefts.forEach((client) => {
             if (client.user) {
-                this.broadcast({ type: "server_user_remove", user: client.user.name }, { type: "server" })
+                this.broadcast({ type: "server_user_remove", user: client.user.name }, { type: "server" });
             }
-        })
+        });
 
+        // Detect owner loss and reassign owner
+        const owner = await this.getOwner();
+        const ownerSession = this.clients.find(session => session.user.id === owner?.id);
+
+        if (!ownerSession || !ownerSession.active) {
+            const firstActive = this.clients.find(session => session.active);
+            if (firstActive) {
+                await this.setOwner(firstActive.user);
+                const message = await this.createServerShareMessage();
+                await this.broadcast(message, { type: "server" });
+            }
+        };
     };
 
     async updateExpiration() {

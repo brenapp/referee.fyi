@@ -30,6 +30,15 @@ router
 
             await env.SHARES.put(`${sku}#${code}`, JSON.stringify(body));
 
+            // Initialize the Durable Object
+            const id = env.INCIDENTS.idFromName(`${sku}#${code}`);
+            const share = env.INCIDENTS.get(id);
+
+            await share.fetch(`https://share/init`, {
+                method: "POST",
+                body: JSON.stringify(body)
+            });
+
             return response<CreateShareResponse>({
                 success: true,
                 data: { code }
@@ -67,7 +76,7 @@ router
     .all("*", () => response({
         success: false,
         reason: "bad_request",
-        details: "unknown endpoint"
+        details: "unknown endpoint",
     }))
 
 export default {

@@ -4,7 +4,7 @@ import { Spinner } from "~components/Spinner";
 
 import { Tabs } from "~components/Tabs";
 import { Event } from "robotevents/out/endpoints/events";
-import { Button, LinkButton } from "~components/Button";
+import { Button } from "~components/Button";
 import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
 import { useEventIncidents } from "~hooks/incident";
@@ -24,13 +24,6 @@ import { DialogMode } from "~components/constants";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { useAddEventVisited } from "~utils/hooks/history";
-import {
-  useNewEventShare,
-  useOwnerCode,
-  useShareCode,
-  useShareData,
-  useStopEventShare,
-} from "~utils/hooks/share";
 
 export type MainTabProps = {
   event: Event;
@@ -197,55 +190,6 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
       await deleteIncident(incident.id);
     }
     setDeleteDataDialogOpen(false);
-  }, [event.sku]);
-
-  const { data: shareCode } = useShareCode(event.sku);
-  const isSharing = useMemo(() => {
-    return !!shareCode;
-  }, [shareCode]);
-
-  const { data: shareData } = useShareData(event.sku, shareCode ?? "", {
-    enabled: isSharing,
-  });
-
-  const { data: ownerCode } = useOwnerCode();
-
-  const isOwner = useMemo(() => {
-    if (!shareData?.success) {
-      return false;
-    }
-
-    return shareData.data.owner === ownerCode;
-  }, [ownerCode, shareData]);
-
-  const { mutateAsync: createShare } = useNewEventShare();
-  const { mutateAsync: stopSharing } = useStopEventShare();
-  const { data: owner } = useOwnerCode();
-
-  const onClickShare = useCallback(async () => {
-    if (!owner) return;
-    const incidents = await getIncidentsByEvent(event.sku);
-
-    await createShare({
-      initial: { owner, sku: event.sku, incidents },
-    });
-  }, [createShare, owner]);
-
-  const onClickShareCode = useCallback(async () => {
-    const url = new URL(`/${event.sku}/join?code=${shareCode}`, location.href);
-    const shareData = {
-      url: url.href,
-    };
-
-    if (navigator.share && navigator.canShare(shareData)) {
-      navigator.share(shareData);
-    } else if (navigator.clipboard) {
-      navigator.clipboard.writeText(url.href);
-    }
-  }, [shareCode]);
-
-  const onClickStopSharing = useCallback(async () => {
-    await stopSharing(event.sku);
   }, [event.sku]);
 
   return (

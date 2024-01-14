@@ -1,7 +1,7 @@
 import { Router } from "itty-router"
 import { ShareUser, type EventIncidents as EventIncidentsData, Incident } from "../types/EventIncidents"
 import { response } from "./utils"
-import { WebSocketMessage, WebSocketPayload, WebSocketPeerMessage, WebSocketSender, WebSocketServerMessage } from "../types/api";
+import { WebSocketMessage, WebSocketMessageData, WebSocketPayload, WebSocketPeerMessage, WebSocketSender, WebSocketServerMessage, WebSocketServerShareInfoMessage } from "../types/api";
 
 export type SessionClient = {
     user: ShareUser;
@@ -25,6 +25,7 @@ export class EventIncidents implements DurableObject {
         this.env = env
         this.router
             .get("/join", this.handleWebsocket.bind(this))
+            .get("/get", this.handleGet.bind(this))
             .post("/init", this.handleInit.bind(this))
             .all("*", () => response({ success: false, reason: "bad_request", details: "unknown action" }))
     }
@@ -90,7 +91,7 @@ export class EventIncidents implements DurableObject {
         return { sku: sku ?? "", owner, incidents };
     };
 
-    async createServerShareMessage(): Promise<WebSocketServerMessage> {
+    async createServerShareMessage(): Promise<WebSocketServerShareInfoMessage> {
         const data = await this.getData();
         return {
             type: "server_share_info",
@@ -118,6 +119,14 @@ export class EventIncidents implements DurableObject {
         };
     };
 
+    async handleGet(request: Request) {
+        const data = await this.createServerShareMessage();
+        return response({
+            success: true,
+            data
+        })
+    };
+
     async handleWebsocket(request: Request) {
         const ip = request.headers.get("CF-Connecting-IP") ?? "0.0.0.0"
 
@@ -134,8 +143,6 @@ export class EventIncidents implements DurableObject {
             }
 
             this.handleSession(pair[1], ip, { name, id })
-            await this.updateExpiration()
-
             return new Response(null, { status: 101, webSocket: pair[0] })
         }
     };
@@ -144,11 +151,14 @@ export class EventIncidents implements DurableObject {
         socket.accept()
 
         const client: SessionClient = { socket, ip, active: true, user }
-        this.clients.push(client)
 
-        if (this.clients.length === 1) {
+        if (this.clients.length < 1) {
             this.setOwner(user);
         }
+
+        // Ensure that clients aren't  listed twice
+        this.clients = this.clients.filter(c => c.user.id !== user.id)
+        this.clients.push(client);
 
         // Set event handlers to receive messages.
         socket.addEventListener("message", async (event: MessageEvent) => {
@@ -233,24 +243,7 @@ export class EventIncidents implements DurableObject {
                 this.broadcast({ type: "server_user_remove", user: client.user.name }, { type: "server" });
             }
         });
-
-        // Detect owner loss and reassign owner
-        const owner = await this.getOwner();
-        const ownerSession = this.clients.find(session => session.user.id === owner?.id);
-
-        if (!ownerSession || !ownerSession.active) {
-            const firstActive = this.clients.find(session => session.active);
-            if (firstActive) {
-                await this.setOwner(firstActive.user);
-                const message = await this.createServerShareMessage();
-                await this.broadcast(message, { type: "server" });
-            }
-        };
     };
-
-    async updateExpiration() {
-        await this.state.storage.setAlarm(Date.now() + 86400 * 1000)
-    }
 
     async alarm() {
         await this.destroy()

@@ -1,92 +1,60 @@
-import { get, set, del } from "idb-keyval";
-import { UseQueryOptions, UseQueryResult, useMutation, useQuery } from "react-query";
+import { get, set } from "idb-keyval";
+import { createContext } from "react";
+import { useMutation, useQuery } from "react-query";
+import { EventIncidents, ShareUser } from "~share/EventIncidents";
+import { CreateShareResponse, ShareResponse } from "~share/api";
 import { queryClient } from "~utils/data/query";
-import {
-  ShareResponse,
-  CreateShareRequest,
+import { ShareConnection, createShare } from "~utils/data/share";
 
-  ShareResponseFailure,
-} from "~share/api";
-import { createShare } from "~utils/data/share";
+export const EventWebsocket = createContext<ShareConnection | null>(null);
 
-export function useOwnerCode() {
-  return useQuery(["owner_code"], async () => {
+export function useShareName() {
+  const query = useQuery(["share_name"], async () => {
+    return get<string>("share_name") ?? "";
+  })
 
-    const code = await get<string>("owner_code");
-
-    if (code) {
-      return code;
-    }
-
-    const newCode = crypto.randomUUID();
-    await set("owner_code", newCode);
-
-    return newCode;
+  const { mutateAsync } = useMutation(async (name: string) => {
+    await set("share_name", name);
+    queryClient.invalidateQueries("share_name");
   });
+
+  return { ...query, setName: mutateAsync }
 };
 
-export function useShareCode(sku: string) {
-  return useQuery(["share_code", sku], async () => {
-    const result = await get<string>(`share_${sku}`);
+export function useCreateShare() {
+  return useMutation(async (incidents: EventIncidents): Promise<ShareResponse<CreateShareResponse>> => {
+    const response = await createShare(incidents);
 
-    if (!result) {
-      return null;
-    }
+    if (response.success) {
+      await set(`share_code_${incidents.sku}`, response.data.code);
+    };
 
-    return result;
+    return response;
   });
-}
-
-export function useNewEventShare() {
-  return useMutation(async (body: CreateShareRequest) => {
-    try {
-      const resp = await createShare(body)
-
-      if (resp.success) {
-        await set(`share_${body.sku}`, resp.data.code);
-        queryClient.invalidateQueries({ queryKey: ["share_code"] });
-      }
-    } catch (e) {
-      return {
-        success: false,
-        details: `${e}`,
-        reason: "server_error",
-      } as ShareResponseFailure;
-    }
-  });
-}
+};
 
 export type JoinShareOptions = {
   sku: string;
   code: string;
-}
-
-export function useJoinShare(onSuccess?: () => void) {
-  return useMutation(async ({ sku, code }: JoinShareOptions) => {
-    await set(`share_${sku}`, code);
-    await updateFromRemote(sku);
-    queryClient.invalidateQueries({ queryKey: ["share_code"] });
-  }, { onSuccess });
+  user: ShareUser;
 };
 
-export function useStopEventShare() {
-  return useMutation(async (sku: string) => {
-    await del(`share_${sku}`);
-    await queryClient.invalidateQueries({ queryKey: ["share_code"] });
+export function useJoinShare() {
+  return useMutation(({ sku, code, user }: JoinShareOptions) => {
+
+    // Cleanup previous websocket (currently, only allowing one websocket connection at a time)
+
+
+
   });
 };
 
-export type UseShareDataOptions = Omit<UseQueryOptions<any, unknown, ShareResponse<ShareGetResponseData>, (string | null | undefined)[]>, "queryKey" | "queryFn">;
 
-export function useShareData(sku: string | undefined | null, code: string, options?: UseShareDataOptions): UseQueryResult<ShareResponse<ShareGetResponseData>> {
-  return useQuery(["share_data", sku, code], async () => {
+export function useShareCode(sku: string | null | undefined) {
+  return useQuery(["share_code", sku], async () => {
     if (!sku) {
-      return;
+      return null;
     }
-
-    const url = new URL("/share/get", window.location.origin);
-    url.searchParams.set("sku", sku);
-    url.searchParams.set("code", code);
-    return fetch(url).then(r => r.json())
-  }, options);
+    return get<string>(`share_code_${sku}`);
+  });
 };

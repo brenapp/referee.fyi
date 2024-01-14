@@ -70,6 +70,19 @@ export type EventNewIncidentDialogProps = {
   initialMatch?: Match | null;
 };
 
+export const EventEditIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
+  open,
+  setOpen,
+}) => {
+  return (
+    <Dialog
+      open={open}
+      mode={DialogMode.Modal}
+      onClose={() => setOpen(false)}
+    ></Dialog>
+  );
+};
+
 export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   open,
   setOpen,

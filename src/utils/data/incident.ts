@@ -145,6 +145,10 @@ export async function newIncident(
   return id;
 }
 
+export async function editIncident(id: string) {
+  window.alert(id);
+}
+
 export async function deleteIncident(
   id: string,
   updateRemote: boolean = true

@@ -13,17 +13,23 @@ import {
   IncidentOutcome,
   IncidentWithID,
   deleteIncident,
+  editIncident,
 } from "~utils/data/incident";
 import { twMerge } from "tailwind-merge";
 import { Tabs } from "~components/Tabs";
 import { Event } from "robotevents/out/endpoints/events";
 import { Team } from "robotevents/out/endpoints/teams";
 import { ClickableMatch } from "~components/ClickableMatch";
-import { IconButton } from "~components/Button";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { Button, IconButton } from "~components/Button";
+import {
+  TrashIcon,
+  PencilSquareIcon,
+  FlagIcon,
+} from "@heroicons/react/24/outline";
 import { queryClient } from "~utils/data/query";
 import { EventMatchDialog } from "./dialogs/match";
 import { Match } from "robotevents/out/endpoints/matches";
+import { EventEditIncidentDialog } from "./dialogs/new";
 
 type EventTeamsTabProps = {
   event: Event | null | undefined;
@@ -78,12 +84,23 @@ export type IncidentProps = {
 } & React.HTMLProps<HTMLDivElement>;
 
 export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
+  const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
+
+  <EventEditIncidentDialog
+    open={incidentDialogOpen}
+    setOpen={setIncidentDialogOpen}
+  ></EventEditIncidentDialog>;
+
   const { data: event } = useEvent(incident.event);
   const { data: match } = useEventMatch(
     event,
     incident.division,
     incident.match
   );
+
+  const onEdit = useCallback(async () => {
+    await editIncident(incident.id);
+  }, []);
 
   const onRemove = useCallback(async () => {
     await deleteIncident(incident.id);
@@ -97,7 +114,7 @@ export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
       {...props}
       className={twMerge(
         IncidentOutcomeClasses[incident.outcome],
-        "px-4 py-2 rounded-md mt-2 flex",
+        "px-4 py-2 rounded-md mt-2 flex gap-2",
         props.className
       )}
     >
@@ -118,6 +135,11 @@ export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
           ))}
         </ul>
       </div>
+      <IconButton
+        className="bg-transparent text-inherit"
+        onClick={onEdit}
+        icon={<PencilSquareIcon height={20} />}
+      ></IconButton>
       <IconButton
         className="bg-transparent text-inherit"
         onClick={onRemove}
@@ -167,6 +189,10 @@ export const EventTeamsPage: React.FC = () => {
           <p className="italic">{teamLocation}</p>
         </header>
       )}
+      <Button onClick={() => {}} className="w-full text-center bg-emerald-600">
+        <FlagIcon height={20} className="inline mr-2 " />
+        New Entry
+      </Button>
       <section>
         <Tabs>
           {{

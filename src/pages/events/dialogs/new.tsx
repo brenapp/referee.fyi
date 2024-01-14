@@ -12,8 +12,10 @@ import { MatchContext } from "~components/Context";
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
 import {
   IncidentOutcome,
+  IncidentWithID,
   RichIncident,
   packIncident,
+  unPackViolations,
 } from "~utils/data/incident";
 import { useNewIncident } from "~hooks/incident";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
@@ -68,19 +70,7 @@ export type EventNewIncidentDialogProps = {
   setOpen: (open: boolean) => void;
   initialTeam?: Team | null;
   initialMatch?: Match | null;
-};
-
-export const EventEditIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
-  open,
-  setOpen,
-}) => {
-  return (
-    <Dialog
-      open={open}
-      mode={DialogMode.Modal}
-      onClose={() => setOpen(false)}
-    ></Dialog>
-  );
+  existingIncident?: IncidentWithID | null;
 };
 
 export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
@@ -88,13 +78,14 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   setOpen,
   initialMatch,
   initialTeam,
+  existingIncident,
 }) => {
   const { mutate } = useNewIncident();
 
   const { data: event } = useCurrentEvent();
   const division = useCurrentDivision();
 
-  const rules = useRulesForProgram(event?.program.code);
+  const gameRules = useRulesForProgram(event?.program.code);
   const { data: recentRules } = useRecentRules(4);
   const { mutateAsync: addRecentRules } = useAddRecentRules();
 
@@ -108,6 +99,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 
   const { data: teamMatches } = useEventMatchesForTeam(event, team);
 
+  // Set up the Rich Incident
   const [incident, setIncident] = useState<RichIncident>({
     time: new Date(),
     division: division ?? 1,
@@ -119,30 +111,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     outcome: IncidentOutcome.Minor,
   });
 
-  useEffect(() => {
-    setIncidentField("team", team);
-    setTeam(team);
-
-    setIncidentField("match", match);
-    setMatch(match);
-  }, [team, match]);
-
-  useEffect(() => {
-    if (initialMatch) {
-      setIncidentField("match", initialMatch);
-      setMatch(initialMatch);
-    }
-    if (initialTeam) {
-      setIncidentField("team", initialTeam);
-      setTeam(initialTeam);
-    }
-  }, [initialMatch, initialTeam]);
-
-  const issues = useMemo(() => getIssues(incident), [incident]);
-  const canSave = useMemo(() => {
-    return issues.every((i) => i.type === "warning");
-  }, [issues]);
-
+  // Simplify adding fields to Rich Incidents
   const setIncidentField = <T extends keyof RichIncident>(
     key: T,
     value: RichIncident[T]
@@ -153,6 +122,13 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     }));
   };
 
+  // Allow saving if no issues detected
+  const issues = useMemo(() => getIssues(incident), [incident]);
+  const canSave = useMemo(() => {
+    return issues.every((i) => i.type === "warning");
+  }, [issues]);
+
+  // When the user changes the selected team
   const onChangeIncidentTeam = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const newTeam = teams?.find((t) => t.number === e.target.value);
@@ -169,6 +145,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     [teams]
   );
 
+  // When the user changes the selected match
   const onChangeIncidentMatch = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const newMatch = matches?.find((m) => m.id.toString() === e.target.value);
@@ -186,6 +163,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     [matches]
   );
 
+  // When the user changes the selected outcome (major / minor / disabled)
   const onChangeIncidentOutcome = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       setIncidentField("outcome", Number.parseInt(e.target.value));
@@ -193,6 +171,15 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     []
   );
 
+  // When the user adds notes to the incident
+  const onChangeIncidentNotes = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setIncidentField("notes", e.target.value);
+    },
+    []
+  );
+
+  // Toggling the quick access associated rule
   const onToggleRule = useCallback(
     (rule: Rule) => {
       if (incident.rules.some((r) => r.rule === rule.rule)) {
@@ -201,23 +188,16 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         onAddRule(rule);
       }
     },
-    [rules, incident.rules]
+    [gameRules, incident.rules]
   );
 
-  const onAddRule = useCallback(
-    (rule: Rule) => {
-      if (incident.rules.some((r) => r.rule === rule.rule)) return;
-      setIncidentField("rules", [...incident.rules, rule]);
-    },
-    [rules, incident.rules]
-  );
-
+  // For selecting rules from the drop down menu
   const onPickOtherRule = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const group = e.target.selectedOptions[0].dataset.rulegroup;
       if (!group) return;
 
-      const rule = rules?.ruleGroups
+      const rule = gameRules?.ruleGroups
         .find((g) => g.name === group)
         ?.rules.find((r) => r.rule === e.target.value);
 
@@ -225,9 +205,18 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       if (incident.rules.some((r) => r.rule === rule.rule)) return;
       setIncidentField("rules", [...incident.rules, rule]);
     },
-    [rules, incident.rules]
+    [gameRules, incident.rules]
   );
 
+  // Adding any rule as a violation
+  const onAddRule = useCallback(
+    (rule: Rule) => {
+      if (incident.rules.some((r) => r.rule === rule.rule)) return;
+      setIncidentField("rules", [...incident.rules, rule]);
+    },
+    [gameRules, incident.rules]
+  );
+  // Removing any rule as a violation
   const onRemoveRule = useCallback(
     (rule: Rule) => {
       setIncidentField(
@@ -238,13 +227,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     [incident.rules]
   );
 
-  const onChangeIncidentNotes = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setIncidentField("notes", e.target.value);
-    },
-    []
-  );
-
+  // User presses submit button
   const onSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement> | React.MouseEvent) => {
       e.preventDefault();
@@ -270,9 +253,40 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     [incident, mutate, setOpen]
   );
 
+  // Set up the initial parameters
+  useEffect(() => {
+    if (initialMatch) {
+      setIncidentField("match", initialMatch);
+      setMatch(initialMatch);
+    }
+    if (initialTeam) {
+      setIncidentField("team", initialTeam);
+      setTeam(initialTeam);
+    }
+    if (existingIncident) {
+      const rulesArr: Rule[] = unPackViolations(
+        existingIncident.rules,
+        gameRules
+      );
+      setIncidentField("rules", rulesArr);
+    }
+  }, [initialMatch, initialTeam]);
+
+  // Update the team and match whenever they change
+  useEffect(() => {
+    setIncidentField("team", team);
+    setTeam(team);
+
+    setIncidentField("match", match);
+    setMatch(match);
+  }, [team, match]);
+
   return (
     <Dialog open={open} mode={DialogMode.Modal} onClose={() => setOpen(false)}>
-      <DialogHeader title="New Report" onClose={() => setOpen(false)} />
+      <DialogHeader
+        title={existingIncident ? "Edit Report" : "New Report"}
+        onClose={() => setOpen(false)}
+      />
       <DialogBody>
         {issues.map((issue) =>
           issue.type === "error" ? (
@@ -382,7 +396,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
               onChange={onPickOtherRule}
             >
               <option>Pick Rule</option>
-              {rules?.ruleGroups.map((group) => (
+              {gameRules?.ruleGroups.map((group) => (
                 <optgroup label={group.name} key={group.name}>
                   {group.rules.map((rule) => (
                     <option

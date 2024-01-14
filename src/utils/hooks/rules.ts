@@ -38,11 +38,6 @@ export function useRules(): UseQueryResult<Rules> {
   );
 }
 
-export function useGameRules(game: string): Game | undefined {
-  const { data: rules } = useRules();
-  return rules?.games.find((g) => g.title === game) as Game | undefined;
-}
-
 export function useRulesForProgram(
   program?: ProgramAbbr,
   year: Year = "2023-2024"

@@ -13,7 +13,6 @@ import {
   IncidentOutcome,
   IncidentWithID,
   deleteIncident,
-  editIncident,
 } from "~utils/data/incident";
 import { twMerge } from "tailwind-merge";
 import { Tabs } from "~components/Tabs";
@@ -21,15 +20,12 @@ import { Event } from "robotevents/out/endpoints/events";
 import { Team } from "robotevents/out/endpoints/teams";
 import { ClickableMatch } from "~components/ClickableMatch";
 import { Button, IconButton } from "~components/Button";
-import {
-  TrashIcon,
-  PencilSquareIcon,
-  FlagIcon,
-} from "@heroicons/react/24/outline";
+import { TrashIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { FlagIcon } from "@heroicons/react/20/solid";
 import { queryClient } from "~utils/data/query";
 import { EventMatchDialog } from "./dialogs/match";
 import { Match } from "robotevents/out/endpoints/matches";
-import { EventEditIncidentDialog } from "./dialogs/new";
+import { EventNewIncidentDialog } from "./dialogs/new";
 
 type EventTeamsTabProps = {
   event: Event | null | undefined;
@@ -84,12 +80,7 @@ export type IncidentProps = {
 } & React.HTMLProps<HTMLDivElement>;
 
 export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
-  const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
-
-  <EventEditIncidentDialog
-    open={incidentDialogOpen}
-    setOpen={setIncidentDialogOpen}
-  ></EventEditIncidentDialog>;
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const { data: event } = useEvent(incident.event);
   const { data: match } = useEventMatch(
@@ -97,10 +88,6 @@ export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
     incident.division,
     incident.match
   );
-
-  const onEdit = useCallback(async () => {
-    await editIncident(incident.id);
-  }, []);
 
   const onRemove = useCallback(async () => {
     await deleteIncident(incident.id);
@@ -118,6 +105,11 @@ export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
         props.className
       )}
     >
+      <EventNewIncidentDialog
+        open={editDialogOpen}
+        setOpen={setEditDialogOpen}
+        existingIncident={incident}
+      />
       <div className="flex-1">
         <p className="text-sm">
           {[
@@ -137,7 +129,7 @@ export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
       </div>
       <IconButton
         className="bg-transparent text-inherit"
-        onClick={onEdit}
+        onClick={() => setEditDialogOpen(true)}
         icon={<PencilSquareIcon height={20} />}
       ></IconButton>
       <IconButton
@@ -167,6 +159,7 @@ export const EventTeamsPage: React.FC = () => {
   const { number } = useParams();
   const { data: event } = useCurrentEvent();
   const { data: team, isLoading } = useTeam(number ?? "", event?.program.code);
+  const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
 
   const teamLocation = useMemo(() => {
     if (!team) return null;
@@ -189,10 +182,20 @@ export const EventTeamsPage: React.FC = () => {
           <p className="italic">{teamLocation}</p>
         </header>
       )}
-      <Button onClick={() => {}} className="w-full text-center bg-emerald-600">
+      <Button
+        onClick={() => {
+          setIncidentDialogOpen(true);
+        }}
+        className="w-full text-center bg-emerald-600"
+      >
         <FlagIcon height={20} className="inline mr-2 " />
         New Entry
       </Button>
+      <EventNewIncidentDialog
+        open={incidentDialogOpen}
+        setOpen={setIncidentDialogOpen}
+        initialTeam={team}
+      />
       <section>
         <Tabs>
           {{

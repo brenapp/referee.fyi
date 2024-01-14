@@ -4,6 +4,7 @@ import { Rule } from "~hooks/rules";
 import { Match } from "robotevents/out/endpoints/matches";
 import { Team } from "robotevents/out/endpoints/teams";
 import { ShareGetResponseData, ShareResponse } from "./share";
+import { Game } from "~hooks/rules";
 
 export enum IncidentOutcome {
   Minor,
@@ -54,6 +55,43 @@ export function packIncident(incident: RichIncident): Incident {
     team: incident.team?.number,
     rules: incident.rules.map((rule) => rule.rule),
   };
+}
+
+// Function to get information about a specific rule
+function getRuleInfo(
+  data: Game | undefined,
+  ruleIdentifier: string
+): Rule | undefined {
+  if (!data) {
+    return undefined;
+  }
+
+  // Iterate through all rule groups
+  for (const ruleGroup of data.ruleGroups) {
+    const matchingRule = ruleGroup.rules.find(
+      (rule) => rule.rule === ruleIdentifier
+    );
+
+    if (matchingRule) {
+      return matchingRule;
+    }
+  }
+
+  return undefined;
+}
+
+export function unPackViolations(
+  existingViolations: string[],
+  gameRules: Game | undefined
+): Rule[] {
+  let rulesArr: Rule[] = [];
+  existingViolations.forEach((rule) => {
+    const ruleInfo = getRuleInfo(gameRules, rule);
+    if (ruleInfo) {
+      rulesArr.push(ruleInfo);
+    }
+  });
+  return rulesArr;
 }
 
 export function generateIncidentId(): string {
@@ -143,10 +181,6 @@ export async function newIncident(
   }
 
   return id;
-}
-
-export async function editIncident(id: string) {
-  window.alert(id);
 }
 
 export async function deleteIncident(

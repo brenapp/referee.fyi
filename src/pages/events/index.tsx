@@ -253,45 +253,7 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
       <section>
         <section className="mt-4">
           <h2 className="font-bold">Share Event Data</h2>
-          {isSharing ? (
-            <section>
-              <p>
-                Use this share code to give read and write access to other
-                devices. Treat this code with caution!
-              </p>
-              <Button
-                className="w-full font-mono text-5xl mt-4 text-center"
-                onClick={onClickShareCode}
-              >
-                {shareCode}
-              </Button>
-              <Button
-                className="w-full mt-4 bg-red-500 text-center"
-                onClick={onClickStopSharing}
-              >
-                {isOwner ? "Stop Sharing" : "Leave Share"}
-              </Button>
-            </section>
-          ) : (
-            <>
-              <p>
-                Sharing allows other devices to work from the same list of
-                incidents by syncing them over the internet.
-              </p>
-              <Button
-                className="w-full mt-4 bg-emerald-500 text-center"
-                onClick={onClickShare}
-              >
-                Share My Incidents
-              </Button>
-              <LinkButton
-                className="w-full mt-4 text-center"
-                to={`/${event.sku}/join`}
-              >
-                Enter A Code
-              </LinkButton>
-            </>
-          )}
+          <p>Currently disabled as I am fixing some stability issues!</p>
         </section>
         <section className="mt-4 relative">
           <h2 className="font-bold">Delete Event Data</h2>

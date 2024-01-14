@@ -1,36 +1,35 @@
 import { Link } from "react-router-dom";
 import { useEventMatches, useEventTeams } from "~hooks/robotevents";
 import { Spinner } from "~components/Spinner";
-
 import { Tabs } from "~components/Tabs";
 import { Event } from "robotevents/out/endpoints/events";
-import { Button, LinkButton } from "~components/Button";
+import { Button } from "~components/Button";
 import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
 import { useEventIncidents } from "~hooks/incident";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import {
   IncidentOutcome,
   deleteIncident,
   getIncidentsByEvent,
-  updateFromRemote,
 } from "~utils/data/incident";
 import { EventNewIncidentDialog } from "./dialogs/new";
 import { EventMatchDialog } from "./dialogs/match";
 import { ClickableMatch } from "~components/ClickableMatch";
 import { Dialog, DialogBody } from "~components/Dialog";
 import { DialogMode } from "~components/constants";
-
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { useAddEventVisited } from "~utils/hooks/history";
 import {
-  useNewEventShare,
-  useOwnerCode,
+  EventWebsocket,
+  useCreateShare,
   useShareCode,
-  useShareData,
-  useStopEventShare,
+  useShareName,
 } from "~utils/hooks/share";
+import { Input } from "~components/Input";
+import { ShareConnection } from "~utils/data/share";
+import { toast } from "~components/Toast";
 
 export type MainTabProps = {
   event: Event;
@@ -191,6 +190,23 @@ const EventMatchesTab: React.FC<MainTabProps> = ({ event }) => {
 const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
   const [deleteDataDialogOpen, setDeleteDataDialogOpen] = useState(false);
 
+  const { data: shareName, setName } = useShareName();
+  const shareNameId = useId();
+
+  const { mutate: beginSharing } = useCreateShare();
+  const onClickShare = useCallback(async () => {
+    const shareId = await ShareConnection.getUserId();
+    const incidents = await getIncidentsByEvent(event.sku);
+
+    await beginSharing({
+      incidents,
+      owner: { id: shareId, name: shareName ?? "" },
+      sku: event.sku,
+    });
+
+    toast({ type: "info", message: "Sharing Enabled" });
+  }, [beginSharing]);
+
   const onConfirmDeleteData = useCallback(async () => {
     const incidents = await getIncidentsByEvent(event.sku);
     for (const incident of incidents) {
@@ -199,99 +215,27 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
     setDeleteDataDialogOpen(false);
   }, [event.sku]);
 
-  const { data: shareCode } = useShareCode(event.sku);
-  const isSharing = useMemo(() => {
-    return !!shareCode;
-  }, [shareCode]);
-
-  const { data: shareData } = useShareData(event.sku, shareCode ?? "", {
-    enabled: isSharing,
-  });
-
-  const { data: ownerCode } = useOwnerCode();
-
-  const isOwner = useMemo(() => {
-    if (!shareData?.success) {
-      return false;
-    }
-
-    return shareData.data.owner === ownerCode;
-  }, [ownerCode, shareData]);
-
-  const { mutateAsync: createShare } = useNewEventShare();
-  const { mutateAsync: stopSharing } = useStopEventShare();
-  const { data: owner } = useOwnerCode();
-
-  const onClickShare = useCallback(async () => {
-    if (!owner) return;
-    const incidents = await getIncidentsByEvent(event.sku);
-
-    await createShare({
-      initial: { owner, sku: event.sku, incidents },
-    });
-  }, [createShare, owner]);
-
-  const onClickShareCode = useCallback(async () => {
-    const url = new URL(`/${event.sku}/join?code=${shareCode}`, location.href);
-    const shareData = {
-      url: url.href,
-    };
-
-    if (navigator.share && navigator.canShare(shareData)) {
-      navigator.share(shareData);
-    } else if (navigator.clipboard) {
-      navigator.clipboard.writeText(url.href);
-    }
-  }, [shareCode]);
-
-  const onClickStopSharing = useCallback(async () => {
-    await stopSharing(event.sku);
-  }, [event.sku]);
-
   return (
     <>
       <section>
         <section className="mt-4">
           <h2 className="font-bold">Share Event Data</h2>
-          {isSharing ? (
-            <section>
-              <p>
-                Use this share code to give read and write access to other
-                devices. Treat this code with caution!
-              </p>
-              <Button
-                className="w-full font-mono text-5xl mt-4 text-center"
-                onClick={onClickShareCode}
-              >
-                {shareCode}
-              </Button>
-              <Button
-                className="w-full mt-4 bg-red-500 text-center"
-                onClick={onClickStopSharing}
-              >
-                {isOwner ? "Stop Sharing" : "Leave Share"}
-              </Button>
-            </section>
-          ) : (
-            <>
-              <p>
-                Sharing allows other devices to work from the same list of
-                incidents by syncing them over the internet.
-              </p>
-              <Button
-                className="w-full mt-4 bg-emerald-500 text-center"
-                onClick={onClickShare}
-              >
-                Share My Incidents
-              </Button>
-              <LinkButton
-                className="w-full mt-4 text-center"
-                to={`/${event.sku}/join`}
-              >
-                Enter A Code
-              </LinkButton>
-            </>
-          )}
+          <label htmlFor={shareNameId}>
+            <p>Name</p>
+            <Input
+              id={shareNameId}
+              required
+              value={shareName}
+              onChange={(e) => setName(e.currentTarget.value)}
+            />
+          </label>
+          <Button
+            className="w-full mt-4 bg-emerald-400 disabled:bg-zinc-400"
+            disabled={!shareName}
+            onClick={onClickShare}
+          >
+            Begin Sharing
+          </Button>
         </section>
         <section className="mt-4 relative">
           <h2 className="font-bold">Delete Event Data</h2>
@@ -337,8 +281,28 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
 export const EventPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
   const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
-
   const { mutateAsync: addEvent, isSuccess } = useAddEventVisited();
+
+  const { data: shareCode } = useShareCode(event?.sku);
+  const { data: shareName } = useShareName();
+
+  const [websocket, setWebsocket] = useState<ShareConnection | null>(null);
+
+  // Manage Share Connection for the current event
+  useEffect(() => {
+    if (!event?.sku || !shareCode) {
+      return;
+    }
+
+    const socket = new ShareConnection(event.sku, shareCode);
+    socket.connect({ name: shareName ?? "" }).then(() => {
+      setWebsocket(socket);
+    });
+
+    return () => {
+      websocket?.cleanup();
+    };
+  }, [shareCode, event?.sku]);
 
   useEffect(() => {
     if (event && !isSuccess) {
@@ -346,36 +310,28 @@ export const EventPage: React.FC = () => {
     }
   }, [event, isSuccess]);
 
-  // Periodically update
-  useEffect(() => {
-    const timer = setInterval(async () => {
-      if (!event) return;
-      await updateFromRemote(event.sku);
-    }, 10 * 1000);
-
-    return () => clearInterval(timer);
-  }, [event]);
-
   return event ? (
-    <section className="mt-4 flex flex-col">
-      <Button
-        onClick={() => setIncidentDialogOpen(true)}
-        className="w-full text-center bg-emerald-600"
-      >
-        <FlagIcon height={20} className="inline mr-2 " />
-        New Entry
-      </Button>
-      <EventNewIncidentDialog
-        open={incidentDialogOpen}
-        setOpen={setIncidentDialogOpen}
-      />
-      <Tabs className="flex-1">
-        {{
-          Matches: <EventMatchesTab event={event} />,
-          Teams: <EventTeamsTab event={event} />,
-          Manage: <EventManageTab event={event} />,
-        }}
-      </Tabs>
-    </section>
+    <EventWebsocket.Provider value={websocket}>
+      <section className="mt-4 flex flex-col">
+        <Button
+          onClick={() => setIncidentDialogOpen(true)}
+          className="w-full text-center bg-emerald-600"
+        >
+          <FlagIcon height={20} className="inline mr-2 " />
+          New Entry
+        </Button>
+        <EventNewIncidentDialog
+          open={incidentDialogOpen}
+          setOpen={setIncidentDialogOpen}
+        />
+        <Tabs className="flex-1">
+          {{
+            Matches: <EventMatchesTab event={event} />,
+            Teams: <EventTeamsTab event={event} />,
+            Manage: <EventManageTab event={event} />,
+          }}
+        </Tabs>
+      </section>
+    </EventWebsocket.Provider>
   ) : null;
 };

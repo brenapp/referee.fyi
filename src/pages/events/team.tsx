@@ -134,8 +134,15 @@ export const EventTeamsIncidents: React.FC<EventTeamsTabProps> = ({
   team,
   event,
 }) => {
-  const { data: incidents, isLoading: isIncidentsLoading } =
-    useTeamIncidentsByEvent(team?.number, event?.sku);
+  const {
+    data: incidents,
+    isLoading: isIncidentsLoading,
+    isSuccess,
+  } = useTeamIncidentsByEvent(team?.number, event?.sku);
+
+  if (isSuccess && incidents.length < 1) {
+    return <p>This team does not have any incidents for this event.</p>;
+  }
 
   return (
     <ul>

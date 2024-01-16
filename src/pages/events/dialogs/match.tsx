@@ -1,7 +1,10 @@
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
 import { useEventMatch, useEventMatches } from "~hooks/robotevents";
-import { Button } from "~components/Button";
-import { ArrowLeftIcon } from "@heroicons/react/20/solid";
+import { Button, IconButton } from "~components/Button";
+import {
+  ArrowLeftIcon,
+  ArrowTopRightOnSquareIcon,
+} from "@heroicons/react/20/solid";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { FlagIcon } from "@heroicons/react/20/solid";
 import { useCallback, useMemo, useState } from "react";
@@ -17,6 +20,8 @@ import { DialogMode } from "~components/constants";
 import { Match } from "robotevents/out/endpoints/matches";
 import { useQuery } from "react-query";
 import * as robotevents from "robotevents";
+import { TeamIncidentsDialog } from "./team";
+import { Team } from "robotevents/out/endpoints/teams";
 
 export function useMatchTeams(match?: Match | null) {
   return useQuery(["match_teams", match?.id], async () => {
@@ -95,9 +100,24 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
     [matchTeams]
   );
 
+  const onClickTeamDetail = useCallback(
+    async (number: string) => {
+      const team = matchTeams?.find((t) => t.number === number);
+      setTeamDialogTeam(team);
+      setTimeout(() => {
+        setTeamIncidentDialogOpen(true);
+      }, 0);
+    },
+    [matchTeams]
+  );
+
   const { data: incidentsByTeam } = useTeamIncidentsByMatch(match);
 
   const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
+  const [teamIncidentDialogOpen, setTeamIncidentDialogOpen] = useState(false);
+  const [teamDialogTeam, setTeamDialogTeam] = useState<Team | undefined>(
+    undefined
+  );
 
   return (
     <>
@@ -107,6 +127,12 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
         initialMatchId={match?.id}
         initialTeamId={initialTeamId}
         preventSave={isLoadingMatch}
+      />
+      <TeamIncidentsDialog
+        open={Boolean(teamDialogTeam) && teamIncidentDialogOpen}
+        setOpen={setTeamIncidentDialogOpen}
+        team={teamDialogTeam}
+        event={event}
       />
       <Dialog
         open={open}
@@ -154,19 +180,49 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                         [IncidentOutcome.Minor]: "text-yellow-400",
                         [IncidentOutcome.Disabled]: "",
                       };
+                      const teamAlliance = match.alliances.find((alliance) =>
+                        alliance.teams.some((t) => t.team.name === team)
+                      );
+
                       return (
                         <div
-                          className="flex-1 flex items-center flex-col rounded-md"
+                          className={twMerge(
+                            "flex-1 flex items-center flex-col"
+                          )}
                           key={team}
                         >
-                          <Button
-                            className="font-mono text-center bg-emerald-600 mb-2 w-full"
-                            onClick={() => onClickTeam(team)}
+                          <header
+                            className={twMerge(
+                              "rounded-md mb-2 w-full",
+                              teamAlliance?.color === "red" && "bg-red-600",
+                              teamAlliance?.color === "blue" && "bg-blue-600"
+                            )}
                           >
-                            <FlagIcon height={16} className="inline mr-2 " />
-                            <p>{team}</p>
-                          </Button>
-                          <ul className="text-center font-mono italic flex-1">
+                            <p
+                              className={twMerge(
+                                "font-mono text-center mb-2 w-full rounded-t-md",
+                                teamAlliance?.color === "red" &&
+                                  "bg-red-400 border border-red-400",
+                                teamAlliance?.color === "blue" &&
+                                  "bg-blue-400 border border-blue-400"
+                              )}
+                            >
+                              {team}
+                            </p>
+                            <nav className="flex gap-2 m-2 justify-center">
+                              <IconButton
+                                className="bg-transparent p-2"
+                                icon={<FlagIcon height={16} />}
+                                onClick={() => onClickTeam(team)}
+                              />
+                              <IconButton
+                                className="bg-transparent p-2"
+                                icon={<ArrowTopRightOnSquareIcon height={16} />}
+                                onClick={() => onClickTeamDetail(team)}
+                              />
+                            </nav>
+                          </header>
+                          <ul className="text-center font-mono italic flex-1 mb-2">
                             {incidents.length > 0 ? (
                               incidents.map((incident) => {
                                 const match = matches?.find(

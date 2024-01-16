@@ -30,7 +30,10 @@ type EventTeamsTabProps = {
   team: Team | null | undefined;
 };
 
-const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({ event, team }) => {
+export const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({
+  event,
+  team,
+}) => {
   const { data: matches } = useEventMatchesForTeam(event, team);
 
   const [matchId, setMatchId] = useState<number>(0);
@@ -127,7 +130,10 @@ export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
   );
 };
 
-const EventTeamsIncidents: React.FC<EventTeamsTabProps> = ({ team, event }) => {
+export const EventTeamsIncidents: React.FC<EventTeamsTabProps> = ({
+  team,
+  event,
+}) => {
   const { data: incidents, isLoading: isIncidentsLoading } =
     useTeamIncidentsByEvent(team?.number, event?.sku);
 

@@ -2,6 +2,8 @@ import {
   useEventMatches,
   useEventTeams,
   useEventMatchesForTeam,
+  useEventMatch,
+  useTeam,
 } from "~hooks/robotevents";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 import { Select, TextArea } from "~components/Input";
@@ -18,12 +20,11 @@ import {
 import { useNewIncident } from "~hooks/incident";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { DialogMode } from "~components/constants";
-import { Team } from "robotevents/out/endpoints/teams";
-import { Match } from "robotevents/out/endpoints/matches";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { useAddRecentRules, useRecentRules } from "~utils/hooks/history";
 import { twMerge } from "tailwind-merge";
 import { toast } from "~components/Toast";
+import { Spinner } from "~components/Spinner";
 
 type Issue = {
   message: string;
@@ -49,32 +50,23 @@ function getIssues(incident: RichIncident): Issue[] {
     return issues;
   }
 
-  const hasTeam = incident.match?.alliances.some((a) =>
-    a.teams.some((t) => t.team.id === incident.team?.id)
-  );
-
-  if (!hasTeam && incident.match && incident.team) {
-    issues.push({
-      message: "Team not in selected match",
-      type: "error",
-    });
-  }
-
   return issues;
 }
 
 export type EventNewIncidentDialogProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
-  initialTeam?: Team | null;
-  initialMatch?: Match | null;
+  initialTeamId?: number | null;
+  initialMatchId?: number | null;
+  preventSave?: boolean;
 };
 
 export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   open,
   setOpen,
-  initialMatch,
-  initialTeam,
+  initialMatchId,
+  initialTeamId,
+  preventSave,
 }) => {
   const { mutate } = useNewIncident();
 
@@ -88,6 +80,14 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   // Find all teams and matches at the event
   const { data: teams } = useEventTeams(event);
   const { data: matches } = useEventMatches(event, division);
+
+  // Load team and match data
+  const { data: initialTeam, isLoading: isLoadingInitialTeam } =
+    useTeam(initialTeamId);
+  const { data: initialMatch, isLoading: isLoadingInitialMatch } =
+    useEventMatch(event, division, initialMatchId);
+
+  const isLoadingInitial = isLoadingInitialMatch || isLoadingInitialTeam;
 
   // Initialise current team and match
   const [team, setTeam] = useState(initialTeam);
@@ -108,10 +108,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 
   useEffect(() => {
     setIncidentField("team", team);
-    setTeam(team);
-
     setIncidentField("match", match);
-    setMatch(match);
   }, [team, match]);
 
   useEffect(() => {
@@ -125,8 +122,15 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     }
   }, [initialMatch, initialTeam]);
 
-  const issues = useMemo(() => getIssues(incident), [incident]);
+  const issues = getIssues(incident);
+
   const canSave = useMemo(() => {
+    if (preventSave) {
+      return false;
+    }
+    if (isLoadingInitial) {
+      return false;
+    }
     return issues.every((i) => i.type === "warning");
   }, [issues]);
 
@@ -261,6 +265,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     <Dialog open={open} mode={DialogMode.Modal} onClose={() => setOpen(false)}>
       <DialogHeader title="New Report" onClose={() => setOpen(false)} />
       <DialogBody>
+        <Spinner show={isLoadingInitial} />
         {issues.map((issue) =>
           issue.type === "error" ? (
             <Error
@@ -276,7 +281,6 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             />
           )
         )}
-
         <label>
           <p className="mt-4">Match</p>
           <Select
@@ -285,6 +289,9 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             className="max-w-full w-full"
           >
             <option value={-1}>Pick A Match</option>
+            {initialMatch && (
+              <option value={initialMatch.id}>{initialMatch.name}</option>
+            )}
             {team &&
               teamMatches?.map((match) => (
                 <option value={match.id} key={match.id}>
@@ -314,6 +321,9 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             className="max-w-full w-full"
           >
             <option value={-1}>Pick A Team</option>
+            {initialTeam && (
+              <option value={initialTeam.id}>{initialTeam.number}</option>
+            )}
             {match?.alliances.map((alliance) => (
               <optgroup
                 key={alliance.color.toUpperCase()}

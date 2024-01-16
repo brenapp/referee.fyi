@@ -13,11 +13,10 @@ import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
 import { IncidentOutcome } from "~utils/data/incident";
 import { shortMatchName } from "~utils/data/match";
-import { Team } from "robotevents/out/endpoints/teams";
-import * as robotevents from "robotevents";
-import { useQuery } from "react-query";
-import { Match } from "robotevents/out/endpoints/matches";
 import { DialogMode } from "~components/constants";
+import { Match } from "robotevents/out/endpoints/matches";
+import { useQuery } from "react-query";
+import * as robotevents from "robotevents";
 
 export function useMatchTeams(match?: Match | null) {
   return useQuery(["match_teams", match?.id], async () => {
@@ -29,9 +28,7 @@ export function useMatchTeams(match?: Match | null) {
       .map((alliance) => alliance.teams.map((t) => t.team.id))
       .flat();
 
-    return Promise.all(
-      teams.map((id) => robotevents.teams.get(id) as Promise<Team>)
-    );
+    return robotevents.teams.search({ id: teams });
   });
 }
 
@@ -55,11 +52,17 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
   const division = useCurrentDivision(defaultDivision);
 
   const { data: matches } = useEventMatches(event, division);
-  const { data: match } = useEventMatch(event, division, matchId);
+  const { data: match, isLoading: isLoadingMatch } = useEventMatch(
+    event,
+    division,
+    matchId
+  );
 
   const { data: matchTeams } = useMatchTeams(match);
 
-  const [initialTeam, setInitialTeam] = useState<Team | undefined>(undefined);
+  const [initialTeamId, setInitialTeamId] = useState<number | undefined>(
+    undefined
+  );
 
   const prevMatch = useMemo(() => {
     return matches?.find((_, i) => matches[i + 1]?.id === match?.id);
@@ -84,7 +87,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
   const onClickTeam = useCallback(
     async (number: string) => {
       const team = matchTeams?.find((t) => t.number === number);
-      setInitialTeam(team ?? undefined);
+      setInitialTeamId(team?.id ?? undefined);
       setTimeout(() => {
         setIncidentDialogOpen(true);
       }, 0);
@@ -101,8 +104,9 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
       <EventNewIncidentDialog
         open={incidentDialogOpen}
         setOpen={setIncidentDialogOpen}
-        initialMatch={match}
-        initialTeam={initialTeam}
+        initialMatchId={match?.id}
+        initialTeamId={initialTeamId}
+        preventSave={isLoadingMatch}
       />
       <Dialog
         open={open}
@@ -151,7 +155,10 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                         [IncidentOutcome.Disabled]: "",
                       };
                       return (
-                        <div className="flex-1 flex items-center flex-col rounded-md">
+                        <div
+                          className="flex-1 flex items-center flex-col rounded-md"
+                          key={team}
+                        >
                           <Button
                             className="font-mono text-center bg-emerald-600 mb-2 w-full"
                             onClick={() => onClickTeam(team)}
@@ -170,6 +177,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                                     {incident.rules.length > 0 ? (
                                       incident.rules.map((r) => (
                                         <li
+                                          key={r}
                                           className={twMerge(
                                             outcomeColors[incident.outcome]
                                           )}

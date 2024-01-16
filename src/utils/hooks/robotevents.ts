@@ -50,6 +50,22 @@ export function useEventTeams(
   }, { staleTime: 1000 * 60 });
 }
 
+
+export function useMatchTeams(match?: Match | null) {
+  return useQuery(["match_teams", match?.id], async () => {
+    if (!match) {
+      return null;
+    }
+
+    const teams = match.alliances
+      .map((alliance) => alliance.teams.map((t) => t.team.id))
+      .flat();
+
+    return robotevents.teams.search({ id: teams });
+  });
+}
+
+
 export function logicalMatchComparison(a: Match, b: Match) {
   const roundOrder = [
     Round.Practice,

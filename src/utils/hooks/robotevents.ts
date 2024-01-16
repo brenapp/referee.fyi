@@ -33,7 +33,7 @@ export function useTeam(
     }
 
     return await robotevents.teams.get(numberOrID, program);
-  }, { staleTime: 1000 * 60 * 60 });
+  }, { staleTime: 1000 * 60 * 60 * 60 });
 }
 
 export function useEventTeams(
@@ -47,7 +47,7 @@ export function useEventTeams(
 
     const teams = await event.teams({ registered: true, ...options });
     return teams.array();
-  });
+  }, { staleTime: 1000 * 60 });
 }
 
 export function logicalMatchComparison(a: Match, b: Match) {
@@ -82,7 +82,7 @@ export function useEventMatches(
     const matches = await event.matches(division);
 
     return matches.array().sort(logicalMatchComparison);
-  });
+  }, { staleTime: 1000 * 30 });
 }
 
 export function useEventMatchesForTeam(
@@ -103,7 +103,7 @@ export function useEventMatchesForTeam(
     }
 
     return matches.sort(logicalMatchComparison);
-  });
+  }, { staleTime: 1000 * 30 });
 }
 
 export function useEventMatch(
@@ -119,7 +119,7 @@ export function useEventMatch(
 
     const matchArray = matches.data ?? [];
     return matchArray.find((m) => m.id === match) ?? null;
-  });
+  }, { staleTime: 1000 * 30 });
 }
 
 export function useEventsToday(): UseQueryResult<robotevents.events.Event[]> {
@@ -143,5 +143,5 @@ export function useEventsToday(): UseQueryResult<robotevents.events.Event[]> {
 
     return events
       .sort((a, b) => a.name.localeCompare(b.name));
-  });
+  }, { staleTime: 1000 * 60 * 60 });
 }

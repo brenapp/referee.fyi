@@ -9,21 +9,17 @@ import { Spinner } from "~components/Spinner";
 import { useCallback, useMemo, useState } from "react";
 import { useCurrentEvent } from "~hooks/state";
 import { useTeamIncidentsByEvent } from "~hooks/incident";
-import {
-  IncidentOutcome,
-  IncidentWithID,
-  deleteIncident,
-} from "~utils/data/incident";
+import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
 import { twMerge } from "tailwind-merge";
 import { Tabs } from "~components/Tabs";
 import { Event } from "robotevents/out/endpoints/events";
 import { Team } from "robotevents/out/endpoints/teams";
 import { ClickableMatch } from "~components/ClickableMatch";
 import { IconButton } from "~components/Button";
-import { TrashIcon } from "@heroicons/react/24/outline";
-import { queryClient } from "~utils/data/query";
 import { EventMatchDialog } from "./dialogs/match";
 import { Match } from "robotevents/out/endpoints/matches";
+import { PencilSquareIcon } from "@heroicons/react/20/solid";
+import { EditIncidentDialog } from "./dialogs/edit";
 
 type EventTeamsTabProps = {
   event: Event | null | undefined;
@@ -88,45 +84,47 @@ export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
     incident.match
   );
 
-  const onRemove = useCallback(async () => {
-    await deleteIncident(incident.id);
-    queryClient.invalidateQueries({
-      queryKey: ["incidents"],
-    });
-  }, []);
+  const [editOpen, setEditOpen] = useState(false);
 
   return (
-    <div
-      {...props}
-      className={twMerge(
-        IncidentOutcomeClasses[incident.outcome],
-        "px-4 py-2 rounded-md mt-2 flex",
-        props.className
-      )}
-    >
-      <div className="flex-1">
-        <p className="text-sm">
-          {[
-            incident.team,
-            match?.name ?? "Event-Wide",
-            IncidentOutcome[incident.outcome],
-          ].join(" • ")}
-        </p>
-        <p>{incident.notes}</p>
-        <ul>
-          {incident.rules.map((r) => (
-            <li key={r} className="text-sm font-mono">
-              {r}
-            </li>
-          ))}
-        </ul>
+    <>
+      <EditIncidentDialog
+        open={editOpen}
+        setOpen={setEditOpen}
+        incident={incident}
+      />
+      <div
+        {...props}
+        className={twMerge(
+          IncidentOutcomeClasses[incident.outcome],
+          "px-4 py-2 rounded-md mt-2 flex",
+          props.className
+        )}
+      >
+        <div className="flex-1">
+          <p className="text-sm">
+            {[
+              incident.team,
+              match?.name ?? "Event-Wide",
+              IncidentOutcome[incident.outcome],
+            ].join(" • ")}
+          </p>
+          <p>{incident.notes}</p>
+          <ul>
+            {incident.rules.map((r) => (
+              <li key={r} className="text-sm font-mono">
+                {r}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <IconButton
+          className="bg-transparent text-inherit"
+          onClick={() => setEditOpen(true)}
+          icon={<PencilSquareIcon height={20} />}
+        ></IconButton>
       </div>
-      <IconButton
-        className="bg-transparent text-inherit"
-        onClick={onRemove}
-        icon={<TrashIcon height={20} />}
-      ></IconButton>
-    </div>
+    </>
   );
 };
 
@@ -141,7 +139,7 @@ export const EventTeamsIncidents: React.FC<EventTeamsTabProps> = ({
   } = useTeamIncidentsByEvent(team?.number, event?.sku);
 
   if (isSuccess && incidents.length < 1) {
-    return <p>This team does not have any incidents for this event.</p>;
+    return <p>No Recorded Entries!</p>;
   }
 
   return (

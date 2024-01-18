@@ -1,4 +1,4 @@
-import { IRequest, Router } from "itty-router";
+import { IRequest, Router, createCors, error, json } from "itty-router";
 import { response } from "./utils";
 import { CreateShareResponse } from "../types/api";
 import { EventIncidents } from "../types/EventIncidents";
@@ -8,9 +8,15 @@ interface Env {
     INCIDENTS: DurableObjectNamespace
 }
 
+export const { preflight, corsify } = createCors({
+    origins: ["*"],
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"]
+});
+
 const router = Router<IRequest, [Env]>();
 
 router
+    .all("*", preflight)
     .post("/api/create/:sku", async (request, env: Env) => {
         const sku = request.params.sku;
 
@@ -80,8 +86,8 @@ router
     }))
 
 export default {
-    fetch(request: Request, env: Env): Promise<Response> {
-        return router.handle(request, env)
+    async fetch(request: Request, env: Env): Promise<Response> {
+        return router.handle(request, env).then(json).catch(error).then(corsify);
     }
 }
 

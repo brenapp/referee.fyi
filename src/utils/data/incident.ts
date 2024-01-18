@@ -3,6 +3,7 @@ import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
 import { Match } from "robotevents/out/endpoints/matches";
 import { Team } from "robotevents/out/endpoints/teams";
+import { addServerIncident, deleteServerIncident } from "./share";
 
 export enum IncidentOutcome {
   Minor,
@@ -128,13 +129,8 @@ export async function newIncident(incident: Incident, updateRemote: boolean = tr
   const all = (await get<string[]>("incidents")) ?? [];
   await set("incidents", [...all, id]);
 
-  // If sharing is enabled, then submit
-  const code = await get<string>(`share_${incident.event}`);
-  if (code && updateRemote) {
-    await fetch(`/share/add?code=${code}&sku=${incident.event}`, {
-      method: "PUT",
-      body: JSON.stringify({ incident: { id, ...incident } }),
-    });
+  if (updateRemote) {
+    await addServerIncident({ ...incident, id });
   }
 
   return id;
@@ -167,13 +163,10 @@ export async function deleteIncident(id: string, updateRemote: boolean = true): 
   const all = await get<string[]>("incidents");
   await set("incidents", all?.filter((i) => i !== id) ?? []);
 
-  // If sharing is enabled, then submit
-  const code = await get<string>(`share_${incident.event}`);
-  if (code && updateRemote) {
-    await fetch(`/share/delete?code=${code}&sku=${incident.event}&id=${id}`, {
-      method: "DELETE",
-    });
+  if (updateRemote) {
+    await deleteServerIncident(id, incident.event);
   }
+
 }
 
 export async function getAllIncidents(): Promise<IncidentWithID[]> {

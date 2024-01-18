@@ -1,25 +1,60 @@
 import { get, set } from "idb-keyval";
-import type { ShareResponse, CreateShareResponse, EventIncidents, ShareUser, WebSocketPayload, WebSocketMessage, WebSocketPeerMessage } from "~share/api";
-import { deleteIncident, getIncidentsByEvent, hasIncident, newIncident, setIncident } from "./incident";
+import type {
+  ShareResponse,
+  CreateShareResponse,
+  EventIncidents,
+  ShareUser,
+  WebSocketPayload,
+  WebSocketMessage,
+  WebSocketPeerMessage,
+} from "~share/api";
+import {
+  IncidentWithID,
+  deleteIncident,
+  getIncidentsByEvent,
+  hasIncident,
+  newIncident,
+  setIncident,
+} from "./incident";
 import { toast } from "~components/Toast";
+import { queryClient } from "./query";
 
 const URL_BASE = import.meta.env.DEV ? "http://localhost:8787" : "";
 
-export async function createShare(incidents: EventIncidents): Promise<ShareResponse<CreateShareResponse>> {
+export async function createShare(
+  incidents: EventIncidents
+): Promise<ShareResponse<CreateShareResponse>> {
   try {
-    const response = await fetch(new URL(`/api/share/${incidents.sku}`, URL_BASE), {
-      method: "POST",
-      body: JSON.stringify(incidents)
-    });
-    return response.json();
+    const response = await fetch(
+      new URL(`/api/create/${incidents.sku}`, URL_BASE),
+      {
+        method: "POST",
+        body: JSON.stringify(incidents),
+      }
+    );
+
+    if (!response.ok) {
+      return response.json();
+    }
+
+    const body = await response.json() as ShareResponse<CreateShareResponse>;
+
+    if (!body.success) {
+      return body;
+    };
+
+    await set(`share_${incidents.sku}`, body.data.code);
+    queryClient.invalidateQueries(["share_code"]);
+
+    return body;
   } catch (e) {
     return {
       success: false,
       reason: "bad_request",
-      details: `${e}`
-    }
-  };
-};
+      details: `${e}`,
+    };
+  }
+}
 
 export async function canJoinShare(sku: string, code: string) {
   const url = new URL(`/api/share/${sku}/${code}/get`, URL_BASE);
@@ -33,21 +68,82 @@ export async function canJoinShare(sku: string, code: string) {
   } catch (e) {
     return false;
   }
-};
+}
 
+export async function addServerIncident(incident: IncidentWithID) {
+  const code = await get<string>(`share_${incident.event}`);
+  const userId = await ShareConnection.getUserId();
+
+  if (!code) {
+    return;
+  }
+
+  const url = new URL(
+    `/api/share/${incident.event}/${code}/incident`,
+    URL_BASE
+  );
+
+  url.searchParams.set("user_id", userId);
+
+  return fetch(url, {
+    method: "PUT",
+    body: JSON.stringify(incident),
+  });
+}
+
+export async function editServerIncident(incident: IncidentWithID) {
+  const code = await get<string>(`share_${incident.event}`);
+  const userId = await ShareConnection.getUserId();
+
+  if (!code) {
+    return;
+  }
+
+  const url = new URL(
+    `/api/share/${incident.event}/${code}/incident`,
+    URL_BASE
+  );
+
+  url.searchParams.set("user_id", userId);
+
+  return fetch(url, {
+    method: "PATCH",
+    body: JSON.stringify(incident),
+  });
+}
+
+export async function deleteServerIncident(id: string, sku: string) {
+  const code = await get<string>(`share_${sku}`);
+  const userId = await ShareConnection.getUserId();
+
+  if (!code) {
+    return;
+  }
+
+  const url = new URL(`/api/share/${sku}/${code}/incident`, URL_BASE);
+  url.searchParams.set("id", id);
+  url.searchParams.set("user_id", userId);
+  return fetch(url, {
+    method: "DELETE",
+  });
+}
 
 export class ShareConnection {
   ws: WebSocket | null = null;
 
-  sku: string;
-  code: string;
+  sku: string = "";
+  code: string = "";
 
   user: ShareUser | null = null;
   owner: string | null = null;
 
-  constructor(sku: string, code: string) {
+  public setup(sku: string, code: string, user: Omit<ShareUser, "id">) {
+    this.cleanup();
+
     this.sku = sku;
     this.code = code;
+
+    return this.connect(user);
   }
 
   public static async getUserId() {
@@ -61,7 +157,7 @@ export class ShareConnection {
     await set("user_id", newCode);
 
     return newCode;
-  };
+  }
 
   async connect(user: Omit<ShareUser, "id">) {
     const id = await ShareConnection.getUserId();
@@ -69,28 +165,33 @@ export class ShareConnection {
 
     const url = new URL(`/api/share/${this.sku}/${this.code}/join`, URL_BASE);
 
+    url.protocol = "ws";
     url.searchParams.set("id", id);
     url.searchParams.set("name", this.user.name);
 
     this.ws = new WebSocket(url);
     this.ws.onmessage = this.handleMessage.bind(this);
-  };
+  }
 
   async send(message: WebSocketPeerMessage) {
-    const payload: WebSocketPayload<WebSocketPeerMessage> = { ...message, sender: { type: "client", name: this.user?.name ?? "" }, date: new Date().toISOString() };
+    const payload: WebSocketPayload<WebSocketPeerMessage> = {
+      ...message,
+      sender: { type: "client", name: this.user?.name ?? "" },
+      date: new Date().toISOString(),
+    };
     this.ws?.send(JSON.stringify(payload));
-  };
+  }
 
   private async handleMessage(event: MessageEvent) {
     try {
-      const data = JSON.parse(event.data) as WebSocketPayload<WebSocketMessage>
+      const data = JSON.parse(event.data) as WebSocketPayload<WebSocketMessage>;
       switch (data.type) {
         case "add_incident": {
-          await newIncident(data.incident, false, data.incident.id)
+          await newIncident(data.incident, false, data.incident.id);
           break;
         }
         case "update_incident": {
-          await setIncident(data.incident.id, data.incident)
+          await setIncident(data.incident.id, data.incident);
           break;
         }
         case "remove_incident": {
@@ -99,23 +200,25 @@ export class ShareConnection {
         }
 
         // Sent when you first join, and also when owner changes. We definitely don't want to
-        // *delete* incidents the user creates before joining the share. 
+        // *delete* incidents the user creates before joining the share.
         case "server_share_info": {
           this.owner = data.data.owner;
 
           for (const incident of data.data.incidents) {
             const has = await hasIncident(incident.id);
             if (!has) {
-              await newIncident(incident, false, incident.id)
+              await newIncident(incident, false, incident.id);
             }
           }
 
           const eventIncidents = await getIncidentsByEvent(this.sku);
-          const localOnly = eventIncidents.filter(local => data.data.incidents.every(remote => local.id !== remote.id));
+          const localOnly = eventIncidents.filter((local) =>
+            data.data.incidents.every((remote) => local.id !== remote.id)
+          );
 
           for (const incident of localOnly) {
             await this.send({ type: "add_incident", incident });
-          };
+          }
 
           break;
         }
@@ -129,17 +232,16 @@ export class ShareConnection {
           break;
         }
         case "message": {
-          const sender = data.sender.type === "server" ? "Server" : data.sender.name;
-          toast({ type: "info", message: `${sender}: ${data.message}` })
+          const sender =
+            data.sender.type === "server" ? "Server" : data.sender.name;
+          toast({ type: "info", message: `${sender}: ${data.message}` });
           break;
         }
       }
-    } catch (e) {
-
-    }
+    } catch (e) { }
   }
 
   public cleanup() {
     this.ws?.close();
-  };
-};
+  }
+}

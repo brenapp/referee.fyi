@@ -22,7 +22,7 @@ import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { useAddEventVisited } from "~utils/hooks/history";
 import {
-  EventWebsocket,
+  ShareProvider,
   useCreateShare,
   useShareCode,
   useShareName,
@@ -193,6 +193,9 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
   const { data: shareName, setName } = useShareName();
   const shareNameId = useId();
 
+  const { data: shareCode } = useShareCode(event.sku);
+  const isSharing = !!shareCode;
+
   const { mutate: beginSharing } = useCreateShare();
   const onClickShare = useCallback(async () => {
     const shareId = await ShareConnection.getUserId();
@@ -220,22 +223,28 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
       <section>
         <section className="mt-4">
           <h2 className="font-bold">Share Event Data</h2>
-          <label htmlFor={shareNameId}>
-            <p>Name</p>
-            <Input
-              id={shareNameId}
-              required
-              value={shareName}
-              onChange={(e) => setName(e.currentTarget.value)}
-            />
-          </label>
-          <Button
-            className="w-full mt-4 bg-emerald-400 disabled:bg-zinc-400"
-            disabled={!shareName}
-            onClick={onClickShare}
-          >
-            Begin Sharing
-          </Button>
+          {isSharing ? (
+            <p>Share Code: {shareCode}</p>
+          ) : (
+            <>
+              <label htmlFor={shareNameId}>
+                <p>Name</p>
+                <Input
+                  id={shareNameId}
+                  required
+                  value={shareName}
+                  onChange={(e) => setName(e.currentTarget.value)}
+                />
+              </label>
+              <Button
+                className="w-full mt-4 bg-emerald-400 disabled:bg-zinc-400"
+                disabled={!shareName}
+                onClick={onClickShare}
+              >
+                Begin Sharing
+              </Button>
+            </>
+          )}
         </section>
         <section className="mt-4 relative">
           <h2 className="font-bold">Delete Event Data</h2>
@@ -283,27 +292,6 @@ export const EventPage: React.FC = () => {
   const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
   const { mutateAsync: addEvent, isSuccess } = useAddEventVisited();
 
-  const { data: shareCode } = useShareCode(event?.sku);
-  const { data: shareName } = useShareName();
-
-  const [websocket, setWebsocket] = useState<ShareConnection | null>(null);
-
-  // Manage Share Connection for the current event
-  useEffect(() => {
-    if (!event?.sku || !shareCode) {
-      return;
-    }
-
-    const socket = new ShareConnection(event.sku, shareCode);
-    socket.connect({ name: shareName ?? "" }).then(() => {
-      setWebsocket(socket);
-    });
-
-    return () => {
-      websocket?.cleanup();
-    };
-  }, [shareCode, event?.sku]);
-
   useEffect(() => {
     if (event && !isSuccess) {
       addEvent(event);
@@ -311,7 +299,7 @@ export const EventPage: React.FC = () => {
   }, [event, isSuccess]);
 
   return event ? (
-    <EventWebsocket.Provider value={websocket}>
+    <ShareProvider>
       <section className="mt-4 flex flex-col">
         <Button
           onClick={() => setIncidentDialogOpen(true)}
@@ -332,6 +320,6 @@ export const EventPage: React.FC = () => {
           }}
         </Tabs>
       </section>
-    </EventWebsocket.Provider>
+    </ShareProvider>
   ) : null;
 };

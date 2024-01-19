@@ -42,10 +42,12 @@ export type JoinShareOptions = {
 
 export async function joinShare({ sku, code }: JoinShareOptions) {
   await set(`share_${sku}`, code);
+  queryClient.invalidateQueries(["share_code"]);
 };
 
 export async function leaveShare(sku: string) {
   await del(`share_${sku}`);
+  queryClient.invalidateQueries(["share_code"]);
 };
 
 
@@ -151,6 +153,11 @@ export class ShareConnection {
   owner: string | null = null;
 
   public setup(sku: string, code: string, user: Omit<ShareUser, "id">) {
+
+    if (this.sku === sku && this.code === code) {
+      return;
+    }
+
     this.cleanup();
 
     this.sku = sku;

@@ -7,6 +7,7 @@ import type {
   WebSocketPayload,
   WebSocketMessage,
   WebSocketPeerMessage,
+  WebSocketServerShareInfoMessage,
 } from "~share/api";
 import {
   IncidentWithID,
@@ -20,6 +21,29 @@ import { toast } from "~components/Toast";
 import { queryClient } from "./query";
 
 const URL_BASE = import.meta.env.DEV ? "http://localhost:8787" : "";
+
+export async function getShareData(sku: string, code: string) {
+  const response = await fetch(
+    new URL(`/api/share/${sku}/${code}/get`, URL_BASE)
+  );
+
+  if (!response.ok) {
+    return null;
+  }
+
+  return response.json() as Promise<ShareResponse<WebSocketServerShareInfoMessage>>;
+
+};
+
+export type JoinShareOptions = {
+  sku: string;
+  code: string
+};
+
+export async function joinShare({ sku, code }: JoinShareOptions) {
+  await set(`share_${sku}`, code);
+};
+
 
 export async function createShare(
   incidents: EventIncidents
@@ -56,19 +80,6 @@ export async function createShare(
   }
 }
 
-export async function canJoinShare(sku: string, code: string) {
-  const url = new URL(`/api/share/${sku}/${code}/get`, URL_BASE);
-  try {
-    const resp = await fetch(url);
-    if (resp.ok) {
-      return true;
-    } else {
-      return false;
-    }
-  } catch (e) {
-    return false;
-  }
-}
 
 export async function addServerIncident(incident: IncidentWithID) {
   const code = await get<string>(`share_${incident.event}`);

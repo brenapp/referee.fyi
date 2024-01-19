@@ -1,10 +1,14 @@
 import { get, set } from "idb-keyval";
 import { PropsWithChildren, createContext, useContext, useEffect } from "react";
-import { useMutation, useQuery } from "react-query";
+import { UseQueryOptions, useMutation, useQuery } from "react-query";
 import { EventIncidents } from "~share/EventIncidents";
-import { CreateShareResponse, ShareResponse } from "~share/api";
+import {
+  CreateShareResponse,
+  ShareResponse,
+  WebSocketServerShareInfoMessage,
+} from "~share/api";
 import { queryClient } from "~utils/data/query";
-import { ShareConnection, createShare } from "~utils/data/share";
+import { ShareConnection, createShare, getShareData } from "~utils/data/share";
 import { useCurrentEvent } from "./state";
 
 const connection = new ShareConnection();
@@ -61,4 +65,24 @@ export function useShareCode(sku: string | null | undefined) {
     }
     return get<string>(`share_${sku}`);
   });
+}
+
+export function useShareData(
+  sku: string | null | undefined,
+  code: string | null | undefined,
+  options?: Omit<
+    UseQueryOptions<ShareResponse<WebSocketServerShareInfoMessage> | null>,
+    "queryKey" | "queryFn"
+  >
+) {
+  return useQuery(
+    ["share_data", sku, code],
+    async () => {
+      if (!sku || !code) {
+        return null;
+      }
+      return getShareData(sku, code);
+    },
+    options
+  );
 }

@@ -20,11 +20,11 @@ import {
 import { toast } from "~components/Toast";
 import { queryClient } from "./query";
 
-const URL_BASE = import.meta.env.DEV ? "http://localhost:8787" : "";
+const URL_BASE = import.meta.env.DEV ? "http://localhost:8787" : "https://referee-fyi-share.bren.workers.dev";
 
 export async function getShareData(sku: string, code: string) {
   const response = await fetch(
-    new URL(`/api/share/${sku}/${code}/get`, URL_BASE)
+    new URL(`/api/share/${sku}/${code}/get`)
   );
 
   if (!response.ok) {
@@ -54,7 +54,7 @@ export async function createShare(
 ): Promise<ShareResponse<CreateShareResponse>> {
   try {
     const response = await fetch(
-      new URL(`/api/create/${incidents.sku}`, URL_BASE),
+      new URL(`/api/create/${incidents.sku}`),
       {
         method: "POST",
         body: JSON.stringify(incidents),
@@ -94,8 +94,7 @@ export async function addServerIncident(incident: IncidentWithID) {
   }
 
   const url = new URL(
-    `/api/share/${incident.event}/${code}/incident`,
-    URL_BASE
+    `/api/share/${incident.event}/${code}/incident`
   );
 
   url.searchParams.set("user_id", userId);
@@ -115,8 +114,7 @@ export async function editServerIncident(incident: IncidentWithID) {
   }
 
   const url = new URL(
-    `/api/share/${incident.event}/${code}/incident`,
-    URL_BASE
+    `/api/share/${incident.event}/${code}/incident`
   );
 
   url.searchParams.set("user_id", userId);
@@ -135,7 +133,7 @@ export async function deleteServerIncident(id: string, sku: string) {
     return;
   }
 
-  const url = new URL(`/api/share/${sku}/${code}/incident`, URL_BASE);
+  const url = new URL(`/api/share/${sku}/${code}/incident`);
   url.searchParams.set("id", id);
   url.searchParams.set("user_id", userId);
   return fetch(url, {
@@ -178,7 +176,7 @@ export class ShareConnection {
     const id = await ShareConnection.getUserId();
     this.user = { id, ...user };
 
-    const url = new URL(`/api/share/${this.sku}/${this.code}/join`, URL_BASE);
+    const url = new URL(`/api/share/${this.sku}/${this.code}/join`);
 
     url.protocol = "ws";
     url.searchParams.set("id", id);

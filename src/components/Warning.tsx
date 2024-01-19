@@ -1,5 +1,27 @@
-import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
+import {
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+} from "@heroicons/react/20/solid";
 import { twMerge } from "tailwind-merge";
+
+export type SuccessProps = {
+  message: string;
+} & React.HTMLProps<HTMLDivElement>;
+
+export const Success: React.FC<SuccessProps> = ({ message, ...props }) => {
+  return (
+    <p
+      {...props}
+      className={twMerge(
+        "bg-emerald-300 text-emerald-950 p-2 rounded-md flex items-center gap-2",
+        props.className
+      )}
+    >
+      <CheckCircleIcon height={20} />
+      {message}
+    </p>
+  );
+};
 
 export type InfoProps = {
   message: string;

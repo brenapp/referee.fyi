@@ -3,7 +3,7 @@ import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
 import { Match } from "robotevents/out/endpoints/matches";
 import { Team } from "robotevents/out/endpoints/teams";
-import { ShareGetResponseData, ShareResponse } from "./share";
+import { addServerIncident, deleteServerIncident } from "./share";
 
 export enum IncidentOutcome {
   Minor,
@@ -129,13 +129,8 @@ export async function newIncident(incident: Incident, updateRemote: boolean = tr
   const all = (await get<string[]>("incidents")) ?? [];
   await set("incidents", [...all, id]);
 
-  // If sharing is enabled, then submit
-  const code = await get<string>(`share_${incident.event}`);
-  if (code && updateRemote) {
-    await fetch(`/share/add?code=${code}&sku=${incident.event}`, {
-      method: "PUT",
-      body: JSON.stringify({ incident: { id, ...incident } }),
-    });
+  if (updateRemote) {
+    await addServerIncident({ ...incident, id });
   }
 
   return id;
@@ -168,43 +163,10 @@ export async function deleteIncident(id: string, updateRemote: boolean = true): 
   const all = await get<string[]>("incidents");
   await set("incidents", all?.filter((i) => i !== id) ?? []);
 
-  // If sharing is enabled, then submit
-  const code = await get<string>(`share_${incident.event}`);
-  if (code && updateRemote) {
-    await fetch(`/share/delete?code=${code}&sku=${incident.event}&id=${id}`, {
-      method: "DELETE",
-    });
-  }
-}
-
-export async function updateFromRemote(sku: string) {
-  const code = await get<string>(`share_${sku}`);
-  if (!code) return;
-
-  const resp = await fetch(`/share/get?sku=${sku}&code=${code}`);
-  if (!resp.ok) return;
-
-  const data = await resp.json() as ShareResponse<ShareGetResponseData>;
-  const incidents = new Set<string>();
-
-  if (!data.success) { return; }
-
-  // Update incident
-  for (const { id, ...incident } of data.data.incidents) {
-    const exists = await hasIncident(id);
-    incidents.add(id);
-    if (!exists) {
-      await newIncident(incident, false, id);
-    }
+  if (updateRemote) {
+    await deleteServerIncident(id, incident.event);
   }
 
-  const eventsIndex = (await get<IncidentIndex>("event_idx"));
-  const list = eventsIndex?.[sku] ?? [];
-
-  for (const id of list) {
-    if (incidents.has(id)) { continue };
-    await deleteIncident(id, false);
-  }
 }
 
 export async function getAllIncidents(): Promise<IncidentWithID[]> {

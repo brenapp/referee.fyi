@@ -4,7 +4,12 @@ import { Spinner } from "~components/Spinner";
 import { Tabs } from "~components/Tabs";
 import { Event } from "robotevents/out/endpoints/events";
 import { Button, LinkButton } from "~components/Button";
-import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
+import {
+  ExclamationTriangleIcon,
+  FlagIcon,
+  KeyIcon,
+  UserCircleIcon,
+} from "@heroicons/react/20/solid";
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
 import { useEventIncidents } from "~hooks/incident";
 import { useCallback, useEffect, useId, useMemo, useState } from "react";
@@ -27,7 +32,6 @@ import {
   useShareCode,
   useShareData,
   useShareName,
-  useShareUserId,
 } from "~utils/hooks/share";
 import { Input } from "~components/Input";
 import { ShareConnection, leaveShare } from "~utils/data/share";
@@ -192,7 +196,6 @@ const EventMatchesTab: React.FC<MainTabProps> = ({ event }) => {
 const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
   const [deleteDataDialogOpen, setDeleteDataDialogOpen] = useState(false);
 
-  const { data: shareUserId } = useShareUserId();
   const { data: shareName, setName } = useShareName();
   const shareNameId = useId();
 
@@ -201,11 +204,11 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
 
   const { data: shareData } = useShareData(event.sku, shareCode);
   const isOwner = useMemo(() => {
-    if (!shareData || !shareNameId || !shareData.success) {
+    if (!shareData || !shareData.success) {
       return false;
     }
-    return shareData.data.data.owner === shareNameId;
-  }, [shareData, shareUserId]);
+    return shareData.data.data.owner === shareName;
+  }, [shareData]);
 
   const { mutate: beginSharing } = useCreateShare();
   const onClickShare = useCallback(async () => {
@@ -253,12 +256,13 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
         <section className="mt-4">
           <h2 className="font-bold">Share Event Data</h2>
 
-          {isSharing ? (
+          {isSharing && shareData?.success ? (
             <section>
               <p>
                 Use this share code to give read and write access to other
                 devices. Treat this code with caution!
               </p>
+              <p className="mt-4">Share Name: {shareName}</p>
               <Button
                 className="w-full font-mono text-5xl mt-4 text-center"
                 onClick={onClickShareCode}
@@ -271,6 +275,26 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
               >
                 {isOwner ? "Stop Sharing" : "Leave Share"}
               </Button>
+              <nav className="flex gap-2 justify-evenly mt-4">
+                <p className="text-lg">
+                  <KeyIcon height={20} className="inline mr-2" />
+                  <span className="text-zinc-400">
+                    {shareData.data.data.owner}
+                  </span>
+                </p>
+                <p className="text-lg">
+                  <FlagIcon height={20} className="inline mr-2" />
+                  <span className="text-zinc-400">
+                    {shareData.data.data.incidents.length} entries
+                  </span>
+                </p>
+                <p className="text-lg">
+                  <UserCircleIcon height={20} className="inline mr-2" />
+                  <span className="text-zinc-400">
+                    {shareData.data.users.length} active
+                  </span>
+                </p>
+              </nav>
             </section>
           ) : (
             <div className="mt-2">

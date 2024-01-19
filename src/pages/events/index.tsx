@@ -3,7 +3,7 @@ import { useEventMatches, useEventTeams } from "~hooks/robotevents";
 import { Spinner } from "~components/Spinner";
 import { Tabs } from "~components/Tabs";
 import { Event } from "robotevents/out/endpoints/events";
-import { Button } from "~components/Button";
+import { Button, LinkButton } from "~components/Button";
 import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
 import { useEventIncidents } from "~hooks/incident";
@@ -25,10 +25,12 @@ import {
   ShareProvider,
   useCreateShare,
   useShareCode,
+  useShareData,
   useShareName,
+  useShareUserId,
 } from "~utils/hooks/share";
 import { Input } from "~components/Input";
-import { ShareConnection } from "~utils/data/share";
+import { ShareConnection, leaveShare } from "~utils/data/share";
 import { toast } from "~components/Toast";
 
 export type MainTabProps = {
@@ -190,11 +192,20 @@ const EventMatchesTab: React.FC<MainTabProps> = ({ event }) => {
 const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
   const [deleteDataDialogOpen, setDeleteDataDialogOpen] = useState(false);
 
+  const { data: shareUserId } = useShareUserId();
   const { data: shareName, setName } = useShareName();
   const shareNameId = useId();
 
   const { data: shareCode } = useShareCode(event.sku);
   const isSharing = !!shareCode;
+
+  const { data: shareData } = useShareData(event.sku, shareCode);
+  const isOwner = useMemo(() => {
+    if (!shareData || !shareNameId || !shareData.success) {
+      return false;
+    }
+    return shareData.data.data.owner === shareNameId;
+  }, [shareData, shareUserId]);
 
   const { mutate: beginSharing } = useCreateShare();
   const onClickShare = useCallback(async () => {
@@ -210,8 +221,26 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
     toast({ type: "info", message: "Sharing Enabled" });
   }, [beginSharing]);
 
+  const onClickShareCode = useCallback(async () => {
+    const url = new URL(`/${event.sku}/join?code=${shareCode}`, location.href);
+    const shareData = {
+      url: url.href,
+    };
+
+    if (navigator.share && navigator.canShare(shareData)) {
+      navigator.share(shareData);
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(url.href);
+    }
+  }, [shareCode]);
+
+  const onClickStopSharing = useCallback(async () => {
+    await leaveShare(event.sku);
+  }, [event.sku]);
+
   const onConfirmDeleteData = useCallback(async () => {
     const incidents = await getIncidentsByEvent(event.sku);
+    await leaveShare(event.sku);
     for (const incident of incidents) {
       await deleteIncident(incident.id);
     }
@@ -223,27 +252,52 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
       <section>
         <section className="mt-4">
           <h2 className="font-bold">Share Event Data</h2>
+
           {isSharing ? (
-            <p>Share Code: {shareCode}</p>
+            <section>
+              <p>
+                Use this share code to give read and write access to other
+                devices. Treat this code with caution!
+              </p>
+              <Button
+                className="w-full font-mono text-5xl mt-4 text-center"
+                onClick={onClickShareCode}
+              >
+                {shareCode}
+              </Button>
+              <Button
+                className="w-full mt-4 bg-red-500 text-center"
+                onClick={onClickStopSharing}
+              >
+                {isOwner ? "Stop Sharing" : "Leave Share"}
+              </Button>
+            </section>
           ) : (
-            <>
+            <div className="mt-2">
               <label htmlFor={shareNameId}>
-                <p>Name</p>
+                <p>Your Name</p>
                 <Input
                   id={shareNameId}
                   required
                   value={shareName}
                   onChange={(e) => setName(e.currentTarget.value)}
+                  className="w-full"
                 />
               </label>
               <Button
-                className="w-full mt-4 bg-emerald-400 disabled:bg-zinc-400"
+                className="w-full mt-4 bg-emerald-400 disabled:bg-zinc-400 text-center"
                 disabled={!shareName}
                 onClick={onClickShare}
               >
                 Begin Sharing
               </Button>
-            </>
+              <LinkButton
+                to={`/${event.sku}/join`}
+                className="mt-4 w-full text-center"
+              >
+                Join Share
+              </LinkButton>
+            </div>
           )}
         </section>
         <section className="mt-4 relative">

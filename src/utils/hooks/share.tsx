@@ -86,3 +86,7 @@ export function useShareData(
     options
   );
 }
+
+export function useShareUserId() {
+  return useQuery("share_user_id", async () => ShareConnection.getUserId());
+}

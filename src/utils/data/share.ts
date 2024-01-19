@@ -1,4 +1,4 @@
-import { get, set } from "idb-keyval";
+import { del, get, set } from "idb-keyval";
 import type {
   ShareResponse,
   CreateShareResponse,
@@ -42,6 +42,10 @@ export type JoinShareOptions = {
 
 export async function joinShare({ sku, code }: JoinShareOptions) {
   await set(`share_${sku}`, code);
+};
+
+export async function leaveShare(sku: string) {
+  await del(`share_${sku}`);
 };
 
 

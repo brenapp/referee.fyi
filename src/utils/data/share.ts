@@ -178,10 +178,10 @@ export class ShareConnection {
 
     const url = new URL(`/api/share/${this.sku}/${this.code}/join`, URL_BASE);
 
-    if (url.protocol === "https") {
-      url.protocol = "wss";
+    if (url.protocol === "https:") {
+      url.protocol = "wss:";
     } else {
-      url.protocol = "ws";
+      url.protocol = "ws:";
     }
 
     url.searchParams.set("id", id);

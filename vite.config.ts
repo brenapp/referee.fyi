@@ -7,8 +7,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    react(),
-    nodePolyfills({ include: ["events"], protocolImports: true }),
+    // nodePolyfills({ exclude: ["buffer"], include: ["events"], }),
     tsconfigPaths({}),
     VitePWA({
       registerType: "autoUpdate",

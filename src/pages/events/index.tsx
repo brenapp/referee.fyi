@@ -37,6 +37,7 @@ import { Input } from "~components/Input";
 import { ShareConnection, leaveShare } from "~utils/data/share";
 import { toast } from "~components/Toast";
 
+
 export type MainTabProps = {
   event: Event;
 };
@@ -363,7 +364,7 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
       </section>
     </>
   );
-};
+};  
 
 export const EventPage: React.FC = () => {
   const { data: event } = useCurrentEvent();

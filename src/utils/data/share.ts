@@ -187,7 +187,10 @@ export class ShareConnection {
       const data = JSON.parse(event.data) as WebSocketPayload<WebSocketMessage>;
       switch (data.type) {
         case "add_incident": {
-          await newIncident(data.incident, false, data.incident.id);
+          const has = await hasIncident(data.incident.id);
+          if (!has) {
+            await newIncident(data.incident, false, data.incident.id);
+          }
           break;
         }
         case "update_incident": {

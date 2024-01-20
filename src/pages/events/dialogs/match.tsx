@@ -1,5 +1,9 @@
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
-import { useEventMatch, useEventMatches } from "~hooks/robotevents";
+import {
+  useEventMatch,
+  useEventMatches,
+  useMatchTeams,
+} from "~hooks/robotevents";
 import { Button } from "~components/Button";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
@@ -13,27 +17,8 @@ import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
 import { IncidentOutcome } from "~utils/data/incident";
 import { shortMatchName } from "~utils/data/match";
-import { Team } from "robotevents/out/endpoints/teams";
-import * as robotevents from "robotevents";
-import { useQuery } from "react-query";
-import { Match } from "robotevents/out/endpoints/matches";
+import { TeamData } from "robotevents/out/endpoints/teams";
 import { DialogMode } from "~components/constants";
-
-export function useMatchTeams(match?: Match | null) {
-  return useQuery(["match_teams", match?.id], async () => {
-    if (!match) {
-      return null;
-    }
-
-    const teams = match.alliances
-      .map((alliance) => alliance.teams.map((t) => t.team.id))
-      .flat();
-
-    return Promise.all(
-      teams.map((id) => robotevents.teams.get(id) as Promise<Team>)
-    );
-  });
-}
 
 export type EventMatchDialogProps = {
   matchId: number;
@@ -59,7 +44,9 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
 
   const { data: matchTeams } = useMatchTeams(match);
 
-  const [initialTeam, setInitialTeam] = useState<Team | undefined>(undefined);
+  const [initialTeam, setInitialTeam] = useState<TeamData | undefined>(
+    undefined
+  );
 
   const prevMatch = useMemo(() => {
     return matches?.find((_, i) => matches[i + 1]?.id === match?.id);

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useEventMatches, useEventTeams } from "~hooks/robotevents";
 import { Spinner } from "~components/Spinner";
 import { Tabs } from "~components/Tabs";
-import { Event } from "robotevents/out/endpoints/events";
+import { EventData } from "robotevents/out/endpoints/events";
 import { Button, LinkButton } from "~components/Button";
 import {
   ExclamationTriangleIcon,
@@ -28,18 +28,18 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import { useAddEventVisited } from "~utils/hooks/history";
 import {
   ShareProvider,
+  useActiveUsers,
   useCreateShare,
   useShareCode,
-  useShareData,
+  useShareConnection,
   useShareName,
 } from "~utils/hooks/share";
 import { Input } from "~components/Input";
 import { ShareConnection, leaveShare } from "~utils/data/share";
 import { toast } from "~components/Toast";
 
-
 export type MainTabProps = {
-  event: Event;
+  event: EventData;
 };
 
 const EventTeamsTab: React.FC<MainTabProps> = ({ event }) => {
@@ -197,19 +197,19 @@ const EventMatchesTab: React.FC<MainTabProps> = ({ event }) => {
 const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
   const [deleteDataDialogOpen, setDeleteDataDialogOpen] = useState(false);
 
-  const { data: shareName, setName } = useShareName();
+  const [shareName, setName] = useShareName();
   const shareNameId = useId();
 
   const { data: shareCode } = useShareCode(event.sku);
   const isSharing = !!shareCode;
 
-  const { data: shareData } = useShareData(event.sku, shareCode);
+  const connection = useShareConnection();
+  const activeUsers = useActiveUsers();
   const isOwner = useMemo(() => {
-    if (!shareData || !shareData.success) {
-      return false;
-    }
-    return shareData.data.data.owner === shareName;
-  }, [shareData]);
+    return connection.owner === shareName;
+  }, [connection]);
+
+  const { data: entries } = useEventIncidents(event?.sku);
 
   const { mutate: beginSharing } = useCreateShare();
   const onClickShare = useCallback(async () => {
@@ -257,7 +257,7 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
         <section className="mt-4">
           <h2 className="font-bold">Share Event Data</h2>
 
-          {isSharing && shareData?.success ? (
+          {isSharing ? (
             <section>
               <p>
                 Use this share code to give read and write access to other
@@ -279,20 +279,18 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
               <nav className="flex gap-2 justify-evenly mt-4">
                 <p className="text-lg">
                   <KeyIcon height={20} className="inline mr-2" />
-                  <span className="text-zinc-400">
-                    {shareData.data.data.owner}
-                  </span>
+                  <span className="text-zinc-400">{connection.owner}</span>
                 </p>
                 <p className="text-lg">
                   <FlagIcon height={20} className="inline mr-2" />
                   <span className="text-zinc-400">
-                    {shareData.data.data.incidents.length} entries
+                    {entries?.length ?? 0} entries
                   </span>
                 </p>
                 <p className="text-lg">
                   <UserCircleIcon height={20} className="inline mr-2" />
                   <span className="text-zinc-400">
-                    {shareData.data.users.length} active
+                    {activeUsers.length} active
                   </span>
                 </p>
               </nav>
@@ -364,7 +362,7 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
       </section>
     </>
   );
-};  
+};
 
 export const EventPage: React.FC = () => {
   const { data: event } = useCurrentEvent();

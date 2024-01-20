@@ -65,7 +65,7 @@ export const EventJoinPage: React.FC = () => {
     }
   }, [event, isActiveCode]);
 
-  const { data: shareName, setName } = useShareName();
+  const [shareName, setName] = useShareName();
   const shareNameId = useId();
 
   const shareId = useId();

@@ -16,18 +16,18 @@ import {
 } from "~utils/data/incident";
 import { twMerge } from "tailwind-merge";
 import { Tabs } from "~components/Tabs";
-import { Event } from "robotevents/out/endpoints/events";
-import { Team } from "robotevents/out/endpoints/teams";
+import { EventData } from "robotevents/out/endpoints/events";
+import { TeamData } from "robotevents/out/endpoints/teams";
 import { ClickableMatch } from "~components/ClickableMatch";
 import { IconButton } from "~components/Button";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { queryClient } from "~utils/data/query";
 import { EventMatchDialog } from "./dialogs/match";
-import { Match } from "robotevents/out/endpoints/matches";
+import { MatchData } from "robotevents/out/endpoints/matches";
 
 type EventTeamsTabProps = {
-  event: Event | null | undefined;
-  team: Team | null | undefined;
+  event: EventData | null | undefined;
+  team: TeamData | null | undefined;
 };
 
 const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({ event, team }) => {
@@ -37,7 +37,7 @@ const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({ event, team }) => {
   const [division, setDivision] = useState(1);
   const [matchDialogOpen, setMatchDialogOpen] = useState(false);
 
-  const onClickMatch = useCallback((match: Match) => {
+  const onClickMatch = useCallback((match: MatchData) => {
     setMatchId(match.id);
     setDivision(match.division.id);
     setTimeout(() => {

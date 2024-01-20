@@ -18,8 +18,8 @@ import {
 import { useNewIncident } from "~hooks/incident";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { DialogMode } from "~components/constants";
-import { Team } from "robotevents/out/endpoints/teams";
-import { Match } from "robotevents/out/endpoints/matches";
+import { TeamData } from "robotevents/out/endpoints/teams";
+import { MatchData } from "robotevents/out/endpoints/matches";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { useAddRecentRules, useRecentRules } from "~utils/hooks/history";
 import { twMerge } from "tailwind-merge";
@@ -55,7 +55,7 @@ function getIssues(incident: RichIncident): Issue[] {
 
   if (!hasTeam && incident.match && incident.team) {
     issues.push({
-      message: "Team not in selected match",
+      message: "TeamData not in selected match",
       type: "error",
     });
   }
@@ -66,8 +66,8 @@ function getIssues(incident: RichIncident): Issue[] {
 export type EventNewIncidentDialogProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
-  initialTeam?: Team | null;
-  initialMatch?: Match | null;
+  initialTeam?: TeamData | null;
+  initialMatch?: MatchData | null;
 };
 
 export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
@@ -236,6 +236,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     (e: React.FormEvent<HTMLFormElement> | React.MouseEvent) => {
       e.preventDefault();
       const packed = packIncident(incident);
+      setOpen(false);
       mutate(packed, {
         onSuccess: () => {
           // Do not reset match, for ease of use.
@@ -246,7 +247,6 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
           setIncidentField("rules", []);
           setIncidentField("outcome", IncidentOutcome.Minor);
           addRecentRules(incident.rules);
-          setOpen(false);
           toast({ type: "info", message: "Created Entry" });
         },
         onError: (error) => {

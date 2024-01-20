@@ -6,55 +6,57 @@ import {
   getIncidentsByTeam,
   newIncident,
 } from "../data/incident";
-import { UseQueryResult, useMutation, useQuery } from "react-query";
-import { Alliance, Match } from "robotevents/out/endpoints/matches";
+import { UseQueryResult, useMutation, useQuery } from "@tanstack/react-query";
+import { Alliance, Match, MatchData } from "robotevents/out/endpoints/matches";
 import { queryClient } from "~utils/data/query";
 
 export function useIncident(id: string | undefined | null) {
-  return useQuery<Incident | undefined>(
-    ["incidents", id],
-    () => {
+  return useQuery<Incident | undefined>({
+    queryKey: ["incidents", id],
+    queryFn: () => {
       if (!id) {
         return undefined;
       }
       return getIncident(id);
     },
-    { cacheTime: 0 }
-  );
+    staleTime: 0
+  });
 }
 
 export function useNewIncident() {
-  return useMutation(async (incident: Incident) => {
-    const id = await newIncident(incident);
-    await queryClient.invalidateQueries("incidents");
-    return id;
+  return useMutation({
+    mutationFn: async (incident: Incident) => {
+      const id = await newIncident(incident);
+      await queryClient.invalidateQueries({ queryKey: ["incidents"] });
+      return id;
+    }
   });
 }
 
 export function useEventIncidents(sku: string | undefined | null) {
-  return useQuery<IncidentWithID[]>(
-    ["incidents", "event", sku],
-    async () => {
+  return useQuery<IncidentWithID[]>({
+    queryKey: ["incidents", "event", sku],
+    queryFn: async () => {
       if (!sku) {
         return [];
       }
       return getIncidentsByEvent(sku);
     },
-    { cacheTime: 0 }
-  );
+    staleTime: 0
+  });
 }
 
 export function useTeamIncidents(team: string | undefined | null) {
-  return useQuery<IncidentWithID[]>(
-    ["incidents", "team", team],
-    () => {
+  return useQuery<IncidentWithID[]>({
+    queryKey: ["incidents", "team", team],
+    queryFn: () => {
       if (!team) {
         return [];
       }
       return getIncidentsByTeam(team);
     },
-    { cacheTime: 0 }
-  );
+    staleTime: 0
+  });
 }
 
 export function useTeamIncidentsByEvent(
@@ -62,20 +64,22 @@ export function useTeamIncidentsByEvent(
   sku: string | undefined | null
 ) {
   return useQuery<IncidentWithID[]>(
-    ["incidents", "team", team, "event", sku],
-    async () => {
-      if (!team || !sku) {
-        return [];
-      }
+    {
+      queryKey: ["incidents", "team", team, "event", sku],
+      queryFn: async () => {
+        if (!team || !sku) {
+          return [];
+        }
 
-      const incidents = await getIncidentsByTeam(team);
-      if (!sku || !incidents) {
-        return [];
-      }
+        const incidents = await getIncidentsByTeam(team);
+        if (!sku || !incidents) {
+          return [];
+        }
 
-      return incidents.filter((incident) => incident.event === sku);
-    },
-    { cacheTime: 0 }
+        return incidents.filter((incident) => incident.event === sku);
+      },
+      staleTime: 0
+    }
   );
 }
 
@@ -85,25 +89,35 @@ export type TeamIncidentsByMatch = {
 }[];
 
 export function useTeamIncidentsByMatch(
-  match: Match | undefined | null
+  matchData: MatchData | undefined | null
 ): UseQueryResult<TeamIncidentsByMatch> {
-  return useQuery(["incidents", "match", match?.id], async () => {
-    const alliances = [match?.alliance("red"), match?.alliance("blue")].filter(
-      (r) => !!r
-    ) as Alliance[];
-    const teams =
-      alliances.map((a) => a.teams.map((t) => t.team.name)).flat() ?? [];
+  return useQuery({
+    queryKey: ["incidents", "match", matchData?.id],
+    queryFn: async () => {
 
-    const incidentsByTeam: TeamIncidentsByMatch = [];
+      if (!matchData) {
+        return [];
+      }
 
-    for (const team of teams) {
-      const incidents = (await getIncidentsByTeam(team)).filter(
-        (i) => i.event === match?.event.code
-      );
+      const match = new Match(matchData);
+      const alliances = [match.alliance("red"), match.alliance("blue")].filter(
+        (r) => !!r
+      ) as Alliance[];
+      const teams =
+        alliances.map((a) => a.teams.map((t) => t.team.name)).flat() ?? [];
 
-      incidentsByTeam.push({ team, incidents });
-    }
+      const incidentsByTeam: TeamIncidentsByMatch = [];
 
-    return incidentsByTeam;
-  });
+      for (const team of teams) {
+        const incidents = (await getIncidentsByTeam(team)).filter(
+          (i) => i.event === match.event.code
+        );
+
+        incidentsByTeam.push({ team, incidents });
+      }
+
+      return incidentsByTeam;
+    },
+    staleTime: 0
+  })
 }

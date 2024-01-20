@@ -1,6 +1,13 @@
 import { get, set } from "idb-keyval";
-import { PropsWithChildren, createContext, useContext, useEffect } from "react";
-import { UseQueryOptions, useMutation, useQuery } from "react-query";
+import {
+  PropsWithChildren,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { UseQueryOptions, useMutation, useQuery } from "@tanstack/react-query";
 import { EventIncidents } from "~share/EventIncidents";
 import {
   CreateShareResponse,
@@ -10,6 +17,7 @@ import {
 import { queryClient } from "~utils/data/query";
 import { ShareConnection, createShare, getShareData } from "~utils/data/share";
 import { useCurrentEvent } from "./state";
+import { useDebounce } from "./debounce";
 
 const connection = new ShareConnection();
 const ShareContext = createContext(connection);
@@ -18,7 +26,7 @@ export const ShareProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const { data: event } = useCurrentEvent();
   const { data: code } = useShareCode(event?.sku);
 
-  const { data: name } = useShareName();
+  const [name] = useShareName();
 
   useEffect(() => {
     if (event && code && name) {
@@ -36,34 +44,58 @@ export function useShareConnection() {
 }
 
 export function useShareName() {
-  const query = useQuery(["share_name"], async () => {
-    return get<string>("share_name") ?? "";
+  const query = useQuery({
+    queryKey: ["share_name"],
+    queryFn: async () => {
+      const value = await get<string>("share_name");
+      return value ?? "";
+    },
+    staleTime: 0,
   });
 
-  const { mutateAsync } = useMutation(async (name: string) => {
-    await set("share_name", name);
-    queryClient.invalidateQueries("share_name");
-  });
+  const persist = useCallback(async (value: string) => {
+    await set(`share_name`, value);
+    queryClient.invalidateQueries({ queryKey: ["share_name"] });
+  }, []);
 
-  return { ...query, setName: mutateAsync };
+  const debouncedPersist = useDebounce(persist, 500);
+
+  const setName: React.Dispatch<React.SetStateAction<string>> = (param) => {
+    const value = param instanceof Function ? param(query.data ?? "") : param;
+    setValue(value);
+    debouncedPersist(value);
+  };
+
+  useEffect(() => {
+    setValue(query.data ?? "");
+  }, [query.data]);
+
+  const [value, setValue] = useState<string>(query.data ?? "");
+
+  return [value, setName] as const;
 }
 
 export function useCreateShare() {
-  return useMutation(
-    async (
+  return useMutation({
+    mutationFn: async (
       incidents: EventIncidents
     ): Promise<ShareResponse<CreateShareResponse>> => {
       return createShare(incidents);
-    }
-  );
+    },
+  });
 }
 
 export function useShareCode(sku: string | null | undefined) {
-  return useQuery(["share_code", sku], async () => {
-    if (!sku) {
-      return null;
-    }
-    return get<string>(`share_${sku}`);
+  return useQuery({
+    queryKey: ["share_code", sku],
+    queryFn: async () => {
+      if (!sku) {
+        return null;
+      }
+      const value = await get<string>(`share_${sku}`);
+      return value ?? null;
+    },
+    staleTime: 0,
   });
 }
 
@@ -75,18 +107,39 @@ export function useShareData(
     "queryKey" | "queryFn"
   >
 ) {
-  return useQuery(
-    ["share_data", sku, code],
-    async () => {
+  return useQuery({
+    queryKey: ["share_data", sku, code],
+    queryFn: async () => {
       if (!sku || !code) {
         return null;
       }
       return getShareData(sku, code);
     },
-    options
-  );
+    staleTime: 1000,
+    networkMode: "online",
+    ...options,
+  });
 }
 
 export function useShareUserId() {
-  return useQuery("share_user_id", async () => ShareConnection.getUserId());
+  return useQuery({
+    queryKey: ["share_user_id"],
+    queryFn: async () => ShareConnection.getUserId(),
+  });
+}
+
+export function useActiveUsers() {
+  const connection = useShareConnection();
+
+  const activeUsers = useQuery({
+    queryKey: ["active_users", connection.sku, connection.code],
+    queryFn: () => connection.users,
+    staleTime: 0,
+    gcTime: 0,
+    refetchInterval: 1000,
+    refetchOnMount: true,
+    networkMode: "always",
+  });
+
+  return activeUsers.data ?? [];
 }

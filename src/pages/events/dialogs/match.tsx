@@ -1,26 +1,123 @@
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
+import { useEventMatch, useEventMatches } from "~hooks/robotevents";
+import { Button, IconButton } from "~components/Button";
 import {
-  useEventMatch,
-  useEventMatches,
-  useMatchTeams,
-} from "~hooks/robotevents";
-import { Button } from "~components/Button";
-import { ArrowLeftIcon } from "@heroicons/react/20/solid";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
-import { FlagIcon } from "@heroicons/react/20/solid";
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  FlagIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/20/solid";
 import { useCallback, useMemo, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { MatchContext } from "~components/Context";
 import { Spinner } from "~components/Spinner";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
-import { IncidentOutcome } from "~utils/data/incident";
-import { shortMatchName } from "~utils/data/match";
-import { TeamData } from "robotevents/out/endpoints/teams";
+import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
 import { DialogMode } from "~components/constants";
+import { MatchData } from "robotevents/out/endpoints/matches";
+import { MatchContext } from "~components/Context";
+import { Incident } from "~components/Incident";
 
-export type EventMatchDialogProps = {
+type TeamSummaryProps = {
+  number: string;
+  incidents: IncidentWithID[];
+  currentMatch: MatchData;
+  matches: MatchData[];
+  onClickFlag: () => void;
+};
+
+const TeamSummary: React.FC<TeamSummaryProps> = ({
+  number,
+  incidents,
+  currentMatch,
+  onClickFlag,
+}) => {
+  const [open, setOpen] = useState(false);
+
+  const teamAlliance = currentMatch.alliances.find((alliance) =>
+    alliance.teams.some((t) => t.team.name === number)
+  );
+
+  const rulesSummary = useMemo(() => {
+    const rules: Record<string, IncidentWithID[]> = {};
+
+    for (const incident of incidents) {
+      for (const rule of incident.rules) {
+        if (rules[rule]) {
+          rules[rule].push(incident);
+        } else {
+          rules[rule] = [incident];
+        }
+      }
+    }
+
+    return Object.entries(rules).sort((a, b) => a[1].length - b[1].length);
+  }, [incidents]);
+
+  return (
+    <details
+      open={open}
+      onToggle={(e) => setOpen(e.currentTarget.open)}
+      className={twMerge("p-1 rounded-md mb-2")}
+    >
+      <summary className="flex gap-2 items-center active:bg-zinc-700 rounded-md">
+        {open ? (
+          <ChevronDownIcon height={16} />
+        ) : (
+          <ChevronRightIcon height={16} />
+        )}
+        <div
+          className={twMerge(
+            "py-1 px-2 rounded-md font-mono",
+            teamAlliance?.color === "red" ? "text-red-400" : "text-blue-400"
+          )}
+        >
+          <p>{number}</p>
+        </div>
+        <ul className="text-sm flex-1 ">
+          {rulesSummary.map(([rule, incidents]) => {
+            let outcome = IncidentOutcome.Minor;
+            for (const incident of incidents) {
+              if (incident.outcome > outcome) {
+                outcome = incident.outcome;
+              }
+            }
+
+            const highlights: Record<IncidentOutcome, string> = {
+              [IncidentOutcome.Minor]: "text-yellow-300",
+              [IncidentOutcome.Disabled]: "",
+              [IncidentOutcome.Major]: "text-red-300",
+            };
+
+            return (
+              <li
+                key={rule}
+                className={twMerge(
+                  highlights[outcome],
+                  "text-sm font-mono inline mx-1"
+                )}
+              >
+                {incidents.length}x{rule.replace(/[<>]/g, "")}
+              </li>
+            );
+          })}
+        </ul>
+        <IconButton
+          className="bg-emerald-600 active:bg-black/10 p-2"
+          onClick={onClickFlag}
+          icon={<FlagIcon height={20} />}
+        />
+      </summary>
+      {incidents.map((incident) => (
+        <Incident incident={incident} key={incident.id} />
+      ))}
+    </details>
+  );
+};
+
+type EventMatchDialogProps = {
   matchId: number;
   setMatchId: (matchId: number) => void;
 
@@ -40,13 +137,11 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
   const division = useCurrentDivision(defaultDivision);
 
   const { data: matches } = useEventMatches(event, division);
-  const { data: match } = useEventMatch(event, division, matchId);
+  const match = useEventMatch(event, division, matchId);
 
-  const { data: matchTeams } = useMatchTeams(match);
-
-  const [initialTeam, setInitialTeam] = useState<TeamData | undefined>(
-    undefined
-  );
+  const [initialTeamNumber, setInitialTeamNumber] = useState<
+    string | undefined
+  >(undefined);
 
   const prevMatch = useMemo(() => {
     return matches?.find((_, i) => matches[i + 1]?.id === match?.id);
@@ -68,28 +163,21 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
     }
   }, [nextMatch, setMatchId]);
 
-  const onClickTeam = useCallback(
-    async (number: string) => {
-      const team = matchTeams?.find((t) => t.number === number);
-      setInitialTeam(team ?? undefined);
-      setTimeout(() => {
-        setIncidentDialogOpen(true);
-      }, 0);
-    },
-    [matchTeams]
-  );
+  const onClickTeam = useCallback(async (number: string) => {
+    setInitialTeamNumber(number);
+    setIncidentDialogOpen(true);
+  }, []);
 
   const { data: incidentsByTeam } = useTeamIncidentsByMatch(match);
 
   const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
-
   return (
     <>
       <EventNewIncidentDialog
         open={incidentDialogOpen}
         setOpen={setIncidentDialogOpen}
-        initialMatch={match}
-        initialTeam={initialTeam}
+        initialMatchId={match?.id}
+        initialTeamNumber={initialTeamNumber}
       />
       <Dialog
         open={open}
@@ -120,71 +208,23 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
             </Button>
           </nav>
           <Spinner show={!match} />
-          <div className="mt-4">
-            {match && (
-              <>
-                <MatchContext
-                  match={match}
-                  className="w-full"
-                  allianceClassName="w-full"
-                />
-                <section className="mt-4">
-                  <h2 className="text-center">Previous Violations</h2>
-                  <div className="flex gap-2 mt-4 items-stretch">
-                    {incidentsByTeam?.map(({ team, incidents }) => {
-                      const outcomeColors: Record<IncidentOutcome, string> = {
-                        [IncidentOutcome.Major]: "text-red-400",
-                        [IncidentOutcome.Minor]: "text-yellow-400",
-                        [IncidentOutcome.Disabled]: "",
-                      };
-                      return (
-                        <div className="flex-1 flex items-center flex-col rounded-md">
-                          <Button
-                            className="font-mono text-center bg-emerald-600 mb-2 w-full"
-                            onClick={() => onClickTeam(team)}
-                          >
-                            <FlagIcon height={16} className="inline mr-2 " />
-                            <p>{team}</p>
-                          </Button>
-                          <ul className="text-center font-mono italic flex-1">
-                            {incidents.length > 0 ? (
-                              incidents.map((incident) => {
-                                const match = matches?.find(
-                                  (v) => incident.match === v.id
-                                );
-                                return (
-                                  <>
-                                    {incident.rules.length > 0 ? (
-                                      incident.rules.map((r) => (
-                                        <li
-                                          className={twMerge(
-                                            outcomeColors[incident.outcome]
-                                          )}
-                                        >
-                                          {match ? shortMatchName(match) : null}{" "}
-                                          {r.replace(/[<>]/g, "")}
-                                        </li>
-                                      ))
-                                    ) : (
-                                      <li>
-                                        {IncidentOutcome[incident.outcome]}
-                                      </li>
-                                    )}
-                                  </>
-                                );
-                              })
-                            ) : (
-                              <li>None</li>
-                            )}
-                          </ul>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </section>
-              </>
-            )}
-          </div>
+          {match && (
+            <div className="mt-4 w-full">
+              <MatchContext match={match} allianceClassName="w-full" />
+              <section className="mt-4">
+                {incidentsByTeam?.map(({ team: number, incidents }) => (
+                  <TeamSummary
+                    key={number}
+                    number={number}
+                    incidents={incidents}
+                    currentMatch={match}
+                    matches={matches ?? []}
+                    onClickFlag={() => onClickTeam(number)}
+                  />
+                ))}
+              </section>
+            </div>
+          )}
         </DialogBody>
       </Dialog>
     </>

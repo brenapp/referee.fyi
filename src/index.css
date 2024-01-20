@@ -22,3 +22,7 @@ dialog:modal {
 body:has(dialog[open]) {
   overflow: hidden;
 }
+
+summary::-webkit-details-marker {
+  display: none;
+}

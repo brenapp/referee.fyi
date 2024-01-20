@@ -106,7 +106,11 @@ export async function setIncident(
   return set(id, incident);
 }
 
-export async function newIncident(incident: Incident, updateRemote: boolean = true, id = generateIncidentId()): Promise<string> {
+export async function newIncident(
+  incident: Incident,
+  updateRemote: boolean = true,
+  id = generateIncidentId()
+): Promise<string> {
   await setIncident(id, incident);
 
   // Add to all indices
@@ -136,7 +140,10 @@ export async function newIncident(incident: Incident, updateRemote: boolean = tr
   return id;
 }
 
-export async function deleteIncident(id: string, updateRemote: boolean = true): Promise<void> {
+export async function deleteIncident(
+  id: string,
+  updateRemote: boolean = true
+): Promise<void> {
   const incident = await getIncident(id);
 
   if (!incident) {

@@ -1,6 +1,7 @@
 import {
   Incident,
   IncidentWithID,
+  deleteIncident,
   getIncident,
   getIncidentsByEvent,
   getIncidentsByTeam,
@@ -45,6 +46,15 @@ export function useEventIncidents(sku: string | undefined | null) {
     staleTime: 0
   });
 }
+
+export function useDeleteIncident(id: string, updateRemote?: boolean) {
+  return useMutation({
+    mutationFn: async (_: unknown) => {
+      await deleteIncident(id, updateRemote);
+      await queryClient.invalidateQueries({ queryKey: ["incidents"] });
+    }
+  })
+};
 
 export function useTeamIncidents(team: string | undefined | null) {
   return useQuery<IncidentWithID[]>({

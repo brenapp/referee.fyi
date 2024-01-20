@@ -4,6 +4,7 @@ import { Round, type MatchData, Color } from "robotevents/out/endpoints/matches"
 import { ProgramAbbr } from "robotevents/out/endpoints/programs";
 import { Team, TeamData, TeamOptionsFromEvent } from "robotevents/out/endpoints/teams";
 import { EventData } from "robotevents/out/endpoints/events";
+import { useMemo } from "react";
 
 const ROBOTEVENTS_TOKEN =
   "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIzIiwianRpIjoiYjM5Y2I1NGNhMTk0OTM0ODNmNTc0MDQ2MTRhZDY0MDZjYTY1ZmQzMjAzNDlhMmM5YmUwOThlNmJjNzhhZWJmZmZjYzU0ZWY2MTQ2ZmQyYjEiLCJpYXQiOjE2ODc2NDIzODcuNTUwMjg4LCJuYmYiOjE2ODc2NDIzODcuNTUwMjkxMSwiZXhwIjoyNjM0NDE3MTg3LjUzNzIzNjIsInN1YiI6Ijk3MDY5Iiwic2NvcGVzIjpbXX0.k0DEt3QRKkgZnyV8X9mDf6VYyc8aOsIEfQbVN4Gi6Csr7O5ILLGFENXZouvplqbcMDdQ8gBMMLg5hIR38RmrTsKcWHMndq1T8wYkGZQfRhc_uZYLQhGQCaanf_F_-gnKocFwT1AKQJmAPkAbV-Itb2UzHeGpNuW8vV_TaNL3coaYvmM6rubwBuNYgyZhTHW_Mgvzh5-XBqqGpmQLm9TGl4gkeqnS-6a5PfoqRTc8v3CQWSCURFry5BA2oXz0lcWmq92FY5crr2KKv1O3chPr--oMba97elY0y9Dw0q2ipKcTm4pE7bbFP8t7-a_RKU4OyXuHRIQXjw3gEDCYXY5Hp22KMY0idnRIPhat6fybxcRfeyzUzdnubRBkDMNklwlgNCyeu2ROqEOYegtu5727Wwvy2I-xW-ZVoXg0rggVu7jVq6zmBqDFIcu50IS9R4P6a244pg2STlBaAGpzT2VfUqCBZrbtBOvdmdNzxSKIkl1AXeOIZOixo1186PX54p92ehXfCbcTgWrQSLuAAg_tBa6T7UFKFOGecVFo3v0vkmE__Q5-701f1qqcdDRNlOG-bzzFh9QLEdJWlpEajwYQ1ZjTAlbnBpKy3IrU0Aa-Jr0aqxtzgr5ZlghNtOcdYYRw5_BN0BOMmAnkvtm0_xzIJSsFbWJQJ8QpPk_n4zKZf-Y";
@@ -129,44 +130,67 @@ export function useEventMatchesForTeam(
   });
 }
 
-export function useMatchTeams(match?: MatchData | null) {
+
+export function useEventMatchesForTeamNumber(
+  event: EventData | null | undefined,
+  teamData: TeamData | null | undefined,
+  color?: Color
+) {
   return useQuery({
-    queryKey: ["match_teams", match?.id],
+    queryKey: ["team_matches", event?.sku, teamData?.number],
     queryFn: async () => {
-      if (!match) {
+      if (!event || !teamData) {
         return null;
       }
+      const team = new Team(teamData);
+      let matches = (await team.matches({ event: [event.id] })).array();
 
-      const teams = match.alliances
-        .map((alliance) => alliance.teams.map((t) => t.team.id))
-        .flat();
+      if (color) {
+        matches = matches.filter((match) =>
+          match.alliance(color).teams.some((t) => t.team.id === team.id)
+        );
+      }
 
-      return Promise.all(
-        teams.map((id) => robotevents.teams.get(id) as Promise<Team>)
-      ).then(teams => teams.map(team => team.getData()))
+      return matches.map(match => match.getData()).sort(logicalMatchComparison);
     },
-    staleTime: Infinity
-  })
+    staleTime: 1000 * 60
+  });
+}
+
+export function useMatchTeams(match?: MatchData | null) {
+  return useMemo(() => {
+    if (!match) {
+      return null;
+    }
+
+    const teams = match.alliances
+      .map((alliance) => alliance.teams.map((t) => t.team.name))
+      .flat();
+
+    return teams
+  }, [match])
 }
 
 export function useEventMatch(
   event: EventData | null | undefined,
   division: number | null | undefined,
   match: number | null | undefined
-): UseQueryResult<MatchData | null> {
+): MatchData | null {
   const matches = useEventMatches(event, division);
-  return useQuery({
-    queryKey: ["match", event?.sku, division, match],
-    queryFn: async () => {
-      if (!event || !division || !match) {
-        return null;
-      }
 
-      const matchArray = matches.data ?? [];
-      return matchArray.find((m) => m.id === match) ?? null;
-    },
-  })
+  const matchArray = matches.data ?? [];
+  return matchArray.find((m) => m.id === match) ?? null;
 }
+
+export function useEventTeam(event: EventData | null | undefined, number: string | null | undefined) {
+  const { data: teams } = useEventTeams(event);
+
+  if (!number) {
+    return undefined;
+  }
+
+  return teams?.find(team => team.number === number);
+};
 
 export function useEventsToday(): UseQueryResult<EventData[]> {
   return useQuery({

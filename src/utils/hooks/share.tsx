@@ -115,7 +115,8 @@ export function useShareData(
       }
       return getShareData(sku, code);
     },
-    staleTime: 1000 * 60,
+    staleTime: 1000,
+    networkMode: "online",
     ...options,
   });
 }
@@ -125,4 +126,20 @@ export function useShareUserId() {
     queryKey: ["share_user_id"],
     queryFn: async () => ShareConnection.getUserId(),
   });
+}
+
+export function useActiveUsers() {
+  const connection = useShareConnection();
+
+  const activeUsers = useQuery({
+    queryKey: ["active_users", connection.sku, connection.code],
+    queryFn: () => connection.users,
+    staleTime: 0,
+    gcTime: 0,
+    refetchInterval: 1000,
+    refetchOnMount: true,
+    networkMode: "always",
+  });
+
+  return activeUsers.data ?? [];
 }

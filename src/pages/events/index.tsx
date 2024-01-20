@@ -28,9 +28,10 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import { useAddEventVisited } from "~utils/hooks/history";
 import {
   ShareProvider,
+  useActiveUsers,
   useCreateShare,
   useShareCode,
-  useShareData,
+  useShareConnection,
   useShareName,
 } from "~utils/hooks/share";
 import { Input } from "~components/Input";
@@ -202,13 +203,13 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
   const { data: shareCode } = useShareCode(event.sku);
   const isSharing = !!shareCode;
 
-  const { data: shareData } = useShareData(event.sku, shareCode);
+  const connection = useShareConnection();
+  const activeUsers = useActiveUsers();
   const isOwner = useMemo(() => {
-    if (!shareData || !shareData.success) {
-      return false;
-    }
-    return shareData.data.data.owner === shareName;
-  }, [shareData]);
+    return connection.owner === shareName;
+  }, [connection]);
+
+  const { data: entries } = useEventIncidents(event?.sku);
 
   const { mutate: beginSharing } = useCreateShare();
   const onClickShare = useCallback(async () => {
@@ -256,7 +257,7 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
         <section className="mt-4">
           <h2 className="font-bold">Share Event Data</h2>
 
-          {isSharing && shareData?.success ? (
+          {isSharing ? (
             <section>
               <p>
                 Use this share code to give read and write access to other
@@ -278,20 +279,18 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
               <nav className="flex gap-2 justify-evenly mt-4">
                 <p className="text-lg">
                   <KeyIcon height={20} className="inline mr-2" />
-                  <span className="text-zinc-400">
-                    {shareData.data.data.owner}
-                  </span>
+                  <span className="text-zinc-400">{connection.owner}</span>
                 </p>
                 <p className="text-lg">
                   <FlagIcon height={20} className="inline mr-2" />
                   <span className="text-zinc-400">
-                    {shareData.data.data.incidents.length} entries
+                    {entries?.length ?? 0} entries
                   </span>
                 </p>
                 <p className="text-lg">
                   <UserCircleIcon height={20} className="inline mr-2" />
                   <span className="text-zinc-400">
-                    {shareData.data.users.length} active
+                    {activeUsers.length} active
                   </span>
                 </p>
               </nav>

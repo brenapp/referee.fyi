@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 .wrangler
+
+tsconfig.tsbuildinfo
+.rollup.cache

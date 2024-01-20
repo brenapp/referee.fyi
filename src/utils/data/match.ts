@@ -1,6 +1,6 @@
-import { type Match, Round } from "robotevents/out/endpoints/matches";
+import { type MatchData, Round } from "robotevents/out/endpoints/matches";
 
-export function shortMatchName(match: Match) {
+export function shortMatchName(match: MatchData) {
   switch (match.round) {
     case Round.Practice: {
       return `P${match.matchnum}`;

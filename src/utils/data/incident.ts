@@ -1,8 +1,8 @@
 import { get, set } from "idb-keyval";
 import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
-import { Match } from "robotevents/out/endpoints/matches";
-import { Team } from "robotevents/out/endpoints/teams";
+import { MatchData } from "robotevents/out/endpoints/matches";
+import { TeamData } from "robotevents/out/endpoints/teams";
 import { addServerIncident, deleteServerIncident } from "./share";
 
 export enum IncidentOutcome {
@@ -39,8 +39,8 @@ export type RichIncident = {
   event: string;
   division: number;
 
-  match?: Match | null;
-  team?: Team | null;
+  match?: MatchData | null;
+  team?: TeamData | null;
 
   outcome: IncidentOutcome;
   rules: Rule[];

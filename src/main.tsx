@@ -2,9 +2,9 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
-import { QueryClientProvider } from "react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { initIncidentStore } from "./utils/data/incident";
-import { queryClient } from "~utils/data/query";
+import { CACHE_BUSTER, queryClient, persister } from "~utils/data/query";
 import { registerSW } from "virtual:pwa-register";
 import { initHistoryStore } from "~utils/hooks/history";
 
@@ -15,8 +15,11 @@ initHistoryStore();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister, buster: CACHE_BUSTER }}
+    >
       <App />
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   </React.StrictMode>
 );

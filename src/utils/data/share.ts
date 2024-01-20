@@ -42,12 +42,12 @@ export type JoinShareOptions = {
 
 export async function joinShare({ sku, code }: JoinShareOptions) {
   await set(`share_${sku}`, code);
-  queryClient.invalidateQueries(["share_code"]);
+  queryClient.invalidateQueries({ queryKey: ["share_code"] });
 };
 
 export async function leaveShare(sku: string) {
   await del(`share_${sku}`);
-  queryClient.invalidateQueries(["share_code"]);
+  queryClient.invalidateQueries({ queryKey: ["share_code"] });
 };
 
 
@@ -74,7 +74,7 @@ export async function createShare(
     };
 
     await set(`share_${incidents.sku}`, body.data.code);
-    queryClient.invalidateQueries(["share_code"]);
+    queryClient.invalidateQueries({ queryKey: ["share_code"] });
 
     return body;
   } catch (e) {

@@ -1,4 +1,4 @@
-import { UseQueryResult, useQuery } from "react-query";
+import { UseQueryResult, useQuery } from "@tanstack/react-query";
 import { ProgramAbbr } from "robotevents/out/endpoints/programs";
 import { Year } from "robotevents/out/endpoints/seasons";
 
@@ -25,17 +25,17 @@ export type Rules = {
 };
 
 export function useRules(): UseQueryResult<Rules> {
-  return useQuery(
-    ["rules"],
-    async () => {
+  return useQuery({
+    queryKey: ["rules"],
+    queryFn: async () => {
       const response = await fetch("/rules.json");
       if (!response.ok) {
         return { games: [] };
       }
       return response.json() as Promise<Rules>;
     },
-    { staleTime: 1000 * 60 * 60 * 6 }
-  );
+    staleTime: 1000 * 60 * 60 * 24
+  })
 }
 
 export function useGameRules(game: string): Game | undefined {

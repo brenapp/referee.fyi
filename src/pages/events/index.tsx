@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useEventMatches, useEventTeams } from "~hooks/robotevents";
 import { Spinner } from "~components/Spinner";
 import { Tabs } from "~components/Tabs";
-import { Event } from "robotevents/out/endpoints/events";
+import { EventData } from "robotevents/out/endpoints/events";
 import { Button, LinkButton } from "~components/Button";
 import {
   ExclamationTriangleIcon,
@@ -37,9 +37,8 @@ import { Input } from "~components/Input";
 import { ShareConnection, leaveShare } from "~utils/data/share";
 import { toast } from "~components/Toast";
 
-
 export type MainTabProps = {
-  event: Event;
+  event: EventData;
 };
 
 const EventTeamsTab: React.FC<MainTabProps> = ({ event }) => {
@@ -197,7 +196,7 @@ const EventMatchesTab: React.FC<MainTabProps> = ({ event }) => {
 const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
   const [deleteDataDialogOpen, setDeleteDataDialogOpen] = useState(false);
 
-  const { data: shareName, setName } = useShareName();
+  const [shareName, setName] = useShareName();
   const shareNameId = useId();
 
   const { data: shareCode } = useShareCode(event.sku);
@@ -364,7 +363,7 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
       </section>
     </>
   );
-};  
+};
 
 export const EventPage: React.FC = () => {
   const { data: event } = useCurrentEvent();

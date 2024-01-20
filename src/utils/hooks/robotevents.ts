@@ -131,7 +131,6 @@ export function useEventMatchesForTeam(
 }
 
 
-
 export function useEventMatchesForTeamNumber(
   event: EventData | null | undefined,
   teamData: TeamData | null | undefined,

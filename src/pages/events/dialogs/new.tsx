@@ -284,7 +284,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             onChange={onChangeIncidentMatch}
             className="max-w-full w-full"
           >
-            <option value={-1}>Pick A MatchData</option>
+            <option value={-1}>Pick A Match</option>
             {team &&
               teamMatches?.map((match) => (
                 <option value={match.id} key={match.id}>

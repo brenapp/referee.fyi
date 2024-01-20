@@ -19,6 +19,7 @@ import {
 } from "./incident";
 import { toast } from "~components/Toast";
 import { queryClient } from "./query";
+import { EventEmitter } from "events";
 
 const URL_BASE = import.meta.env.DEV ? "http://localhost:8787" : "https://referee-fyi-share.bren.workers.dev";
 
@@ -142,8 +143,30 @@ export async function deleteServerIncident(id: string, sku: string) {
     method: "DELETE",
   });
 }
+interface ShareConnectionEvents {
+  connect: () => void;
+  disconnect: () => void;
+  message: (data: WebSocketPayload<WebSocketMessage>) => void;
+}
 
-export class ShareConnection {
+export interface ShareConnection {
+  on<U extends keyof ShareConnectionEvents>(
+    event: U,
+    listener: ShareConnectionEvents[U]
+  ): this;
+  once<U extends keyof ShareConnectionEvents>(
+    event: U,
+    listener: ShareConnectionEvents[U]
+  ): this;
+  off<U extends keyof ShareConnectionEvents>(
+    event: U,
+    listener: ShareConnectionEvents[U]
+  ): this;
+}
+
+
+
+export class ShareConnection extends EventEmitter {
   ws: WebSocket | null = null;
 
   sku: string = "";
@@ -151,6 +174,8 @@ export class ShareConnection {
 
   user: ShareUser | null = null;
   owner: string | null = null;
+
+  users: string[] = []
 
   public setup(sku: string, code: string, user: Omit<ShareUser, "id">) {
 
@@ -196,6 +221,9 @@ export class ShareConnection {
 
     this.ws = new WebSocket(url);
     this.ws.onmessage = this.handleMessage.bind(this);
+
+    this.ws.onopen = () => this.emit("connect");
+    this.ws.onclose = () => this.emit("disconnect");
   }
 
   async send(message: WebSocketPeerMessage) {
@@ -231,6 +259,7 @@ export class ShareConnection {
         // *delete* incidents the user creates before joining the share.
         case "server_share_info": {
           this.owner = data.data.owner;
+          this.users = data.users;
 
           for (const incident of data.data.incidents) {
             const has = await hasIncident(incident.id);
@@ -266,6 +295,9 @@ export class ShareConnection {
           break;
         }
       }
+
+      this.emit("message", data)
+
     } catch (e) { }
   }
 

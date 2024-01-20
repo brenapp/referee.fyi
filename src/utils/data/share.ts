@@ -282,7 +282,9 @@ export class ShareConnection extends EventEmitter {
 
         case "server_user_add": {
           toast({ type: "info", message: `${data.user} joined.` });
-          this.users.push(data.user);
+          if (this.users.indexOf(data.user) < 0) {
+            this.users.push(data.user);
+          }
           break;
         }
         case "server_user_remove": {

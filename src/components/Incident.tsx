@@ -1,6 +1,9 @@
 import { twMerge } from "tailwind-merge";
 import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
 import { useEvent, useEventMatch } from "~utils/hooks/robotevents";
+import { IconButton } from "./Button";
+import { TrashIcon } from "@heroicons/react/24/outline";
+import { useDeleteIncident } from "~utils/hooks/incident";
 
 const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
   [IncidentOutcome.Minor]: "bg-yellow-400 text-yellow-900",
@@ -19,6 +22,8 @@ export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
     incident.division,
     incident.match
   );
+
+  const { mutate: onClickDelete } = useDeleteIncident(incident.id);
 
   return (
     <>
@@ -47,6 +52,11 @@ export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
             ))}
           </ul>
         </div>
+        <IconButton
+          icon={<TrashIcon height={20} />}
+          className="bg-transparent text-black/75"
+          onClick={onClickDelete}
+        />
       </div>
     </>
   );

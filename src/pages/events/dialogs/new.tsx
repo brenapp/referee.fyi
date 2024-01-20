@@ -1,9 +1,8 @@
 import {
   useEventMatches,
   useEventTeams,
-  useEventMatchesForTeam,
   useEventMatch,
-  useTeam,
+  useEventTeam,
 } from "~hooks/robotevents";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 import { Select, TextArea } from "~components/Input";
@@ -63,24 +62,22 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const [team, setTeam] = useState(initialTeamNumber);
   const [match, setMatch] = useState(initialMatch?.id);
 
-  const { data: teamData, isLoading: isLoadingTeamData } = useTeam(
-    team,
-    event?.program.code
-  );
+  const teamData = useEventTeam(event, team);
   const matchData = useEventMatch(event, division, match);
-  const { data: teamMatches, isLoading: isLoadingTeamMatches } =
-    useEventMatchesForTeam(event, teamData);
+  const teamMatches = useMemo(() => {
+    if (!team) {
+      return [];
+    }
+    return matches?.filter((match) => {
+      const teams = match.alliances
+        .map((a) => a.teams.map((t) => t.team.name))
+        .flat();
+      return teams.includes(team);
+    });
+  }, [matches, team]);
 
   const isLoadingMetaData =
-    isLoadingEvent ||
-    isLoadingTeams ||
-    isLoadingMatches ||
-    isLoadingTeamData ||
-    isLoadingTeamMatches;
-
-  const teamMatchesInDivision = useMemo(() => {
-    return teamMatches?.filter((match) => match.division.id === division) ?? [];
-  }, [teamMatches]);
+    isLoadingEvent || isLoadingTeams || isLoadingMatches;
 
   const [incident, setIncident] = useState<RichIncident>({
     time: new Date(),
@@ -255,7 +252,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
           >
             <option value={-1}>Pick A Match</option>
             {team &&
-              teamMatchesInDivision?.map((match) => (
+              teamMatches?.map((match) => (
                 <option value={match.id} key={match.id}>
                   {match.name}
                 </option>

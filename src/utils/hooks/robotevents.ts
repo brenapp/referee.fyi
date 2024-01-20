@@ -182,6 +182,16 @@ export function useEventMatch(
   return matchArray.find((m) => m.id === match) ?? null;
 }
 
+export function useEventTeam(event: EventData | null | undefined, number: string | null | undefined) {
+  const { data: teams } = useEventTeams(event);
+
+  if (!number) {
+    return undefined;
+  }
+
+  return teams?.find(team => team.number === number);
+};
+
 export function useEventsToday(): UseQueryResult<EventData[]> {
   return useQuery({
     queryKey: ["events_today"],

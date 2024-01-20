@@ -1,5 +1,10 @@
 import { get, set, del } from "idb-keyval";
-import { UseQueryOptions, UseQueryResult, useMutation, useQuery } from "react-query";
+import {
+  UseQueryOptions,
+  UseQueryResult,
+  useMutation,
+  useQuery,
+} from "react-query";
 import { updateFromRemote } from "~utils/data/incident";
 import { queryClient } from "~utils/data/query";
 import {
@@ -12,7 +17,6 @@ import {
 
 export function useOwnerCode() {
   return useQuery(["owner_code"], async () => {
-
     const code = await get<string>("owner_code");
 
     if (code) {
@@ -24,7 +28,7 @@ export function useOwnerCode() {
 
     return newCode;
   });
-};
+}
 
 export function useShareCode(sku: string) {
   return useQuery(["share_code", sku], async () => {
@@ -66,34 +70,53 @@ export function useNewEventShare() {
 export type JoinShareOptions = {
   sku: string;
   code: string;
-}
+};
 
 export function useJoinShare(onSuccess?: () => void) {
-  return useMutation(async ({ sku, code }: JoinShareOptions) => {
-    await set(`share_${sku}`, code);
-    await updateFromRemote(sku);
-    queryClient.invalidateQueries({ queryKey: ["share_code"] });
-  }, { onSuccess });
-};
+  return useMutation(
+    async ({ sku, code }: JoinShareOptions) => {
+      await set(`share_${sku}`, code);
+      await updateFromRemote(sku);
+      queryClient.invalidateQueries({ queryKey: ["share_code"] });
+    },
+    { onSuccess }
+  );
+}
 
 export function useStopEventShare() {
   return useMutation(async (sku: string) => {
     await del(`share_${sku}`);
     await queryClient.invalidateQueries({ queryKey: ["share_code"] });
   });
-};
+}
 
-export type UseShareDataOptions = Omit<UseQueryOptions<any, unknown, ShareResponse<ShareGetResponseData>, (string | null | undefined)[]>, "queryKey" | "queryFn">;
+export type UseShareDataOptions = Omit<
+  UseQueryOptions<
+    any,
+    unknown,
+    ShareResponse<ShareGetResponseData>,
+    (string | null | undefined)[]
+  >,
+  "queryKey" | "queryFn"
+>;
 
-export function useShareData(sku: string | undefined | null, code: string, options?: UseShareDataOptions): UseQueryResult<ShareResponse<ShareGetResponseData>> {
-  return useQuery(["share_data", sku, code], async () => {
-    if (!sku) {
-      return;
-    }
+export function useShareData(
+  sku: string | undefined | null,
+  code: string,
+  options?: UseShareDataOptions
+): UseQueryResult<ShareResponse<ShareGetResponseData>> {
+  return useQuery(
+    ["share_data", sku, code],
+    async () => {
+      if (!sku) {
+        return;
+      }
 
-    const url = new URL("/share/get", window.location.origin);
-    url.searchParams.set("sku", sku);
-    url.searchParams.set("code", code);
-    return fetch(url).then(r => r.json())
-  }, options);
-};
+      const url = new URL("/share/get", window.location.origin);
+      url.searchParams.set("sku", sku);
+      url.searchParams.set("code", code);
+      return fetch(url).then((r) => r.json());
+    },
+    options
+  );
+}

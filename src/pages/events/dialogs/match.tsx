@@ -3,7 +3,6 @@ import {
   useEventMatch,
   useEventMatches,
   useMatchTeams,
-  useTeam,
 } from "~hooks/robotevents";
 import { Button, IconButton } from "~components/Button";
 import { ArrowLeftIcon, FlagIcon } from "@heroicons/react/20/solid";
@@ -18,14 +17,13 @@ import { Spinner } from "~components/Spinner";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
-import { IncidentWithID } from "~utils/data/incident";
+import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
 import { DialogMode } from "~components/constants";
-import { shortMatchName } from "~utils/data/match";
-import { EventTeamsIncidents } from "../team";
 import { Match } from "robotevents/out/endpoints/matches";
 import { MatchContext } from "~components/Context";
+import { Incident } from "~components/Incident";
 
-export type TeamSummaryProps = {
+type TeamSummaryProps = {
   number: string;
   incidents: IncidentWithID[];
   currentMatch: Match;
@@ -38,29 +36,28 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
   incidents,
   currentMatch,
   onClickFlag,
-  matches,
 }) => {
   const [open, setOpen] = useState(false);
-
-  const { data: event } = useCurrentEvent();
-  const { data: team } = useTeam(number, event?.program.code);
 
   const teamAlliance = currentMatch.alliances.find((alliance) =>
     alliance.teams.some((t) => t.team.name === number)
   );
 
-  const teamSummary = incidents.map((incident) => {
-    const match = matches?.find((m) => m.id === incident.match);
-    const rulesList = incident.rules
-      .map((r) => r.replace(/[<>]/g, ""))
-      .join(" ");
+  const rulesSummary = useMemo(() => {
+    const rules: Record<string, IncidentWithID[]> = {};
 
-    if (match) {
-      return `${shortMatchName(match)}-${rulesList}`;
+    for (const incident of incidents) {
+      for (const rule of incident.rules) {
+        if (rules[rule]) {
+          rules[rule].push(incident);
+        } else {
+          rules[rule] = [incident];
+        }
+      }
     }
 
-    return rulesList;
-  });
+    return Object.entries(rules).sort((a, b) => a[1].length - b[1].length);
+  }, [incidents]);
 
   return (
     <details
@@ -74,33 +71,55 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
         ) : (
           <ChevronRightIcon height={16} />
         )}
-        <p
+        <div
           className={twMerge(
             "py-1 px-2 rounded-md font-mono",
             teamAlliance?.color === "red" ? "text-red-400" : "text-blue-400"
           )}
         >
-          {number}
-        </p>
+          <p>{number}</p>
+        </div>
         <ul className="text-sm flex-1 ">
-          {teamSummary.map((t) => (
-            <li key={t} className={twMerge("inline mr-1")}>
-              {t}
-            </li>
-          ))}
+          {rulesSummary.map(([rule, incidents]) => {
+            let outcome = IncidentOutcome.Minor;
+            for (const incident of incidents) {
+              if (incident.outcome > outcome) {
+                outcome = incident.outcome;
+              }
+            }
+
+            const highlights: Record<IncidentOutcome, string> = {
+              [IncidentOutcome.Minor]: "text-yellow-300",
+              [IncidentOutcome.Disabled]: "",
+              [IncidentOutcome.Major]: "text-red-300",
+            };
+
+            return (
+              <li
+                className={twMerge(
+                  highlights[outcome],
+                  "text-sm font-mono inline mx-1"
+                )}
+              >
+                {incidents.length}x{rule.replace(/[<>]/g, "")}
+              </li>
+            );
+          })}
         </ul>
         <IconButton
           className="bg-emerald-600 active:bg-black/10 p-2"
           onClick={onClickFlag}
-          icon={<FlagIcon height={16} />}
+          icon={<FlagIcon height={20} />}
         />
       </summary>
-      <EventTeamsIncidents event={event} team={team} />
+      {incidents.map((incident) => (
+        <Incident incident={incident} key={incident.id} />
+      ))}
     </details>
   );
 };
 
-export type EventMatchDialogProps = {
+type EventMatchDialogProps = {
   matchId: number;
   setMatchId: (matchId: number) => void;
 

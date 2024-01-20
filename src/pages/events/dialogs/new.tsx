@@ -236,6 +236,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     (e: React.FormEvent<HTMLFormElement> | React.MouseEvent) => {
       e.preventDefault();
       const packed = packIncident(incident);
+      setOpen(false);
       mutate(packed, {
         onSuccess: () => {
           // Do not reset match, for ease of use.
@@ -246,7 +247,6 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
           setIncidentField("rules", []);
           setIncidentField("outcome", IncidentOutcome.Minor);
           addRecentRules(incident.rules);
-          setOpen(false);
           toast({ type: "info", message: "Created Entry" });
         },
         onError: (error) => {
@@ -278,7 +278,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         )}
 
         <label>
-          <p className="mt-4">MatchData</p>
+          <p className="mt-4">Match</p>
           <Select
             value={incident.match?.id ?? -1}
             onChange={onChangeIncidentMatch}

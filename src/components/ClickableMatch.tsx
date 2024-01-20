@@ -1,5 +1,5 @@
 import { useId } from "react";
-import { Match } from "robotevents/out/endpoints/matches";
+import { MatchData } from "robotevents/out/endpoints/matches";
 import { MatchContext } from "./Context";
 import { Button } from "./Button";
 import { ButtonMode } from "./constants";
@@ -9,7 +9,7 @@ const dateFormatter = new Intl.DateTimeFormat(navigator.language, {
   minute: "numeric",
 });
 
-function matchTime(match: Match) {
+function matchTime(match: MatchData) {
   if (match.started) {
     return <span>{dateFormatter.format(new Date(match.started))}</span>;
   }
@@ -22,7 +22,7 @@ function matchTime(match: Match) {
 }
 
 export type ClickableMatch = {
-  match: Match;
+  match: MatchData;
   onClick: React.EventHandler<React.MouseEvent<HTMLButtonElement>>;
 };
 

@@ -17,11 +17,7 @@ export type IncidentProps = {
 
 export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
   const { data: event } = useEvent(incident.event);
-  const { data: match } = useEventMatch(
-    event,
-    incident.division,
-    incident.match
-  );
+  const match = useEventMatch(event, incident.division, incident.match);
 
   const { mutate: onClickDelete } = useDeleteIncident(incident.id);
 

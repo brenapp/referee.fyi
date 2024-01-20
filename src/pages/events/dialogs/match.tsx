@@ -1,16 +1,13 @@
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
-import {
-  useEventMatch,
-  useEventMatches,
-  useMatchTeams,
-} from "~hooks/robotevents";
+import { useEventMatch, useEventMatches } from "~hooks/robotevents";
 import { Button, IconButton } from "~components/Button";
-import { ArrowLeftIcon, FlagIcon } from "@heroicons/react/20/solid";
 import {
+  ArrowLeftIcon,
   ArrowRightIcon,
+  FlagIcon,
   ChevronDownIcon,
   ChevronRightIcon,
-} from "@heroicons/react/24/outline";
+} from "@heroicons/react/20/solid";
 import { useCallback, useMemo, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { Spinner } from "~components/Spinner";
@@ -19,15 +16,15 @@ import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
 import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
 import { DialogMode } from "~components/constants";
-import { Match } from "robotevents/out/endpoints/matches";
+import { MatchData } from "robotevents/out/endpoints/matches";
 import { MatchContext } from "~components/Context";
 import { Incident } from "~components/Incident";
 
 type TeamSummaryProps = {
   number: string;
   incidents: IncidentWithID[];
-  currentMatch: Match;
-  matches: Match[];
+  currentMatch: MatchData;
+  matches: MatchData[];
   onClickFlag: () => void;
 };
 
@@ -65,7 +62,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
       onToggle={(e) => setOpen(e.currentTarget.open)}
       className={twMerge("p-1 rounded-md mb-2")}
     >
-      <summary className="flex gap-2 items-center">
+      <summary className="flex gap-2 items-center active:bg-zinc-700 rounded-md">
         {open ? (
           <ChevronDownIcon height={16} />
         ) : (
@@ -140,17 +137,11 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
   const division = useCurrentDivision(defaultDivision);
 
   const { data: matches } = useEventMatches(event, division);
-  const { data: match, isLoading: isLoadingMatch } = useEventMatch(
-    event,
-    division,
-    matchId
-  );
+  const match = useEventMatch(event, division, matchId);
 
-  const { data: matchTeams } = useMatchTeams(match);
-
-  const [initialTeamId, setInitialTeamId] = useState<number | undefined>(
-    undefined
-  );
+  const [initialTeamNumber, setInitialTeamNumber] = useState<
+    string | undefined
+  >(undefined);
 
   const prevMatch = useMemo(() => {
     return matches?.find((_, i) => matches[i + 1]?.id === match?.id);
@@ -172,16 +163,10 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
     }
   }, [nextMatch, setMatchId]);
 
-  const onClickTeam = useCallback(
-    async (number: string) => {
-      const team = matchTeams?.find((t) => t.number === number);
-      setInitialTeamId(team?.id ?? undefined);
-      setTimeout(() => {
-        setIncidentDialogOpen(true);
-      }, 0);
-    },
-    [matchTeams]
-  );
+  const onClickTeam = useCallback(async (number: string) => {
+    setInitialTeamNumber(number);
+    setIncidentDialogOpen(true);
+  }, []);
 
   const { data: incidentsByTeam } = useTeamIncidentsByMatch(match);
 
@@ -192,8 +177,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
         open={incidentDialogOpen}
         setOpen={setIncidentDialogOpen}
         initialMatchId={match?.id}
-        initialTeamId={initialTeamId}
-        preventSave={isLoadingMatch}
+        initialTeamNumber={initialTeamNumber}
       />
       <Dialog
         open={open}

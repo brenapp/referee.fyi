@@ -1,32 +1,45 @@
 import { Link } from "react-router-dom";
 import { useEventMatches, useEventTeams } from "~hooks/robotevents";
 import { Spinner } from "~components/Spinner";
-
 import { Tabs } from "~components/Tabs";
-import { Event } from "robotevents/out/endpoints/events";
-import { Button } from "~components/Button";
-import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
+import { EventData } from "robotevents/out/endpoints/events";
+import { Button, LinkButton } from "~components/Button";
+import {
+  ExclamationTriangleIcon,
+  FlagIcon,
+  KeyIcon,
+  UserCircleIcon,
+} from "@heroicons/react/20/solid";
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
 import { useEventIncidents } from "~hooks/incident";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import {
   IncidentOutcome,
   deleteIncident,
   getIncidentsByEvent,
-  updateFromRemote,
 } from "~utils/data/incident";
 import { EventNewIncidentDialog } from "./dialogs/new";
 import { EventMatchDialog } from "./dialogs/match";
 import { ClickableMatch } from "~components/ClickableMatch";
 import { Dialog, DialogBody } from "~components/Dialog";
 import { DialogMode } from "~components/constants";
-
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { useAddEventVisited } from "~utils/hooks/history";
+import {
+  ShareProvider,
+  useActiveUsers,
+  useCreateShare,
+  useShareCode,
+  useShareConnection,
+  useShareName,
+} from "~utils/hooks/share";
+import { Input } from "~components/Input";
+import { ShareConnection, leaveShare } from "~utils/data/share";
+import { toast } from "~components/Toast";
 
 export type MainTabProps = {
-  event: Event;
+  event: EventData;
 };
 
 const EventTeamsTab: React.FC<MainTabProps> = ({ event }) => {
@@ -184,8 +197,54 @@ const EventMatchesTab: React.FC<MainTabProps> = ({ event }) => {
 const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
   const [deleteDataDialogOpen, setDeleteDataDialogOpen] = useState(false);
 
+  const [shareName, setName] = useShareName();
+  const shareNameId = useId();
+
+  const { data: shareCode } = useShareCode(event.sku);
+  const isSharing = !!shareCode;
+
+  const connection = useShareConnection();
+  const activeUsers = useActiveUsers();
+  const isOwner = useMemo(() => {
+    return connection.owner === shareName;
+  }, [connection]);
+
+  const { data: entries } = useEventIncidents(event?.sku);
+
+  const { mutate: beginSharing } = useCreateShare();
+  const onClickShare = useCallback(async () => {
+    const shareId = await ShareConnection.getUserId();
+    const incidents = await getIncidentsByEvent(event.sku);
+
+    await beginSharing({
+      incidents,
+      owner: { id: shareId, name: shareName ?? "" },
+      sku: event.sku,
+    });
+
+    toast({ type: "info", message: "Sharing Enabled" });
+  }, [beginSharing]);
+
+  const onClickShareCode = useCallback(async () => {
+    const url = new URL(`/${event.sku}/join?code=${shareCode}`, location.href);
+    const shareData = {
+      url: url.href,
+    };
+
+    if (navigator.share && navigator.canShare(shareData)) {
+      navigator.share(shareData);
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(url.href);
+    }
+  }, [shareCode]);
+
+  const onClickStopSharing = useCallback(async () => {
+    await leaveShare(event.sku);
+  }, [event.sku]);
+
   const onConfirmDeleteData = useCallback(async () => {
     const incidents = await getIncidentsByEvent(event.sku);
+    await leaveShare(event.sku);
     for (const incident of incidents) {
       await deleteIncident(incident.id);
     }
@@ -197,7 +256,72 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
       <section>
         <section className="mt-4">
           <h2 className="font-bold">Share Event Data</h2>
-          <p>Currently disabled as I am fixing some stability issues!</p>
+
+          {isSharing ? (
+            <section>
+              <p>
+                Use this share code to give read and write access to other
+                devices. Treat this code with caution!
+              </p>
+              <p className="mt-4">Share Name: {shareName}</p>
+              <Button
+                className="w-full font-mono text-5xl mt-4 text-center"
+                onClick={onClickShareCode}
+              >
+                {shareCode}
+              </Button>
+              <Button
+                className="w-full mt-4 bg-red-500 text-center"
+                onClick={onClickStopSharing}
+              >
+                {isOwner ? "Stop Sharing" : "Leave Share"}
+              </Button>
+              <nav className="flex gap-2 justify-evenly mt-4">
+                <p className="text-lg">
+                  <KeyIcon height={20} className="inline mr-2" />
+                  <span className="text-zinc-400">{connection.owner}</span>
+                </p>
+                <p className="text-lg">
+                  <FlagIcon height={20} className="inline mr-2" />
+                  <span className="text-zinc-400">
+                    {entries?.length ?? 0} entries
+                  </span>
+                </p>
+                <p className="text-lg">
+                  <UserCircleIcon height={20} className="inline mr-2" />
+                  <span className="text-zinc-400">
+                    {activeUsers.length} active
+                  </span>
+                </p>
+              </nav>
+            </section>
+          ) : (
+            <div className="mt-2">
+              <label htmlFor={shareNameId}>
+                <p>Your Name</p>
+                <Input
+                  id={shareNameId}
+                  required
+                  value={shareName}
+                  onChange={(e) => setName(e.currentTarget.value)}
+                  className="w-full"
+                />
+              </label>
+              <Button
+                className="w-full mt-4 bg-emerald-400 disabled:bg-zinc-400 text-center"
+                disabled={!shareName}
+                onClick={onClickShare}
+              >
+                Begin Sharing
+              </Button>
+              <LinkButton
+                to={`/${event.sku}/join`}
+                className="mt-4 w-full text-center"
+              >
+                Join Share
+              </LinkButton>
+            </div>
+          )}
         </section>
         <section className="mt-4 relative">
           <h2 className="font-bold">Delete Event Data</h2>
@@ -243,7 +367,6 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
 export const EventPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
   const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
-
   const { mutateAsync: addEvent, isSuccess } = useAddEventVisited();
 
   useEffect(() => {
@@ -252,36 +375,28 @@ export const EventPage: React.FC = () => {
     }
   }, [event, isSuccess]);
 
-  // Periodically update
-  useEffect(() => {
-    const timer = setInterval(async () => {
-      if (!event) return;
-      await updateFromRemote(event.sku);
-    }, 10 * 1000);
-
-    return () => clearInterval(timer);
-  }, [event]);
-
   return event ? (
-    <section className="mt-4 flex flex-col">
-      <Button
-        onClick={() => setIncidentDialogOpen(true)}
-        className="w-full text-center bg-emerald-600"
-      >
-        <FlagIcon height={20} className="inline mr-2 " />
-        New Entry
-      </Button>
-      <EventNewIncidentDialog
-        open={incidentDialogOpen}
-        setOpen={setIncidentDialogOpen}
-      />
-      <Tabs className="flex-1">
-        {{
-          Matches: <EventMatchesTab event={event} />,
-          Teams: <EventTeamsTab event={event} />,
-          Manage: <EventManageTab event={event} />,
-        }}
-      </Tabs>
-    </section>
+    <ShareProvider>
+      <section className="mt-4 flex flex-col">
+        <Button
+          onClick={() => setIncidentDialogOpen(true)}
+          className="w-full text-center bg-emerald-600"
+        >
+          <FlagIcon height={20} className="inline mr-2 " />
+          New Entry
+        </Button>
+        <EventNewIncidentDialog
+          open={incidentDialogOpen}
+          setOpen={setIncidentDialogOpen}
+        />
+        <Tabs className="flex-1">
+          {{
+            Matches: <EventMatchesTab event={event} />,
+            Teams: <EventTeamsTab event={event} />,
+            Manage: <EventManageTab event={event} />,
+          }}
+        </Tabs>
+      </section>
+    </ShareProvider>
   ) : null;
 };

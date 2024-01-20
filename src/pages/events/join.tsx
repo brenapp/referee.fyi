@@ -1,42 +1,48 @@
-import React, { useCallback, useId, useMemo, useState } from "react";
+import { FlagIcon, KeyIcon, UserCircleIcon } from "@heroicons/react/20/solid";
+import React, { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "~components/Button";
 import { Input } from "~components/Input";
-import { Error } from "~components/Warning";
-import { useCurrentEvent } from "~hooks/state";
-import { useJoinShare, useShareData } from "~utils/hooks/share";
+import { Error, Success } from "~components/Warning";
+import { joinShare } from "~utils/data/share";
+import { useShareCode, useShareData, useShareName } from "~utils/hooks/share";
+import { useCurrentEvent } from "~utils/hooks/state";
 
 function isValidCode(code: string) {
   return !!code.match(/[A-Z0-9]{3}-[A-Z0-9]{3}/g);
 }
 
 export const EventJoinPage: React.FC = () => {
-  const { data: event } = useCurrentEvent();
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const { data: event } = useCurrentEvent();
 
+  const { data: currentShareCode } = useShareCode(event?.sku);
   const [code, setCode] = useState(params.get("code") ?? "");
-  const { data: shareData, isFetched } = useShareData(event?.sku, code, {
-    enabled: isValidCode(code),
-  });
 
-  const { mutateAsync: joinShare } = useJoinShare(() =>
-    navigate(`/${event?.sku}`)
+  useEffect(() => {
+    if (currentShareCode && !code) {
+      setCode(currentShareCode);
+    }
+  }, [currentShareCode]);
+
+  const { data: shareData, isSuccess: isShareSuccess } = useShareData(
+    event?.sku,
+    code,
+    {
+      enabled: isValidCode(code),
+    }
   );
 
-  const success = useMemo(() => {
-    return shareData?.success ?? false;
-  }, [shareData]);
+  const isActiveCode = useMemo(
+    () => (isShareSuccess && shareData?.success) ?? false,
+    [isShareSuccess, shareData]
+  );
 
-  const errorMessage = useMemo(() => {
-    if (!isFetched) return "";
-
-    if (shareData?.success) {
-      return "";
-    } else {
-      return shareData?.details ?? "";
-    }
-  }, [isFetched, shareData]);
+  const isInvalidCode = useMemo(
+    () => (isShareSuccess && !shareData?.success) ?? false,
+    [isShareSuccess, shareData]
+  );
 
   const onChangeCode: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
@@ -51,12 +57,33 @@ export const EventJoinPage: React.FC = () => {
     []
   );
 
+  const onClickJoin = useCallback(async () => {
+    console.log(event, event?.sku, isActiveCode);
+    if (event && event.sku && code && isActiveCode) {
+      await joinShare({ sku: event.sku, code });
+      await navigate(`/${event.sku}`);
+    }
+  }, [event, isActiveCode]);
+
+  const [shareName, setName] = useShareName();
+  const shareNameId = useId();
+
   const shareId = useId();
 
   return (
     <section className="mt-4 flex flex-col gap-4">
+      <label htmlFor={shareNameId}>
+        <p>Your Name</p>
+        <Input
+          id={shareNameId}
+          required
+          value={shareName}
+          onChange={(e) => setName(e.currentTarget.value)}
+          className="w-full"
+        />
+      </label>
       <label htmlFor={shareId}>
-        <p>Enter Share Code </p>
+        <p>Enter Share Code</p>
         <Input
           id={shareId}
           value={code ?? ""}
@@ -66,21 +93,40 @@ export const EventJoinPage: React.FC = () => {
           className="text-6xl w-full font-mono text-center"
         />
       </label>
-      {success && isFetched ? (
+      {isInvalidCode ? (
         <>
+          <Error message="Invalid Code!" />
+        </>
+      ) : null}
+      {isActiveCode && shareData?.success ? (
+        <>
+          <Success message="Active Group!"></Success>
+          <nav className="flex gap-2 justify-evenly">
+            <p className="text-lg">
+              <KeyIcon height={20} className="inline mr-2" />
+              <span className="text-zinc-400">{shareData.data.data.owner}</span>
+            </p>
+            <p className="text-lg">
+              <FlagIcon height={20} className="inline mr-2" />
+              <span className="text-zinc-400">
+                {shareData.data.data.incidents.length} entries
+              </span>
+            </p>
+            <p className="text-lg">
+              <UserCircleIcon height={20} className="inline mr-2" />
+              <span className="text-zinc-400">
+                {shareData.data.users.length} active
+              </span>
+            </p>
+          </nav>
           <Button
-            className="w-full bg-emerald-400 text-center"
-            onClick={() => joinShare({ code, sku: event!.sku })}
+            onClick={onClickJoin}
+            className="w-full mt-4 bg-emerald-600 disabled:bg-zinc-400 text-center text-black"
           >
             Join
           </Button>
         </>
       ) : null}
-      {isFetched && errorMessage ? (
-        <Error message={errorMessage} />
-      ) : (
-        errorMessage
-      )}
     </section>
   );
 };

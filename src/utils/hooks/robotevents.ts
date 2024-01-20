@@ -1,8 +1,10 @@
 import * as robotevents from "robotevents";
-import { UseQueryResult, useQuery } from "react-query";
-import { Round, type Match, Color } from "robotevents/out/endpoints/matches";
+import { UseQueryResult, useQuery } from "@tanstack/react-query";
+import { Round, type MatchData, Color } from "robotevents/out/endpoints/matches";
 import { ProgramAbbr } from "robotevents/out/endpoints/programs";
-import { Team, TeamOptionsFromEvent } from "robotevents/out/endpoints/teams";
+import { Team, TeamData, TeamOptionsFromEvent } from "robotevents/out/endpoints/teams";
+import { EventData } from "robotevents/out/endpoints/events";
+import { useMemo } from "react";
 
 const ROBOTEVENTS_TOKEN =
   "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIzIiwianRpIjoiYjM5Y2I1NGNhMTk0OTM0ODNmNTc0MDQ2MTRhZDY0MDZjYTY1ZmQzMjAzNDlhMmM5YmUwOThlNmJjNzhhZWJmZmZjYzU0ZWY2MTQ2ZmQyYjEiLCJpYXQiOjE2ODc2NDIzODcuNTUwMjg4LCJuYmYiOjE2ODc2NDIzODcuNTUwMjkxMSwiZXhwIjoyNjM0NDE3MTg3LjUzNzIzNjIsInN1YiI6Ijk3MDY5Iiwic2NvcGVzIjpbXX0.k0DEt3QRKkgZnyV8X9mDf6VYyc8aOsIEfQbVN4Gi6Csr7O5ILLGFENXZouvplqbcMDdQ8gBMMLg5hIR38RmrTsKcWHMndq1T8wYkGZQfRhc_uZYLQhGQCaanf_F_-gnKocFwT1AKQJmAPkAbV-Itb2UzHeGpNuW8vV_TaNL3coaYvmM6rubwBuNYgyZhTHW_Mgvzh5-XBqqGpmQLm9TGl4gkeqnS-6a5PfoqRTc8v3CQWSCURFry5BA2oXz0lcWmq92FY5crr2KKv1O3chPr--oMba97elY0y9Dw0q2ipKcTm4pE7bbFP8t7-a_RKU4OyXuHRIQXjw3gEDCYXY5Hp22KMY0idnRIPhat6fybxcRfeyzUzdnubRBkDMNklwlgNCyeu2ROqEOYegtu5727Wwvy2I-xW-ZVoXg0rggVu7jVq6zmBqDFIcu50IS9R4P6a244pg2STlBaAGpzT2VfUqCBZrbtBOvdmdNzxSKIkl1AXeOIZOixo1186PX54p92ehXfCbcTgWrQSLuAAg_tBa6T7UFKFOGecVFo3v0vkmE__Q5-701f1qqcdDRNlOG-bzzFh9QLEdJWlpEajwYQ1ZjTAlbnBpKy3IrU0Aa-Jr0aqxtzgr5ZlghNtOcdYYRw5_BN0BOMmAnkvtm0_xzIJSsFbWJQJ8QpPk_n4zKZf-Y";
@@ -10,69 +12,58 @@ const ROBOTEVENTS_TOKEN =
 robotevents.authentication.setBearer(ROBOTEVENTS_TOKEN);
 
 export function useEvent(sku: string) {
-  return useQuery(
-    ["event", sku],
-    async () => {
+  return useQuery({
+    queryKey: ["event", sku],
+    queryFn: async () => {
       if (!sku) {
         return null;
       }
 
-      return await robotevents.events.get(sku);
+      const event = await robotevents.events.get(sku);
+      return event?.getData();
     },
-    { staleTime: 1000 * 60 * 60 }
-  );
+    staleTime: Infinity
+  })
 }
 
 export function useTeam(
   numberOrID: string | number | null | undefined,
   program?: ProgramAbbr
 ) {
-  return useQuery(
-    ["team", numberOrID],
-    async () => {
+  return useQuery({
+    queryKey: ["team", numberOrID],
+    queryFn: async () => {
       if (!numberOrID) {
         return null;
       }
 
-      return await robotevents.teams.get(numberOrID, program);
+      const team = await robotevents.teams.get(numberOrID, program);
+      return team?.getData();
     },
-    { staleTime: 1000 * 60 * 60 * 60 }
-  );
+    staleTime: 1000 * 60 * 60 * 4
+  })
 }
 
 export function useEventTeams(
-  event: robotevents.events.Event | null | undefined,
+  eventData: EventData | null | undefined,
   options?: TeamOptionsFromEvent
-): UseQueryResult<robotevents.teams.Team[]> {
-  return useQuery(
-    ["teams", event?.sku, options],
-    async () => {
-      if (!event) {
+): UseQueryResult<TeamData[]> {
+  return useQuery({
+    queryKey: ["teams", eventData?.sku, options],
+    queryFn: async () => {
+      if (!eventData) {
         return [];
       }
 
+      const event = new robotevents.events.Event(eventData);
       const teams = await event.teams({ registered: true, ...options });
-      return teams.array();
+      return teams.array().map(team => team.getData());
     },
-    { staleTime: 1000 * 60 }
-  );
-}
-
-export function useMatchTeams(match?: Match | null) {
-  return useQuery(["match_teams", match?.id], async () => {
-    if (!match) {
-      return null;
-    }
-
-    const teams = match.alliances
-      .map((alliance) => alliance.teams.map((t) => t.team.id))
-      .flat();
-
-    return robotevents.teams.search({ id: teams });
+    staleTime: 1000 * 60 * 60
   });
 }
 
-export function logicalMatchComparison(a: Match, b: Match) {
+export function logicalMatchComparison(a: MatchData, b: MatchData) {
   const roundOrder = [
     Round.Practice,
     Round.Qualification,
@@ -94,34 +85,37 @@ export function logicalMatchComparison(a: Match, b: Match) {
 }
 
 export function useEventMatches(
-  event: robotevents.events.Event | null | undefined,
+  eventData: EventData | null | undefined,
   division: number | null | undefined
-): UseQueryResult<Match[]> {
-  return useQuery(
-    ["matches", event?.sku, division],
-    async () => {
-      if (!event || !division) {
+): UseQueryResult<MatchData[]> {
+  return useQuery({
+    queryKey: ["matches", eventData?.sku, division],
+    queryFn: async () => {
+      if (!eventData || !division) {
         return [];
       }
+
+      const event = new robotevents.events.Event(eventData);
       const matches = await event.matches(division);
 
-      return matches.array().sort(logicalMatchComparison);
+      return matches.array().map(match => match.getData()).sort(logicalMatchComparison);
     },
-    { staleTime: 1000 * 30 }
-  );
-}
+    staleTime: 1000 * 60
+  });
+};
 
 export function useEventMatchesForTeam(
-  event: robotevents.events.Event | null | undefined,
-  team: Team | null | undefined,
+  event: EventData | null | undefined,
+  teamData: TeamData | null | undefined,
   color?: Color
 ) {
-  return useQuery(
-    ["team_matches", event?.sku, team?.number],
-    async () => {
-      if (!event || !team) {
+  return useQuery({
+    queryKey: ["team_matches", event?.sku, teamData?.number],
+    queryFn: async () => {
+      if (!event || !teamData) {
         return null;
       }
+      const team = new Team(teamData);
       let matches = (await team.matches({ event: [event.id] })).array();
 
       if (color) {
@@ -130,40 +124,72 @@ export function useEventMatchesForTeam(
         );
       }
 
-      return matches.sort(logicalMatchComparison);
+      return matches.map(match => match.getData()).sort(logicalMatchComparison);
     },
-    { staleTime: 1000 * 30 }
-  );
+    staleTime: 1000 * 60
+  });
+}
+
+
+
+export function useEventMatchesForTeamNumber(
+  event: EventData | null | undefined,
+  teamData: TeamData | null | undefined,
+  color?: Color
+) {
+  return useQuery({
+    queryKey: ["team_matches", event?.sku, teamData?.number],
+    queryFn: async () => {
+      if (!event || !teamData) {
+        return null;
+      }
+      const team = new Team(teamData);
+      let matches = (await team.matches({ event: [event.id] })).array();
+
+      if (color) {
+        matches = matches.filter((match) =>
+          match.alliance(color).teams.some((t) => t.team.id === team.id)
+        );
+      }
+
+      return matches.map(match => match.getData()).sort(logicalMatchComparison);
+    },
+    staleTime: 1000 * 60
+  });
+}
+
+export function useMatchTeams(match?: MatchData | null) {
+  return useMemo(() => {
+    if (!match) {
+      return null;
+    }
+
+    const teams = match.alliances
+      .map((alliance) => alliance.teams.map((t) => t.team.name))
+      .flat();
+
+    return teams
+  }, [match])
 }
 
 export function useEventMatch(
-  event: robotevents.events.Event | null | undefined,
+  event: EventData | null | undefined,
   division: number | null | undefined,
   match: number | null | undefined
-): UseQueryResult<Match | null> {
+): MatchData | null {
   const matches = useEventMatches(event, division);
-  return useQuery(
-    ["match", event?.sku, matches, division, match],
-    async () => {
-      if (!event || !division || !match) {
-        return null;
-      }
 
-      const matchArray = matches.data ?? [];
-      return matchArray.find((m) => m.id === match) ?? null;
-    },
-    { staleTime: 1000 * 30 }
-  );
+  const matchArray = matches.data ?? [];
+  return matchArray.find((m) => m.id === match) ?? null;
 }
 
-export function useEventsToday(): UseQueryResult<robotevents.events.Event[]> {
-  const currentSeasons = (["VRC", "VEXU", "VIQRC"] as const).map((program) =>
-    robotevents.seasons.current(program)
-  ) as number[];
-
-  return useQuery(
-    "events_today",
-    async () => {
+export function useEventsToday(): UseQueryResult<EventData[]> {
+  return useQuery({
+    queryKey: ["events_today"],
+    queryFn: async () => {
+      const currentSeasons = (["VRC", "VEXU", "VIQRC"] as const).map((program) =>
+        robotevents.seasons.current(program)
+      ) as number[];
       const today = new Date();
 
       const yesterday = new Date(today);
@@ -177,8 +203,9 @@ export function useEventsToday(): UseQueryResult<robotevents.events.Event[]> {
         season: currentSeasons,
       });
 
-      return events.sort((a, b) => a.name.localeCompare(b.name));
-    },
-    { staleTime: 1000 * 60 * 60 }
-  );
+      return events
+        .map(event => event.getData())
+        .sort((a, b) => a.name.localeCompare(b.name));
+    }
+  })
 }

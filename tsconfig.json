@@ -24,7 +24,8 @@
     "paths": {
       "~utils/*": ["./utils/*"],
       "~hooks/*": ["./utils/hooks/*"],
-      "~components/*": ["./components/*"]
+      "~components/*": ["./components/*"],
+      "~share/*": ["../worker/types/*"]
     }
   },
   "include": ["src", "node_modules/vite-plugin-pwa/client.d.ts"],

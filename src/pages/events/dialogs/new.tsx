@@ -24,7 +24,6 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 import { useAddRecentRules, useRecentRules } from "~utils/hooks/history";
 import { twMerge } from "tailwind-merge";
 import { toast } from "~components/Toast";
-import { Spinner } from "~components/Spinner";
 
 type Issue = {
   message: string;
@@ -56,7 +55,7 @@ function getIssues(incident: RichIncident): Issue[] {
 export type EventNewIncidentDialogProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
-  initialTeamId?: number | null;
+  initialTeamNumber?: string | null;
   initialMatchId?: number | null;
   preventSave?: boolean;
 };
@@ -65,7 +64,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   open,
   setOpen,
   initialMatchId,
-  initialTeamId,
+  initialTeamNumber,
   preventSave,
 }) => {
   const { mutate } = useNewIncident();
@@ -82,53 +81,40 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const { data: matches } = useEventMatches(event, division);
 
   // Load team and match data
-  const { data: initialTeam, isLoading: isLoadingInitialTeam } =
-    useTeam(initialTeamId);
-  const { data: initialMatch, isLoading: isLoadingInitialMatch } =
-    useEventMatch(event, division, initialMatchId);
-
-  const isLoadingInitial = isLoadingInitialMatch || isLoadingInitialTeam;
+  const initialMatch = useEventMatch(event, division, initialMatchId);
 
   // Initialise current team and match
-  const [team, setTeam] = useState(initialTeam);
-  const [match, setMatch] = useState(initialMatch);
+  const [team, setTeam] = useState(initialTeamNumber);
+  const [match, setMatch] = useState(initialMatch?.id);
 
-  const { data: teamMatches } = useEventMatchesForTeam(event, team);
+  const { data: teamData } = useTeam(team, event?.program.code);
+  const matchData = useEventMatch(event, division, match);
+  const { data: teamMatches } = useEventMatchesForTeam(event, teamData);
+
+  const teamMatchesInDivision = useMemo(() => {
+    return teamMatches?.filter((match) => match.division.id === division) ?? [];
+  }, [teamMatches]);
 
   const [incident, setIncident] = useState<RichIncident>({
     time: new Date(),
     division: division ?? 1,
     event: event?.sku ?? "",
-    team,
-    match,
+    team: teamData,
+    match: matchData,
     rules: [],
     notes: "",
     outcome: IncidentOutcome.Minor,
   });
 
   useEffect(() => {
-    setIncidentField("team", team);
-    setIncidentField("match", match);
-  }, [team, match]);
-
-  useEffect(() => {
-    if (initialMatch) {
-      setIncidentField("match", initialMatch);
-      setMatch(initialMatch);
-    }
-    if (initialTeam) {
-      setIncidentField("team", initialTeam);
-      setTeam(initialTeam);
-    }
-  }, [initialMatch, initialTeam]);
+    setIncidentField("team", teamData);
+    setIncidentField("match", matchData);
+  }, [teamData, matchData]);
 
   const issues = getIssues(incident);
 
   const canSave = useMemo(() => {
     if (preventSave) {
-      return false;
-    }
-    if (isLoadingInitial) {
       return false;
     }
     return issues.every((i) => i.type === "warning");
@@ -148,14 +134,12 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const newTeam = teams?.find((t) => t.number === e.target.value);
       if (e.target.value === "-1") {
-        setMatch(null);
-        setTeam(null);
+        setMatch(undefined);
+        setTeam(undefined);
       }
 
-      if (!newTeam) return;
-
       setIncidentField("team", newTeam);
-      setTeam(newTeam);
+      setTeam(newTeam?.number);
     },
     [teams]
   );
@@ -165,14 +149,14 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       const newMatch = matches?.find((m) => m.id.toString() === e.target.value);
 
       if (e.target.value === "-1") {
-        setMatch(null);
-        setTeam(null);
+        setMatch(undefined);
+        setTeam(undefined);
       }
 
       if (!newMatch) return;
 
       setIncidentField("match", newMatch);
-      setMatch(newMatch);
+      setMatch(newMatch.id);
     },
     [matches]
   );
@@ -240,17 +224,17 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     (e: React.FormEvent<HTMLFormElement> | React.MouseEvent) => {
       e.preventDefault();
       const packed = packIncident(incident);
+      setOpen(false);
       mutate(packed, {
         onSuccess: () => {
           // Do not reset match, for ease of use.
           setTeam(null);
 
-          setIncidentField("team", null);
+          setIncidentField("team", undefined);
           setIncidentField("notes", "");
           setIncidentField("rules", []);
           setIncidentField("outcome", IncidentOutcome.Minor);
           addRecentRules(incident.rules);
-          setOpen(false);
           toast({ type: "info", message: "Created Entry" });
         },
         onError: (error) => {
@@ -265,7 +249,6 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     <Dialog open={open} mode={DialogMode.Modal} onClose={() => setOpen(false)}>
       <DialogHeader title="New Report" onClose={() => setOpen(false)} />
       <DialogBody>
-        <Spinner show={isLoadingInitial} />
         {issues.map((issue) =>
           issue.type === "error" ? (
             <Error
@@ -289,11 +272,8 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             className="max-w-full w-full"
           >
             <option value={-1}>Pick A Match</option>
-            {initialMatch && (
-              <option value={initialMatch.id}>{initialMatch.name}</option>
-            )}
             {team &&
-              teamMatches?.map((match) => (
+              teamMatchesInDivision?.map((match) => (
                 <option value={match.id} key={match.id}>
                   {match.name}
                 </option>
@@ -321,10 +301,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             className="max-w-full w-full"
           >
             <option value={-1}>Pick A Team</option>
-            {initialTeam && (
-              <option value={initialTeam.id}>{initialTeam.number}</option>
-            )}
-            {match?.alliances.map((alliance) => (
+            {matchData?.alliances.map((alliance) => (
               <optgroup
                 key={alliance.color.toUpperCase()}
                 label={alliance.color.toUpperCase()}

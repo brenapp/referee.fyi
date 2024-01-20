@@ -5,16 +5,16 @@ import { useCallback, useMemo, useState } from "react";
 import { useCurrentEvent } from "~hooks/state";
 import { useTeamIncidentsByEvent } from "~hooks/incident";
 import { Tabs } from "~components/Tabs";
-import { Event } from "robotevents/out/endpoints/events";
-import { Team } from "robotevents/out/endpoints/teams";
+import { EventData } from "robotevents/out/endpoints/events";
+import { TeamData } from "robotevents/out/endpoints/teams";
 import { ClickableMatch } from "~components/ClickableMatch";
 import { EventMatchDialog } from "./dialogs/match";
-import { Match } from "robotevents/out/endpoints/matches";
+import { MatchData } from "robotevents/out/endpoints/matches";
 import { Incident } from "~components/Incident";
 
 type EventTeamsTabProps = {
-  event: Event | null | undefined;
-  team: Team | null | undefined;
+  event: EventData | null | undefined;
+  team: TeamData | null | undefined;
 };
 
 export const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({
@@ -27,7 +27,7 @@ export const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({
   const [division, setDivision] = useState(1);
   const [matchDialogOpen, setMatchDialogOpen] = useState(false);
 
-  const onClickMatch = useCallback((match: Match) => {
+  const onClickMatch = useCallback((match: MatchData) => {
     setMatchId(match.id);
     setDivision(match.division.id);
     setTimeout(() => {

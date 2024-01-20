@@ -8,7 +8,6 @@ import {
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 import { Select, TextArea } from "~components/Input";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Error, Warning } from "~components/Warning";
 import { Button, IconButton } from "~components/Button";
 import { MatchContext } from "~components/Context";
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
@@ -24,33 +23,7 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 import { useAddRecentRules, useRecentRules } from "~utils/hooks/history";
 import { twMerge } from "tailwind-merge";
 import { toast } from "~components/Toast";
-
-type Issue = {
-  message: string;
-  type: "warning" | "error";
-};
-
-function getIssues(incident: RichIncident): Issue[] {
-  const issues: Issue[] = [];
-
-  if (!incident.team && !incident.match) {
-    issues.push({
-      message: "Please select team or match",
-      type: "error",
-    });
-    return issues;
-  }
-
-  if (incident.match && !incident.team) {
-    issues.push({
-      message: "Pick a team",
-      type: "error",
-    });
-    return issues;
-  }
-
-  return issues;
-}
+import { Spinner } from "~components/Spinner";
 
 export type EventNewIncidentDialogProps = {
   open: boolean;
@@ -69,7 +42,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 }) => {
   const { mutate } = useNewIncident();
 
-  const { data: event } = useCurrentEvent();
+  const { data: event, isLoading: isLoadingEvent } = useCurrentEvent();
   const division = useCurrentDivision();
 
   const rules = useRulesForProgram(event?.program.code);
@@ -77,8 +50,11 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const { mutateAsync: addRecentRules } = useAddRecentRules();
 
   // Find all teams and matches at the event
-  const { data: teams } = useEventTeams(event);
-  const { data: matches } = useEventMatches(event, division);
+  const { data: teams, isLoading: isLoadingTeams } = useEventTeams(event);
+  const { data: matches, isLoading: isLoadingMatches } = useEventMatches(
+    event,
+    division
+  );
 
   // Load team and match data
   const initialMatch = useEventMatch(event, division, initialMatchId);
@@ -87,9 +63,20 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const [team, setTeam] = useState(initialTeamNumber);
   const [match, setMatch] = useState(initialMatch?.id);
 
-  const { data: teamData } = useTeam(team, event?.program.code);
+  const { data: teamData, isLoading: isLoadingTeamData } = useTeam(
+    team,
+    event?.program.code
+  );
   const matchData = useEventMatch(event, division, match);
-  const { data: teamMatches } = useEventMatchesForTeam(event, teamData);
+  const { data: teamMatches, isLoading: isLoadingTeamMatches } =
+    useEventMatchesForTeam(event, teamData);
+
+  const isLoadingMetaData =
+    isLoadingEvent ||
+    isLoadingTeams ||
+    isLoadingMatches ||
+    isLoadingTeamData ||
+    isLoadingTeamMatches;
 
   const teamMatchesInDivision = useMemo(() => {
     return teamMatches?.filter((match) => match.division.id === division) ?? [];
@@ -107,18 +94,27 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   });
 
   useEffect(() => {
+    setTeam(initialTeamNumber);
+  }, [initialTeamNumber]);
+
+  useEffect(() => {
+    setMatch(initialMatchId ?? undefined);
+  }, [initialMatchId]);
+
+  useEffect(() => {
     setIncidentField("team", teamData);
     setIncidentField("match", matchData);
   }, [teamData, matchData]);
-
-  const issues = getIssues(incident);
 
   const canSave = useMemo(() => {
     if (preventSave) {
       return false;
     }
-    return issues.every((i) => i.type === "warning");
-  }, [issues]);
+    if (isLoadingMetaData) {
+      return false;
+    }
+    return !!team;
+  }, [preventSave, isLoadingMetaData, team]);
 
   const setIncidentField = <T extends keyof RichIncident>(
     key: T,
@@ -249,21 +245,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     <Dialog open={open} mode={DialogMode.Modal} onClose={() => setOpen(false)}>
       <DialogHeader title="New Report" onClose={() => setOpen(false)} />
       <DialogBody>
-        {issues.map((issue) =>
-          issue.type === "error" ? (
-            <Error
-              message={issue.message}
-              className="mt-4"
-              key={issue.message}
-            />
-          ) : (
-            <Warning
-              message={issue.message}
-              className="mt-4"
-              key={issue.message}
-            />
-          )
-        )}
+        <Spinner show={isLoadingMetaData} />
         <label>
           <p className="mt-4">Match</p>
           <Select

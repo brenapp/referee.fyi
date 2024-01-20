@@ -96,6 +96,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
 
             return (
               <li
+                key={rule}
                 className={twMerge(
                   highlights[outcome],
                   "text-sm font-mono inline mx-1"
@@ -229,6 +230,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
               <section className="mt-4">
                 {incidentsByTeam?.map(({ team: number, incidents }) => (
                   <TeamSummary
+                    key={number}
                     number={number}
                     incidents={incidents}
                     currentMatch={match}

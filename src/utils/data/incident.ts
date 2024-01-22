@@ -17,7 +17,10 @@ export type Incident = {
   event: string; // SKU
   division: number; // division ID
 
-  match?: number; // match ID
+  match?: {
+    id: number;
+    name: string;
+  };
   team?: string; // team ID
 
   outcome: IncidentOutcome;
@@ -50,7 +53,10 @@ export type RichIncident = {
 export function packIncident(incident: RichIncident): Incident {
   return {
     ...incident,
-    match: incident.match?.id,
+    match: incident.match ? {
+      id: incident.match.id,
+      name: incident.match.name
+    } : undefined,
     team: incident.team?.number,
     rules: incident.rules.map((rule) => rule.rule),
   };

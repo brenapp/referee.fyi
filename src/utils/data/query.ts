@@ -15,7 +15,7 @@ export const queryClient = new QueryClient({
 });
 
 // Cache buster key, used to forcibly invalidate queries
-export const CACHE_BUSTER = "v1";
+export const CACHE_BUSTER = "v2";
 
 export function createIDBPersister(idbValidKey: IDBValidKey = "reactQuery") {
     return {

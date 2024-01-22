@@ -12,7 +12,10 @@ export type Incident = {
     event: string; // SKU
     division: number; // division ID
 
-    match?: number; // match ID
+    match?: {
+        name: string;
+        id: number;
+    };
     team?: string; // team number
 
     outcome: IncidentOutcome;

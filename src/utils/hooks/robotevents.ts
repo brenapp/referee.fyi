@@ -130,33 +130,6 @@ export function useEventMatchesForTeam(
   });
 }
 
-
-export function useEventMatchesForTeamNumber(
-  event: EventData | null | undefined,
-  teamData: TeamData | null | undefined,
-  color?: Color
-) {
-  return useQuery({
-    queryKey: ["team_matches", event?.sku, teamData?.number],
-    queryFn: async () => {
-      if (!event || !teamData) {
-        return null;
-      }
-      const team = new Team(teamData);
-      let matches = (await team.matches({ event: [event.id] })).array();
-
-      if (color) {
-        matches = matches.filter((match) =>
-          match.alliance(color).teams.some((t) => t.team.id === team.id)
-        );
-      }
-
-      return matches.map(match => match.getData()).sort(logicalMatchComparison);
-    },
-    staleTime: 1000 * 60
-  });
-}
-
 export function useMatchTeams(match?: MatchData | null) {
   return useMemo(() => {
     if (!match) {

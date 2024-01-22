@@ -35,7 +35,7 @@ export function useRecentEvents(limit?: number) {
       return events.slice(0, limit);
     },
     staleTime: 0,
-    refetchOnMount: "always"
+    refetchOnMount: "always",
   });
 }
 
@@ -47,16 +47,18 @@ export function useRecentRules(limit?: number) {
       return rules.slice(0, limit);
     },
     staleTime: 0,
-    refetchOnMount: "always"
-  })
+    refetchOnMount: "always",
+  });
 }
 
 export function useAddEventVisited() {
   return useMutation({
     mutationFn: async (event: EventData) => {
-      const events = (await getRecentEvents()).filter((e) => e.sku !== event.sku);
+      const events = (await getRecentEvents()).filter(
+        (e) => e.sku !== event.sku
+      );
       await set("event_history", [event, ...events]);
-    }
+    },
   });
 }
 
@@ -71,6 +73,6 @@ export function useAddRecentRules() {
         rules.every((b) => b.rule !== a.rule)
       );
       await set("rule_history", [...rules, ...recent]);
-    }
+    },
   });
 }

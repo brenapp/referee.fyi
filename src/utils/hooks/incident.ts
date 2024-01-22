@@ -20,7 +20,7 @@ export function useIncident(id: string | undefined | null) {
       }
       return getIncident(id);
     },
-    staleTime: 0
+    staleTime: 0,
   });
 }
 
@@ -30,7 +30,7 @@ export function useNewIncident() {
       const id = await newIncident(incident);
       await queryClient.invalidateQueries({ queryKey: ["incidents"] });
       return id;
-    }
+    },
   });
 }
 
@@ -43,7 +43,7 @@ export function useEventIncidents(sku: string | undefined | null) {
       }
       return getIncidentsByEvent(sku);
     },
-    staleTime: 0
+    staleTime: 0,
   });
 }
 
@@ -52,9 +52,9 @@ export function useDeleteIncident(id: string, updateRemote?: boolean) {
     mutationFn: async (_: unknown) => {
       await deleteIncident(id, updateRemote);
       await queryClient.invalidateQueries({ queryKey: ["incidents"] });
-    }
-  })
-};
+    },
+  });
+}
 
 export function useTeamIncidents(team: string | undefined | null) {
   return useQuery<IncidentWithID[]>({
@@ -65,7 +65,7 @@ export function useTeamIncidents(team: string | undefined | null) {
       }
       return getIncidentsByTeam(team);
     },
-    staleTime: 0
+    staleTime: 0,
   });
 }
 
@@ -73,24 +73,22 @@ export function useTeamIncidentsByEvent(
   team: string | undefined | null,
   sku: string | undefined | null
 ) {
-  return useQuery<IncidentWithID[]>(
-    {
-      queryKey: ["incidents", "team", team, "event", sku],
-      queryFn: async () => {
-        if (!team || !sku) {
-          return [];
-        }
+  return useQuery<IncidentWithID[]>({
+    queryKey: ["incidents", "team", team, "event", sku],
+    queryFn: async () => {
+      if (!team || !sku) {
+        return [];
+      }
 
-        const incidents = await getIncidentsByTeam(team);
-        if (!sku || !incidents) {
-          return [];
-        }
+      const incidents = await getIncidentsByTeam(team);
+      if (!sku || !incidents) {
+        return [];
+      }
 
-        return incidents.filter((incident) => incident.event === sku);
-      },
-      staleTime: 0
-    }
-  );
+      return incidents.filter((incident) => incident.event === sku);
+    },
+    staleTime: 0,
+  });
 }
 
 export type TeamIncidentsByMatch = {
@@ -104,7 +102,6 @@ export function useTeamIncidentsByMatch(
   return useQuery({
     queryKey: ["incidents", "match", matchData?.id],
     queryFn: async () => {
-
       if (!matchData) {
         return [];
       }
@@ -128,6 +125,6 @@ export function useTeamIncidentsByMatch(
 
       return incidentsByTeam;
     },
-    staleTime: 0
-  })
+    staleTime: 0,
+  });
 }

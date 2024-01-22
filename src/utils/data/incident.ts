@@ -53,10 +53,12 @@ export type RichIncident = {
 export function packIncident(incident: RichIncident): Incident {
   return {
     ...incident,
-    match: incident.match ? {
-      id: incident.match.id,
-      name: incident.match.name
-    } : undefined,
+    match: incident.match
+      ? {
+          id: incident.match.id,
+          name: incident.match.name,
+        }
+      : undefined,
     team: incident.team?.number,
     rules: incident.rules.map((rule) => rule.rule),
   };
@@ -179,7 +181,6 @@ export async function deleteIncident(
   if (updateRemote) {
     await deleteServerIncident(id, incident.event);
   }
-
 }
 
 export async function getAllIncidents(): Promise<IncidentWithID[]> {

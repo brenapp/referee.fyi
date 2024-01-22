@@ -1,8 +1,16 @@
 import * as robotevents from "robotevents";
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
-import { Round, type MatchData, Color } from "robotevents/out/endpoints/matches";
+import {
+  Round,
+  type MatchData,
+  Color,
+} from "robotevents/out/endpoints/matches";
 import { ProgramAbbr } from "robotevents/out/endpoints/programs";
-import { Team, TeamData, TeamOptionsFromEvent } from "robotevents/out/endpoints/teams";
+import {
+  Team,
+  TeamData,
+  TeamOptionsFromEvent,
+} from "robotevents/out/endpoints/teams";
 import { EventData } from "robotevents/out/endpoints/events";
 import { useMemo } from "react";
 
@@ -22,8 +30,8 @@ export function useEvent(sku: string) {
       const event = await robotevents.events.get(sku);
       return event?.getData();
     },
-    staleTime: Infinity
-  })
+    staleTime: Infinity,
+  });
 }
 
 export function useTeam(
@@ -40,8 +48,8 @@ export function useTeam(
       const team = await robotevents.teams.get(numberOrID, program);
       return team?.getData();
     },
-    staleTime: 1000 * 60 * 60 * 4
-  })
+    staleTime: 1000 * 60 * 60 * 4,
+  });
 }
 
 export function useEventTeams(
@@ -57,9 +65,9 @@ export function useEventTeams(
 
       const event = new robotevents.events.Event(eventData);
       const teams = await event.teams({ registered: true, ...options });
-      return teams.array().map(team => team.getData());
+      return teams.array().map((team) => team.getData());
     },
-    staleTime: 1000 * 60 * 60
+    staleTime: 1000 * 60 * 60,
   });
 }
 
@@ -98,11 +106,14 @@ export function useEventMatches(
       const event = new robotevents.events.Event(eventData);
       const matches = await event.matches(division);
 
-      return matches.array().map(match => match.getData()).sort(logicalMatchComparison);
+      return matches
+        .array()
+        .map((match) => match.getData())
+        .sort(logicalMatchComparison);
     },
-    staleTime: 1000 * 60
+    staleTime: 1000 * 60,
   });
-};
+}
 
 export function useEventMatchesForTeam(
   event: EventData | null | undefined,
@@ -124,36 +135,11 @@ export function useEventMatchesForTeam(
         );
       }
 
-      return matches.map(match => match.getData()).sort(logicalMatchComparison);
+      return matches
+        .map((match) => match.getData())
+        .sort(logicalMatchComparison);
     },
-    staleTime: 1000 * 60
-  });
-}
-
-
-export function useEventMatchesForTeamNumber(
-  event: EventData | null | undefined,
-  teamData: TeamData | null | undefined,
-  color?: Color
-) {
-  return useQuery({
-    queryKey: ["team_matches", event?.sku, teamData?.number],
-    queryFn: async () => {
-      if (!event || !teamData) {
-        return null;
-      }
-      const team = new Team(teamData);
-      let matches = (await team.matches({ event: [event.id] })).array();
-
-      if (color) {
-        matches = matches.filter((match) =>
-          match.alliance(color).teams.some((t) => t.team.id === team.id)
-        );
-      }
-
-      return matches.map(match => match.getData()).sort(logicalMatchComparison);
-    },
-    staleTime: 1000 * 60
+    staleTime: 1000 * 60,
   });
 }
 
@@ -167,8 +153,8 @@ export function useMatchTeams(match?: MatchData | null) {
       .map((alliance) => alliance.teams.map((t) => t.team.name))
       .flat();
 
-    return teams
-  }, [match])
+    return teams;
+  }, [match]);
 }
 
 export function useEventMatch(
@@ -182,22 +168,25 @@ export function useEventMatch(
   return matchArray.find((m) => m.id === match) ?? null;
 }
 
-export function useEventTeam(event: EventData | null | undefined, number: string | null | undefined) {
+export function useEventTeam(
+  event: EventData | null | undefined,
+  number: string | null | undefined
+) {
   const { data: teams } = useEventTeams(event);
 
   if (!number) {
     return undefined;
   }
 
-  return teams?.find(team => team.number === number);
-};
+  return teams?.find((team) => team.number === number);
+}
 
 export function useEventsToday(): UseQueryResult<EventData[]> {
   return useQuery({
     queryKey: ["events_today"],
     queryFn: async () => {
-      const currentSeasons = (["VRC", "VEXU", "VIQRC"] as const).map((program) =>
-        robotevents.seasons.current(program)
+      const currentSeasons = (["VRC", "VEXU", "VIQRC"] as const).map(
+        (program) => robotevents.seasons.current(program)
       ) as number[];
       const today = new Date();
 
@@ -213,8 +202,8 @@ export function useEventsToday(): UseQueryResult<EventData[]> {
       });
 
       return events
-        .map(event => event.getData())
+        .map((event) => event.getData())
         .sort((a, b) => a.name.localeCompare(b.name));
-    }
-  })
+    },
+  });
 }

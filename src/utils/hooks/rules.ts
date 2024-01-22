@@ -34,8 +34,8 @@ export function useRules(): UseQueryResult<Rules> {
       }
       return response.json() as Promise<Rules>;
     },
-    staleTime: 1000 * 60 * 60 * 24
-  })
+    staleTime: 1000 * 60 * 60 * 24,
+  });
 }
 
 export function useGameRules(game: string): Game | undefined {

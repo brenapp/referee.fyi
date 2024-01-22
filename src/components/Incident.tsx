@@ -1,6 +1,5 @@
 import { twMerge } from "tailwind-merge";
 import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
-import { useEvent, useEventMatch } from "~utils/hooks/robotevents";
 import { IconButton } from "./Button";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { useDeleteIncident } from "~utils/hooks/incident";
@@ -16,11 +15,7 @@ export type IncidentProps = {
 } & React.HTMLProps<HTMLDivElement>;
 
 export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
-  const { data: event } = useEvent(incident.event);
-  const match = useEventMatch(event, incident.division, incident.match);
-
   const { mutate: onClickDelete } = useDeleteIncident(incident.id);
-
   return (
     <>
       <div
@@ -35,7 +30,7 @@ export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
           <p className="text-sm">
             {[
               incident.team,
-              match?.name ?? "Event-Wide",
+              incident.match?.name ?? "Event-Wide",
               IncidentOutcome[incident.outcome],
             ].join(" • ")}
           </p>

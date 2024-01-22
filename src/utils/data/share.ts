@@ -21,7 +21,9 @@ import { toast } from "~components/Toast";
 import { queryClient } from "./query";
 import { EventEmitter } from "events";
 
-const URL_BASE = import.meta.env.DEV ? "http://localhost:8787" : "https://referee-fyi-share.bren.workers.dev";
+const URL_BASE = import.meta.env.DEV
+  ? "http://localhost:8787"
+  : "https://referee-fyi-share.bren.workers.dev";
 
 export async function getShareData(sku: string, code: string) {
   const response = await fetch(
@@ -32,25 +34,25 @@ export async function getShareData(sku: string, code: string) {
     return null;
   }
 
-  return response.json() as Promise<ShareResponse<WebSocketServerShareInfoMessage>>;
-
-};
+  return response.json() as Promise<
+    ShareResponse<WebSocketServerShareInfoMessage>
+  >;
+}
 
 export type JoinShareOptions = {
   sku: string;
-  code: string
+  code: string;
 };
 
 export async function joinShare({ sku, code }: JoinShareOptions) {
   await set(`share_${sku}`, code);
   queryClient.invalidateQueries({ queryKey: ["share_code"] });
-};
+}
 
 export async function leaveShare(sku: string) {
   await del(`share_${sku}`);
   queryClient.invalidateQueries({ queryKey: ["share_code"] });
-};
-
+}
 
 export async function createShare(
   incidents: EventIncidents
@@ -68,11 +70,11 @@ export async function createShare(
       return response.json();
     }
 
-    const body = await response.json() as ShareResponse<CreateShareResponse>;
+    const body = (await response.json()) as ShareResponse<CreateShareResponse>;
 
     if (!body.success) {
       return body;
-    };
+    }
 
     await set(`share_${incidents.sku}`, body.data.code);
     queryClient.invalidateQueries({ queryKey: ["share_code"] });
@@ -87,7 +89,6 @@ export async function createShare(
   }
 }
 
-
 export async function addServerIncident(incident: IncidentWithID) {
   const code = await get<string>(`share_${incident.event}`);
   const userId = await ShareConnection.getUserId();
@@ -97,7 +98,8 @@ export async function addServerIncident(incident: IncidentWithID) {
   }
 
   const url = new URL(
-    `/api/share/${incident.event}/${code}/incident`, URL_BASE
+    `/api/share/${incident.event}/${code}/incident`,
+    URL_BASE
   );
 
   url.searchParams.set("user_id", userId);
@@ -117,7 +119,8 @@ export async function editServerIncident(incident: IncidentWithID) {
   }
 
   const url = new URL(
-    `/api/share/${incident.event}/${code}/incident`, URL_BASE
+    `/api/share/${incident.event}/${code}/incident`,
+    URL_BASE
   );
 
   url.searchParams.set("user_id", userId);
@@ -164,8 +167,6 @@ export interface ShareConnection {
   ): this;
 }
 
-
-
 export class ShareConnection extends EventEmitter {
   ws: WebSocket | null = null;
 
@@ -175,10 +176,9 @@ export class ShareConnection extends EventEmitter {
   user: ShareUser | null = null;
   owner: string | null = null;
 
-  users: string[] = []
+  users: string[] = [];
 
   public setup(sku: string, code: string, user: Omit<ShareUser, "id">) {
-
     if (this.sku === sku && this.code === code) {
       return;
     }
@@ -289,9 +289,9 @@ export class ShareConnection extends EventEmitter {
         }
         case "server_user_remove": {
           toast({ type: "warn", message: `${data.user} left.` });
-          const index = this.users.findIndex(u => u === data.user);
+          const index = this.users.findIndex((u) => u === data.user);
           if (index > -1) {
-            this.users.splice(index, 1)
+            this.users.splice(index, 1);
           }
           break;
         }
@@ -303,9 +303,8 @@ export class ShareConnection extends EventEmitter {
         }
       }
 
-      this.emit("message", data)
-
-    } catch (e) { }
+      this.emit("message", data);
+    } catch (e) {}
   }
 
   public cleanup() {

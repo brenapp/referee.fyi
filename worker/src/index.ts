@@ -13,6 +13,14 @@ export const { preflight, corsify } = createCors({
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"]
 });
 
+async function logFailedRequests(request: Request, response: Response): Promise<Response> {
+    if (!response.ok) {
+        console.log(`${request.url},${await response.text()}`);
+    }
+    return response;
+};
+
+
 const router = Router<IRequest, [Env]>();
 
 router
@@ -87,7 +95,7 @@ router
 
 export default {
     async fetch(request: Request, env: Env): Promise<Response> {
-        return router.handle(request, env).then(json).catch(error).then(corsify);
+        return router.handle(request, env).then(json).catch(error).then(corsify).then(response => logFailedRequests(request, response));
     }
 }
 

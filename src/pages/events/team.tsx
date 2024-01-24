@@ -11,6 +11,9 @@ import { ClickableMatch } from "~components/ClickableMatch";
 import { EventMatchDialog } from "./dialogs/match";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { Incident } from "~components/Incident";
+import { EventNewIncidentDialog } from "./dialogs/new";
+import { Button } from "~components/Button";
+import { FlagIcon } from "@heroicons/react/20/solid";
 
 type EventTeamsTabProps = {
   event: EventData | null | undefined;
@@ -86,6 +89,8 @@ export const EventTeamsPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
   const { data: team, isLoading } = useTeam(number ?? "", event?.program.code);
 
+  const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
+
   const teamLocation = useMemo(() => {
     if (!team) return null;
     return [team?.location.city, team?.location.region, team?.location.country]
@@ -95,6 +100,11 @@ export const EventTeamsPage: React.FC = () => {
 
   return (
     <section>
+      <EventNewIncidentDialog
+        open={incidentDialogOpen}
+        setOpen={setIncidentDialogOpen}
+        initialTeamNumber={number}
+      />
       <Spinner show={isLoading} />
       {team && (
         <header className="p-4">
@@ -108,6 +118,13 @@ export const EventTeamsPage: React.FC = () => {
         </header>
       )}
       <section>
+        <Button
+          onClick={() => setIncidentDialogOpen(true)}
+          className="w-full text-center bg-emerald-600"
+        >
+          <FlagIcon height={20} className="inline mr-2 " />
+          New Entry
+        </Button>
         <Tabs>
           {{
             Schedule: <EventTeamsMatches event={event} team={team} />,

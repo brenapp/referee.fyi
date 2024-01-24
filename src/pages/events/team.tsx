@@ -108,6 +108,13 @@ export const EventTeamsPage: React.FC = () => {
       <Spinner show={isLoading} />
       {team && (
         <header className="p-4">
+          <Button
+            onClick={() => setIncidentDialogOpen(true)}
+            className="w-full text-center bg-emerald-600"
+          >
+            <FlagIcon height={20} className="inline mr-2 " />
+            New Entry
+          </Button>
           <h1 className="text-xl overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose">
             <span className="font-mono text-emerald-400">{team?.number}</span>
             {" • "}
@@ -118,13 +125,6 @@ export const EventTeamsPage: React.FC = () => {
         </header>
       )}
       <section>
-        <Button
-          onClick={() => setIncidentDialogOpen(true)}
-          className="w-full text-center bg-emerald-600"
-        >
-          <FlagIcon height={20} className="inline mr-2 " />
-          New Entry
-        </Button>
         <Tabs>
           {{
             Schedule: <EventTeamsMatches event={event} team={team} />,

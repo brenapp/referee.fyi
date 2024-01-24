@@ -7,7 +7,7 @@ import { useDeleteIncident } from "~utils/hooks/incident";
 const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
   [IncidentOutcome.Minor]: "bg-yellow-400 text-yellow-900",
   [IncidentOutcome.Major]: "bg-red-400 text-red-900",
-  [IncidentOutcome.Disabled]: "bg-zinc-900",
+  [IncidentOutcome.Disabled]: "bg-yellow-400 text-yellow-900",
 };
 
 export type IncidentProps = {

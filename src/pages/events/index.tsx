@@ -197,7 +197,11 @@ const EventMatchesTab: React.FC<MainTabProps> = ({ event }) => {
 const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
   const [deleteDataDialogOpen, setDeleteDataDialogOpen] = useState(false);
 
-  const [shareName, setName] = useShareName();
+  const {
+    name: shareName,
+    setName,
+    persist: persistShareName,
+  } = useShareName();
   const shareNameId = useId();
 
   const { data: shareCode } = useShareCode(event.sku);
@@ -304,6 +308,7 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
                   required
                   value={shareName}
                   onChange={(e) => setName(e.currentTarget.value)}
+                  onBlur={persistShareName}
                   className="w-full"
                 />
               </label>

@@ -17,7 +17,6 @@ import {
 import { queryClient } from "~utils/data/query";
 import { ShareConnection, createShare, getShareData } from "~utils/data/share";
 import { useCurrentEvent } from "./state";
-import { useDebounce } from "./debounce";
 
 const connection = new ShareConnection();
 const ShareContext = createContext(connection);
@@ -26,7 +25,7 @@ export const ShareProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const { data: event } = useCurrentEvent();
   const { data: code } = useShareCode(event?.sku);
 
-  const [name] = useShareName();
+  const { name } = useShareName();
 
   useEffect(() => {
     if (event && code && name) {
@@ -44,35 +43,25 @@ export function useShareConnection() {
 }
 
 export function useShareName() {
+  const [name, setName] = useState("");
+
   const query = useQuery({
     queryKey: ["share_name"],
-    queryFn: async () => {
-      const value = await get<string>("share_name");
-      return value ?? "";
-    },
-    staleTime: 0,
+    queryFn: () => get<string>("share_name"),
   });
 
-  const persist = useCallback(async (value: string) => {
-    await set(`share_name`, value);
-    queryClient.invalidateQueries({ queryKey: ["share_name"] });
-  }, []);
-
-  const debouncedPersist = useDebounce(persist, 500);
-
-  const setName: React.Dispatch<React.SetStateAction<string>> = (param) => {
-    const value = param instanceof Function ? param(query.data ?? "") : param;
-    setValue(value);
-    debouncedPersist(value);
-  };
-
   useEffect(() => {
-    setValue(query.data ?? "");
+    if (query.isSuccess && query.data) {
+      setName(query.data);
+    }
   }, [query.data]);
 
-  const [value, setValue] = useState<string>(query.data ?? "");
+  const persist = useCallback(async () => {
+    await set("share_name", name);
+    queryClient.invalidateQueries({ exact: true, queryKey: ["share_name"] });
+  }, [name]);
 
-  return [value, setName] as const;
+  return { name, setName, persist };
 }
 
 export function useCreateShare() {

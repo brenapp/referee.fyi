@@ -191,6 +191,8 @@ export class ShareConnection extends EventEmitter {
     return this.connect(user);
   }
 
+  static reconnectTimer?: NodeJS.Timeout = undefined;
+
   public static async getUserId() {
     const code = await get<string>("user_id");
 
@@ -223,7 +225,12 @@ export class ShareConnection extends EventEmitter {
     this.ws.onmessage = this.handleMessage.bind(this);
 
     this.ws.onopen = () => this.emit("connect");
-    this.ws.onclose = () => this.emit("disconnect");
+    this.ws.onclose = () => {
+      toast({ type: "error", message: "Reconnecting to socket..." });
+      clearTimeout(ShareConnection.reconnectTimer);
+      ShareConnection.reconnectTimer = setTimeout(() => this.connect(user), 5000);
+      this.emit("disconnect");
+    }
   }
 
   async send(message: WebSocketPeerMessage) {
@@ -304,7 +311,7 @@ export class ShareConnection extends EventEmitter {
       }
 
       this.emit("message", data);
-    } catch (e) {}
+    } catch (e) { }
   }
 
   public cleanup() {

@@ -1,6 +1,6 @@
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
 import { useEventMatch, useEventMatches } from "~hooks/robotevents";
-import { Button, IconButton } from "~components/Button";
+import { Button } from "~components/Button";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -104,11 +104,13 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
             );
           })}
         </ul>
-        <IconButton
-          className="bg-emerald-600 active:bg-black/10 p-2"
+        <Button
+          className="bg-emerald-600 active:bg-black/10 p-2 flex items-center"
           onClick={onClickFlag}
-          icon={<FlagIcon height={20} />}
-        />
+        >
+          <FlagIcon height={20} className="mr-2" />
+          <span>New</span>
+        </Button>
       </summary>
       {incidents.map((incident) => (
         <Incident incident={incident} key={incident.id} />

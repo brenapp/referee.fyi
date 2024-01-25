@@ -1,7 +1,7 @@
 import { Router } from "itty-router"
-import { ShareUser, type EventIncidents as EventIncidentsData, Incident } from "../types/EventIncidents"
+import type { ShareUser, EventIncidents as EventIncidentsData, Incident, IncidentOutcome } from "../types/EventIncidents"
 import { corsHeaders, response } from "./utils"
-import { WebSocketMessage, WebSocketMessageData, WebSocketPayload, WebSocketPeerMessage, WebSocketSender, WebSocketServerMessage, WebSocketServerShareInfoMessage } from "../types/api";
+import type { WebSocketMessage, WebSocketPayload, WebSocketPeerMessage, WebSocketSender, WebSocketServerShareInfoMessage } from "../types/api";
 
 export type SessionClient = {
     user: ShareUser;
@@ -27,6 +27,7 @@ export class EventIncidents implements DurableObject {
         this.router
             .get("/join", this.handleWebsocket.bind(this))
             .get("/get", this.handleGet.bind(this))
+            .get("/csv", this.handleCSV.bind(this))
             .post("/init", this.handleInit.bind(this))
             .get("/incident", () => response({ success: true, data: "success" }))
             .put("/incident", this.handleAddIncident.bind(this))
@@ -56,8 +57,7 @@ export class EventIncidents implements DurableObject {
         await this.state.blockConcurrencyWhile(async () => {
             await this.state.storage.put(incident.id, incident);
             const list = await this.state.storage.get<string[]>("incidents") ?? [];
-            list.push(incident.id);
-            await this.state.storage.put("incidents", list);
+            await this.state.storage.put("incidents", [...list, incident.id]);
         });
     };
 
@@ -120,7 +120,6 @@ export class EventIncidents implements DurableObject {
     };
 
     async fetch(request: Request) {
-        console.log(request);
         return this.router.handle(request);
     }
 
@@ -143,34 +142,51 @@ export class EventIncidents implements DurableObject {
         })
     };
 
+    async handleCSV(request: Request) {
+        const incidents = await this.getAllIncidents();
+
+        const outcome: Record<IncidentOutcome, string> = {
+            [0]: "Minor",
+            [1]: "Major",
+            [2]: "Disabled"
+        };
+
+        let output = "Date,Time,ID,SKU,Division,Match,Team,Outcome,Rules,Notes\n";
+
+        output += incidents.map(incident => {
+            return [
+                new Date(incident.time).toLocaleDateString(),
+                new Date(incident.time).toLocaleTimeString(),
+                incident.id,
+                incident.event,
+                incident.division,
+                incident.match?.name,
+                incident.team,
+                outcome[incident.outcome],
+                incident.rules.join(" "),
+                incident.notes
+            ].join(",")
+        }).join("\n");
+
+        const response = new Response(output, { headers: corsHeaders });
+        return response;
+    }
+
+
     async handleAddIncident(request: Request) {
 
         const params = new URL(request.url).searchParams;
 
-        // user id
         const userId = params.get("user_id");
-
-        if (!userId) {
-            return response({
-                success: false,
-                reason: "bad_request",
-                details: "Must specify user_id"
-            })
-        }
-
         const client = this.clients.find(client => client.user.id === userId);
 
-        if (!client) {
-            return response({
-                success: false,
-                reason: "incorrect_code",
-                details: "User id must be a current websocket client"
-            })
-        };
+        const sender: WebSocketSender = client ? {
+            type: "client", name: client.user.name
+        } : { type: "server" };
 
         const incident = await request.json<Incident>();
         await this.addIncident(incident);
-        await this.broadcast({ type: "add_incident", incident }, { type: "client", name: client.user.name });
+        await this.broadcast({ type: "add_incident", incident }, sender);
 
         return response({
             success: true,
@@ -183,26 +199,12 @@ export class EventIncidents implements DurableObject {
 
         const params = new URL(request.url).searchParams;
 
-        // user id
         const userId = params.get("user_id");
-
-        if (!userId) {
-            return response({
-                success: false,
-                reason: "bad_request",
-                details: "Must specify user_id"
-            })
-        }
-
         const client = this.clients.find(client => client.user.id === userId);
 
-        if (!client) {
-            return response({
-                success: false,
-                reason: "incorrect_code",
-                details: "User id must be a current websocket client"
-            })
-        };
+        const sender: WebSocketSender = client ? {
+            type: "client", name: client.user.name
+        } : { type: "server" };
 
         const success = await this.editIncident(incident);
 
@@ -214,7 +216,7 @@ export class EventIncidents implements DurableObject {
             }))
         }
 
-        await this.broadcast({ type: "update_incident", incident }, { type: "client", name: client.user.name });
+        await this.broadcast({ type: "update_incident", incident }, sender);
 
         return response({
             success: true,
@@ -225,26 +227,12 @@ export class EventIncidents implements DurableObject {
     async handleDeleteIncident(request: Request) {
         const params = new URL(request.url).searchParams;
 
-        // user id
         const userId = params.get("user_id");
-
-        if (!userId) {
-            return response({
-                success: false,
-                reason: "bad_request",
-                details: "Must specify user_id"
-            })
-        }
-
         const client = this.clients.find(client => client.user.id === userId);
 
-        if (!client) {
-            return response({
-                success: false,
-                reason: "incorrect_code",
-                details: "User user_id must be a current websocket client"
-            })
-        };
+        const sender: WebSocketSender = client ? {
+            type: "client", name: client.user.name
+        } : { type: "server" };
 
         const id = params.get("id");
 
@@ -266,7 +254,7 @@ export class EventIncidents implements DurableObject {
             })
         }
 
-        this.broadcast({ type: "remove_incident", id }, { type: "client", name: client.user.name });
+        this.broadcast({ type: "remove_incident", id }, sender);
 
         return response({
             success: true,

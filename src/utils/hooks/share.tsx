@@ -47,7 +47,7 @@ export function useShareName() {
 
   const query = useQuery({
     queryKey: ["share_name"],
-    queryFn: () => get<string>("share_name"),
+    queryFn: async () => (await get<string>("share_name")) ?? "",
   });
 
   useEffect(() => {

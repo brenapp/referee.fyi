@@ -65,7 +65,7 @@ export const EventJoinPage: React.FC = () => {
     }
   }, [event, isActiveCode]);
 
-  const [shareName, setName] = useShareName();
+  const { name: shareName, setName, persist } = useShareName();
   const shareNameId = useId();
 
   const shareId = useId();
@@ -79,6 +79,7 @@ export const EventJoinPage: React.FC = () => {
           required
           value={shareName}
           onChange={(e) => setName(e.currentTarget.value)}
+          onBlur={persist}
           className="w-full"
         />
       </label>

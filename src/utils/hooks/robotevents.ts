@@ -1,5 +1,5 @@
 import * as robotevents from "robotevents";
-import { UseQueryResult, useQuery } from "@tanstack/react-query";
+import { UndefinedInitialDataOptions, UseQueryResult, useQuery } from "@tanstack/react-query";
 import {
   Round,
   type MatchData,
@@ -71,6 +71,52 @@ export function useEventTeams(
   });
 }
 
+type UseDivisionTeamsResult = {
+  teams: TeamData[];
+  divisionOnly: boolean;
+};
+
+export function useDivisionTeams(eventData: EventData | null | undefined, division: number | null | undefined) {
+  const { data: teams, isSuccess: isTeamsSuccess } = useEventTeams(eventData);
+  const { data: matches, isSuccess: isMatchesSuccess } = useEventMatches(eventData, division);
+
+  return useQuery<UseDivisionTeamsResult>({
+    queryKey: ["division_teams", eventData?.sku, division],
+    queryFn: async () => {
+      if (!eventData || !division) {
+        return { teams: [], divisionOnly: false };
+      }
+
+      const event = new robotevents.events.Event(eventData);
+
+      // "Overall Finals" division IDs, which won't have rankings. Instead, get teams from the matches
+      if (division > 10) {
+        const ids = matches?.map(m => m.alliances.flatMap(a => a.teams.map(t => t.team.id))).flat() ?? []
+        const divisionTeams = teams?.filter(t => ids.includes(t.id)) ?? [];
+
+        return {
+          divisionOnly: true,
+          teams: divisionTeams
+        }
+      };
+
+      const rankings = await event.rankings(division);
+
+      if (rankings.size < 1) {
+        return { divisionOnly: false, teams: teams! };
+      }
+
+      const divisionTeams = teams?.filter(t => rankings.some(r => r.team.id === t.id)) ?? [];
+      return {
+        divisionOnly: true,
+        teams: divisionTeams
+      }
+    },
+    staleTime: 1000 * 60 * 60,
+    enabled: isTeamsSuccess && isMatchesSuccess
+  });
+};
+
 export function logicalMatchComparison(a: MatchData, b: MatchData) {
   const roundOrder = [
     Round.Practice,
@@ -94,7 +140,8 @@ export function logicalMatchComparison(a: MatchData, b: MatchData) {
 
 export function useEventMatches(
   eventData: EventData | null | undefined,
-  division: number | null | undefined
+  division: number | null | undefined,
+  options?: UndefinedInitialDataOptions<MatchData[]>
 ): UseQueryResult<MatchData[]> {
   return useQuery({
     queryKey: ["matches", eventData?.sku, division],
@@ -112,19 +159,21 @@ export function useEventMatches(
         .sort(logicalMatchComparison);
     },
     staleTime: 1000 * 60,
+    ...options
   });
 }
 
 export function useEventMatchesForTeam(
   event: EventData | null | undefined,
   teamData: TeamData | null | undefined,
-  color?: Color
+  color?: Color,
+  options?: UndefinedInitialDataOptions<MatchData[]>
 ) {
   return useQuery({
     queryKey: ["team_matches", event?.sku, teamData?.number],
     queryFn: async () => {
       if (!event || !teamData) {
-        return null;
+        return [];
       }
       const team = new Team(teamData);
       let matches = (await team.matches({ event: [event.id] })).array();
@@ -140,6 +189,7 @@ export function useEventMatchesForTeam(
         .sort(logicalMatchComparison);
     },
     staleTime: 1000 * 60,
+    ...options
   });
 }
 

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useEventMatches, useEventTeams } from "~hooks/robotevents";
+import { useDivisionTeams, useEventMatches } from "~hooks/robotevents";
 import { Spinner } from "~components/Spinner";
 import { Tabs } from "~components/Tabs";
 import { EventData } from "robotevents/out/endpoints/events";
@@ -22,7 +22,7 @@ import { EventNewIncidentDialog } from "./dialogs/new";
 import { EventMatchDialog } from "./dialogs/match";
 import { ClickableMatch } from "~components/ClickableMatch";
 import { Dialog, DialogBody } from "~components/Dialog";
-import { DialogMode } from "~components/constants";
+import { ButtonMode, DialogMode } from "~components/constants";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { useAddEventVisited } from "~utils/hooks/history";
@@ -43,9 +43,15 @@ export type MainTabProps = {
 };
 
 const EventTeamsTab: React.FC<MainTabProps> = ({ event }) => {
-  const { data: teams, isLoading } = useEventTeams(event);
-
+  const division = useCurrentDivision();
+  const {
+    data: divisionTeams,
+    isLoading,
+    isPaused,
+  } = useDivisionTeams(event, division);
   const { data: incidents } = useEventIncidents(event.sku);
+
+  const teams = divisionTeams?.teams ?? [];
 
   const majorIncidents = useMemo(() => {
     if (!incidents) return new Map<string, number>();
@@ -79,7 +85,7 @@ const EventTeamsTab: React.FC<MainTabProps> = ({ event }) => {
 
   return (
     <section className="flex-1">
-      <Spinner show={isLoading} />
+      <Spinner show={isLoading || isPaused} />
       <AutoSizer>
         {(size) => (
           <List
@@ -308,7 +314,8 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
                 />
               </label>
               <Button
-                className="w-full mt-4 bg-emerald-400 disabled:bg-zinc-400 text-center"
+                className="disabled:bg-zinc-400 mt-4"
+                mode={ButtonMode.Primary}
                 disabled={!shareName}
                 onClick={onClickShare}
               >
@@ -380,7 +387,7 @@ export const EventPage: React.FC = () => {
       <section className="mt-4 flex flex-col">
         <Button
           onClick={() => setIncidentDialogOpen(true)}
-          className="w-full text-center bg-emerald-600"
+          mode={ButtonMode.Primary}
         >
           <FlagIcon height={20} className="inline mr-2 " />
           New Entry

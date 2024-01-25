@@ -14,6 +14,7 @@ import { Incident } from "~components/Incident";
 import { EventNewIncidentDialog } from "./dialogs/new";
 import { Button } from "~components/Button";
 import { FlagIcon } from "@heroicons/react/20/solid";
+import { ButtonMode } from "~components/constants";
 
 type EventTeamsTabProps = {
   event: EventData | null | undefined;
@@ -107,20 +108,19 @@ export const EventTeamsPage: React.FC = () => {
       />
       <Spinner show={isLoading} />
       {team && (
-        <header className="p-4">
+        <header className="mt-4">
           <Button
             onClick={() => setIncidentDialogOpen(true)}
-            className="w-full text-center bg-emerald-600"
+            mode={ButtonMode.Primary}
           >
             <FlagIcon height={20} className="inline mr-2 " />
             New Entry
           </Button>
-          <h1 className="text-xl overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose">
+          <h1 className="text-xl overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose mt-4">
             <span className="font-mono text-emerald-400">{team?.number}</span>
             {" • "}
             <span className="">{team.team_name}</span>
           </h1>
-
           <p className="italic">{teamLocation}</p>
         </header>
       )}

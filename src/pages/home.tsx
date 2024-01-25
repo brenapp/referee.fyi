@@ -1,8 +1,8 @@
-import { LinkButton } from "~components/Button";
+import { Button, LinkButton } from "~components/Button";
 import { useRecentEvents } from "~utils/hooks/history";
 import { useEffect, useState } from "react";
 import { Dialog, DialogHeader, DialogBody } from "~components/Dialog";
-import { DialogMode } from "~components/constants";
+import { ButtonMode, DialogMode } from "~components/constants";
 import Markdown from "react-markdown";
 import pjson from "../../package.json";
 import "./markdown.css";
@@ -40,12 +40,13 @@ export const HomePage: React.FC = () => {
     <>
       <div>
         <aside className="text-right">
-          <button
-            className="bg-emerald-900 text-right ml-auto mt-4 py-1 px-3 rounded-md"
+          <Button
+            mode={ButtonMode.Primary}
+            className="text-right ml-auto w-max mt-4"
             onClick={() => setUpdateDialogOpen(true)}
           >
-            View Update Notes
-          </button>
+            Update Notes
+          </Button>
         </aside>
 
         <section className="max-w-full">

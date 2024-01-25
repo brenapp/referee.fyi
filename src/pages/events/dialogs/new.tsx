@@ -45,8 +45,10 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const division = useCurrentDivision();
 
   const rules = useRulesForProgram(event?.program.code);
-  const { data: recentRules } = useRecentRules(4);
-  const { mutateAsync: addRecentRules } = useAddRecentRules();
+  const { data: recentRules } = useRecentRules(event?.program.code ?? "VRC", 4);
+  const { mutateAsync: addRecentRules } = useAddRecentRules(
+    event?.program.code ?? "VRC"
+  );
 
   // Find all teams and matches at the event
   const { data: teams, isLoading: isLoadingTeams } = useEventTeams(event);

@@ -15,7 +15,7 @@ import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
 import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
-import { DialogMode } from "~components/constants";
+import { ButtonMode, DialogMode } from "~components/constants";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { MatchContext } from "~components/Context";
 import { Incident } from "~components/Incident";
@@ -104,11 +104,14 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
             );
           })}
         </ul>
-        <IconButton
-          className="bg-emerald-600 active:bg-black/10 p-2"
+        <Button
+          mode={ButtonMode.Primary}
+          className="flex items-center w-max"
           onClick={onClickFlag}
-          icon={<FlagIcon height={20} />}
-        />
+        >
+          <FlagIcon height={20} className="mr-2" />
+          <span>New</span>
+        </Button>
       </summary>
       {incidents.map((incident) => (
         <Incident incident={incident} key={incident.id} />
@@ -187,25 +190,23 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
         <DialogHeader title="Matches" onClose={() => setOpen(false)} />
         <DialogBody>
           <nav className="flex items-center">
-            <Button
+            <IconButton
+              icon={<ArrowLeftIcon height={24} />}
               onClick={onClickPrevMatch}
               className={twMerge(
                 "bg-transparent",
                 prevMatch ? "visible" : "invisible"
               )}
-            >
-              <ArrowLeftIcon height={24} />
-            </Button>
+            />
             <h1 className="flex-1 text-xl text-center">{match?.name}</h1>
-            <Button
+            <IconButton
+              icon={<ArrowRightIcon height={24} />}
               onClick={onClickNextMatch}
               className={twMerge(
                 "bg-transparent",
                 nextMatch ? "visible" : "invisible"
               )}
-            >
-              <ArrowRightIcon height={24} />
-            </Button>
+            />
           </nav>
           <Spinner show={!match} />
           {match && (

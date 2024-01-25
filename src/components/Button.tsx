@@ -27,8 +27,12 @@ export const IconButton: React.FC<IconButtonProps> = ({ icon, ...props }) => {
 };
 
 const ButtonClasses: { [K in ButtonMode]: string } = {
-  [ButtonMode.Normal]: "",
-  [ButtonMode.None]: "bg-transparent",
+  [ButtonMode.None]: "",
+  [ButtonMode.Transparent]: "w-full bg-transparent",
+  [ButtonMode.Normal]: "w-full text-center",
+  [ButtonMode.Primary]:
+    "w-full text-center bg-emerald-600 active:bg-emerald-700",
+  [ButtonMode.Dangerous]: "w-full text-center bg-red-600 active:bg-red-700",
 };
 
 export type ButtonProps = BaseButtonProps & {
@@ -44,7 +48,7 @@ export const Button: React.FC<ButtonProps> = ({
       {...props}
       className={twMerge(
         "rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2",
-        "active:bg-zinc-600 disabled:bg-zinc-300 disabled:cursor-not-allowed",
+        " disabled:bg-zinc-300 disabled:cursor-not-allowed",
         ButtonClasses[mode],
         props.className
       )}

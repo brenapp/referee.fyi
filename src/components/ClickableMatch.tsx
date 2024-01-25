@@ -37,10 +37,10 @@ export const ClickableMatch: React.FC<ClickableMatch> = ({
       className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
     >
       <Button
-        mode={ButtonMode.None}
+        mode={ButtonMode.Transparent}
         data-matchid={match.id}
         onClick={onClick}
-        className="flex-1"
+        className="flex-1 active:bg-zinc-600"
         id={id}
       >
         <p>{match.name}</p>

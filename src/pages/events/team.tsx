@@ -14,6 +14,7 @@ import { Incident } from "~components/Incident";
 import { EventNewIncidentDialog } from "./dialogs/new";
 import { Button } from "~components/Button";
 import { FlagIcon } from "@heroicons/react/20/solid";
+import { ButtonMode } from "~components/constants";
 
 type EventTeamsTabProps = {
   event: EventData | null | undefined;
@@ -110,7 +111,7 @@ export const EventTeamsPage: React.FC = () => {
         <header className="mt-4">
           <Button
             onClick={() => setIncidentDialogOpen(true)}
-            className="w-full text-center bg-emerald-600"
+            mode={ButtonMode.Primary}
           >
             <FlagIcon height={20} className="inline mr-2 " />
             New Entry

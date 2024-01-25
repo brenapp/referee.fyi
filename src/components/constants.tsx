@@ -1,5 +1,8 @@
 export enum ButtonMode {
   Normal,
+  Primary,
+  Dangerous,
+  Transparent,
   None,
 }
 

@@ -5,8 +5,8 @@ import { Button, IconButton, LinkButton } from "~components/Button";
 import {
   BookOpenIcon,
   ChevronDownIcon,
-  ChevronLeftIcon,
   XMarkIcon,
+  ChevronLeftIcon,
 } from "@heroicons/react/24/outline";
 import { twMerge } from "tailwind-merge";
 import { Spinner } from "~components/Spinner";
@@ -17,7 +17,7 @@ import {
   DialogCustomHeader,
   DialogHeader,
 } from "~components/Dialog";
-import { DialogMode } from "~components/constants";
+import { ButtonMode, DialogMode } from "~components/constants";
 import { ProgramAbbr } from "robotevents/out/endpoints/programs";
 import { Input, RulesSelect, Select } from "~components/Input";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
@@ -123,7 +123,11 @@ const EventPicker: React.FC = () => {
           </section>
         </DialogBody>
       </Dialog>
-      <Button className={twMerge("flex-1")} onClick={onClick}>
+      <Button
+        mode={ButtonMode.None}
+        className={twMerge("flex-1")}
+        onClick={onClick}
+      >
         <div
           className="grid items-center gap-2"
           style={{ gridTemplateColumns: "1fr 1.25rem" }}
@@ -204,12 +208,10 @@ const Rules: React.FC = () => {
           </section>
         </DialogBody>
       </Dialog>
-      <Button
+      <IconButton
         onClick={() => setOpen(true)}
-        className="flex items-center aspect-square justify-center"
-      >
-        <BookOpenIcon height={24} />
-      </Button>
+        icon={<BookOpenIcon height={24} />}
+      />
     </>
   );
 };
@@ -225,9 +227,11 @@ export const AppShell: React.FC = () => {
     >
       <Toaster />
       <nav className="h-16 flex gap-4 max-w-full">
-        <Button onClick={() => navigate(-1)} className="bg-transparent p-0">
-          <ChevronLeftIcon height={24} />
-        </Button>
+        <IconButton
+          onClick={() => navigate(-1)}
+          icon={<ChevronLeftIcon height={24} />}
+          className="aspect-auto bg-transparent"
+        />
         <EventPicker />
         <Rules />
       </nav>

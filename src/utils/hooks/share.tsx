@@ -31,7 +31,7 @@ export const ShareProvider: React.FC<PropsWithChildren> = ({ children }) => {
     if (event && code && name) {
       connection.setup(event.sku, code, { name });
     }
-  }, [event, code]);
+  }, [event, code, name]);
 
   return (
     <ShareContext.Provider value={connection}>{children}</ShareContext.Provider>

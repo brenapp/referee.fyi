@@ -8,7 +8,6 @@ import type {
   WebSocketMessage,
   WebSocketPeerMessage,
   WebSocketServerShareInfoMessage,
-  ShareResponseFailure,
   EditIncidentResponse,
 } from "~share/api";
 import {

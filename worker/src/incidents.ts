@@ -95,7 +95,7 @@ export class EventIncidents implements DurableObject {
     };
 
     async getDeletedIncidents() {
-        return await this.state.storage.get<string[]>("delete_incidents") ?? [];
+        return await this.state.storage.get<string[]>("deleted_incidents") ?? [];
     };
 
     async getIncidentList() {

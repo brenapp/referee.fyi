@@ -80,12 +80,22 @@ export class EventIncidents implements DurableObject {
             const filtered = list.filter(value => value !== id);
             await this.state.storage.put("incidents", filtered);
 
+            const deletedIncidents = await this.state.storage.get<string[]>("deleted_incidents") ?? [];
+
+            if (!deletedIncidents.includes(id)) {
+                await this.state.storage.put("deleted_incidents", [...deletedIncidents, id])
+            }
+
             return list.length !== filtered.length;
         })
     }
 
     async getIncident(id: string) {
         return this.state.storage.get<Incident>(id);
+    };
+
+    async getDeletedIncidents() {
+        return await this.state.storage.get<string[]>("delete_incidents") ?? [];
     };
 
     async getIncidentList() {
@@ -102,8 +112,9 @@ export class EventIncidents implements DurableObject {
         const sku = await this.getSKU();
         const owner = await this.getOwner();
         const incidents = await this.getAllIncidents();
+        const deleted = await this.getDeletedIncidents();
 
-        return { sku: sku ?? "", owner, incidents };
+        return { sku: sku ?? "", owner, incidents, deleted };
     };
 
     async createServerShareMessage(): Promise<WebSocketServerShareInfoMessage> {
@@ -185,6 +196,17 @@ export class EventIncidents implements DurableObject {
         } : { type: "server" };
 
         const incident = await request.json<Incident>();
+        const deleted = await this.getDeletedIncidents();
+
+        if (deleted.includes(incident.id)) {
+            return response({
+                success: false,
+                reason: "bad_request",
+                details: "That incident has been deleted."
+            })
+        };
+
+
         await this.addIncident(incident);
         await this.broadcast({ type: "add_incident", incident }, sender);
 
@@ -197,6 +219,15 @@ export class EventIncidents implements DurableObject {
     async handleEditIncident(request: Request): Promise<Response> {
         const incident = await request.json<Incident>();
 
+        const deletedIncidents = await this.getDeletedIncidents();
+        if (deletedIncidents.includes(incident.id)) {
+            return response({
+                success: false,
+                reason: "bad_request",
+                details: "That incident has been deleted."
+            })
+        };
+
         const params = new URL(request.url).searchParams;
 
         const userId = params.get("user_id");
@@ -205,6 +236,16 @@ export class EventIncidents implements DurableObject {
         const sender: WebSocketSender = client ? {
             type: "client", name: client.user.name
         } : { type: "server" };
+
+        if (incident.revision) {
+            incident.revision.count++;
+            incident.revision.user = sender;
+        } else {
+            incident.revision = {
+                count: 0,
+                user: sender
+            }
+        }
 
         const success = await this.editIncident(incident);
 
@@ -220,7 +261,7 @@ export class EventIncidents implements DurableObject {
 
         return response({
             success: true,
-            data: {}
+            data: incident.revision
         })
     };
 

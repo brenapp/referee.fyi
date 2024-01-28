@@ -4,33 +4,12 @@ import { Rule } from "~hooks/rules";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { TeamData } from "robotevents/out/endpoints/teams";
 import { addServerIncident, deleteServerIncident } from "./share";
+import { IncidentOutcome, Incident as ServerIncident } from "~share/EventIncidents";
 
-export enum IncidentOutcome {
-  Minor,
-  Major,
-  Disabled,
-}
+export { IncidentOutcome } from "~share/EventIncidents";
 
-export type Incident = {
-  time: Date;
-
-  event: string; // SKU
-  division: number; // division ID
-
-  match?: {
-    id: number;
-    name: string;
-  };
-  team?: string; // team ID
-
-  outcome: IncidentOutcome;
-  rules: string[];
-  notes: string;
-};
-
-export type IncidentWithID = Incident & {
-  id: string;
-};
+export type Incident = Omit<ServerIncident, "id">
+export type IncidentWithID = ServerIncident;
 
 export type IncidentIndex = {
   [key: string]: string[];
@@ -55,9 +34,9 @@ export function packIncident(incident: RichIncident): Incident {
     ...incident,
     match: incident.match
       ? {
-          id: incident.match.id,
-          name: incident.match.name,
-        }
+        id: incident.match.id,
+        name: incident.match.name,
+      }
       : undefined,
     team: incident.team?.number,
     rules: incident.rules.map((rule) => rule.rule),
@@ -158,7 +137,8 @@ export async function deleteIncident(
     return;
   }
 
-  // Remove from all indices
+  // Remove from all indices. Note that we're not *actually* deleted in the incidents, just removed
+  // from indices, so we could recover them in the future.
   const eventsIndex = await get<IncidentIndex>("event_idx");
   const teamsIndex = await get<IncidentIndex>("team_idx");
 

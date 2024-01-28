@@ -8,7 +8,6 @@ import {
   XMarkIcon,
   ChevronLeftIcon,
 } from "@heroicons/react/24/outline";
-import { twMerge } from "tailwind-merge";
 import { Spinner } from "~components/Spinner";
 import { useCurrentDivision, useCurrentEvent } from "~utils/hooks/state";
 import {
@@ -125,19 +124,19 @@ const EventPicker: React.FC = () => {
       </Dialog>
       <Button
         mode={ButtonMode.None}
-        className={twMerge("flex-1")}
+        className="flex-1 active:bg-zinc-600"
         onClick={onClick}
       >
         <div
           className="grid items-center gap-2"
           style={{ gridTemplateColumns: "1fr 1.25rem" }}
         >
-          <p className="flex-1 overflow-hidden whitespace-nowrap text-ellipsis">
-            {event ? event.name : "Select Event"}
+          <div className="flex-1 overflow-hidden whitespace-nowrap text-ellipsis">
+            <p>{event ? event.name : "Select Event"}</p>
             {showDiv && (
               <p className="text-sm text-emerald-400">{selectedDiv?.name}</p>
             )}
-          </p>
+          </div>
           <ChevronDownIcon className="w-5 h-5" />
         </div>
       </Button>

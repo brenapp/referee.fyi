@@ -4,10 +4,13 @@ import { Rule } from "~hooks/rules";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { TeamData } from "robotevents/out/endpoints/teams";
 import { addServerIncident, deleteServerIncident } from "./share";
-import { IncidentOutcome, Incident as ServerIncident } from "~share/EventIncidents";
+import { Incident as ServerIncident } from "~share/EventIncidents";
 
-export { IncidentOutcome } from "~share/EventIncidents";
-
+export enum IncidentOutcome {
+  Minor,
+  Major,
+  Disabled,
+}
 export type Incident = Omit<ServerIncident, "id">
 export type IncidentWithID = ServerIncident;
 

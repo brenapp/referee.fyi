@@ -47,15 +47,15 @@ const EventPicker: React.FC = () => {
 
     return (
       eventsToday?.filter((event) => {
-        if (event.name.includes(query)) {
+        if (event.name.toUpperCase().includes(query)) {
           return true;
         }
 
-        if (event.sku.includes(query)) {
+        if (event.sku.toUpperCase().includes(query)) {
           return true;
         }
 
-        if (event.location.venue.includes(query)) {
+        if (event.location.venue.toUpperCase().includes(query)) {
           return true;
         }
       }) ?? []
@@ -87,11 +87,10 @@ const EventPicker: React.FC = () => {
             <h2 className="text-lg font-bold text-white mx-2">Search</h2>
             <Input
               type="text"
-              pattern="RE-(VRC|VIQRC|VEXU|VIQC)-[0-9]{2}-[0-9]{4}"
               placeholder="SKU or Event Name"
               className="font-mono px-4 py-4 rounded-md invalid:bg-red-500 w-full"
               value={query}
-              onChange={(e) => setQuery(e.currentTarget.value)}
+              onChange={(e) => setQuery(e.currentTarget.value.toUpperCase())}
             />
             <Spinner show={isLoadingEventFromSKU} />
             {eventFromSKU && (

@@ -217,18 +217,22 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
 
   const { data: entries } = useEventIncidents(event?.sku);
 
-  const { mutate: beginSharing } = useCreateShare();
+  const { mutateAsync: beginSharing } = useCreateShare();
   const onClickShare = useCallback(async () => {
     const shareId = await ShareConnection.getUserId();
     const incidents = await getIncidentsByEvent(event.sku);
 
-    await beginSharing({
+    const response = await beginSharing({
       incidents,
       owner: { id: shareId, name: shareName ?? "" },
       sku: event.sku,
     });
 
-    toast({ type: "info", message: "Sharing Enabled" });
+    if (response.success) {
+      toast({ type: "info", message: "Sharing Enabled" });
+    } else {
+      toast({ type: "error", message: response.details });
+    }
   }, [beginSharing]);
 
   const onClickShareCode = useCallback(async () => {

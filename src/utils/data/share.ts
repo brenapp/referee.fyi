@@ -149,6 +149,7 @@ export async function deleteServerIncident(id: string, sku: string) {
 interface ShareConnectionEvents {
   connect: () => void;
   disconnect: () => void;
+  error: () => void;
   message: (data: WebSocketPayload<WebSocketMessage>) => void;
 }
 
@@ -226,11 +227,14 @@ export class ShareConnection extends EventEmitter {
 
     this.ws.onopen = () => this.emit("connect");
     this.ws.onclose = () => {
-      toast({ type: "error", message: "Reconnecting to socket..." });
       clearTimeout(ShareConnection.reconnectTimer);
       ShareConnection.reconnectTimer = setTimeout(() => this.connect(user), 5000);
       this.emit("disconnect");
     }
+    this.ws.onerror = () => {
+      toast({ type: "error", message: "Could not connect to sharing server." });
+      this.emit("error")
+    };
   }
 
   async send(message: WebSocketPeerMessage) {

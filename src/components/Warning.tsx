@@ -2,10 +2,11 @@ import {
   CheckCircleIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/20/solid";
+import { ReactNode } from "react";
 import { twMerge } from "tailwind-merge";
 
 export type SuccessProps = {
-  message: string;
+  message: ReactNode;
 } & React.HTMLProps<HTMLDivElement>;
 
 export const Success: React.FC<SuccessProps> = ({ message, ...props }) => {
@@ -24,7 +25,7 @@ export const Success: React.FC<SuccessProps> = ({ message, ...props }) => {
 };
 
 export type InfoProps = {
-  message: string;
+  message: ReactNode;
 } & React.HTMLProps<HTMLDivElement>;
 
 export const Info: React.FC<InfoProps> = ({ message, ...props }) => {
@@ -43,7 +44,7 @@ export const Info: React.FC<InfoProps> = ({ message, ...props }) => {
 };
 
 export type WarningProps = {
-  message: string;
+  message: ReactNode;
 } & React.HTMLProps<HTMLDivElement>;
 
 export const Warning: React.FC<WarningProps> = ({ message, ...props }) => {

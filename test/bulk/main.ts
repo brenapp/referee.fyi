@@ -1,52 +1,52 @@
-
 import puppeteer from "puppeteer";
-import "dotenv/config"
+import "dotenv/config";
 
 const BASE_URL = "http://localhost:5173";
 const { SKU, CODE, DIVISION } = process.env;
 
-
 (async () => {
+  console.log(BASE_URL);
+  console.log(`SKU: ${SKU} CODE: ${CODE}`);
 
-    console.log(BASE_URL);
-    console.log(`SKU: ${SKU} CODE: ${CODE}`);
+  if (!SKU || !CODE) {
+    return;
+  }
 
-    if (!SKU || !CODE) {
-        return;
-    }
+  const browser = await puppeteer.launch({ headless: false });
+  const page = await browser.newPage();
 
-    const browser = await puppeteer.launch({ headless: false });
-    const page = await browser.newPage();
+  await page.setViewport({
+    width: 412,
+    height: 915,
+    hasTouch: true,
+    isMobile: true,
+  });
 
-    await page.setViewport({ width: 412, height: 915, hasTouch: true, isMobile: true });
+  const url = new URL(`/${SKU}/join?code=${CODE}`, BASE_URL);
+  console.log(`Connecting to ${url}...`);
+  await page.goto(url.toString());
 
+  console.log(`OK`);
 
-    const url = new URL(`/${SKU}/join?code=${CODE}`, BASE_URL);
-    console.log(`Connecting to ${url}...`);
-    await page.goto(url.toString());
+  const text = "Your Name";
+  const selector = "xpath/" + `//label[text()='${text}']`;
 
-    console.log(`OK`);
+  const input = await page.waitForSelector(selector);
+  await input?.click();
+  await page.keyboard.type("Test", { delay: 10 });
 
-    let text = "Your Name";
-    let selector = "xpath/" + `//label[text()='${text}']`;
+  // Enter name
+  // const name = crypto.randomUUID();
+  // await page.type("input[required]", name);
+  // console.log("NAME: " + name);
 
-    let input = await page.waitForSelector(selector);
-    await input?.click();
-    await page.keyboard.type('Test', { delay: 10 });
+  // const joinButton = await page.waitForSelector("button::-p-text(Join)");
+  // await joinButton?.click();
 
-    // Enter name
-    // const name = crypto.randomUUID();
-    // await page.type("input[required]", name);
-    // console.log("NAME: " + name);
+  // url.pathname = `/${SKU}/${DIVISION}`;
+  // await page.goto(url.toString());
 
-    // const joinButton = await page.waitForSelector("button::-p-text(Join)");
-    // await joinButton?.click();
-
-    // url.pathname = `/${SKU}/${DIVISION}`;
-    // await page.goto(url.toString());
-
-    // // get all matches 
-    // const selector = await page.waitForSelector("button[data-matchid]");
-    // await selector?.click();
-
+  // // get all matches
+  // const selector = await page.waitForSelector("button[data-matchid]");
+  // await selector?.click();
 })();

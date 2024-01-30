@@ -37,7 +37,6 @@ import {
 import { Input } from "~components/Input";
 import { ShareConnection, leaveShare } from "~utils/data/share";
 import { toast } from "~components/Toast";
-import { useMutation } from "@tanstack/react-query";
 
 export type MainTabProps = {
   event: EventData;
@@ -222,23 +221,24 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
 
   const { data: entries } = useEventIncidents(event?.sku);
 
-  const { mutate: beginSharing } = useCreateShare();
+  const { mutateAsync: beginSharing, isPending: isPendingShare } =
+    useCreateShare();
+  const onClickShare = useCallback(async () => {
+    const shareId = await ShareConnection.getUserId();
+    const incidents = await getIncidentsByEvent(event.sku);
 
-  const { mutateAsync: onClickShare, isPending: isPendingShare } = useMutation({
-    mutationFn: async (_: React.MouseEvent) => {
-      await persistShareName();
-      const shareId = await ShareConnection.getUserId();
-      const incidents = await getIncidentsByEvent(event.sku);
+    const response = await beginSharing({
+      incidents,
+      owner: { id: shareId, name: shareName ?? "" },
+      sku: event.sku,
+    });
 
-      await beginSharing({
-        incidents,
-        owner: { id: shareId, name: shareName ?? "" },
-        sku: event.sku,
-      });
-
+    if (response.success) {
       toast({ type: "info", message: "Sharing Enabled" });
-    },
-  });
+    } else {
+      toast({ type: "error", message: response.details });
+    }
+  }, [beginSharing]);
 
   const onClickShareCode = useCallback(async () => {
     const url = new URL(`/${event.sku}/join?code=${shareCode}`, location.href);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useEvent, useEventsToday } from "~utils/hooks/robotevents";
 import { Button, IconButton, LinkButton } from "~components/Button";
@@ -8,7 +8,6 @@ import {
   XMarkIcon,
   ChevronLeftIcon,
 } from "@heroicons/react/24/outline";
-import { twMerge } from "tailwind-merge";
 import { Spinner } from "~components/Spinner";
 import { useCurrentDivision, useCurrentEvent } from "~utils/hooks/state";
 import {
@@ -23,17 +22,45 @@ import { Input, RulesSelect, Select } from "~components/Input";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 import { Toaster } from "react-hot-toast";
 
+function isValidSKU(sku: string) {
+  return !!sku.match(/RE-(VRC|VIQRC|VEXU|VIQC)-[0-9]{2}-[0-9]{4}/g);
+}
+
 const EventPicker: React.FC = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
-  const [sku, setSKU] = useState("");
-  const { data: eventFromSKU, isLoading: isLoadingEventFromSKU } =
-    useEvent(sku);
+  const [query, setQuery] = useState("");
+  const { data: eventFromSKU, isLoading: isLoadingEventFromSKU } = useEvent(
+    query,
+    { enabled: isValidSKU(query) }
+  );
 
   const { data: eventsToday, isLoading } = useEventsToday();
   const { data: event } = useCurrentEvent();
   const division = useCurrentDivision();
+
+  const results = useMemo(() => {
+    if (!query) {
+      return eventsToday ?? [];
+    }
+
+    return (
+      eventsToday?.filter((event) => {
+        if (event.name.toUpperCase().includes(query)) {
+          return true;
+        }
+
+        if (event.sku.toUpperCase().includes(query)) {
+          return true;
+        }
+
+        if (event.location.venue.toUpperCase().includes(query)) {
+          return true;
+        }
+      }) ?? []
+    );
+  }, [query, eventsToday]);
 
   const selectedDiv = event?.divisions.find((d) => d.id === division);
   const showDiv = selectedDiv && (event?.divisions.length ?? 0) > 1;
@@ -57,14 +84,13 @@ const EventPicker: React.FC = () => {
         <DialogBody>
           <Spinner show={isLoading} />
           <section>
-            <h2 className="text-lg font-bold text-white mx-2">Event Code</h2>
+            <h2 className="text-lg font-bold text-white mx-2">Search</h2>
             <Input
               type="text"
-              pattern="RE-(VRC|VIQRC|VEXU|VIQC)-[0-9]{2}-[0-9]{4}"
-              placeholder="SKU"
+              placeholder="SKU or Event Name"
               className="font-mono px-4 py-4 rounded-md invalid:bg-red-500 w-full"
-              value={sku}
-              onChange={(e) => setSKU(e.currentTarget.value)}
+              value={query}
+              onChange={(e) => setQuery(e.currentTarget.value.toUpperCase())}
             />
             <Spinner show={isLoadingEventFromSKU} />
             {eventFromSKU && (
@@ -93,11 +119,9 @@ const EventPicker: React.FC = () => {
           </section>
           <p className="italic text-center py-4">Or</p>
           <section>
-            <h2 className="text-lg font-bold text-white mx-2">
-              Ongoing Events
-            </h2>
+            <h2 className="text-lg font-bold text-white mx-2">Events</h2>
             <ul>
-              {eventsToday?.map((event) => (
+              {results?.map((event) => (
                 <li key={event.id}>
                   <LinkButton
                     to={`/${event.sku}`}
@@ -125,19 +149,19 @@ const EventPicker: React.FC = () => {
       </Dialog>
       <Button
         mode={ButtonMode.None}
-        className={twMerge("flex-1")}
+        className="flex-1 active:bg-zinc-600"
         onClick={onClick}
       >
         <div
           className="grid items-center gap-2"
           style={{ gridTemplateColumns: "1fr 1.25rem" }}
         >
-          <p className="flex-1 overflow-hidden whitespace-nowrap text-ellipsis">
-            {event ? event.name : "Select Event"}
+          <div className="flex-1 overflow-hidden whitespace-nowrap text-ellipsis">
+            <p>{event ? event.name : "Select Event"}</p>
             {showDiv && (
               <p className="text-sm text-emerald-400">{selectedDiv?.name}</p>
             )}
-          </p>
+          </div>
           <ChevronDownIcon className="w-5 h-5" />
         </div>
       </Button>

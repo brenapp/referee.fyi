@@ -37,6 +37,7 @@ import {
 import { Input } from "~components/Input";
 import { ShareConnection, leaveShare } from "~utils/data/share";
 import { toast } from "~components/Toast";
+import { useMutation } from "@tanstack/react-query";
 
 export type MainTabProps = {
   event: EventData;
@@ -203,7 +204,11 @@ const EventMatchesTab: React.FC<MainTabProps> = ({ event }) => {
 const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
   const [deleteDataDialogOpen, setDeleteDataDialogOpen] = useState(false);
 
-  const [shareName, setName] = useShareName();
+  const {
+    name: shareName,
+    setName,
+    persist: persistShareName,
+  } = useShareName();
   const shareNameId = useId();
 
   const { data: shareCode } = useShareCode(event.sku);
@@ -233,7 +238,7 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
     } else {
       toast({ type: "error", message: response.details });
     }
-  }, [beginSharing]);
+  }, [beginSharing]); 
 
   const onClickShareCode = useCallback(async () => {
     const url = new URL(`/${event.sku}/join?code=${shareCode}`, location.href);
@@ -266,7 +271,7 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
       <section>
         <section className="mt-4">
           <h2 className="font-bold">Share Event Data</h2>
-
+          <Spinner show={isPendingShare} />
           {isSharing ? (
             <section>
               <p>
@@ -314,6 +319,7 @@ const EventManageTab: React.FC<MainTabProps> = ({ event }) => {
                   required
                   value={shareName}
                   onChange={(e) => setName(e.currentTarget.value)}
+                  onBlur={persistShareName}
                   className="w-full"
                 />
               </label>

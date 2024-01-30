@@ -180,7 +180,7 @@ export class ShareConnection extends EventEmitter {
   users: string[] = [];
 
   public setup(sku: string, code: string, user: Omit<ShareUser, "id">) {
-    if (this.sku === sku && this.code === code && this.ws && this.ws.readyState === this.ws?.OPEN) {
+    if (this.sku === sku && this.code === code && this.ws && this.ws.readyState === this.ws.OPEN) {
       return;
     }
 

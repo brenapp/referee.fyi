@@ -1,5 +1,9 @@
 import * as robotevents from "robotevents";
-import { UseQueryOptions, UseQueryResult, useQuery } from "@tanstack/react-query";
+import {
+  UseQueryOptions,
+  UseQueryResult,
+  useQuery,
+} from "@tanstack/react-query";
 import {
   Round,
   type MatchData,
@@ -19,10 +23,15 @@ const ROBOTEVENTS_TOKEN =
 
 robotevents.authentication.setBearer(ROBOTEVENTS_TOKEN);
 
-export type HookQueryOptions<T> =
-  Omit<UseQueryOptions<T>, "queryKey" | "queryFn">
+export type HookQueryOptions<T> = Omit<
+  UseQueryOptions<T>,
+  "queryKey" | "queryFn"
+>;
 
-export function useEvent(sku: string, options?: HookQueryOptions<EventData | null | undefined>): UseQueryResult<EventData | null | undefined> {
+export function useEvent(
+  sku: string,
+  options?: HookQueryOptions<EventData | null | undefined>
+): UseQueryResult<EventData | null | undefined> {
   return useQuery({
     queryKey: ["event", sku],
     queryFn: async () => {
@@ -34,7 +43,7 @@ export function useEvent(sku: string, options?: HookQueryOptions<EventData | nul
       return event?.getData();
     },
     staleTime: Infinity,
-    ...options
+    ...options,
   });
 }
 
@@ -54,7 +63,7 @@ export function useTeam(
       return team?.getData();
     },
     staleTime: 1000 * 60 * 60 * 4,
-    ...options
+    ...options,
   });
 }
 
@@ -75,7 +84,7 @@ export function useEventTeams(
       return teams.array().map((team) => team.getData());
     },
     staleTime: 1000 * 60 * 60,
-    ...queryOptions
+    ...queryOptions,
   });
 }
 
@@ -84,9 +93,16 @@ type UseDivisionTeamsResult = {
   divisionOnly: boolean;
 };
 
-export function useDivisionTeams(eventData: EventData | null | undefined, division: number | null | undefined, options?: HookQueryOptions<UseDivisionTeamsResult>): UseQueryResult<UseDivisionTeamsResult> {
+export function useDivisionTeams(
+  eventData: EventData | null | undefined,
+  division: number | null | undefined,
+  options?: HookQueryOptions<UseDivisionTeamsResult>
+): UseQueryResult<UseDivisionTeamsResult> {
   const { data: teams, isSuccess: isTeamsSuccess } = useEventTeams(eventData);
-  const { data: matches, isSuccess: isMatchesSuccess } = useEventMatches(eventData, division);
+  const { data: matches, isSuccess: isMatchesSuccess } = useEventMatches(
+    eventData,
+    division
+  );
 
   return useQuery<UseDivisionTeamsResult>({
     queryKey: ["division_teams", eventData?.sku, division],
@@ -99,14 +115,19 @@ export function useDivisionTeams(eventData: EventData | null | undefined, divisi
 
       // "Overall Finals" division IDs, which won't have rankings. Instead, get teams from the matches
       if (division > 10) {
-        const ids = matches?.map(m => m.alliances.flatMap(a => a.teams.map(t => t.team.id))).flat() ?? []
-        const divisionTeams = teams?.filter(t => ids.includes(t.id)) ?? [];
+        const ids =
+          matches
+            ?.map((m) =>
+              m.alliances.flatMap((a) => a.teams.map((t) => t.team.id))
+            )
+            .flat() ?? [];
+        const divisionTeams = teams?.filter((t) => ids.includes(t.id)) ?? [];
 
         return {
           divisionOnly: true,
-          teams: divisionTeams
-        }
-      };
+          teams: divisionTeams,
+        };
+      }
 
       const rankings = await event.rankings(division);
 
@@ -114,17 +135,18 @@ export function useDivisionTeams(eventData: EventData | null | undefined, divisi
         return { divisionOnly: false, teams: teams! };
       }
 
-      const divisionTeams = teams?.filter(t => rankings.some(r => r.team.id === t.id)) ?? [];
+      const divisionTeams =
+        teams?.filter((t) => rankings.some((r) => r.team.id === t.id)) ?? [];
       return {
         divisionOnly: true,
-        teams: divisionTeams
-      }
+        teams: divisionTeams,
+      };
     },
     staleTime: 1000 * 60 * 60,
     enabled: isTeamsSuccess && isMatchesSuccess,
-    ...options
+    ...options,
   });
-};
+}
 
 export function logicalMatchComparison(a: MatchData, b: MatchData) {
   const roundOrder = [
@@ -168,7 +190,7 @@ export function useEventMatches(
         .sort(logicalMatchComparison);
     },
     staleTime: 1000 * 60,
-    ...options
+    ...options,
   });
 }
 
@@ -198,7 +220,7 @@ export function useEventMatchesForTeam(
         .sort(logicalMatchComparison);
     },
     staleTime: 1000 * 60,
-    ...options
+    ...options,
   });
 }
 
@@ -240,7 +262,9 @@ export function useEventTeam(
   return teams?.find((team) => team.number === number);
 }
 
-export function useEventsToday(options?: HookQueryOptions<EventData[]>): UseQueryResult<EventData[]> {
+export function useEventsToday(
+  options?: HookQueryOptions<EventData[]>
+): UseQueryResult<EventData[]> {
   return useQuery({
     queryKey: ["events_today"],
     queryFn: async () => {
@@ -264,6 +288,6 @@ export function useEventsToday(options?: HookQueryOptions<EventData[]>): UseQuer
         .map((event) => event.getData())
         .sort((a, b) => a.name.localeCompare(b.name));
     },
-    ...options
+    ...options,
   });
 }

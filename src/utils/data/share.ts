@@ -180,7 +180,12 @@ export class ShareConnection extends EventEmitter {
   users: string[] = [];
 
   public setup(sku: string, code: string, user: Omit<ShareUser, "id">) {
-    if (this.sku === sku && this.code === code && this.ws && this.ws.readyState === this.ws.OPEN) {
+    if (
+      this.sku === sku &&
+      this.code === code &&
+      this.ws &&
+      this.ws.readyState === this.ws.OPEN
+    ) {
       return;
     }
 
@@ -228,12 +233,15 @@ export class ShareConnection extends EventEmitter {
     this.ws.onopen = () => this.emit("connect");
     this.ws.onclose = () => {
       clearTimeout(ShareConnection.reconnectTimer);
-      ShareConnection.reconnectTimer = setTimeout(() => this.connect(user), 5000);
+      ShareConnection.reconnectTimer = setTimeout(
+        () => this.connect(user),
+        5000
+      );
       this.emit("disconnect");
-    }
+    };
     this.ws.onerror = () => {
       toast({ type: "error", message: "Could not connect to sharing server." });
-      this.emit("error")
+      this.emit("error");
     };
   }
 
@@ -315,7 +323,7 @@ export class ShareConnection extends EventEmitter {
       }
 
       this.emit("message", data);
-    } catch (e) { }
+    } catch (e) {}
   }
 
   public cleanup() {

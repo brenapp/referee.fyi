@@ -33,9 +33,9 @@ export function packIncident(incident: RichIncident): Incident {
     ...incident,
     match: incident.match
       ? {
-        id: incident.match.id,
-        name: incident.match.name,
-      }
+          id: incident.match.id,
+          name: incident.match.name,
+        }
       : undefined,
     team: incident.team?.number,
     rules: incident.rules.map((rule) => rule.rule),

@@ -130,7 +130,7 @@ export async function editServerIncident(incident: IncidentWithID) {
   const response = await fetch(url, {
     method: "PATCH",
     body: JSON.stringify(incident),
-  })
+  });
 
   return response.json() as Promise<ShareResponse<EditIncidentResponse>>;
 }
@@ -308,15 +308,15 @@ export class ShareConnection extends EventEmitter {
                 }
                 await setIncident(incident.id, current);
               } else if (remoteRevision > localRevision) {
-                await setIncident(incident.id, incident)
-              };
+                await setIncident(incident.id, incident);
+              }
             }
           }
 
           // Explicitly delete incidents marked as deleted first.
           for (const id of data.data.deleted) {
             await deleteIncident(id, false);
-          };
+          }
 
           const eventIncidents = await getIncidentsByEvent(this.sku);
           const localOnly = eventIncidents.filter((local) =>

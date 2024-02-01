@@ -1,7 +1,7 @@
 import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AppShell } from "./pages/shell";
-import { EventPage } from "./pages/events";
+import { EventPage } from "./pages/events/home";
 import { EventTeamsPage } from "./pages/events/team";
 import { EventDivisionPickerPage } from "./pages/events/division";
 import { HomePage } from "./pages/home";

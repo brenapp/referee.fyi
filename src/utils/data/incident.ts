@@ -136,7 +136,8 @@ export async function deleteIncident(
     return;
   }
 
-  // Remove from all indices
+  // Remove from all indices. Note that we're not *actually* deleted in the incidents, just removed
+  // from indices, so we could recover them in the future.
   const eventsIndex = await get<IncidentIndex>("event_idx");
   const teamsIndex = await get<IncidentIndex>("team_idx");
 

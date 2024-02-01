@@ -16,7 +16,6 @@ import {
   DialogCustomHeader,
   DialogHeader,
 } from "~components/Dialog";
-import { ButtonMode, DialogMode } from "~components/constants";
 import { ProgramAbbr } from "robotevents/out/endpoints/programs";
 import { Input, RulesSelect, Select } from "~components/Input";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
@@ -75,11 +74,7 @@ const EventPicker: React.FC = () => {
 
   return (
     <>
-      <Dialog
-        open={open}
-        mode={DialogMode.Modal}
-        onClose={() => setOpen(false)}
-      >
+      <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
         <DialogHeader title="Pick An Event" onClose={() => setOpen(false)} />
         <DialogBody>
           <Spinner show={isLoading} />
@@ -148,7 +143,7 @@ const EventPicker: React.FC = () => {
         </DialogBody>
       </Dialog>
       <Button
-        mode={ButtonMode.None}
+        mode="none"
         className="flex-1 active:bg-zinc-600"
         onClick={onClick}
       >
@@ -174,7 +169,7 @@ const Rules: React.FC = () => {
 
   const [open, setOpen] = useState(false);
   const programs: ProgramAbbr[] = ["VRC", "VIQRC", "VEXU", "VAIC"];
-  const [program, setProgram] = useState<ProgramAbbr>();
+  const [program, setProgram] = useState<ProgramAbbr>("VRC");
 
   const rules = useRulesForProgram(program);
   const [rule, setRule] = useState<Rule | null>(null);
@@ -193,11 +188,7 @@ const Rules: React.FC = () => {
 
   return (
     <>
-      <Dialog
-        open={open}
-        mode={DialogMode.Modal}
-        onClose={() => setOpen(false)}
-      >
+      <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
         <DialogCustomHeader>
           <IconButton
             icon={<XMarkIcon height={24} />}

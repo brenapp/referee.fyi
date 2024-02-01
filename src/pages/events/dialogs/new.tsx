@@ -17,7 +17,6 @@ import {
 } from "~utils/data/incident";
 import { useNewIncident } from "~hooks/incident";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
-import { DialogMode } from "~components/constants";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { useAddRecentRules, useRecentRules } from "~utils/hooks/history";
 import { twMerge } from "tailwind-merge";
@@ -89,7 +88,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     match: matchData,
     rules: [],
     notes: "",
-    outcome: IncidentOutcome.Minor,
+    outcome: "Minor",
   });
 
   useEffect(() => {
@@ -158,9 +157,27 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 
   const onChangeIncidentOutcome = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setIncidentField("outcome", Number.parseInt(e.target.value));
+      setIncidentField("outcome", e.target.value as IncidentOutcome);
     },
     []
+  );
+
+  const onAddRule = useCallback(
+    (rule: Rule) => {
+      if (incident.rules.some((r) => r.rule === rule.rule)) return;
+      setIncidentField("rules", [...incident.rules, rule]);
+    },
+    [incident.rules]
+  );
+
+  const onRemoveRule = useCallback(
+    (rule: Rule) => {
+      setIncidentField(
+        "rules",
+        incident.rules.filter((r) => r.rule !== rule.rule)
+      );
+    },
+    [incident.rules]
   );
 
   const onToggleRule = useCallback(
@@ -171,15 +188,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         onAddRule(rule);
       }
     },
-    [rules, incident.rules]
-  );
-
-  const onAddRule = useCallback(
-    (rule: Rule) => {
-      if (incident.rules.some((r) => r.rule === rule.rule)) return;
-      setIncidentField("rules", [...incident.rules, rule]);
-    },
-    [rules, incident.rules]
+    [incident.rules, onAddRule, onRemoveRule]
   );
 
   const onPickOtherRule = useCallback(
@@ -196,16 +205,6 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       setIncidentField("rules", [...incident.rules, rule]);
     },
     [rules, incident.rules]
-  );
-
-  const onRemoveRule = useCallback(
-    (rule: Rule) => {
-      setIncidentField(
-        "rules",
-        incident.rules.filter((r) => r.rule !== rule.rule)
-      );
-    },
-    [incident.rules]
   );
 
   const onChangeIncidentNotes = useCallback(
@@ -228,7 +227,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
           setIncidentField("team", undefined);
           setIncidentField("notes", "");
           setIncidentField("rules", []);
-          setIncidentField("outcome", IncidentOutcome.Minor);
+          setIncidentField("outcome", "Minor");
           addRecentRules(incident.rules);
           toast({ type: "info", message: "Created Entry" });
         },
@@ -237,11 +236,11 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         },
       });
     },
-    [incident, mutate, setOpen]
+    [incident, mutate, setOpen, addRecentRules]
   );
 
   return (
-    <Dialog open={open} mode={DialogMode.Modal} onClose={() => setOpen(false)}>
+    <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
       <DialogHeader title="New Report" onClose={() => setOpen(false)} />
       <DialogBody>
         <Spinner show={isLoadingMetaData} />
@@ -309,13 +308,13 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             onChange={onChangeIncidentOutcome}
             className="max-w-full w-full"
           >
-            <option value={IncidentOutcome.Minor}>Minor</option>
-            <option value={IncidentOutcome.Major}>Major</option>
-            <option value={IncidentOutcome.Disabled}>Disabled</option>
+            <option value="Minor">Minor</option>
+            <option value="Major">Major</option>
+            <option value="Disabled">Disabled</option>
           </Select>
         </label>
         <p className="mt-4">Associated Rules</p>
-        <div className="flex mt-2 gap-2">
+        <div className="flex mt-2 gap-2 flex-wrap">
           {recentRules?.map((rule) => (
             <Button
               className={twMerge(

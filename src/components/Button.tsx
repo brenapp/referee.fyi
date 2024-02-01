@@ -1,6 +1,12 @@
 import { twMerge } from "tailwind-merge";
 import { Link, LinkProps } from "react-router-dom";
-import { ButtonMode } from "./constants";
+
+export type ButtonMode =
+  | "normal"
+  | "primary"
+  | "dangerous"
+  | "transparent"
+  | "none";
 
 type BaseButtonProps = React.DetailedHTMLProps<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -27,12 +33,11 @@ export const IconButton: React.FC<IconButtonProps> = ({ icon, ...props }) => {
 };
 
 const ButtonClasses: { [K in ButtonMode]: string } = {
-  [ButtonMode.None]: "",
-  [ButtonMode.Transparent]: "w-full bg-transparent",
-  [ButtonMode.Normal]: "w-full text-center",
-  [ButtonMode.Primary]:
-    "w-full text-center bg-emerald-600 active:bg-emerald-700",
-  [ButtonMode.Dangerous]: "w-full text-center bg-red-600 active:bg-red-700",
+  none: "",
+  transparent: "w-full bg-transparent",
+  normal: "w-full text-center",
+  primary: "w-full text-center bg-emerald-600 active:bg-emerald-700",
+  dangerous: "w-full text-center bg-red-600 active:bg-red-700",
 };
 
 export type ButtonProps = BaseButtonProps & {
@@ -40,7 +45,7 @@ export type ButtonProps = BaseButtonProps & {
 };
 
 export const Button: React.FC<ButtonProps> = ({
-  mode = ButtonMode.Normal,
+  mode = "normal",
   ...props
 }) => {
   return (

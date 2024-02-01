@@ -2,7 +2,8 @@ import { twMerge } from "tailwind-merge";
 import { IconButton } from "./Button";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 import { useEffect, useRef } from "react";
-import { DialogMode } from "./constants";
+
+export type DialogMode = "modal" | "nonmodal";
 
 export type DialogCustomHeaderProps = {
   children?: React.ReactNode;
@@ -74,10 +75,10 @@ export const Dialog: React.FC<DialogProps> = ({
   useEffect(() => {
     if (open) {
       switch (mode) {
-        case DialogMode.Modal:
+        case "modal":
           ref.current?.showModal();
           break;
-        case DialogMode.NonModal:
+        case "nonmodal":
           ref.current?.show();
           break;
       }

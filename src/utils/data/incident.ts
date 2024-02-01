@@ -4,33 +4,11 @@ import { Rule } from "~hooks/rules";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { TeamData } from "robotevents/out/endpoints/teams";
 import { addServerIncident, deleteServerIncident } from "./share";
+import { IncidentOutcome, Incident as ServerIncident } from "~share/api";
 
-export enum IncidentOutcome {
-  Minor,
-  Major,
-  Disabled,
-}
-
-export type Incident = {
-  time: Date;
-
-  event: string; // SKU
-  division: number; // division ID
-
-  match?: {
-    id: number;
-    name: string;
-  };
-  team?: string; // team ID
-
-  outcome: IncidentOutcome;
-  rules: string[];
-  notes: string;
-};
-
-export type IncidentWithID = Incident & {
-  id: string;
-};
+export type Incident = Omit<ServerIncident, "id">;
+export type IncidentWithID = ServerIncident;
+export type { IncidentOutcome };
 
 export type IncidentIndex = {
   [key: string]: string[];

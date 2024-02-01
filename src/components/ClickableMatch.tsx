@@ -2,7 +2,6 @@ import { useId } from "react";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { MatchContext } from "./Context";
 import { Button } from "./Button";
-import { ButtonMode } from "./constants";
 
 const dateFormatter = new Intl.DateTimeFormat(navigator.language, {
   hour: "numeric",
@@ -37,7 +36,7 @@ export const ClickableMatch: React.FC<ClickableMatch> = ({
       className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
     >
       <Button
-        mode={ButtonMode.Transparent}
+        mode={"transparent"}
         data-matchid={match.id}
         onClick={onClick}
         className="flex-1 active:bg-zinc-600"

@@ -24,7 +24,7 @@ export const EventJoinPage: React.FC = () => {
     if (currentShareCode && !code) {
       setCode(currentShareCode);
     }
-  }, [currentShareCode]);
+  }, [currentShareCode, code]);
 
   const { data: shareData, isSuccess: isShareSuccess } = useShareData(
     event?.sku,
@@ -63,7 +63,7 @@ export const EventJoinPage: React.FC = () => {
       await joinShare({ sku: event.sku, code });
       await navigate(`/${event.sku}`);
     }
-  }, [event, isActiveCode]);
+  }, [event, isActiveCode, code, navigate]);
 
   const { name: shareName, setName, persist } = useShareName();
   const shareNameId = useId();

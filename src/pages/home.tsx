@@ -2,7 +2,6 @@ import { Button, LinkButton } from "~components/Button";
 import { useRecentEvents } from "~utils/hooks/history";
 import { useEffect, useState } from "react";
 import { Dialog, DialogHeader, DialogBody } from "~components/Dialog";
-import { ButtonMode, DialogMode } from "~components/constants";
 import Markdown from "react-markdown";
 import pjson from "../../package.json";
 import "./markdown.css";
@@ -41,7 +40,7 @@ export const HomePage: React.FC = () => {
       <div>
         <aside className="text-right">
           <Button
-            mode={ButtonMode.Primary}
+            mode="primary"
             className="text-right ml-auto w-max mt-4"
             onClick={() => setUpdateDialogOpen(true)}
           >
@@ -67,7 +66,7 @@ export const HomePage: React.FC = () => {
       <Dialog
         className="markdown"
         open={updateDialogOpen}
-        mode={DialogMode.Modal}
+        mode="modal"
         onClose={() => setUpdateDialogOpen(false)}
       >
         <DialogHeader

@@ -4,7 +4,6 @@ import { FlagIcon } from "@heroicons/react/20/solid";
 import { useCurrentEvent } from "~hooks/state";
 import { PropsWithChildren, useEffect, useState } from "react";
 import { EventNewIncidentDialog } from "../dialogs/new";
-import { ButtonMode } from "~components/constants";
 import { useAddEventVisited } from "~utils/hooks/history";
 import { EventMatchesTab } from "./matches";
 import { EventTeamsTab } from "./teams";
@@ -47,10 +46,7 @@ export const EventPage: React.FC = () => {
   return event ? (
     <ShareProvider>
       <section className="mt-4 flex flex-col">
-        <Button
-          onClick={() => setIncidentDialogOpen(true)}
-          mode={ButtonMode.Primary}
-        >
+        <Button onClick={() => setIncidentDialogOpen(true)} mode="primary">
           <FlagIcon height={20} className="inline mr-2 " />
           New Entry
         </Button>

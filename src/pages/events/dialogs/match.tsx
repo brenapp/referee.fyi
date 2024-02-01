@@ -15,7 +15,6 @@ import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
 import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
-import { ButtonMode, DialogMode } from "~components/constants";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { MatchContext } from "~components/Context";
 import { Incident } from "~components/Incident";
@@ -86,7 +85,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
         </div>
         <ul className="text-sm flex-1 break-normal">
           {rulesSummary.map(([rule, incidents]) => {
-            let outcome = IncidentOutcome.Minor;
+            let outcome: IncidentOutcome = "Minor";
             for (const incident of incidents) {
               if (incident.outcome > outcome) {
                 outcome = incident.outcome;
@@ -94,9 +93,9 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
             }
 
             const highlights: Record<IncidentOutcome, string> = {
-              [IncidentOutcome.Minor]: "text-yellow-300",
-              [IncidentOutcome.Disabled]: "",
-              [IncidentOutcome.Major]: "text-red-300",
+              Minor: "text-yellow-300",
+              Disabled: "",
+              Major: "text-red-300",
             };
 
             return (
@@ -113,7 +112,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
           })}
         </ul>
         <Button
-          mode={ButtonMode.Primary}
+          mode="primary"
           className="flex items-center w-max flex-shrink-0"
           onClick={onClickFlag}
         >
@@ -190,11 +189,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
         initialMatchId={match?.id}
         initialTeamNumber={initialTeamNumber}
       />
-      <Dialog
-        open={open}
-        mode={DialogMode.Modal}
-        onClose={() => setOpen(false)}
-      >
+      <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
         <DialogHeader title="Matches" onClose={() => setOpen(false)} />
         <DialogBody>
           <nav className="flex items-center">

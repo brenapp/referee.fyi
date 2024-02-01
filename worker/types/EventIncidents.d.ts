@@ -1,8 +1,4 @@
-export enum IncidentOutcome {
-    Minor,
-    Major,
-    Disabled,
-}
+export type IncidentOutcome = "Minor" | "Major" | "Disabled"
 
 export type Incident = {
     id: string;

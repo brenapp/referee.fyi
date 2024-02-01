@@ -15,7 +15,6 @@ import {
 } from "~utils/hooks/share";
 import { FlagIcon, KeyIcon, UserCircleIcon } from "@heroicons/react/20/solid";
 import { Dialog, DialogBody } from "~components/Dialog";
-import { ButtonMode, DialogMode } from "~components/constants";
 import { Input } from "~components/Input";
 
 export type ManageTabProps = {
@@ -147,7 +146,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
               </label>
               <Button
                 className="disabled:bg-zinc-400 mt-4"
-                mode={ButtonMode.Primary}
+                mode="primary"
                 disabled={!shareName}
                 onClick={onClickShare}
               >
@@ -176,7 +175,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
           </Button>
           <Dialog
             open={deleteDataDialogOpen}
-            mode={DialogMode.NonModal}
+            mode="nonmodal"
             className="absolute w-full rounded-md h-min mt-4 bg-zinc-100 text-zinc-900"
             onClose={() => setDeleteDataDialogOpen(false)}
           >

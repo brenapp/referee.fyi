@@ -17,7 +17,6 @@ import {
 } from "~utils/data/incident";
 import { useNewIncident } from "~hooks/incident";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
-import { DialogMode } from "~components/constants";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { useAddRecentRules, useRecentRules } from "~utils/hooks/history";
 import { twMerge } from "tailwind-merge";
@@ -89,7 +88,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     match: matchData,
     rules: [],
     notes: "",
-    outcome: IncidentOutcome.Minor,
+    outcome: "Minor",
   });
 
   useEffect(() => {
@@ -158,7 +157,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 
   const onChangeIncidentOutcome = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setIncidentField("outcome", Number.parseInt(e.target.value));
+      setIncidentField("outcome", e.target.value as IncidentOutcome);
     },
     []
   );
@@ -228,7 +227,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
           setIncidentField("team", undefined);
           setIncidentField("notes", "");
           setIncidentField("rules", []);
-          setIncidentField("outcome", IncidentOutcome.Minor);
+          setIncidentField("outcome", "Minor");
           addRecentRules(incident.rules);
           toast({ type: "info", message: "Created Entry" });
         },
@@ -241,7 +240,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   );
 
   return (
-    <Dialog open={open} mode={DialogMode.Modal} onClose={() => setOpen(false)}>
+    <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
       <DialogHeader title="New Report" onClose={() => setOpen(false)} />
       <DialogBody>
         <Spinner show={isLoadingMetaData} />
@@ -309,9 +308,9 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             onChange={onChangeIncidentOutcome}
             className="max-w-full w-full"
           >
-            <option value={IncidentOutcome.Minor}>Minor</option>
-            <option value={IncidentOutcome.Major}>Major</option>
-            <option value={IncidentOutcome.Disabled}>Disabled</option>
+            <option value="Minor">Minor</option>
+            <option value="Major">Major</option>
+            <option value="Disabled">Disabled</option>
           </Select>
         </label>
         <p className="mt-4">Associated Rules</p>

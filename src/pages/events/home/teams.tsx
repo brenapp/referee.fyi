@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { EventData } from "robotevents/out/endpoints/events";
 import { Spinner } from "~components/Spinner";
-import { IncidentOutcome } from "~utils/data/incident";
 import { useEventIncidents } from "~utils/hooks/incident";
 import { useDivisionTeams } from "~utils/hooks/robotevents";
 import { useCurrentDivision } from "~utils/hooks/state";
@@ -31,7 +30,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
     const grouped = new Map<string, number>();
 
     for (const incident of incidents) {
-      if (incident.outcome !== IncidentOutcome.Major) continue;
+      if (incident.outcome !== "Major") continue;
       const key = incident.team ?? "<none>";
       const count = grouped.get(key) ?? 0;
       grouped.set(key, count + 1);
@@ -46,7 +45,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
     const grouped = new Map<string, number>();
 
     for (const incident of incidents) {
-      if (incident.outcome === IncidentOutcome.Major) continue;
+      if (incident.outcome === "Major") continue;
       const key = incident.team ?? "<none>";
       const count = grouped.get(key) ?? 0;
       grouped.set(key, count + 1);

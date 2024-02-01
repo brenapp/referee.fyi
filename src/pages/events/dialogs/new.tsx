@@ -314,7 +314,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
           </Select>
         </label>
         <p className="mt-4">Associated Rules</p>
-        <div className="flex mt-2 gap-2">
+        <div className="flex mt-2 gap-2 flex-wrap">
           {recentRules?.map((rule) => (
             <Button
               className={twMerge(

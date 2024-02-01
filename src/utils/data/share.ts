@@ -153,9 +153,11 @@ export async function deleteServerIncident(id: string, sku: string) {
 interface ShareConnectionEvents {
   connect: () => void;
   disconnect: () => void;
+  error: () => void;
   message: (data: WebSocketPayload<WebSocketMessage>) => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface ShareConnection {
   on<U extends keyof ShareConnectionEvents>(
     event: U,
@@ -171,6 +173,7 @@ export interface ShareConnection {
   ): this;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class ShareConnection extends EventEmitter {
   ws: WebSocket | null = null;
 
@@ -183,7 +186,12 @@ export class ShareConnection extends EventEmitter {
   users: string[] = [];
 
   public setup(sku: string, code: string, user: Omit<ShareUser, "id">) {
-    if (this.sku === sku && this.code === code && this.ws && this.ws.readyState === this.ws.OPEN) {
+    if (
+      this.sku === sku &&
+      this.code === code &&
+      this.ws &&
+      this.ws.readyState === this.ws.OPEN
+    ) {
       return;
     }
 
@@ -230,11 +238,17 @@ export class ShareConnection extends EventEmitter {
 
     this.ws.onopen = () => this.emit("connect");
     this.ws.onclose = () => {
-      toast({ type: "error", message: "Reconnecting to socket..." });
       clearTimeout(ShareConnection.reconnectTimer);
-      ShareConnection.reconnectTimer = setTimeout(() => this.connect(user), 5000);
+      ShareConnection.reconnectTimer = setTimeout(
+        () => this.connect(user),
+        5000
+      );
       this.emit("disconnect");
-    }
+    };
+    this.ws.onerror = () => {
+      toast({ type: "error", message: "Could not connect to sharing server." });
+      this.emit("error");
+    };
   }
 
   async send(message: WebSocketPeerMessage) {
@@ -340,7 +354,9 @@ export class ShareConnection extends EventEmitter {
       }
 
       this.emit("message", data);
-    } catch (e) { }
+    } catch (e) {
+      toast({ type: "error", message: `${e}` });
+    }
   }
 
   public cleanup() {

@@ -21,7 +21,7 @@ export const Tabs: React.FC<TabsProps> = ({ children, ...props }) => {
             aria-controls={`panel-${key}`}
             onClick={() => setActiveTab(index)}
             className={twMerge(
-              "text-zinc-50 flex-1 text-center py-2 px-4 active:bg-zinc-600 first:rounded-tl-md last::rounded-tr-md",
+              "text-zinc-50 flex-1 text-center py-2 px-4 active:bg-zinc-600 first:rounded-tl-md last:rounded-tr-md",
               index === activeTab &&
                 "text-emerald-400 border-b-2 border-emerald-400"
             )}

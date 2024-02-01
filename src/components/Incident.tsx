@@ -5,9 +5,9 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 import { useDeleteIncident } from "~utils/hooks/incident";
 
 const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
-  [IncidentOutcome.Minor]: "bg-yellow-400 text-yellow-900",
-  [IncidentOutcome.Major]: "bg-red-400 text-red-900",
-  [IncidentOutcome.Disabled]: "bg-yellow-400 text-yellow-900",
+  Minor: "bg-yellow-400 text-yellow-900",
+  Major: "bg-red-400 text-red-900",
+  Disabled: "bg-yellow-400 text-yellow-900",
 };
 
 export type IncidentProps = {
@@ -31,7 +31,7 @@ export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
             {[
               incident.team,
               incident.match?.name ?? "Event-Wide",
-              IncidentOutcome[incident.outcome],
+              incident.outcome,
             ].join(" • ")}
           </p>
           <p>{incident.notes}</p>

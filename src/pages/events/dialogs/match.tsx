@@ -15,7 +15,6 @@ import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
 import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
-import { ButtonMode, DialogMode } from "~components/constants";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { MatchContext } from "~components/Context";
 import { Incident } from "~components/Incident";
@@ -44,6 +43,14 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
     const rules: Record<string, IncidentWithID[]> = {};
 
     for (const incident of incidents) {
+      if (incident.rules.length < 1) {
+        if (rules["NA"]) {
+          rules["NA"].push(incident);
+        } else {
+          rules["NA"] = [incident];
+        }
+      }
+
       for (const rule of incident.rules) {
         if (rules[rule]) {
           rules[rule].push(incident);
@@ -62,23 +69,23 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
       onToggle={(e) => setOpen(e.currentTarget.open)}
       className={twMerge("p-1 rounded-md mb-2")}
     >
-      <summary className="flex gap-2 items-center active:bg-zinc-700 rounded-md">
+      <summary className="flex gap-2 items-center active:bg-zinc-700 rounded-md max-w-full">
         {open ? (
-          <ChevronDownIcon height={16} />
+          <ChevronDownIcon height={16} width={16} className="flex-shrink-0" />
         ) : (
-          <ChevronRightIcon height={16} />
+          <ChevronRightIcon height={16} width={16} className="flex-shrink-0" />
         )}
         <div
           className={twMerge(
-            "py-1 px-2 rounded-md font-mono",
+            "py-1 px-2 rounded-md font-mono flex-shrink-0",
             teamAlliance?.color === "red" ? "text-red-400" : "text-blue-400"
           )}
         >
           <p>{number}</p>
         </div>
-        <ul className="text-sm flex-1 ">
+        <ul className="text-sm flex-1 break-normal">
           {rulesSummary.map(([rule, incidents]) => {
-            let outcome = IncidentOutcome.Minor;
+            let outcome: IncidentOutcome = "Minor";
             for (const incident of incidents) {
               if (incident.outcome > outcome) {
                 outcome = incident.outcome;
@@ -86,9 +93,9 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
             }
 
             const highlights: Record<IncidentOutcome, string> = {
-              [IncidentOutcome.Minor]: "text-yellow-300",
-              [IncidentOutcome.Disabled]: "",
-              [IncidentOutcome.Major]: "text-red-300",
+              Minor: "text-yellow-300",
+              Disabled: "",
+              Major: "text-red-300",
             };
 
             return (
@@ -105,8 +112,8 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
           })}
         </ul>
         <Button
-          mode={ButtonMode.Primary}
-          className="flex items-center w-max"
+          mode="primary"
+          className="flex items-center w-max flex-shrink-0"
           onClick={onClickFlag}
         >
           <FlagIcon height={20} className="mr-2" />
@@ -182,11 +189,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
         initialMatchId={match?.id}
         initialTeamNumber={initialTeamNumber}
       />
-      <Dialog
-        open={open}
-        mode={DialogMode.Modal}
-        onClose={() => setOpen(false)}
-      >
+      <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
         <DialogHeader title="Matches" onClose={() => setOpen(false)} />
         <DialogBody>
           <nav className="flex items-center">

@@ -126,7 +126,10 @@ export class EventIncidents implements DurableObject {
     async handleInit(request: Request) {
         const data = await request.json<EventIncidentsData>();
 
-        await this.setOwner(data.owner!);
+        if (data.owner) {
+            await this.setOwner(data.owner);
+        }
+
         await this.setSKU(data.sku);
 
         for (const incident of data.incidents) {
@@ -134,7 +137,7 @@ export class EventIncidents implements DurableObject {
         };
     };
 
-    async handleGet(request: Request) {
+    async handleGet() {
         const data = await this.createServerShareMessage();
         return response({
             success: true,
@@ -142,7 +145,7 @@ export class EventIncidents implements DurableObject {
         })
     };
 
-    async handleCSV(request: Request) {
+    async handleCSV() {
         const incidents = await this.getAllIncidents();
 
         const outcome: Record<IncidentOutcome, string> = {

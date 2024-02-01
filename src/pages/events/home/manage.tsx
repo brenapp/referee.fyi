@@ -39,7 +39,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
   const activeUsers = useActiveUsers();
   const isOwner = useMemo(() => {
     return connection.owner === shareName;
-  }, [connection]);
+  }, [connection, shareName]);
 
   const { data: entries } = useEventIncidents(event?.sku);
 
@@ -60,7 +60,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
     } else {
       toast({ type: "error", message: response.details });
     }
-  }, [beginSharing]);
+  }, [beginSharing, event.sku, shareName]);
 
   const onClickShareCode = useCallback(async () => {
     const url = new URL(`/${event.sku}/join?code=${shareCode}`, location.href);
@@ -73,7 +73,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
     } else if (navigator.clipboard) {
       navigator.clipboard.writeText(url.href);
     }
-  }, [shareCode]);
+  }, [shareCode, event.sku]);
 
   const onClickStopSharing = useCallback(async () => {
     await leaveShare(event.sku);

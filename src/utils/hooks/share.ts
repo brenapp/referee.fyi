@@ -1,6 +1,5 @@
 import { get, set } from "idb-keyval";
 import {
-  PropsWithChildren,
   createContext,
   useCallback,
   useContext,
@@ -16,27 +15,9 @@ import {
 } from "~share/api";
 import { queryClient } from "~utils/data/query";
 import { ShareConnection, createShare, getShareData } from "~utils/data/share";
-import { useCurrentEvent } from "./state";
 
-const connection = new ShareConnection();
-const ShareContext = createContext(connection);
-
-export const ShareProvider: React.FC<PropsWithChildren> = ({ children }) => {
-  const { data: event } = useCurrentEvent();
-  const { data: code } = useShareCode(event?.sku);
-
-  const { name } = useShareName();
-
-  useEffect(() => {
-    if (event && code && name) {
-      connection.setup(event.sku, code, { name });
-    }
-  }, [event, code, name]);
-
-  return (
-    <ShareContext.Provider value={connection}>{children}</ShareContext.Provider>
-  );
-};
+export const connection = new ShareConnection();
+export const ShareContext = createContext(connection);
 
 export function useShareConnection() {
   return useContext(ShareContext);
@@ -54,7 +35,7 @@ export function useShareName() {
     if (query.isSuccess && query.data) {
       setName(query.data);
     }
-  }, [query.data]);
+  }, [query.data, query.isSuccess]);
 
   const persist = useCallback(async () => {
     await set("share_name", name);

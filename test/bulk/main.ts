@@ -2,7 +2,7 @@ import puppeteer from "puppeteer";
 import "dotenv/config";
 
 const BASE_URL = "http://localhost:5173";
-const { SKU, CODE, DIVISION } = process.env;
+const { SKU, CODE } = process.env;
 
 (async () => {
   console.log(BASE_URL);

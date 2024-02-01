@@ -153,6 +153,7 @@ interface ShareConnectionEvents {
   message: (data: WebSocketPayload<WebSocketMessage>) => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface ShareConnection {
   on<U extends keyof ShareConnectionEvents>(
     event: U,
@@ -168,6 +169,7 @@ export interface ShareConnection {
   ): this;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class ShareConnection extends EventEmitter {
   ws: WebSocket | null = null;
 
@@ -323,7 +325,9 @@ export class ShareConnection extends EventEmitter {
       }
 
       this.emit("message", data);
-    } catch (e) {}
+    } catch (e) {
+      toast({ type: "error", message: `${e}` });
+    }
   }
 
   public cleanup() {

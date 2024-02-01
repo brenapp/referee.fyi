@@ -163,6 +163,24 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     []
   );
 
+  const onAddRule = useCallback(
+    (rule: Rule) => {
+      if (incident.rules.some((r) => r.rule === rule.rule)) return;
+      setIncidentField("rules", [...incident.rules, rule]);
+    },
+    [incident.rules]
+  );
+
+  const onRemoveRule = useCallback(
+    (rule: Rule) => {
+      setIncidentField(
+        "rules",
+        incident.rules.filter((r) => r.rule !== rule.rule)
+      );
+    },
+    [incident.rules]
+  );
+
   const onToggleRule = useCallback(
     (rule: Rule) => {
       if (incident.rules.some((r) => r.rule === rule.rule)) {
@@ -171,15 +189,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         onAddRule(rule);
       }
     },
-    [rules, incident.rules]
-  );
-
-  const onAddRule = useCallback(
-    (rule: Rule) => {
-      if (incident.rules.some((r) => r.rule === rule.rule)) return;
-      setIncidentField("rules", [...incident.rules, rule]);
-    },
-    [rules, incident.rules]
+    [incident.rules, onAddRule, onRemoveRule]
   );
 
   const onPickOtherRule = useCallback(
@@ -196,16 +206,6 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       setIncidentField("rules", [...incident.rules, rule]);
     },
     [rules, incident.rules]
-  );
-
-  const onRemoveRule = useCallback(
-    (rule: Rule) => {
-      setIncidentField(
-        "rules",
-        incident.rules.filter((r) => r.rule !== rule.rule)
-      );
-    },
-    [incident.rules]
   );
 
   const onChangeIncidentNotes = useCallback(
@@ -237,7 +237,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         },
       });
     },
-    [incident, mutate, setOpen]
+    [incident, mutate, setOpen, addRecentRules]
   );
 
   return (

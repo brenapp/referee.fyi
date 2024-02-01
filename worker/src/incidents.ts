@@ -159,12 +159,6 @@ export class EventIncidents implements DurableObject {
     async handleCSV() {
         const incidents = await this.getAllIncidents();
 
-        const outcome: Record<IncidentOutcome, string> = {
-            [0]: "Minor",
-            [1]: "Major",
-            [2]: "Disabled"
-        };
-
         let output = "Date,Time,ID,SKU,Division,Match,Team,Outcome,Rules,Notes\n";
 
         output += incidents.map(incident => {
@@ -176,7 +170,7 @@ export class EventIncidents implements DurableObject {
                 incident.division,
                 incident.match?.name,
                 incident.team,
-                outcome[incident.outcome],
+                incident.outcome,
                 incident.rules.join(" "),
                 incident.notes
             ].join(",")

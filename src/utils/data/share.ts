@@ -314,7 +314,7 @@ export class ShareConnection extends EventEmitter {
           }
 
           // Explicitly delete incidents marked as deleted first.
-          for (const id of data.data.deleted) {
+          for (const id of data.data?.deleted ?? []) {
             await deleteIncident(id, false);
           }
 

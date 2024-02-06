@@ -243,7 +243,7 @@ export const AppShell: React.FC = () => {
       <Toaster />
       <nav className="h-16 flex gap-4 max-w-full">
         <IconButton
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/")}
           icon={<ChevronLeftIcon height={24} />}
           className="aspect-auto bg-transparent"
         />

@@ -314,11 +314,12 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
           </Select>
         </label>
         <p className="mt-4">Associated Rules</p>
-        <div className="flex mt-2 gap-2 flex-wrap">
+        <div className="flex mt-2 gap-2 flex-wrap md:flex-nowrap">
           {recentRules?.map((rule) => (
             <Button
+              mode="none"
               className={twMerge(
-                "text-emerald-400 font-mono",
+                "text-emerald-400 font-mono min-w-min flex-shrink",
                 incident.rules.some((r) => r.rule === rule.rule)
                   ? "bg-emerald-600 text-zinc-50"
                   : ""
@@ -329,12 +330,8 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
               {rule.rule}
             </Button>
           ))}
-          <label>
-            <Select
-              className="w-full py-4"
-              value={""}
-              onChange={onPickOtherRule}
-            >
+          <label className="flex-1">
+            <Select className="py-4" value={""} onChange={onPickOtherRule}>
               <option>Pick Rule</option>
               {rules?.ruleGroups.map((group) => (
                 <optgroup label={group.name} key={group.name}>

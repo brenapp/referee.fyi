@@ -64,7 +64,6 @@ export const HomePage: React.FC = () => {
         </section>
       </div>
       <Dialog
-        className="markdown"
         open={updateDialogOpen}
         mode="modal"
         onClose={() => setUpdateDialogOpen(false)}
@@ -73,8 +72,8 @@ export const HomePage: React.FC = () => {
           title="What's New"
           onClose={() => setUpdateDialogOpen(false)}
         />
-        <DialogBody>
-          <Markdown>{markdownContent}</Markdown>
+        <DialogBody className="markdown">
+          <Markdown className="p-4">{markdownContent}</Markdown>
         </DialogBody>
       </Dialog>
     </>

@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useEventMatchesForTeam, useTeam } from "~hooks/robotevents";
+import { useEventMatchesForTeam, useEventTeam } from "~hooks/robotevents";
 import { Spinner } from "~components/Spinner";
 import { useCallback, useMemo, useState } from "react";
 import { useCurrentEvent } from "~hooks/state";
@@ -24,7 +24,7 @@ export const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({
   event,
   team,
 }) => {
-  const { data: matches } = useEventMatchesForTeam(event, team);
+  const { data: matches, isLoading } = useEventMatchesForTeam(event, team);
 
   const [matchId, setMatchId] = useState<number>(0);
   const [division, setDivision] = useState(1);
@@ -47,6 +47,7 @@ export const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({
         setOpen={setMatchDialogOpen}
         division={division}
       />
+      <Spinner show={isLoading} />
       <ul>
         {matches?.map((match) => (
           <ClickableMatch
@@ -71,7 +72,7 @@ export const EventTeamsIncidents: React.FC<EventTeamsTabProps> = ({
   } = useTeamIncidentsByEvent(team?.number, event?.sku);
 
   if (isSuccess && incidents.length < 1) {
-    return <p>No Recorded Entries!</p>;
+    return <p className="mt-4">No Recorded Entries!</p>;
   }
 
   return (
@@ -87,7 +88,7 @@ export const EventTeamsIncidents: React.FC<EventTeamsTabProps> = ({
 export const EventTeamsPage: React.FC = () => {
   const { number } = useParams();
   const { data: event } = useCurrentEvent();
-  const { data: team, isLoading } = useTeam(number ?? "", event?.program.code);
+  const team = useEventTeam(event, number ?? "");
 
   const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
 
@@ -105,21 +106,18 @@ export const EventTeamsPage: React.FC = () => {
         setOpen={setIncidentDialogOpen}
         initialTeamNumber={number}
       />
-      <Spinner show={isLoading} />
-      {team && (
-        <header className="mt-4">
-          <Button onClick={() => setIncidentDialogOpen(true)} mode="primary">
-            <FlagIcon height={20} className="inline mr-2 " />
-            New Entry
-          </Button>
-          <h1 className="text-xl overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose mt-4">
-            <span className="font-mono text-emerald-400">{team?.number}</span>
-            {" • "}
-            <span className="">{team.team_name}</span>
-          </h1>
-          <p className="italic">{teamLocation}</p>
-        </header>
-      )}
+      <header className="mt-4">
+        <Button onClick={() => setIncidentDialogOpen(true)} mode="primary">
+          <FlagIcon height={20} className="inline mr-2 " />
+          New Entry
+        </Button>
+        <h1 className="text-xl overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose mt-4">
+          <span className="font-mono text-emerald-400">{number}</span>
+          {" • "}
+          <span>{team?.team_name}</span>
+        </h1>
+        <p className="italic">{teamLocation}</p>
+      </header>
       <section>
         <Tabs>
           {{

@@ -4,7 +4,10 @@ import { LinkButton } from "~components/Button";
 import { useCurrentEvent } from "~hooks/state";
 
 export const EventDivisionPickerPage: React.FC = () => {
-  const { data: event } = useCurrentEvent();
+  const { data: event } = useCurrentEvent({
+    networkMode: "always",
+    refetchOnMount: "always",
+  });
 
   if (event?.divisions.length === 1) {
     return <Navigate to={`/${event.sku}/${event.divisions[0].id}`} replace />;

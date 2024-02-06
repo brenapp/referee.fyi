@@ -1,9 +1,10 @@
 import { useParams } from "react-router-dom";
-import { useEvent } from "./robotevents";
+import { HookQueryOptions, useEvent } from "./robotevents";
+import { EventData } from "robotevents/out/endpoints/events";
 
-export function useCurrentEvent() {
+export function useCurrentEvent(options?: HookQueryOptions<EventData | null | undefined>) {
   const { sku } = useParams();
-  return useEvent(sku ?? "");
+  return useEvent(sku ?? "", options);
 }
 
 export function useCurrentDivision(def?: number) {

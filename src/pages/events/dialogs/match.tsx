@@ -43,6 +43,10 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
     const rules: Record<string, IncidentWithID[]> = {};
 
     for (const incident of incidents) {
+      if (incident.outcome !== "Major" && incident.outcome !== "Minor") {
+        continue;
+      }
+
       if (incident.rules.length < 1) {
         if (rules["NA"]) {
           rules["NA"].push(incident);
@@ -87,8 +91,8 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
           {rulesSummary.map(([rule, incidents]) => {
             let outcome: IncidentOutcome = "Minor";
             for (const incident of incidents) {
-              if (incident.outcome > outcome) {
-                outcome = incident.outcome;
+              if (incident.outcome === "Major") {
+                outcome = "Major";
               }
             }
 
@@ -96,6 +100,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
               Minor: "text-yellow-300",
               Disabled: "",
               Major: "text-red-300",
+              General: "",
             };
 
             return (

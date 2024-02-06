@@ -108,9 +108,11 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     if (preventSave) {
       return false;
     }
+
     if (isLoadingMetaData) {
       return false;
     }
+
     return !!team;
   }, [preventSave, isLoadingMetaData, team]);
 
@@ -308,6 +310,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             onChange={onChangeIncidentOutcome}
             className="max-w-full w-full"
           >
+            <option value="General">General</option>
             <option value="Minor">Minor</option>
             <option value="Major">Major</option>
             <option value="Disabled">Disabled</option>

@@ -27,6 +27,9 @@ export type CreateShareResponse = {
     code: string;
 }
 
+// PATCH /api/share/:sku:/:code:/incident
+export type EditIncidentResponse = Exclude<Incident["revision"], undefined>;
+
 export type ShareGetDataResponse = WebSocketMessageData[""]
 
 // WebSocket communications

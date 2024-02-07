@@ -1,5 +1,6 @@
-import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import { defineConfig } from "vite";
+import { vitePluginVersionMark } from 'vite-plugin-version-mark'
 import { VitePWA } from "vite-plugin-pwa";
 import tsconfigPaths from "vite-tsconfig-paths";
 
@@ -7,6 +8,11 @@ import tsconfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   plugins: [
     react(),
+    vitePluginVersionMark({
+      name: "Referee FYI",
+      ifShortSHA: true,
+      command: "git describe --tags"
+    }),
     tsconfigPaths({}),
     VitePWA({
       registerType: "autoUpdate",

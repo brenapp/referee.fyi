@@ -87,6 +87,10 @@ export const Dialog: React.FC<DialogProps> = ({
     }
   }, [open, mode]);
 
+  if (!open) {
+    return null;
+  }
+
   return (
     <dialog
       {...props}

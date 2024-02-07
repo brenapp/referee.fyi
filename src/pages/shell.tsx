@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import {
+  Outlet,
+  useLocation,
+  useNavigate,
+  useResolvedPath,
+} from "react-router-dom";
 import { useEvent, useEventsToday } from "~utils/hooks/robotevents";
 import { Button, IconButton, LinkButton } from "~components/Button";
 import {
@@ -28,6 +33,7 @@ function isValidSKU(sku: string) {
 const EventPicker: React.FC = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [query, setQuery] = useState("");
   const { data: eventFromSKU, isLoading: isLoadingEventFromSKU } = useEvent(
@@ -62,7 +68,9 @@ const EventPicker: React.FC = () => {
   }, [query, eventsToday]);
 
   const selectedDiv = event?.divisions.find((d) => d.id === division);
-  const showDiv = selectedDiv && (event?.divisions.length ?? 0) > 1;
+  const showDiv =
+    location.pathname !== `/${event?.sku}` &&
+    (event?.divisions.length ?? 0) > 1;
 
   const onClick = () => {
     if (showDiv) {

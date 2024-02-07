@@ -383,25 +383,29 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
               {rule.rule}
             </Button>
           ))}
-          <label className="flex-1">
-            <Select className="py-4" value={""} onChange={onPickOtherRule}>
-              <option>Pick Rule</option>
-              {rules?.ruleGroups.map((group) => (
-                <optgroup label={group.name} key={group.name}>
-                  {group.rules.map((rule) => (
-                    <option
-                      value={rule.rule}
-                      data-rulegroup={group.name}
-                      key={rule.rule}
-                    >
-                      {rule.rule} {rule.description}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </Select>
-          </label>
         </div>
+        <label>
+          <Select
+            className="py-4 max-w-full w-full mt-2"
+            value={""}
+            onChange={onPickOtherRule}
+          >
+            <option>Pick Rule</option>
+            {rules?.ruleGroups.map((group) => (
+              <optgroup label={group.name} key={group.name}>
+                {group.rules.map((rule) => (
+                  <option
+                    value={rule.rule}
+                    data-rulegroup={group.name}
+                    key={rule.rule}
+                  >
+                    {rule.rule} {rule.description}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </Select>
+        </label>
         <ul className="mt-4 flex flex-wrap gap-2">
           {incident.rules.map((rule) => (
             <li
@@ -428,14 +432,14 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             onChange={onChangeIncidentNotes}
           />
         </label>
-        <Button
-          className="w-full text-center mt-4 bg-emerald-400 text-black"
-          disabled={!canSave}
-          onClick={onSubmit}
-        >
-          Submit
-        </Button>
       </DialogBody>
+      <Button
+        className="w-full text-center my-4 bg-emerald-400 text-black"
+        disabled={!canSave}
+        onClick={onSubmit}
+      >
+        Submit
+      </Button>
     </Dialog>
   );
 };

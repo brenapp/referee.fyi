@@ -1,3 +1,5 @@
+import { WebSocketSender } from "./api";
+
 export type IncidentOutcome = "Minor" | "Major" | "Disabled"
 
 export type Incident = {
@@ -14,6 +16,11 @@ export type Incident = {
     };
     team?: string; // team number
 
+    revision?: {
+        count: number;
+        user: WebSocketSender;
+    };
+
     outcome: IncidentOutcome;
     rules: string[];
     notes: string;
@@ -27,5 +34,6 @@ export type ShareUser = {
 export type EventIncidents = {
     sku: string;
     owner?: ShareUser;
-    incidents: Incident[]
+    incidents: Incident[];
+    deleted: string[];
 }

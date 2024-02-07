@@ -8,10 +8,12 @@ import type {
   WebSocketMessage,
   WebSocketPeerMessage,
   WebSocketServerShareInfoMessage,
+  EditIncidentResponse,
 } from "~share/api";
 import {
   IncidentWithID,
   deleteIncident,
+  getIncident,
   getIncidentsByEvent,
   hasIncident,
   newIncident,
@@ -125,10 +127,12 @@ export async function editServerIncident(incident: IncidentWithID) {
 
   url.searchParams.set("user_id", userId);
 
-  return fetch(url, {
+  const response = await fetch(url, {
     method: "PATCH",
     body: JSON.stringify(incident),
   });
+
+  return response.json() as Promise<ShareResponse<EditIncidentResponse>>;
 }
 
 export async function deleteServerIncident(id: string, sku: string) {
@@ -277,16 +281,41 @@ export class ShareConnection extends EventEmitter {
         }
 
         // Sent when you first join, and also when owner changes. We definitely don't want to
-        // *delete* incidents the user creates before joining the share.
+        // *delete* incidents the user creates before joining the share, unless they are listed as
+        // being deleted on the server.
         case "server_share_info": {
           this.owner = data.data.owner;
           this.users = data.users;
 
           for (const incident of data.data.incidents) {
             const has = await hasIncident(incident.id);
+
+            // Handle newly created incidents
             if (!has) {
               await newIncident(incident, false, incident.id);
+
+              // Handle any incidents with different revisions while offline
+            } else {
+              const current = (await getIncident(incident.id))!;
+
+              const localRevision = incident.revision?.count ?? 0;
+              const remoteRevision = incident.revision?.count ?? 0;
+
+              if (localRevision > remoteRevision) {
+                const response = await editServerIncident(current);
+                if (response?.success) {
+                  current.revision = response.data;
+                }
+                await setIncident(incident.id, current);
+              } else if (remoteRevision > localRevision) {
+                await setIncident(incident.id, incident);
+              }
             }
+          }
+
+          // Explicitly delete incidents marked as deleted first.
+          for (const id of data.data.deleted) {
+            await deleteIncident(id, false);
           }
 
           const eventIncidents = await getIncidentsByEvent(this.sku);

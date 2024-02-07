@@ -51,6 +51,8 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
     const response = await beginSharing({
       incidents,
       owner: { id: shareId, name: shareName ?? "" },
+      // Any incidents we may have deleted before sharing should not be uploaded to begin with
+      deleted: [],
       sku: event.sku,
     });
 

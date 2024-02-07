@@ -27,10 +27,14 @@ export function useIncident(id: string | undefined | null) {
 export function useNewIncident() {
   return useMutation({
     mutationFn: async (incident: Incident) => {
-      const id = await newIncident(incident);
-      await queryClient.invalidateQueries({ queryKey: ["incidents"] });
-      return id;
+      // Catch failed fetch
+      try {
+        const id = await newIncident(incident);
+        await queryClient.invalidateQueries({ queryKey: ["incidents"] });
+        return id;
+      } catch { };
     },
+
   });
 }
 

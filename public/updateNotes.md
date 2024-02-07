@@ -1,3 +1,9 @@
+### 6 Jan 2024
+
+- Add general notes to incidents, which do not count in rule summaries. General notes are intended
+  for situations where the referee wants to note something about the team without it necessarily
+  being a violation (ex: team was 2 minutes late for match, or team showed good sportsmanship)
+
 ### 18 Jan 2024
 
 - You are now able to share your anomaly log with other users from the Manage tab of an event.

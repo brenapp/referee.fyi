@@ -67,6 +67,10 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
     return Object.entries(rules).sort((a, b) => a[1].length - b[1].length);
   }, [incidents]);
 
+  const hasGeneral = useMemo(() => {
+    return incidents.some((incident) => incident.outcome === "General");
+  }, [incidents]);
+
   return (
     <details
       open={open}
@@ -85,7 +89,10 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
             teamAlliance?.color === "red" ? "text-red-400" : "text-blue-400"
           )}
         >
-          <p>{number}</p>
+          <p>
+            {number}
+            <span className="text-zinc-300">{hasGeneral ? "*" : ""}</span>
+          </p>
         </div>
         <ul className="text-sm flex-1 break-normal">
           {rulesSummary.map(([rule, incidents]) => {

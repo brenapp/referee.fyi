@@ -75,7 +75,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
     <details
       open={open}
       onToggle={(e) => setOpen(e.currentTarget.open)}
-      className={twMerge("p-1 rounded-md mb-2")}
+      className="p-1 rounded-md mb-2 max-w-full"
     >
       <summary className="flex gap-2 items-center active:bg-zinc-700 rounded-md max-w-full">
         {open ? (
@@ -94,7 +94,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
             <span className="text-zinc-300">{hasGeneral ? "*" : ""}</span>
           </p>
         </div>
-        <ul className="text-sm flex-1 break-normal">
+        <ul className="text-sm flex-1 flex-shrink break-normal overflow-x-hidden">
           {rulesSummary.map(([rule, incidents]) => {
             let outcome: IncidentOutcome = "Minor";
             for (const incident of incidents) {

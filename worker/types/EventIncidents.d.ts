@@ -1,6 +1,6 @@
 import { WebSocketSender } from "./api";
 
-export type IncidentOutcome = "Minor" | "Major" | "Disabled"
+export type IncidentOutcome = "Minor" | "Major" | "Disabled" | "General"
 
 export type Incident = {
     id: string;

@@ -8,6 +8,7 @@ const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
   Minor: "bg-yellow-400 text-yellow-900",
   Major: "bg-red-400 text-red-900",
   Disabled: "bg-yellow-400 text-yellow-900",
+  General: "bg-zinc-300 text-zinc-900",
 };
 
 export type IncidentProps = {
@@ -30,7 +31,7 @@ export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
           <p className="text-sm">
             {[
               incident.team,
-              incident.match?.name ?? "Event-Wide",
+              incident.match?.name ?? "Non-Match",
               incident.outcome,
             ].join(" • ")}
           </p>

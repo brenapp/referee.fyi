@@ -43,6 +43,10 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
     const rules: Record<string, IncidentWithID[]> = {};
 
     for (const incident of incidents) {
+      if (incident.outcome !== "Major" && incident.outcome !== "Minor") {
+        continue;
+      }
+
       if (incident.rules.length < 1) {
         if (rules["NA"]) {
           rules["NA"].push(incident);
@@ -63,6 +67,10 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
     return Object.entries(rules).sort((a, b) => a[1].length - b[1].length);
   }, [incidents]);
 
+  const hasGeneral = useMemo(() => {
+    return incidents.some((incident) => incident.outcome === "General");
+  }, [incidents]);
+
   return (
     <details
       open={open}
@@ -81,14 +89,17 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
             teamAlliance?.color === "red" ? "text-red-400" : "text-blue-400"
           )}
         >
-          <p>{number}</p>
+          <p>
+            {number}
+            <span className="text-zinc-300">{hasGeneral ? "*" : ""}</span>
+          </p>
         </div>
         <ul className="text-sm flex-1 flex-shrink break-normal overflow-x-hidden">
           {rulesSummary.map(([rule, incidents]) => {
             let outcome: IncidentOutcome = "Minor";
             for (const incident of incidents) {
-              if (incident.outcome > outcome) {
-                outcome = incident.outcome;
+              if (incident.outcome === "Major") {
+                outcome = "Major";
               }
             }
 
@@ -96,6 +107,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
               Minor: "text-yellow-300",
               Disabled: "",
               Major: "text-red-300",
+              General: "",
             };
 
             return (

@@ -151,7 +151,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       return false;
     }
     return !!team || !!event;
-  }, [preventSave, isLoadingMetaData, team]);
+  }, [preventSave, isLoadingMetaData, team, event]);
 
   const setIncidentField = <T extends keyof RichIncident>(
     key: T,
@@ -285,7 +285,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         },
       });
     },
-    [incident, mutate, setOpen, addRecentRules]
+    [incident, mutate, setOpen, addRecentRules, initialMatch?.id]
   );
 
   return (

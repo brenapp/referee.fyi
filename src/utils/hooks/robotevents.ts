@@ -293,7 +293,11 @@ export function useEventsToday(
   });
 }
 
-export function useEventSkills(data: EventData | null | undefined, options?: SkillOptionsFromEvent, queryOptions?: HookQueryOptions<Skill[]>) {
+export function useEventSkills(
+  data: EventData | null | undefined,
+  options?: SkillOptionsFromEvent,
+  queryOptions?: HookQueryOptions<Skill[]>
+) {
   return useQuery({
     queryKey: ["skills", data?.sku, options],
     queryFn: async () => {
@@ -305,6 +309,6 @@ export function useEventSkills(data: EventData | null | undefined, options?: Ski
       const runs = await event.skills();
       return runs.array();
     },
-    ...queryOptions
+    ...queryOptions,
   });
-};
+}

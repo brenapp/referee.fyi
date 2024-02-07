@@ -9,6 +9,7 @@ import {
 } from "../data/incident";
 import { UseQueryResult, useMutation, useQuery } from "@tanstack/react-query";
 import { Alliance, Match, MatchData } from "robotevents/out/endpoints/matches";
+import { toast } from "~components/Toast";
 import { queryClient } from "~utils/data/query";
 
 export function useIncident(id: string | undefined | null) {
@@ -32,9 +33,10 @@ export function useNewIncident() {
         const id = await newIncident(incident);
         await queryClient.invalidateQueries({ queryKey: ["incidents"] });
         return id;
-      } catch { };
+      } catch (e) {
+        toast({ type: "error", message: `${e}` });
+      }
     },
-
   });
 }
 
@@ -56,7 +58,9 @@ export function useDeleteIncident(id: string, updateRemote?: boolean) {
     mutationFn: async () => {
       try {
         await deleteIncident(id, updateRemote);
-      } catch { };
+      } catch (e) {
+        toast({ type: "error", message: `${e}` });
+      }
       await queryClient.invalidateQueries({ queryKey: ["incidents"] });
     },
   });

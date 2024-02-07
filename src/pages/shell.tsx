@@ -1,10 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  Outlet,
-  useLocation,
-  useNavigate,
-  useResolvedPath,
-} from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useEvent, useEventsToday } from "~utils/hooks/robotevents";
 import { Button, IconButton, LinkButton } from "~components/Button";
 import {

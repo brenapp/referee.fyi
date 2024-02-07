@@ -1,3 +1,9 @@
+### 6 Feb 2024
+
+- Added skills-only page for multi-division events to make it easier to enter incidents
+- Fix bug where incidents could not be created from the team page
+- Performance improvements and bug fixes
+
 ### 18 Jan 2024
 
 - You are now able to share your anomaly log with other users from the Manage tab of an event.

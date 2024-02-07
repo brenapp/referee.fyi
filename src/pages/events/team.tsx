@@ -121,8 +121,8 @@ export const EventTeamsPage: React.FC = () => {
       <section>
         <Tabs>
           {{
-            Schedule: <EventTeamsMatches event={event} team={team} />,
             Incidents: <EventTeamsIncidents event={event} team={team} />,
+            Schedule: <EventTeamsMatches event={event} team={team} />,
           }}
         </Tabs>
       </section>

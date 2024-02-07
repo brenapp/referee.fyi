@@ -50,7 +50,10 @@ export const DialogBody: React.FC<DialogBodyProps> = ({
   return (
     <div
       {...props}
-      className={twMerge("flex-1 overflow-y-auto", props.className)}
+      className={twMerge(
+        "flex-1 overflow-y-auto overflow-x-clip max-w-full",
+        props.className
+      )}
     >
       {children}
     </div>
@@ -86,6 +89,10 @@ export const Dialog: React.FC<DialogProps> = ({
       ref.current?.close();
     }
   }, [open, mode]);
+
+  if (!open) {
+    return null;
+  }
 
   return (
     <dialog

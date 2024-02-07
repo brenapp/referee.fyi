@@ -54,7 +54,9 @@ export function useEventIncidents(sku: string | undefined | null) {
 export function useDeleteIncident(id: string, updateRemote?: boolean) {
   return useMutation<unknown, Error, unknown>({
     mutationFn: async () => {
-      await deleteIncident(id, updateRemote);
+      try {
+        await deleteIncident(id, updateRemote);
+      } catch { };
       await queryClient.invalidateQueries({ queryKey: ["incidents"] });
     },
   });

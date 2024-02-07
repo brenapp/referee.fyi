@@ -1,6 +1,11 @@
 import { useParams } from "react-router-dom";
 import { useEvent } from "./robotevents";
 
+export function useSKU() {
+  const { sku } = useParams();
+  return sku;
+};
+
 export function useCurrentEvent() {
   const { sku } = useParams();
   return useEvent(sku ?? "");

@@ -24,7 +24,7 @@ export const HomePage: React.FC = () => {
       }
     };
 
-    fetchMarkdownContent();
+    await fetchMarkdownContent();
 
     const latestVersion = pjson.version;
     const userVersion = localStorage.getItem("version");

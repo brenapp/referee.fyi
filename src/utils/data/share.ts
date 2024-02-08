@@ -268,15 +268,18 @@ export class ShareConnection extends EventEmitter {
           const has = await hasIncident(data.incident.id);
           if (!has) {
             await newIncident(data.incident, false, data.incident.id);
+            queryClient.invalidateQueries({ queryKey: ["incidents"] });
           }
           break;
         }
         case "update_incident": {
           await setIncident(data.incident.id, data.incident);
+          queryClient.invalidateQueries({ queryKey: ["incidents"] });
           break;
         }
         case "remove_incident": {
           await deleteIncident(data.id, false);
+          queryClient.invalidateQueries({ queryKey: ["incidents"] });
           break;
         }
 

@@ -23,6 +23,7 @@ export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
     <>
       <EditIncidentDialog
         incident={incident}
+        key={incident.revision?.count ?? -1}
         open={editIncidentOpen}
         setOpen={setEditIncidentOpen}
       />

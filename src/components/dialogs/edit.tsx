@@ -124,7 +124,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
   return (
     <Dialog mode="modal" onClose={() => setOpen(false)} open={open}>
       <DialogHeader onClose={() => setOpen(false)} title="Edit Incident" />
-      <DialogBody className="p-4">
+      <DialogBody>
         <label>
           <p className="mt-4">Team</p>
           <Input value={incident.team} readOnly className="w-full" />

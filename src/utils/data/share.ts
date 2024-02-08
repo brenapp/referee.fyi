@@ -308,17 +308,20 @@ export class ShareConnection extends EventEmitter {
               const localRevision = current.revision?.count ?? 0;
               const remoteRevision = incident.revision?.count ?? 0;
 
-              console.log(incident, localRevision, remoteRevision)
-
               if (localRevision > remoteRevision) {
                 const response = await editServerIncident(current);
                 if (response?.success) {
                   current.revision = response.data;
                 }
                 await setIncident(incident.id, current);
-              } else if (remoteRevision > localRevision) {
-                await setIncident(incident.id, incident);
+                queryClient.invalidateQueries({ queryKey: ["incidents"] });
               }
+
+              if (remoteRevision > localRevision) {
+                await setIncident(incident.id, incident);
+                queryClient.invalidateQueries({ queryKey: ["incidents"] });
+              }
+
             }
           }
 

@@ -140,6 +140,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
                 : undefined
             }
           >
+            <option value={undefined}>Non-Match</option>
             {teamMatchesByDivision.map(([name, matches]) => {
               return (
                 <optgroup key={name} label={name}>

@@ -229,17 +229,24 @@ export class EventIncidents implements DurableObject {
 
         const userId = params.get("user_id");
         const client = this.clients.find(client => client.user.id === userId);
+        const currentIncident = await this.getIncident(incident.id);
 
         const sender: WebSocketSender = client ? {
             type: "client", name: client.user.name
         } : { type: "server" };
 
-        if (incident.revision) {
-            incident.revision.count++;
-            incident.revision.user = sender;
-        } else {
+        const currentRevision = currentIncident?.revision?.count ?? 0;
+        if (incident.revision && incident.revision.count < currentRevision) {
+            return response({
+                success: false,
+                reason: "bad_request",
+                details: "The incident has been edited more recently."
+            })
+        };
+
+        if (!incident.revision) {
             incident.revision = {
-                count: 0,
+                count: 1,
                 user: sender
             }
         }

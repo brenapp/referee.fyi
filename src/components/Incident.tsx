@@ -18,12 +18,12 @@ export type IncidentProps = {
 
 export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
   const [editIncidentOpen, setEditIncidentOpen] = useState(false);
-
+  const key = incident.id+(incident.revision?.count ?? -1).toString()
   return (
     <>
       <EditIncidentDialog
         incident={incident}
-        key={incident.revision?.count ?? -1}
+        key={key}
         open={editIncidentOpen}
         setOpen={setEditIncidentOpen}
       />

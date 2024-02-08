@@ -3,7 +3,7 @@ import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { TeamData } from "robotevents/out/endpoints/teams";
-import { addServerIncident, deleteServerIncident, editServerIncident } from "./share";
+import { addServerIncident, deleteServerIncident, editServerIncident, getShareName } from "./share";
 import { IncidentOutcome, Incident as ServerIncident } from "~share/api";
 
 export type Incident = Omit<ServerIncident, "id">;
@@ -14,7 +14,7 @@ export type IncidentIndex = {
   [key: string]: string[];
 };
 
-export type RichIncident = {
+export type RichIncidentElements = {
   time: Date;
 
   event: string;
@@ -27,6 +27,8 @@ export type RichIncident = {
   rules: Rule[];
   notes: string;
 };
+
+export type RichIncident = Omit<Incident, keyof RichIncidentElements> & RichIncidentElements;
 
 export function packIncident(incident: RichIncident): Incident {
   return {
@@ -132,12 +134,18 @@ export async function editIncident(
   updateRemote: boolean = true
 ) {
   const current = await getIncident(id);
+  const name = await getShareName();
 
   if (!current) {
     return;
   }
 
-  const updatedIncident = { ...current, ...incident };
+  const revision = current.revision ?? { count: 0, user: { type: "client", name } };
+
+  revision.count += 1;
+  revision.user = { type: "client", name };
+
+  const updatedIncident = { ...current, ...incident, revision };
   await setIncident(id, updatedIncident);
 
   if (updateRemote) {

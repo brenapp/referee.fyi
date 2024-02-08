@@ -24,6 +24,7 @@ import { toast } from "~components/Toast";
 import { Spinner } from "~components/Spinner";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { queryClient } from "~utils/data/query";
+import { useShareName } from "~utils/hooks/share";
 
 export type EventNewIncidentDialogProps = {
   open: boolean;
@@ -40,7 +41,8 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   initialTeamNumber,
   preventSave,
 }) => {
-  const { mutate } = useNewIncident();
+  const { name: shareName } = useShareName();
+  const { mutateAsync: createIncident } = useNewIncident();
 
   const sku = useSKU();
   const { data: event, isLoading: isLoadingEvent } = useCurrentEvent();
@@ -250,30 +252,36 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   );
 
   const onSubmit = useCallback(
-    (e: React.FormEvent<HTMLFormElement> | React.MouseEvent) => {
+    async (e: React.FormEvent<HTMLFormElement> | React.MouseEvent) => {
       e.preventDefault();
+
+      incident.revision = {
+        count: 0,
+        user: { type: "client", name: shareName },
+      };
+
       const packed = packIncident(incident);
       setOpen(false);
-      mutate(packed, {
-        onSuccess: () => {
-          setTeam(initialTeamNumber);
-          setMatch(initialMatch?.id);
 
-          setIncidentField("team", undefined);
-          setIncidentField("notes", "");
-          setIncidentField("rules", []);
-          setIncidentField("outcome", "Minor");
-          addRecentRules(incident.rules);
+      try {
+        await createIncident(packed);
+        setTeam(initialTeamNumber);
+        setMatch(initialMatch?.id);
 
-          toast({ type: "info", message: "Created Entry" });
-          queryClient.invalidateQueries({ queryKey: ["incidents"] });
-        },
-        onError: (error) => {
-          toast({ type: "error", message: `${error}` });
-        },
-      });
+        setIncidentField("team", undefined);
+        setIncidentField("notes", "");
+        setIncidentField("rules", []);
+        setIncidentField("outcome", "Minor");
+        addRecentRules(incident.rules);
+
+        toast({ type: "info", message: "Created Entry" });
+      } catch (e) {
+        toast({ type: "error", message: `${e}` });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["incidents"] });
     },
-    [incident, mutate, setOpen, addRecentRules, initialMatch?.id]
+    [incident, createIncident, setOpen, addRecentRules, initialMatch?.id]
   );
 
   return (

@@ -3,7 +3,7 @@ import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { TeamData } from "robotevents/out/endpoints/teams";
-import { addServerIncident, deleteServerIncident } from "./share";
+import { addServerIncident, deleteServerIncident, editServerIncident, getShareName } from "./share";
 import { IncidentOutcome, Incident as ServerIncident } from "~share/api";
 
 export type Incident = Omit<ServerIncident, "id">;
@@ -14,7 +14,7 @@ export type IncidentIndex = {
   [key: string]: string[];
 };
 
-export type RichIncident = {
+export type RichIncidentElements = {
   time: Date;
 
   event: string;
@@ -28,14 +28,16 @@ export type RichIncident = {
   notes: string;
 };
 
+export type RichIncident = Omit<Incident, keyof RichIncidentElements> & RichIncidentElements;
+
 export function packIncident(incident: RichIncident): Incident {
   return {
     ...incident,
     match: incident.match
       ? {
-          id: incident.match.id,
-          name: incident.match.name,
-        }
+        id: incident.match.id,
+        name: incident.match.name,
+      }
       : undefined,
     team: incident.team?.number,
     rules: incident.rules.map((rule) => rule.rule),
@@ -124,6 +126,32 @@ export async function newIncident(
   }
 
   return id;
+}
+
+export async function editIncident(
+  id: string,
+  incident: Omit<IncidentWithID, "team" | "event">,
+  updateRemote: boolean = true
+) {
+  const current = await getIncident(id);
+  const name = await getShareName();
+
+  if (!current) {
+    return;
+  }
+
+  const revision = current.revision ?? { count: 0, user: { type: "client", name } };
+
+  revision.count += 1;
+  revision.user = { type: "client", name };
+
+  const updatedIncident = { ...current, ...incident, revision };
+  await setIncident(id, updatedIncident);
+
+  if (updateRemote) {
+    await editServerIncident(updatedIncident)
+  };
+
 }
 
 export async function deleteIncident(

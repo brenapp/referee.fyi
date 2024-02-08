@@ -1,8 +1,11 @@
-### 6 Jan 2024
+### 7 Jan 2024
+
+- You can now edit incidents after you have created.
 
 - Add general notes to incidents, which do not count in rule summaries. General notes are intended
   for situations where the referee wants to note something about the team without it necessarily
   being a violation (ex: team was 2 minutes late for match, or team showed good sportsmanship)
+
 - Added skills-only page for multi-division events to make it easier to enter incidents
 - Fix bug where incidents could not be created from the team page
 - Performance improvements and bug fixes

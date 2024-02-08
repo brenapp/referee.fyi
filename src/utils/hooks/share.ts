@@ -14,7 +14,7 @@ import {
   WebSocketServerShareInfoMessage,
 } from "~share/api";
 import { queryClient } from "~utils/data/query";
-import { ShareConnection, createShare, getShareData } from "~utils/data/share";
+import { ShareConnection, createShare, getShareData, getShareName } from "~utils/data/share";
 
 export const connection = new ShareConnection();
 export const ShareContext = createContext(connection);
@@ -28,7 +28,7 @@ export function useShareName() {
 
   const query = useQuery({
     queryKey: ["share_name"],
-    queryFn: async () => (await get<string>("share_name")) ?? "",
+    queryFn: getShareName,
   });
 
   useEffect(() => {

@@ -1,8 +1,9 @@
 import { twMerge } from "tailwind-merge";
 import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
 import { IconButton } from "./Button";
-import { TrashIcon } from "@heroicons/react/24/outline";
-import { useDeleteIncident } from "~utils/hooks/incident";
+import { EditIncidentDialog } from "./dialogs/edit";
+import { useState } from "react";
+import { PencilSquareIcon } from "@heroicons/react/20/solid";
 
 const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
   Minor: "bg-yellow-400 text-yellow-900",
@@ -16,9 +17,16 @@ export type IncidentProps = {
 } & React.HTMLProps<HTMLDivElement>;
 
 export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
-  const { mutate: onClickDelete } = useDeleteIncident(incident.id);
+  const [editIncidentOpen, setEditIncidentOpen] = useState(false);
+
   return (
     <>
+      <EditIncidentDialog
+        incident={incident}
+        key={incident.revision?.count ?? -1}
+        open={editIncidentOpen}
+        setOpen={setEditIncidentOpen}
+      />
       <div
         {...props}
         className={twMerge(
@@ -45,9 +53,9 @@ export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
           </ul>
         </div>
         <IconButton
-          icon={<TrashIcon height={20} />}
+          icon={<PencilSquareIcon height={20} />}
           className="bg-transparent text-black/75"
-          onClick={onClickDelete}
+          onClick={() => setEditIncidentOpen(true)}
         />
       </div>
     </>

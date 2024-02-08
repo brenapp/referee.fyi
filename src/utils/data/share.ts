@@ -27,6 +27,10 @@ const URL_BASE = import.meta.env.DEV
   ? "http://localhost:8787"
   : "https://referee-fyi-share.bren.workers.dev";
 
+export async function getShareName() {
+  return (await get<string>("share_name")) ?? "";
+};
+
 export async function getShareData(sku: string, code: string) {
   const response = await fetch(
     new URL(`/api/share/${sku}/${code}/get`, URL_BASE)
@@ -268,15 +272,18 @@ export class ShareConnection extends EventEmitter {
           const has = await hasIncident(data.incident.id);
           if (!has) {
             await newIncident(data.incident, false, data.incident.id);
+            queryClient.invalidateQueries({ queryKey: ["incidents"] });
           }
           break;
         }
         case "update_incident": {
           await setIncident(data.incident.id, data.incident);
+          queryClient.invalidateQueries({ queryKey: ["incidents"] });
           break;
         }
         case "remove_incident": {
           await deleteIncident(data.id, false);
+          queryClient.invalidateQueries({ queryKey: ["incidents"] });
           break;
         }
 
@@ -298,7 +305,7 @@ export class ShareConnection extends EventEmitter {
             } else {
               const current = (await getIncident(incident.id))!;
 
-              const localRevision = incident.revision?.count ?? 0;
+              const localRevision = current.revision?.count ?? 0;
               const remoteRevision = incident.revision?.count ?? 0;
 
               if (localRevision > remoteRevision) {
@@ -307,9 +314,14 @@ export class ShareConnection extends EventEmitter {
                   current.revision = response.data;
                 }
                 await setIncident(incident.id, current);
-              } else if (remoteRevision > localRevision) {
-                await setIncident(incident.id, incident);
+                queryClient.invalidateQueries({ queryKey: ["incidents"] });
               }
+
+              if (remoteRevision > localRevision) {
+                await setIncident(incident.id, incident);
+                queryClient.invalidateQueries({ queryKey: ["incidents"] });
+              }
+
             }
           }
 

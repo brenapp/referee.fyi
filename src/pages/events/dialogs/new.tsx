@@ -6,9 +6,9 @@ import {
   useEventMatchesForTeam,
 } from "~hooks/robotevents";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
-import { Select, TextArea } from "~components/Input";
+import { RulesMultiSelect, Select, TextArea } from "~components/Input";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button, IconButton } from "~components/Button";
+import { Button } from "~components/Button";
 import { MatchContext } from "~components/Context";
 import { useCurrentDivision, useCurrentEvent, useSKU } from "~hooks/state";
 import {
@@ -18,7 +18,6 @@ import {
 } from "~utils/data/incident";
 import { useNewIncident } from "~hooks/incident";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
-import { TrashIcon } from "@heroicons/react/24/outline";
 import { useAddRecentRules, useRecentRules } from "~utils/hooks/history";
 import { twMerge } from "tailwind-merge";
 import { toast } from "~components/Toast";
@@ -239,21 +238,9 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     [incident.rules, onAddRule, onRemoveRule]
   );
 
-  const onPickOtherRule = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const group = e.target.selectedOptions[0].dataset.rulegroup;
-      if (!group) return;
-
-      const rule = rules?.ruleGroups
-        .find((g) => g.name === group)
-        ?.rules.find((r) => r.rule === e.target.value);
-
-      if (!rule) return;
-      if (incident.rules.some((r) => r.rule === rule.rule)) return;
-      setIncidentField("rules", [...incident.rules, rule]);
-    },
-    [rules, incident.rules]
-  );
+  const onChangeIncidentRules = useCallback((rules: Rule[]) => {
+    setIncidentField("rules", rules);
+  }, []);
 
   const onChangeIncidentNotes = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -368,64 +355,31 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             <option value="Disabled">Disabled</option>
           </Select>
         </label>
-        <p className="mt-4">Associated Rules</p>
-        <div className="flex mt-2 gap-2 flex-wrap md:flex-nowrap">
-          {recentRules?.map((rule) => (
-            <Button
-              mode="none"
-              className={twMerge(
-                "text-emerald-400 font-mono min-w-min flex-shrink",
-                incident.rules.some((r) => r.rule === rule.rule)
-                  ? "bg-emerald-600 text-zinc-50"
-                  : ""
-              )}
-              onClick={() => onToggleRule(rule)}
-              key={rule.rule}
-            >
-              {rule.rule}
-            </Button>
-          ))}
-        </div>
         <label>
-          <Select
-            className="py-4 max-w-full w-full mt-2"
-            value={""}
-            onChange={onPickOtherRule}
-          >
-            <option>Pick Rule</option>
-            {rules?.ruleGroups.map((group) => (
-              <optgroup label={group.name} key={group.name}>
-                {group.rules.map((rule) => (
-                  <option
-                    value={rule.rule}
-                    data-rulegroup={group.name}
-                    key={rule.rule}
-                  >
-                    {rule.rule} {rule.description}
-                  </option>
-                ))}
-              </optgroup>
+          <p className="mt-4">Associated Rules</p>
+          <div className="flex mt-2 gap-2 flex-wrap md:flex-nowrap">
+            {recentRules?.map((rule) => (
+              <Button
+                mode="none"
+                className={twMerge(
+                  "text-emerald-400 font-mono min-w-min flex-shrink",
+                  incident.rules.some((r) => r.rule === rule.rule)
+                    ? "bg-emerald-600 text-zinc-50"
+                    : ""
+                )}
+                onClick={() => onToggleRule(rule)}
+                key={rule.rule}
+              >
+                {rule.rule}
+              </Button>
             ))}
-          </Select>
+          </div>
+          <RulesMultiSelect
+            game={rules!}
+            value={incident.rules}
+            onChange={onChangeIncidentRules}
+          />
         </label>
-        <ul className="mt-4 flex flex-wrap gap-2">
-          {incident.rules.map((rule) => (
-            <li
-              key={rule.rule}
-              className="p-2 flex w-full items-center bg-zinc-800 rounded-md"
-            >
-              <p className="flex-1 mr-1">
-                <strong className="font-mono mr-2">{rule.rule}</strong>
-                <span>{rule.description}</span>
-              </p>
-              <IconButton
-                className="bg-transparent"
-                icon={<TrashIcon height={24} />}
-                onClick={() => onRemoveRule(rule)}
-              ></IconButton>
-            </li>
-          ))}
-        </ul>
         <label>
           <p className="mt-4">Notes</p>
           <TextArea

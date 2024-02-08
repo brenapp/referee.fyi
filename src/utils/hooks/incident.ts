@@ -54,7 +54,7 @@ export function useEventIncidents(sku: string | undefined | null) {
 }
 
 export function useDeleteIncident(id: string, updateRemote?: boolean) {
-  return useMutation<unknown, Error, unknown>({
+  return useMutation<unknown, Error, void>({
     mutationFn: async () => {
       try {
         await deleteIncident(id, updateRemote);

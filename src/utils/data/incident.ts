@@ -3,7 +3,7 @@ import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { TeamData } from "robotevents/out/endpoints/teams";
-import { addServerIncident, deleteServerIncident } from "./share";
+import { addServerIncident, deleteServerIncident, editServerIncident } from "./share";
 import { IncidentOutcome, Incident as ServerIncident } from "~share/api";
 
 export type Incident = Omit<ServerIncident, "id">;
@@ -33,9 +33,9 @@ export function packIncident(incident: RichIncident): Incident {
     ...incident,
     match: incident.match
       ? {
-          id: incident.match.id,
-          name: incident.match.name,
-        }
+        id: incident.match.id,
+        name: incident.match.name,
+      }
       : undefined,
     team: incident.team?.number,
     rules: incident.rules.map((rule) => rule.rule),
@@ -124,6 +124,26 @@ export async function newIncident(
   }
 
   return id;
+}
+
+export async function editIncident(
+  id: string,
+  incident: Omit<IncidentWithID, "team" | "event">,
+  updateRemote: boolean = true
+) {
+  const current = await getIncident(id);
+
+  if (!current) {
+    return;
+  }
+
+  const updatedIncident = { ...current, ...incident };
+  await setIncident(id, updatedIncident);
+
+  if (updateRemote) {
+    await editServerIncident(updatedIncident)
+  };
+
 }
 
 export async function deleteIncident(

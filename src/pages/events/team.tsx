@@ -14,6 +14,7 @@ import { Incident } from "~components/Incident";
 import { EventNewIncidentDialog } from "./dialogs/new";
 import { Button } from "~components/Button";
 import { FlagIcon } from "@heroicons/react/20/solid";
+import { ShareProvider } from "./home";
 
 type EventTeamsTabProps = {
   event: EventData | null | undefined;
@@ -100,32 +101,34 @@ export const EventTeamsPage: React.FC = () => {
   }, [team]);
 
   return (
-    <section>
-      <EventNewIncidentDialog
-        open={incidentDialogOpen}
-        setOpen={setIncidentDialogOpen}
-        initialTeamNumber={number}
-      />
-      <header className="mt-4">
-        <Button onClick={() => setIncidentDialogOpen(true)} mode="primary">
-          <FlagIcon height={20} className="inline mr-2 " />
-          New Entry
-        </Button>
-        <h1 className="text-xl overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose mt-4">
-          <span className="font-mono text-emerald-400">{number}</span>
-          {" • "}
-          <span>{team?.team_name}</span>
-        </h1>
-        <p className="italic">{teamLocation}</p>
-      </header>
+    <ShareProvider>
       <section>
-        <Tabs>
-          {{
-            Incidents: <EventTeamsIncidents event={event} team={team} />,
-            Schedule: <EventTeamsMatches event={event} team={team} />,
-          }}
-        </Tabs>
+        <EventNewIncidentDialog
+          open={incidentDialogOpen}
+          setOpen={setIncidentDialogOpen}
+          initialTeamNumber={number}
+        />
+        <header className="mt-4">
+          <Button onClick={() => setIncidentDialogOpen(true)} mode="primary">
+            <FlagIcon height={20} className="inline mr-2 " />
+            New Entry
+          </Button>
+          <h1 className="text-xl overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose mt-4">
+            <span className="font-mono text-emerald-400">{number}</span>
+            {" • "}
+            <span>{team?.team_name}</span>
+          </h1>
+          <p className="italic">{teamLocation}</p>
+        </header>
+        <section>
+          <Tabs>
+            {{
+              Incidents: <EventTeamsIncidents event={event} team={team} />,
+              Schedule: <EventTeamsMatches event={event} team={team} />,
+            }}
+          </Tabs>
+        </section>
       </section>
-    </section>
+    </ShareProvider>
   );
 };

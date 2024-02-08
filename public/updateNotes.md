@@ -1,5 +1,6 @@
-### 6 Jan 2024
+### 7 Jan 2024
 
+- Editing incidents is now possible!
 - Add general notes to incidents, which do not count in rule summaries. General notes are intended
   for situations where the referee wants to note something about the team without it necessarily
   being a violation (ex: team was 2 minutes late for match, or team showed good sportsmanship)

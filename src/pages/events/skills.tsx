@@ -2,13 +2,8 @@ import { useCurrentEvent } from "~utils/hooks/state";
 import { ShareProvider } from "./home";
 import { useEffect, useMemo, useState } from "react";
 import { useAddEventVisited } from "~utils/hooks/history";
-import { Button, IconButton } from "~components/Button";
-import {
-  ArrowRightIcon,
-  CodeBracketIcon,
-  FlagIcon,
-  PlayIcon,
-} from "@heroicons/react/20/solid";
+import { Button } from "~components/Button";
+import { CodeBracketIcon, FlagIcon, PlayIcon } from "@heroicons/react/20/solid";
 import { EventNewIncidentDialog } from "./dialogs/new";
 import { Tabs } from "~components/Tabs";
 import { EventManageTab } from "./home/manage";
@@ -19,7 +14,6 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList as List } from "react-window";
 import { Link } from "react-router-dom";
 import { Skill } from "robotevents/out/endpoints/skills";
-import { Input } from "~components/Input";
 
 type TeamSkillsTabProps = {
   event: EventData;

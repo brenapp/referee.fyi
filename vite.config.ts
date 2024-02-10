@@ -11,7 +11,7 @@ export default defineConfig({
     vitePluginVersionMark({
       name: "Referee FYI",
       ifGitSHA: true,
-      command: "git describe --tags"
+      version: `${process.env.CF_PAGES_COMMIT_SHA}`
     }),
     tsconfigPaths({}),
     VitePWA({

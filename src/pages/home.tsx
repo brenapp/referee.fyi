@@ -74,7 +74,7 @@ export const HomePage: React.FC = () => {
         />
         <DialogBody className="markdown">
           <section className="m-4 mt-0 ">
-            <p>Version</p>
+            <p>Build Version</p>
             <div className=" bg-zinc-600 mt-2 p-2 rounded-md">
               <code>{__REFEREE_FYI_VERSION__}</code>
             </div>

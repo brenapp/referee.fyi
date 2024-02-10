@@ -171,10 +171,6 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
   const { data: matches } = useEventMatches(event, division);
   const match = useEventMatch(event, division, matchId);
 
-  const [initialTeamNumber, setInitialTeamNumber] = useState<
-    string | undefined
-  >(undefined);
-
   const prevMatch = useMemo(() => {
     return matches?.find((_, i) => matches[i + 1]?.id === match?.id);
   }, [matches, match]);
@@ -196,7 +192,6 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
   }, [nextMatch, setMatchId]);
 
   const onClickTeam = useCallback(async (number: string) => {
-    setInitialTeamNumber(number);
     setIncidentDialogOpen(true);
   }, []);
 
@@ -208,8 +203,6 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
       <EventNewIncidentDialog
         open={incidentDialogOpen}
         setOpen={setIncidentDialogOpen}
-        initialMatchId={match?.id}
-        initialTeamNumber={initialTeamNumber}
       />
       <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
         <DialogHeader title="Matches" onClose={() => setOpen(false)} />

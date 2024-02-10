@@ -29,17 +29,11 @@ import { useShareName } from "~utils/hooks/share";
 export type EventNewIncidentDialogProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
-  initialTeamNumber?: string | null;
-  initialMatchId?: number | null;
-  preventSave?: boolean;
 };
 
 export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   open,
   setOpen,
-  initialMatchId,
-  initialTeamNumber,
-  preventSave,
 }) => {
   const { name: shareName } = useShareName();
   const { mutateAsync: createIncident } = useNewIncident();
@@ -61,12 +55,9 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     division
   );
 
-  // Load team and match data
-  const initialMatch = useEventMatch(event, division, initialMatchId);
-
   // Initialise current team and match
-  const [team, setTeam] = useState(initialTeamNumber);
-  const [match, setMatch] = useState(initialMatch?.id);
+  const [team, setTeam] = useState<string>();
+  const [match, setMatch] = useState<number>();
 
   const teamData = useEventTeam(event, team);
   const eventMatchData = useEventMatch(event, division, match);
@@ -132,28 +123,25 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   });
 
   useEffect(() => {
-    setTeam(initialTeamNumber);
-  }, [initialTeamNumber]);
-
-  useEffect(() => {
-    setMatch(initialMatchId ?? undefined);
-  }, [initialMatchId]);
-
-  useEffect(() => {
     setIncidentField("team", teamData);
     setIncidentField("match", matchData);
   }, [teamData, matchData]);
 
   const canSave = useMemo(() => {
-    if (preventSave) {
-      return false;
-    }
-
     if (isLoadingMetaData) {
       return false;
     }
-    return !!team || !!event;
-  }, [preventSave, isLoadingMetaData, team, event]);
+
+    if (!incident.team) {
+      return false;
+    }
+
+    if (!event) {
+      return false;
+    }
+
+    return true;
+  }, [isLoadingMetaData, team, event]);
 
   const setIncidentField = <T extends keyof RichIncident>(
     key: T,
@@ -265,8 +253,6 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 
       try {
         await createIncident(packed);
-        setTeam(initialTeamNumber);
-        setMatch(initialMatch?.id);
 
         setIncidentField("team", undefined);
         setIncidentField("notes", "");
@@ -281,8 +267,10 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 
       queryClient.invalidateQueries({ queryKey: ["incidents"] });
     },
-    [incident, createIncident, setOpen, addRecentRules, initialMatch?.id]
+    [incident, createIncident, setOpen, addRecentRules]
   );
+
+  console.log(incident.team);
 
   return (
     <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>

@@ -5,10 +5,10 @@ import { EditIncidentDialog } from "./dialogs/edit";
 import { useState } from "react";
 import { PencilSquareIcon } from "@heroicons/react/20/solid";
 
-const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
+export const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
   Minor: "bg-yellow-400 text-yellow-900",
   Major: "bg-red-400 text-red-900",
-  Disabled: "bg-yellow-400 text-yellow-900",
+  Disabled: "bg-blue-400 text-blue-900",
   General: "bg-zinc-300 text-zinc-900",
 };
 
@@ -18,7 +18,7 @@ export type IncidentProps = {
 
 export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
   const [editIncidentOpen, setEditIncidentOpen] = useState(false);
-  const key = incident.id+(incident.revision?.count ?? -1).toString()
+  const key = incident.id + (incident.revision?.count ?? -1).toString();
   return (
     <>
       <EditIncidentDialog

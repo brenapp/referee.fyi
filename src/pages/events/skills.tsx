@@ -84,7 +84,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
                           {team.team_name}
                         </p>
                       </div>
-                      <p className="h-full w-32 px-2 flex items-center">
+                      <p className="h-full pl-2 flex items-center">
                         <span className="mr-4">
                           <PlayIcon height={20} className="inline" />
                           <span className="font-mono ml-2">

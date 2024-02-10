@@ -13,7 +13,12 @@ import {
   useShareConnection,
   useShareName,
 } from "~utils/hooks/share";
-import { FlagIcon, KeyIcon, UserCircleIcon } from "@heroicons/react/20/solid";
+import {
+  ArrowRightIcon,
+  FlagIcon,
+  KeyIcon,
+  UserCircleIcon,
+} from "@heroicons/react/20/solid";
 import { Dialog, DialogBody } from "~components/Dialog";
 import { Input } from "~components/Input";
 
@@ -162,6 +167,17 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
               </LinkButton>
             </div>
           )}
+        </section>
+        <section className="mt-4">
+          <h2 className="font-bold">Event Summary</h2>
+          <p>See a summary of all entries at the event.</p>
+          <LinkButton
+            to={`/${event.sku}/summary`}
+            className="w-full mt-2 flex items-center"
+          >
+            <span className="flex-1">Event Summary</span>
+            <ArrowRightIcon height={20} className="text-emerald-400" />
+          </LinkButton>
         </section>
         <section className="mt-4 relative">
           <h2 className="font-bold">Delete Event Data</h2>

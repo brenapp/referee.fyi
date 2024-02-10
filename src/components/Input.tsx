@@ -1,8 +1,21 @@
 import { twMerge } from "tailwind-merge";
 import { Game, Rule } from "~utils/hooks/rules";
-import { useCallback } from "react";
+import React, { useCallback } from "react";
 import { IconButton } from "./Button";
 import { TrashIcon } from "@heroicons/react/24/outline";
+
+export type CheckboxProps = React.HTMLProps<HTMLInputElement> & {
+  type: "checkbox" | "radio";
+};
+export const Checkbox: React.FC<CheckboxProps> = (props) => {
+  return (
+    <input
+      {...props}
+      type={props.type}
+      className={twMerge("accent-emerald-400", props.className)}
+    />
+  );
+};
 
 export type InputBaseProps = React.HTMLProps<HTMLInputElement>;
 

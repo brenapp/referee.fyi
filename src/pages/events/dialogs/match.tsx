@@ -19,6 +19,13 @@ import { MatchData } from "robotevents/out/endpoints/matches";
 import { MatchContext } from "~components/Context";
 import { Incident } from "~components/Incident";
 
+const OUTCOME_PRIORITY: IncidentOutcome[] = [
+  "Major",
+  "Disabled",
+  "Minor",
+  "General",
+];
+
 type TeamSummaryProps = {
   number: string;
   incidents: IncidentWithID[];
@@ -43,7 +50,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
     const rules: Record<string, IncidentWithID[]> = {};
 
     for (const incident of incidents) {
-      if (incident.outcome !== "Major" && incident.outcome !== "Minor") {
+      if (incident.outcome === "General") {
         continue;
       }
 
@@ -98,16 +105,19 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
           {rulesSummary.map(([rule, incidents]) => {
             let outcome: IncidentOutcome = "Minor";
             for (const incident of incidents) {
-              if (incident.outcome === "Major") {
-                outcome = "Major";
+              if (
+                OUTCOME_PRIORITY.indexOf(incident.outcome) <
+                OUTCOME_PRIORITY.indexOf(outcome)
+              ) {
+                outcome = incident.outcome;
               }
             }
 
             const highlights: Record<IncidentOutcome, string> = {
               Minor: "text-yellow-300",
-              Disabled: "",
+              Disabled: "text-blue-300",
               Major: "text-red-300",
-              General: "",
+              General: "text-zinc-300",
             };
 
             return (

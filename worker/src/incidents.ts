@@ -162,6 +162,7 @@ export class EventIncidents implements DurableObject {
         let output = "Date,Time,ID,SKU,Division,Match,Team,Outcome,Rules,Notes\n";
 
         output += incidents.map(incident => {
+            const notes = incident.notes.replaceAll(/[\s\r\n]/g, " ")
             return [
                 new Date(incident.time).toLocaleDateString(),
                 new Date(incident.time).toLocaleTimeString(),
@@ -172,7 +173,7 @@ export class EventIncidents implements DurableObject {
                 incident.team,
                 incident.outcome,
                 incident.rules.join(" "),
-                incident.notes
+                notes
             ].join(",")
         }).join("\n");
 

@@ -10,7 +10,7 @@ export default defineConfig({
     react(),
     vitePluginVersionMark({
       name: "Referee FYI",
-      ifShortSHA: true,
+      ifGitSHA: true,
       command: "git describe --tags"
     }),
     tsconfigPaths({}),

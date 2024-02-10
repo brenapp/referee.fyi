@@ -73,7 +73,13 @@ export const HomePage: React.FC = () => {
           onClose={() => setUpdateDialogOpen(false)}
         />
         <DialogBody className="markdown">
-          <Markdown className="p-4">{markdownContent}</Markdown>
+          <section className="m-4 mt-0 ">
+            <p>Version</p>
+            <div className=" bg-zinc-600 mt-2 p-2 rounded-md">
+              <code>{__REFEREE_FYI_VERSION__}</code>
+            </div>
+          </section>
+          <Markdown className="p-4 pt-0">{markdownContent}</Markdown>
         </DialogBody>
       </Dialog>
     </>

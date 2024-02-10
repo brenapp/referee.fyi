@@ -1,6 +1,12 @@
+### 9 Jan 2024
+
+- Added event summary section, accessible from the Manage Tab, that shows all entries in the
+  anomaly log at the event, displays summary statistics about events, and allows you to filter by
+  outcome and rules cited.
+
 ### 7 Jan 2024
 
-- Add edit functionality for existing incidents. 
+- Add edit functionality for existing incidents.
 - Add general notes to incidents, which do not count in rule summaries. General notes are intended
   for situations where the referee wants to note something about the team without it necessarily
   being a violation (ex: team was 2 minutes late for match, or team showed good sportsmanship)

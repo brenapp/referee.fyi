@@ -58,7 +58,6 @@ export const EventJoinPage: React.FC = () => {
   );
 
   const onClickJoin = useCallback(async () => {
-    console.log(event, event?.sku, isActiveCode);
     if (event && event.sku && code && isActiveCode) {
       await joinShare({ sku: event.sku, code });
       await navigate(`/${event.sku}`);

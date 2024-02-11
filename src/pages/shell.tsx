@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useEvent, useEventsToday } from "~utils/hooks/robotevents";
 import { Button, IconButton, LinkButton } from "~components/Button";
@@ -235,8 +235,19 @@ const Rules: React.FC = () => {
 };
 
 export const AppShell: React.FC = () => {
-  const { isLoading } = useCurrentEvent();
+  const { data: event, isLoading } = useCurrentEvent();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const onPressBack = useCallback(() => {
+    if (!event) {
+      navigate(`/`);
+    } else if (location.pathname === `/${event?.sku}`) {
+      navigate("/");
+    } else {
+      navigate(`/${event?.sku}`);
+    }
+  }, [event]);
 
   return (
     <main
@@ -246,7 +257,7 @@ export const AppShell: React.FC = () => {
       <Toaster />
       <nav className="h-16 flex gap-4 max-w-full">
         <IconButton
-          onClick={() => navigate(-1)}
+          onClick={onPressBack}
           icon={<ChevronLeftIcon height={24} />}
           className="aspect-auto bg-transparent"
         />

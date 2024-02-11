@@ -1,11 +1,26 @@
 import { twMerge } from "tailwind-merge";
-import React from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+
+export type TabsNavigationState = {
+  tab?: number;
+};
+
 export type TabsProps = Omit<React.HTMLProps<HTMLDivElement>, "children"> & {
   children: Record<string, React.ReactNode>;
 };
 
 export const Tabs: React.FC<TabsProps> = ({ children, ...props }) => {
-  const [activeTab, setActiveTab] = React.useState(0);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const [activeTab, setActiveTab] = useState(location?.state?.tab ?? 0);
+
+  const onClickTab = useCallback((index: number) => {
+    const state: TabsNavigationState = { tab: index };
+    navigate(location, { replace: true, state });
+    setActiveTab(index);
+  }, []);
 
   return (
     <div
@@ -19,7 +34,7 @@ export const Tabs: React.FC<TabsProps> = ({ children, ...props }) => {
             role="tab"
             aria-selected={index === activeTab}
             aria-controls={`panel-${key}`}
-            onClick={() => setActiveTab(index)}
+            onClick={() => onClickTab(index)}
             className={twMerge(
               "text-zinc-50 flex-1 text-center py-2 px-4 active:bg-zinc-600 first:rounded-tl-md last:rounded-tr-md",
               index === activeTab &&

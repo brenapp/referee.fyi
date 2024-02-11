@@ -131,7 +131,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   }, [teamData, matchData]);
 
   useEffect(() => {
-    setIncident((i) => ({ ...i, initial }));
+    setIncident((i) => ({ ...i, ...initial }));
   }, [initial]);
 
   const canSave = useMemo(() => {

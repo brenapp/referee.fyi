@@ -53,7 +53,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
   const onClickApply = useCallback(() => {
     setOpen(false);
     apply(filters);
-  }, [filters]);
+  }, [apply, setOpen, filters]);
 
   if (!game) {
     return null;
@@ -172,7 +172,7 @@ export const EventSummaryPage: React.FC = () => {
       addEvent(event);
       performSearch(DEFAULT_FILTERS);
     }
-  }, [event, isSuccess, addEvent]);
+  }, [performSearch, event, isSuccess, addEvent]);
 
   if (!event || !game) {
     return <Spinner show />;
@@ -198,7 +198,7 @@ export const EventSummaryPage: React.FC = () => {
         <section className="flex gap-1 flex-wrap">
           {commonRules.slice(0, 5).map(([rule, count]) => (
             <p className="font-mono bg-emerald-900 rounded-lg px-2 py-1 text-sm text-center">
-              {rule.replace(/[\<\>]/g, "")}{" "}
+              {rule.replace(/[<>]/g, "")}{" "}
               <span className="text-emerald-400">{count}</span>
             </p>
           ))}

@@ -14,7 +14,12 @@ import {
   WebSocketServerShareInfoMessage,
 } from "~share/api";
 import { queryClient } from "~utils/data/query";
-import { ShareConnection, createShare, getShareData, getShareName } from "~utils/data/share";
+import {
+  ShareConnection,
+  createShare,
+  getShareData,
+  getShareName,
+} from "~utils/data/share";
 
 export const connection = new ShareConnection();
 export const ShareContext = createContext(connection);

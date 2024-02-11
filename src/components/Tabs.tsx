@@ -1,5 +1,5 @@
 import { twMerge } from "tailwind-merge";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export type TabsNavigationState = {
@@ -16,11 +16,14 @@ export const Tabs: React.FC<TabsProps> = ({ children, ...props }) => {
 
   const [activeTab, setActiveTab] = useState(location?.state?.tab ?? 0);
 
-  const onClickTab = useCallback((index: number) => {
-    const state: TabsNavigationState = { tab: index };
-    navigate(location, { replace: true, state });
-    setActiveTab(index);
-  }, []);
+  const onClickTab = useCallback(
+    (index: number) => {
+      const state: TabsNavigationState = { tab: index };
+      navigate(location, { replace: true, state });
+      setActiveTab(index);
+    },
+    [location, navigate]
+  );
 
   return (
     <div

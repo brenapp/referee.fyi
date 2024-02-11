@@ -149,7 +149,7 @@ export const RulesMultiSelect: React.FC<RulesMultiSelectProps> = ({
       if (value.some((r) => r.rule === rule.rule)) return;
       onChange([...value, rule]);
     },
-    [game, value]
+    [game, value, onChange]
   );
 
   const onRemoveRule = useCallback(
@@ -157,7 +157,7 @@ export const RulesMultiSelect: React.FC<RulesMultiSelectProps> = ({
       const rules = value.filter((r) => r.rule !== rule.rule);
       onChange(rules);
     },
-    [value]
+    [value, onChange]
   );
 
   return (

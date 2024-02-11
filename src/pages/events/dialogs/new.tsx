@@ -29,11 +29,13 @@ import { useShareName } from "~utils/hooks/share";
 export type EventNewIncidentDialogProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
+  initial?: Partial<RichIncident>;
 };
 
 export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   open,
   setOpen,
+  initial,
 }) => {
   const { name: shareName } = useShareName();
   const { mutateAsync: createIncident } = useNewIncident();
@@ -120,12 +122,17 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     rules: [],
     notes: "",
     outcome: "Minor",
+    ...initial,
   });
 
   useEffect(() => {
     setIncidentField("team", teamData);
     setIncidentField("match", matchData);
   }, [teamData, matchData]);
+
+  useEffect(() => {
+    setIncident((i) => ({ ...i, initial }));
+  }, [initial]);
 
   const canSave = useMemo(() => {
     if (isLoadingMetaData) {
@@ -141,7 +148,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     }
 
     return true;
-  }, [isLoadingMetaData, team, event]);
+  }, [incident.team, isLoadingMetaData, event]);
 
   const setIncidentField = <T extends keyof RichIncident>(
     key: T,
@@ -267,10 +274,8 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 
       queryClient.invalidateQueries({ queryKey: ["incidents"] });
     },
-    [incident, createIncident, setOpen, addRecentRules]
+    [shareName, incident, createIncident, setOpen, addRecentRules]
   );
-
-  console.log(incident.team);
 
   return (
     <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>

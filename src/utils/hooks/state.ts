@@ -7,7 +7,9 @@ export function useSKU() {
   return sku;
 }
 
-export function useCurrentEvent(options?: HookQueryOptions<EventData | null | undefined>) {
+export function useCurrentEvent(
+  options?: HookQueryOptions<EventData | null | undefined>
+) {
   const { sku } = useParams();
   return useEvent(sku ?? "", options);
 }

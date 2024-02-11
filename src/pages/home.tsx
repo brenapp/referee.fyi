@@ -1,10 +1,11 @@
 import { Button, LinkButton } from "~components/Button";
 import { useRecentEvents } from "~utils/hooks/history";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Dialog, DialogHeader, DialogBody } from "~components/Dialog";
 import Markdown from "react-markdown";
-import pjson from "../../package.json";
+import { version } from "../../package.json";
 import "./markdown.css";
+import DocumentDuplicateIcon from "@heroicons/react/24/outline/DocumentDuplicateIcon";
 
 export const HomePage: React.FC = () => {
   const { data: recentEvents } = useRecentEvents(5);
@@ -13,7 +14,6 @@ export const HomePage: React.FC = () => {
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
 
   useEffect(() => {
-    // Fetch the update notes as a markdown file
     const fetchMarkdownContent = async () => {
       try {
         const response = await fetch("/updateNotes.md");
@@ -26,14 +26,18 @@ export const HomePage: React.FC = () => {
 
     fetchMarkdownContent();
 
-    const latestVersion = pjson.version;
     const userVersion = localStorage.getItem("version");
 
-    if (userVersion && userVersion !== latestVersion) {
+    if (userVersion && userVersion !== version) {
       setUpdateDialogOpen(true);
     }
-    localStorage.setItem("version", latestVersion);
-  }, []); // Run this effect only once, when the component mounts
+
+    localStorage.setItem("version", version);
+  }, []);
+
+  const onClickCopyBuild = useCallback(() => {
+    navigator.clipboard.writeText(__REFEREE_FYI_VERSION__);
+  }, []);
 
   return (
     <>
@@ -75,9 +79,14 @@ export const HomePage: React.FC = () => {
         <DialogBody className="markdown">
           <section className="m-4 mt-0 ">
             <p>Build Version</p>
-            <div className=" bg-zinc-600 mt-2 p-2 rounded-md">
-              <code>{__REFEREE_FYI_VERSION__}</code>
-            </div>
+            <Button
+              mode="normal"
+              className="font-mono text-left mt-2 flex items-center gap-2 active:bg-zinc-500"
+              onClick={onClickCopyBuild}
+            >
+              <DocumentDuplicateIcon height={20} />
+              <span>{__REFEREE_FYI_VERSION__}</span>
+            </Button>
           </section>
           <Markdown className="p-4 pt-0">{markdownContent}</Markdown>
         </DialogBody>

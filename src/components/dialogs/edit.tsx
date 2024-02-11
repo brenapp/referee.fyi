@@ -67,7 +67,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
         match: match ? { id: match.id, name: match.name } : undefined,
       }));
     },
-    []
+    [teamMatches]
   );
 
   const onChangeIncidentOutcome = useCallback(
@@ -85,7 +85,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
     return incident.rules.map(
       (rule) => gameRules.find((r) => r.rule === rule)!
     );
-  }, [initialIncident.rules]);
+  }, [game?.ruleGroups, incident.rules]);
 
   const [incidentRules, setIncidentRules] = useState(initialRichRules);
 
@@ -108,7 +108,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
     setOpen(false);
     await deleteIncident();
     toast({ type: "info", message: "Deleted Incident" });
-  }, []);
+  }, [deleteIncident, setOpen]);
 
   const onClickSave = useCallback(async () => {
     setOpen(false);
@@ -119,7 +119,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
       toast({ type: "error", message: `${e}` });
     }
     await queryClient.invalidateQueries({ queryKey: ["incidents"] });
-  }, [incident]);
+  }, [incident, setOpen]);
 
   return (
     <Dialog mode="modal" onClose={() => setOpen(false)} open={open}>

@@ -29,7 +29,7 @@ const URL_BASE = import.meta.env.DEV
 
 export async function getShareName() {
   return (await get<string>("share_name")) ?? "";
-};
+}
 
 export async function getShareData(sku: string, code: string) {
   const response = await fetch(
@@ -321,7 +321,6 @@ export class ShareConnection extends EventEmitter {
                 await setIncident(incident.id, incident);
                 queryClient.invalidateQueries({ queryKey: ["incidents"] });
               }
-
             }
           }
 

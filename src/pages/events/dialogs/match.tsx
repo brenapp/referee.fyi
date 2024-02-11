@@ -1,5 +1,9 @@
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
-import { useEventMatch, useEventMatches } from "~hooks/robotevents";
+import {
+  useEventMatch,
+  useEventMatches,
+  useEventTeam,
+} from "~hooks/robotevents";
 import { Button, IconButton } from "~components/Button";
 import {
   ArrowLeftIcon,
@@ -18,6 +22,7 @@ import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { MatchContext } from "~components/Context";
 import { Incident } from "~components/Incident";
+import { TeamData } from "robotevents/out/endpoints/teams";
 
 const OUTCOME_PRIORITY: IncidentOutcome[] = [
   "Major",
@@ -28,21 +33,21 @@ const OUTCOME_PRIORITY: IncidentOutcome[] = [
 
 type TeamSummaryProps = {
   number: string;
+  match: MatchData;
   incidents: IncidentWithID[];
-  currentMatch: MatchData;
-  matches: MatchData[];
-  onClickFlag: () => void;
 };
 
 const TeamSummary: React.FC<TeamSummaryProps> = ({
   number,
+  match,
   incidents,
-  currentMatch,
-  onClickFlag,
 }) => {
   const [open, setOpen] = useState(false);
 
-  const teamAlliance = currentMatch.alliances.find((alliance) =>
+  const { data: event } = useCurrentEvent();
+  const team = useEventTeam(event, number);
+
+  const teamAlliance = match.alliances.find((alliance) =>
     alliance.teams.some((t) => t.team.name === number)
   );
 
@@ -133,19 +138,37 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
             );
           })}
         </ul>
-        <Button
-          mode="primary"
-          className="flex items-center w-max flex-shrink-0"
-          onClick={onClickFlag}
-        >
-          <FlagIcon height={20} className="mr-2" />
-          <span>New</span>
-        </Button>
+        {team ? <TeamFlagButton match={match} team={team} /> : null}
       </summary>
       {incidents.map((incident) => (
         <Incident incident={incident} key={incident.id} />
       ))}
     </details>
+  );
+};
+
+const TeamFlagButton: React.FC<{ match: MatchData; team: TeamData }> = ({
+  match,
+  team,
+}) => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <EventNewIncidentDialog
+        open={open}
+        setOpen={setOpen}
+        initial={{ match, team }}
+      />
+      <Button
+        mode="primary"
+        className="flex items-center w-max flex-shrink-0"
+        onClick={() => setOpen(true)}
+      >
+        <FlagIcon height={20} className="mr-2" />
+        <span>New</span>
+      </Button>
+    </>
   );
 };
 
@@ -171,10 +194,6 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
   const { data: matches } = useEventMatches(event, division);
   const match = useEventMatch(event, division, matchId);
 
-  const [initialTeamNumber, setInitialTeamNumber] = useState<
-    string | undefined
-  >(undefined);
-
   const prevMatch = useMemo(() => {
     return matches?.find((_, i) => matches[i + 1]?.id === match?.id);
   }, [matches, match]);
@@ -195,11 +214,6 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
     }
   }, [nextMatch, setMatchId]);
 
-  const onClickTeam = useCallback(async (number: string) => {
-    setInitialTeamNumber(number);
-    setIncidentDialogOpen(true);
-  }, []);
-
   const { data: incidentsByTeam } = useTeamIncidentsByMatch(match);
 
   const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
@@ -208,8 +222,6 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
       <EventNewIncidentDialog
         open={incidentDialogOpen}
         setOpen={setIncidentDialogOpen}
-        initialMatchId={match?.id}
-        initialTeamNumber={initialTeamNumber}
       />
       <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
         <DialogHeader title="Matches" onClose={() => setOpen(false)} />
@@ -241,11 +253,9 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                 {incidentsByTeam?.map(({ team: number, incidents }) => (
                   <TeamSummary
                     key={number}
-                    number={number}
                     incidents={incidents}
-                    currentMatch={match}
-                    matches={matches ?? []}
-                    onClickFlag={() => onClickTeam(number)}
+                    match={match}
+                    number={number}
                   />
                 ))}
               </section>

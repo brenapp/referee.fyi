@@ -1,6 +1,6 @@
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig } from "vite";
-import { vitePluginVersionMark } from 'vite-plugin-version-mark'
+import { vitePluginVersionMark } from "vite-plugin-version-mark";
 import { VitePWA } from "vite-plugin-pwa";
 import tsconfigPaths from "vite-tsconfig-paths";
 
@@ -11,7 +11,7 @@ export default defineConfig({
     vitePluginVersionMark({
       name: "Referee FYI",
       ifGitSHA: true,
-      version: `${process.env.CF_PAGES_COMMIT_SHA}`
+      version: `${process.env.CF_PAGES_COMMIT_SHA}`,
     }),
     tsconfigPaths({}),
     VitePWA({

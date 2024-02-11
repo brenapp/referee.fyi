@@ -5,7 +5,7 @@ import { EditIncidentDialog } from "./dialogs/edit";
 import { useState } from "react";
 import { PencilSquareIcon } from "@heroicons/react/20/solid";
 
-export const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
+const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
   Minor: "bg-yellow-400 text-yellow-900",
   Major: "bg-red-400 text-red-900",
   Disabled: "bg-blue-400 text-blue-900",

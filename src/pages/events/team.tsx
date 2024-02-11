@@ -106,7 +106,7 @@ export const EventTeamsPage: React.FC = () => {
         <EventNewIncidentDialog
           open={incidentDialogOpen}
           setOpen={setIncidentDialogOpen}
-          initialTeamNumber={number}
+          initial={{ team }}
         />
         <header className="mt-4">
           <Button onClick={() => setIncidentDialogOpen(true)} mode="primary">

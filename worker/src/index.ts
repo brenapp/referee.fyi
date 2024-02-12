@@ -95,7 +95,7 @@ router
 
 export default {
     async fetch(request: Request, env: Env): Promise<Response> {
-        return router.handle(request, env).then(json).catch(error).then(corsify).then(response => logFailedRequests(request, response));
+        return router.handle(request, env).then(json).catch(error).then(corsify);
     }
 }
 

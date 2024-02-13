@@ -51,13 +51,9 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
     useCreateShare();
   const onClickShare = useCallback(async () => {
     const shareId = await ShareConnection.getUserId();
-    const incidents = await getIncidentsByEvent(event.sku);
 
     const response = await beginSharing({
-      incidents,
       owner: { id: shareId, name: shareName ?? "" },
-      // Any incidents we may have deleted before sharing should not be uploaded to begin with
-      deleted: [],
       sku: event.sku,
     });
 

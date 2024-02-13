@@ -9,7 +9,6 @@ import { useEventIncidents } from "~utils/hooks/incident";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { Incident } from "~components/Incident";
-import { useMutation } from "@tanstack/react-query";
 import { IncidentOutcome } from "~share/EventIncidents";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 import { Dialog, DialogBody } from "~components/Dialog";
@@ -112,41 +111,33 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
   );
 };
 
-function useEventIncidentsWithFilters(sku: string | undefined | null) {
-  const { data: incidents } = useEventIncidents(sku);
-  return useMutation({
-    mutationFn: async (filters: Filters) => {
-      const results = incidents?.filter((incident) => {
-        if (!filters.outcomes[incident.outcome]) {
-          return false;
-        }
-
-        const hasRule =
-          filters.rules.length < 1 ||
-          filters.rules.some((rule) => incident.rules.includes(rule.rule));
-        if (!hasRule) {
-          return false;
-        }
-
-        return true;
-      });
-
-      return results ?? [];
-    },
-  });
-}
-
 export const EventSummaryPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
   const game = useRulesForProgram(event?.program.code);
   const { mutateAsync: addEvent, isSuccess } = useAddEventVisited();
 
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
-  const {
-    data: incidents,
-    mutateAsync: performSearch,
-    isPending,
-  } = useEventIncidentsWithFilters(event?.sku);
+  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const { data: allIncidents } = useEventIncidents(event?.sku);
+
+  const incidents = useMemo(() => {
+    const results = allIncidents?.filter((incident) => {
+      if (!filters.outcomes[incident.outcome]) {
+        return false;
+      }
+
+      const hasRule =
+        filters.rules.length < 1 ||
+        filters.rules.some((rule) => incident.rules.includes(rule.rule));
+      if (!hasRule) {
+        return false;
+      }
+
+      return true;
+    });
+
+    return results ?? [];
+  }, [allIncidents, filters]);
 
   const commonRules = useMemo(() => {
     if (!incidents) {
@@ -170,9 +161,8 @@ export const EventSummaryPage: React.FC = () => {
   useEffect(() => {
     if (event && !isSuccess) {
       addEvent(event);
-      performSearch(DEFAULT_FILTERS);
     }
-  }, [performSearch, event, isSuccess, addEvent]);
+  }, [event, isSuccess, addEvent]);
 
   if (!event || !game) {
     return <Spinner show />;
@@ -183,10 +173,9 @@ export const EventSummaryPage: React.FC = () => {
       <FilterDialog
         open={filterDialogOpen}
         setOpen={setFilterDialogOpen}
-        apply={performSearch}
+        apply={(filters) => setFilters(filters)}
       />
       <section className="mt-4 flex flex-col">
-        <Spinner show={isPending} />
         <nav className="flex gap-4 p-2 rounded-md">
           <p className="flex-1">{incidents?.length} Incidents</p>
           <IconButton

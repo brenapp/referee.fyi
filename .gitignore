@@ -27,3 +27,5 @@ test/**/*.js
 .wrangler
 .rollup.cache
 tsconfig.tsbuildinfo
+
+test/websocket/log

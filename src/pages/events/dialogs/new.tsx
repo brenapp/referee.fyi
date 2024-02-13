@@ -58,8 +58,8 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   );
 
   // Initialise current team and match
-  const [team, setTeam] = useState<string>();
-  const [match, setMatch] = useState<number>();
+  const [team, setTeam] = useState<string | undefined>(initial?.team?.number);
+  const [match, setMatch] = useState<number | undefined>(initial?.match?.id);
 
   const teamData = useEventTeam(event, team);
   const eventMatchData = useEventMatch(event, division, match);

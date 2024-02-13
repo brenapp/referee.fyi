@@ -107,6 +107,7 @@ export const EventTeamsPage: React.FC = () => {
           open={incidentDialogOpen}
           setOpen={setIncidentDialogOpen}
           initial={{ team }}
+          key={team?.id}
         />
         <header className="mt-4">
           <Button onClick={() => setIncidentDialogOpen(true)} mode="primary">

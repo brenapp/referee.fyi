@@ -1,7 +1,7 @@
 import { Router } from "itty-router"
 import type { ShareUser, EventIncidents as EventIncidentsData, Incident } from "../types/EventIncidents"
 import { corsHeaders, response } from "./utils"
-import type { WebSocketMessage, WebSocketPayload, WebSocketPeerMessage, WebSocketSender, WebSocketServerShareInfoMessage } from "../types/api";
+import type { ShareMetadata, WebSocketMessage, WebSocketPayload, WebSocketPeerMessage, WebSocketSender, WebSocketServerShareInfoMessage } from "../types/api";
 
 export type SessionClient = {
     user: ShareUser;
@@ -16,8 +16,14 @@ export interface Env {
 
 export class EventIncidents implements DurableObject {
     router = Router()
-    clients: SessionClient[] = []
-    state: DurableObjectState
+    clients: SessionClient[] = [];
+    state: DurableObjectState;
+    owner?: ShareUser;
+    trusted?: string[];
+
+    sku: string = "";
+    code: string = "";
+
     env: Env
 
     constructor(state: DurableObjectState, env: Env) {
@@ -38,19 +44,24 @@ export class EventIncidents implements DurableObject {
 
     // Storage
     async getOwner() {
-        return this.state.storage.get<ShareUser>("owner");
+        return this.owner;
     };
 
     async setOwner(owner: ShareUser) {
-        return this.state.storage.put<ShareUser>("owner", owner);
+        this.owner = owner;
+
+        const value = await this.env.SHARES.get(`${this.sku}#${this.code}`);
+
+        if (!value) {
+            return;
+        }
+
+        const body: ShareMetadata = JSON.parse(value);
+        body.owner = owner;
     };
 
     async getSKU() {
-        return this.state.storage.get<string>("sku");
-    };
-
-    async setSKU(sku: string) {
-        return this.state.storage.put<string>("sku", sku);
+        return this.sku;
     };
 
     async addIncident(incident: Incident) {
@@ -135,17 +146,11 @@ export class EventIncidents implements DurableObject {
     }
 
     async handleInit(request: Request) {
-        const data = await request.json<EventIncidentsData>();
-
-        if (data.owner) {
-            await this.setOwner(data.owner);
-        }
-
-        await this.setSKU(data.sku);
-
-        for (const incident of data.incidents) {
-            await this.addIncident(incident);
-        };
+        const data = await request.json<ShareMetadata>();
+        this.sku = data.sku;
+        this.code = data.code;
+        this.owner = data.owner;
+        this.trusted = data.trusted;
     };
 
     async handleGet() {
@@ -339,10 +344,6 @@ export class EventIncidents implements DurableObject {
         socket.accept()
 
         const client: SessionClient = { socket, ip, active: true, user }
-
-        if (this.clients.length < 1) {
-            this.setOwner(user);
-        }
 
         // Ensure that clients aren't  listed twice
         this.clients = this.clients.filter(c => c.user.id !== user.id)

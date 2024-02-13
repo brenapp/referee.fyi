@@ -37,3 +37,10 @@ export type EventIncidents = {
     incidents: Incident[];
     deleted: string[];
 }
+
+export type ShareMetadata = {
+    sku: string;
+    code: string;
+    owner: ShareUser;
+    trusted?: string[]; // trusted user IDs. If specified, only these users can join.
+};

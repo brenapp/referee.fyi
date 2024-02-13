@@ -1,4 +1,4 @@
-import { EventIncidents, Incident, ShareUser } from "./EventIncidents";
+import { EventIncidents, ShareMetadata, Incident, ShareUser } from "./EventIncidents";
 
 export * from "./EventIncidents";
 
@@ -21,15 +21,11 @@ export type ShareResponseFailure = {
 export type ShareResponse<T> = ShareResponseSuccess<T> | ShareResponseFailure;
 
 // /api/create/:sku
-export type CreateShareRequest = EventIncidents;
-
-export type CreateShareResponse = {
-    code: string;
-}
+export type CreateShareRequest = Omit<ShareMetadata, "code">;
+export type CreateShareResponse = Pick<ShareMetadata, "code">
 
 // PATCH /api/share/:sku:/:code:/incident
 export type EditIncidentResponse = Exclude<Incident["revision"], undefined>;
-
 export type ShareGetDataResponse = WebSocketMessageData[""]
 
 // WebSocket communications
@@ -53,8 +49,6 @@ export type WebSocketBroadcastMessage = {
     type: "message";
     message: string;
 }
-
-
 
 export type WebSocketPeerMessage =
     WebSocketAddIncidentMessage |

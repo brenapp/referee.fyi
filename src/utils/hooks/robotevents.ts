@@ -16,7 +16,6 @@ import {
   TeamOptionsFromEvent,
 } from "robotevents/out/endpoints/teams";
 import { EventData } from "robotevents/out/endpoints/events";
-import { useMemo } from "react";
 import { Skill, SkillOptionsFromEvent } from "robotevents/out/endpoints/skills";
 
 const ROBOTEVENTS_TOKEN =
@@ -225,18 +224,16 @@ export function useEventMatchesForTeam(
   });
 }
 
-export function useMatchTeams(match?: MatchData | null) {
-  return useMemo(() => {
-    if (!match) {
-      return null;
-    }
+export function useMatchTeams(event?: EventData | null, match?: MatchData | null) {
+  const { data: teams } = useEventTeams(event);
 
-    const teams = match.alliances
-      .map((alliance) => alliance.teams.map((t) => t.team.name))
-      .flat();
+  if (!teams || !match) {
+    return [];
+  }
 
-    return teams;
-  }, [match]);
+  const teamsInMatch = match?.alliances.flatMap(a => a.teams.map(a => a.team.id)) ?? [];
+  return teamsInMatch.map(id => teams.find(t => t.id === id)!)
+
 }
 
 export function useEventMatch(

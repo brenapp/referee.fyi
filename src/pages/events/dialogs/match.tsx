@@ -260,8 +260,23 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
   const { data: event } = useCurrentEvent();
   const division = useCurrentDivision(defaultDivision);
 
-  const { data: matches } = useEventMatches(event, division);
+  const { data: matches, isSuccess: isLoadingMatchesSuccess } = useEventMatches(
+    event,
+    division
+  );
   const match = useEventMatch(event, division, matchId);
+
+  // Edge-case: If the match dialog was open when the match was scored, the match ID no longer
+  // exists (RobotEvents creates a new match ID with the same name), so just close the dialog and have
+  // the user reopen it to pick the right match. We could try and go find the updated match ID, but
+  // I think this is less likely to frustrate them if we (for example, pick the wrong match).
+  useEffect(() => {
+    if (isLoadingMatchesSuccess && !match) {
+      setTimeout(() => {
+        setOpen(false);
+      }, 100);
+    }
+  }, [isLoadingMatchesSuccess, match]);
 
   const prevMatch = useMemo(() => {
     return matches?.find((_, i) => matches[i + 1]?.id === match?.id);

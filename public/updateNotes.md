@@ -1,10 +1,19 @@
-### 9 Jan 2024
+### 17 Feb 2024
+
+- Add timer to current and future matches that shows how far ahead or behind that match was. For
+  matches that haven't been started yet, the timer counts live.
+
+- You can now use swipe gestures to navigate between tabs and the match dialog.
+
+- Minor bug fixes and usability improvements
+
+### 9 Feb 2024
 
 - Added event summary section, accessible from the Manage Tab, that shows all entries in the
   anomaly log at the event, displays summary statistics about events, and allows you to filter by
   outcome and rules cited.
 
-### 7 Jan 2024
+### 7 Feb 2024
 
 - Add edit functionality for existing incidents.
 - Add general notes to incidents, which do not count in rule summaries. General notes are intended

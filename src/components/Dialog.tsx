@@ -96,6 +96,7 @@ export const Dialog: React.FC<DialogProps> = ({
 
   return (
     <dialog
+      onPointerDown={(e) => e.stopPropagation()}
       {...props}
       ref={ref}
       onClose={onClose}

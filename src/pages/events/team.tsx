@@ -7,7 +7,7 @@ import { useTeamIncidentsByEvent } from "~hooks/incident";
 import { Tabs } from "~components/Tabs";
 import { EventData } from "robotevents/out/endpoints/events";
 import { TeamData } from "robotevents/out/endpoints/teams";
-import { ClickableMatch } from "~components/ClickableMatch";
+import { ClickableMatch } from "~components/Match";
 import { EventMatchDialog } from "./dialogs/match";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { Incident } from "~components/Incident";

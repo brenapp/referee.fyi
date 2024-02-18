@@ -241,10 +241,8 @@ export function useEventMatch(
   division: number | null | undefined,
   match: number | null | undefined
 ): MatchData | null {
-  const matches = useEventMatches(event, division);
-
-  const matchArray = matches.data ?? [];
-  return matchArray.find((m) => m.id === match) ?? null;
+  const { data: matches } = useEventMatches(event, division);
+  return matches?.find((m) => m.id === match) ?? null;
 }
 
 export function useEventTeam(

@@ -24,6 +24,7 @@ import { MatchContext } from "~components/Context";
 import { Incident } from "~components/Incident";
 import { TeamData } from "robotevents/out/endpoints/teams";
 import { useDrag } from "@use-gesture/react";
+import { MatchTime } from "~components/Match";
 
 const OUTCOME_PRIORITY: IncidentOutcome[] = [
   "Major",
@@ -180,64 +181,6 @@ const TeamFlagButton: React.FC<TeamFlagButtonProps> = ({
         <span>New</span>
       </Button>
     </>
-  );
-};
-
-function formatTime(ms: number) {
-  const seconds = Math.floor(Math.abs(ms / 1000));
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.round(seconds % 60);
-  const t = [h, m > 9 ? m : h ? "0" + m : m || "0", s > 9 ? s : "0" + s]
-    .filter(Boolean)
-    .join(":");
-  return ms < 0 && seconds ? `-${t}` : t;
-}
-
-export type MatchTimeProps = {
-  match?: MatchData;
-};
-
-export const MatchTime: React.FC<MatchTimeProps> = ({ match }) => {
-  const [now, setNow] = useState<number>(Date.now());
-
-  const delta = useMemo(() => {
-    if (!match?.scheduled) {
-      return undefined;
-    }
-
-    const scheduled = new Date(match.scheduled).getTime();
-
-    // upcoming matches
-    if (!match.started) {
-      const time = scheduled - now;
-      return time;
-    }
-
-    const started = new Date(match.started).getTime();
-    const time = started - scheduled;
-
-    return time;
-  }, [match, now]);
-
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  if (typeof delta === "undefined") {
-    return null;
-  }
-
-  return (
-    <span
-      className={twMerge(
-        "font-mono",
-        delta > 0 ? "text-emerald-400" : "text-red-400"
-      )}
-    >
-      {formatTime(delta)}
-    </span>
   );
 };
 

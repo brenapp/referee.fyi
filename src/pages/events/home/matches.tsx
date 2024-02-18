@@ -2,11 +2,11 @@ import { useCallback, useMemo, useState } from "react";
 import { EventData } from "robotevents/out/endpoints/events";
 import { useEventMatches } from "~utils/hooks/robotevents";
 import { useCurrentDivision } from "~utils/hooks/state";
-import { EventMatchDialog, MatchTime } from "../dialogs/match";
+import { EventMatchDialog } from "../dialogs/match";
 import { Spinner } from "~components/Spinner";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
-import { ClickableMatch } from "~components/ClickableMatch";
+import { ClickableMatch, MatchTime } from "~components/Match";
 import { Button } from "~components/Button";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 

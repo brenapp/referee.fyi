@@ -74,8 +74,8 @@ export const EventMatchesTab: React.FC<MatchesTabProps> = ({ event }) => {
         open={open}
         setOpen={setOpen}
       />
+      <UpcomingMatch event={event} onClickMatch={onClickMatch} />
       <section className="flex-1">
-        <UpcomingMatch event={event} onClickMatch={onClickMatch} />
         <Spinner show={isLoading} />
         <AutoSizer>
           {(size) => (

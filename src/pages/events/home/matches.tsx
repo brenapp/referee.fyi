@@ -1,12 +1,48 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { EventData } from "robotevents/out/endpoints/events";
 import { useEventMatches } from "~utils/hooks/robotevents";
 import { useCurrentDivision } from "~utils/hooks/state";
-import { EventMatchDialog } from "../dialogs/match";
+import { EventMatchDialog, MatchTime } from "../dialogs/match";
 import { Spinner } from "~components/Spinner";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { ClickableMatch } from "~components/ClickableMatch";
+import { Button } from "~components/Button";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
+
+export type UpcomingMatchProps = {
+  event: EventData;
+  onClickMatch: (e: React.MouseEvent<HTMLButtonElement>) => void;
+};
+
+export const UpcomingMatch: React.FC<UpcomingMatchProps> = ({
+  event,
+  onClickMatch,
+}) => {
+  const division = useCurrentDivision();
+  const { data: matches } = useEventMatches(event, division);
+
+  const match = useMemo(
+    () =>
+      matches?.find(
+        (m) => !m.started && m.alliances.every((a) => a.score === 0)
+      ),
+    [matches]
+  );
+
+  return (
+    <Button
+      mode="normal"
+      className="text-left flex mb-2 mt-2 gap-2 items-center"
+      data-matchid={match?.id}
+      onClick={onClickMatch}
+    >
+      <span className="flex-1">{match?.name}</span>
+      <MatchTime match={match} />
+      <ArrowRightIcon height={20} />
+    </Button>
+  );
+};
 
 export type MatchesTabProps = {
   event: EventData;
@@ -35,6 +71,7 @@ export const EventMatchesTab: React.FC<MatchesTabProps> = ({ event }) => {
         setOpen={setOpen}
       />
       <section className="flex-1">
+        <UpcomingMatch event={event} onClickMatch={onClickMatch} />
         <Spinner show={isLoading} />
         <AutoSizer>
           {(size) => (

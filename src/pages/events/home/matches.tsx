@@ -30,10 +30,14 @@ export const UpcomingMatch: React.FC<UpcomingMatchProps> = ({
     [matches]
   );
 
+  if (!match) {
+    return null;
+  }
+
   return (
     <Button
       mode="normal"
-      className="text-left flex mb-2 mt-2 gap-2 items-center"
+      className="text-left flex mt-2 gap-2 items-center bg-zinc-700 mb-2"
       data-matchid={match?.id}
       onClick={onClickMatch}
     >

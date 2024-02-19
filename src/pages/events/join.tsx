@@ -8,10 +8,6 @@ import { joinShare } from "~utils/data/share";
 import { useShareCode, useShareData, useShareName } from "~utils/hooks/share";
 import { useCurrentEvent } from "~utils/hooks/state";
 
-function isValidCode(code: string) {
-  return !!code.match(/[A-Z0-9]{3}-[A-Z0-9]{3}/g);
-}
-
 export const EventJoinPage: React.FC = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
@@ -28,10 +24,7 @@ export const EventJoinPage: React.FC = () => {
 
   const { data: shareData, isSuccess: isShareSuccess } = useShareData(
     event?.sku,
-    code,
-    {
-      enabled: isValidCode(code),
-    }
+    code
   );
 
   const isActiveCode = useMemo(
@@ -88,7 +81,7 @@ export const EventJoinPage: React.FC = () => {
           id={shareId}
           value={code ?? ""}
           onChange={onChangeCode}
-          aria-invalid={!isValidCode(code)}
+          // aria-invalid={!isValidCode(code)}
           maxLength={7}
           className="text-6xl w-full font-mono text-center"
         />

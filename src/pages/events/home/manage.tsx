@@ -21,6 +21,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { Dialog, DialogBody } from "~components/Dialog";
 import { Input } from "~components/Input";
+import { QRCode } from "~components/QRCode";
 
 export type ManageTabProps = {
   event: EventData;
@@ -64,18 +65,22 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
     }
   }, [beginSharing, event.sku, shareName]);
 
+  const joinURL = useMemo(
+    () => new URL(`/${event.sku}/join?code=${shareCode}`, location.href),
+    [shareCode]
+  );
+
   const onClickShareCode = useCallback(async () => {
-    const url = new URL(`/${event.sku}/join?code=${shareCode}`, location.href);
     const shareData = {
-      url: url.href,
+      url: joinURL.href,
     };
 
     if (navigator.share && navigator.canShare(shareData)) {
       navigator.share(shareData);
     } else if (navigator.clipboard) {
-      navigator.clipboard.writeText(url.href);
+      navigator.clipboard.writeText(joinURL.href);
     }
-  }, [shareCode, event.sku]);
+  }, [shareCode, event.sku, joinURL]);
 
   const onClickStopSharing = useCallback(async () => {
     await leaveShare(event.sku);
@@ -92,17 +97,20 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
 
   return (
     <>
-      <section>
+      <section className="max-w-lg">
         <section className="mt-4">
           <h2 className="font-bold">Share Event Data</h2>
           <Spinner show={isPendingShare} />
           {isSharing ? (
             <section>
-              <p>
-                Use this share code to give read and write access to other
-                devices. Treat this code with caution!
-              </p>
+              <p>Allow others to join by using the QR Code below.</p>
               <p className="mt-4">Share Name: {shareName}</p>
+
+              <QRCode
+                config={{ text: joinURL.href }}
+                className="mt-2"
+                onClick={onClickShareCode}
+              />
               <Button
                 className="w-full font-mono text-5xl mt-4 text-center"
                 onClick={onClickShareCode}

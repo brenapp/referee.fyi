@@ -152,10 +152,12 @@ export function logicalMatchComparison(a: MatchData, b: MatchData) {
   const roundOrder = [
     Round.Practice,
     Round.Qualification,
+    Round.RoundRobin,
     Round.RoundOf16,
     Round.Quarterfinals,
     Round.Semifinals,
     Round.Finals,
+    Round.TopN
   ];
 
   if (a.round !== b.round) {

@@ -1,6 +1,6 @@
 import { IRequest, Router, createCors, error, json } from "itty-router";
 import { response } from "./utils";
-import { CreateShareResponse } from "../types/api";
+import { CreateShareRequest, CreateShareResponse, ShareMetadata } from "../types/api";
 import { EventIncidents } from "../types/EventIncidents";
 
 interface Env {
@@ -37,12 +37,13 @@ router
         };
 
         try {
-            const body = await request.json() as EventIncidents;
+            const body = await request.json() as CreateShareRequest;
 
             const base = crypto.randomUUID();
             const code = base.slice(0, 3).toUpperCase() + "-" + base.slice(3, 6).toUpperCase();
 
-            await env.SHARES.put(`${sku}#${code}`, JSON.stringify(body));
+            const kv: ShareMetadata = { ...body, code };
+            await env.SHARES.put(`${sku}#${code}`, JSON.stringify(kv));
 
             // Initialize the Durable Object
             const id = env.INCIDENTS.idFromName(`${sku}#${code}`);

@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useState } from "react";
-import { MatchData, Round } from "robotevents/out/endpoints/matches";
+import { Match, MatchData } from "robotevents/out/endpoints/matches";
 import { MatchContext } from "./Context";
 import { Button } from "./Button";
 import { twMerge } from "tailwind-merge";
@@ -78,45 +78,18 @@ function matchTime(match: MatchData) {
     </span>
   );
 }
-
-function shortMatchName(match: MatchData) {
-  switch (match.round) {
-    case Round.Practice: {
-      return "P " + match.matchnum;
-      break;
-    }
-    case Round.Qualification: {
-      return "Q " + match.matchnum;
-    }
-    case Round.RoundOf16: {
-      return "R16 " + match.instance + "-" + match.matchnum;
-      break;
-    }
-    case Round.Quarterfinals: {
-      return "QF " + match.instance + "-" + match.matchnum;
-      break;
-    }
-    case Round.Semifinals: {
-      return "SF " + match.instance + "-" + match.matchnum;
-      break;
-    }
-    case Round.Finals: {
-      return "F " + match.instance + "-" + match.matchnum;
-      break;
-    }
-  }
-}
-
 export type ClickableMatch = {
   match: MatchData;
   onClick: React.EventHandler<React.MouseEvent<HTMLButtonElement>>;
 };
 
 export const ClickableMatch: React.FC<ClickableMatch> = ({
-  match,
+  match: matchData,
   onClick,
 }) => {
   const id = useId();
+  const match = useMemo(() => new Match(matchData), [matchData]);
+
   return (
     <li
       key={match.id}
@@ -129,7 +102,7 @@ export const ClickableMatch: React.FC<ClickableMatch> = ({
         className="flex-1 active:bg-zinc-600"
         id={id}
       >
-        <p>{shortMatchName(match)}</p>
+        <p>{match.shortName()}</p>
         <p className="text-sm">{matchTime(match)}</p>
       </Button>
       <label htmlFor={id}>

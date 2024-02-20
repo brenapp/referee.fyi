@@ -2,13 +2,13 @@ import { del, get, set } from "idb-keyval";
 import type {
   ShareResponse,
   CreateShareResponse,
-  EventIncidents,
   ShareUser,
   WebSocketPayload,
   WebSocketMessage,
   WebSocketPeerMessage,
   WebSocketServerShareInfoMessage,
   EditIncidentResponse,
+  CreateShareRequest,
 } from "~share/api";
 import {
   IncidentWithID,
@@ -61,7 +61,7 @@ export async function leaveShare(sku: string) {
 }
 
 export async function createShare(
-  incidents: EventIncidents
+  incidents: CreateShareRequest
 ): Promise<ShareResponse<CreateShareResponse>> {
   try {
     const response = await fetch(

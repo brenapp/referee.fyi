@@ -7,8 +7,8 @@ import {
   useState,
 } from "react";
 import { UseQueryOptions, useMutation, useQuery } from "@tanstack/react-query";
-import { EventIncidents } from "~share/EventIncidents";
 import {
+  CreateShareRequest,
   CreateShareResponse,
   ShareResponse,
   WebSocketServerShareInfoMessage,
@@ -53,9 +53,9 @@ export function useShareName() {
 export function useCreateShare() {
   return useMutation({
     mutationFn: async (
-      incidents: EventIncidents
+      data: CreateShareRequest
     ): Promise<ShareResponse<CreateShareResponse>> => {
-      return createShare(incidents);
+      return createShare(data);
     },
   });
 }

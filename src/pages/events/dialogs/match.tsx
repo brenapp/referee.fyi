@@ -25,6 +25,8 @@ import { Incident } from "~components/Incident";
 import { TeamData } from "robotevents/out/endpoints/teams";
 import { useDrag } from "@use-gesture/react";
 import { MatchTime } from "~components/Match";
+import { TeamIsolationDialog } from "./team";
+import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 
 const OUTCOME_PRIORITY: IncidentOutcome[] = [
   "Major",
@@ -45,6 +47,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
   incidents,
 }) => {
   const [open, setOpen] = useState(false);
+  const [isolationOpen, setIsolationOpen] = useState(false);
 
   const { data: event } = useCurrentEvent();
   const team = useEventTeam(event, number);
@@ -145,6 +148,23 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
       {incidents.map((incident) => (
         <Incident incident={incident} key={incident.id} />
       ))}
+      {incidents.length > 0 ? (
+        <>
+          <TeamIsolationDialog
+            team={team?.number}
+            open={isolationOpen}
+            setOpen={setIsolationOpen}
+          />
+          <Button
+            mode="normal"
+            className="flex gap-2 items-center mt-2 justify-center"
+            onClick={() => setIsolationOpen(true)}
+          >
+            <ArrowsPointingOutIcon height={20} />
+            <p>Isolate Team</p>
+          </Button>
+        </>
+      ) : null}
     </details>
   );
 };
@@ -264,7 +284,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
       />
       <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
         <DialogHeader title="Matches" onClose={() => setOpen(false)} />
-        <DialogBody className="relative touch-none" {...bind()}>
+        <DialogBody className="touch-none" {...bind()}>
           <Spinner show={!match} />
           <nav className="flex items-center mx-2 gap-4">
             <IconButton

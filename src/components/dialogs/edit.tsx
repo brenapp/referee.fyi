@@ -29,6 +29,21 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
   const [incident, setIncident] = useState(initialIncident);
   const { mutateAsync: deleteIncident } = useDeleteIncident(incident.id);
 
+  const mostRecentUser = useMemo(() => {
+    if (!incident.revision) {
+      return null;
+    }
+
+    switch (incident.revision.user.type) {
+      case "client": {
+        return incident.revision.user.name;
+      }
+      case "server": {
+        return "System";
+      }
+    }
+  }, [incident]);
+
   const { data: eventData } = useCurrentEvent();
   const teamData = useEventTeam(eventData, incident.team);
   const { data: teamMatches } = useEventMatchesForTeam(eventData, teamData);
@@ -188,6 +203,13 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             onChange={onChangeIncidentNotes}
           />
         </label>
+        {incident.revision ? (
+          <section className="p-2">
+            <h3 className="font-bold">Revision History</h3>
+            <p>Edit Count: {incident.revision.count}</p>
+            <p>Last User: {mostRecentUser}</p>
+          </section>
+        ) : null}
       </DialogBody>
       <nav className="flex gap-4 p-2">
         <Button mode="dangerous" onClick={onClickDelete}>

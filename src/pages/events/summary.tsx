@@ -13,12 +13,13 @@ import { IncidentOutcome } from "~share/EventIncidents";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 import { Dialog, DialogBody } from "~components/Dialog";
 import { XMarkIcon } from "@heroicons/react/20/solid";
-import { Checkbox, RulesMultiSelect } from "~components/Input";
+import { Checkbox, RulesMultiSelect, Select } from "~components/Input";
 import { twMerge } from "tailwind-merge";
 
 export type Filters = {
   outcomes: Record<IncidentOutcome, boolean>;
   rules: Rule[];
+  division?: number;
 };
 
 const DEFAULT_FILTERS: Filters = {
@@ -40,6 +41,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
   apply,
 }) => {
   const { data: event } = useCurrentEvent();
+  const divisions = useMemo(() => event?.divisions ?? [], [event]);
   const game = useRulesForProgram(event?.program.code);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const setFiltersField = useCallback(
@@ -63,7 +65,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
       mode="modal"
       open={open}
       onClose={() => setOpen(false)}
-      className="w-[calc(100%-2rem)] h-2/3 rounded-md p-4"
+      className="p-4"
     >
       <DialogBody>
         <nav className="w-full flex pt-1 gap-2">
@@ -103,6 +105,30 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
             <span>{outcome}</span>
           </label>
         ))}
+        {divisions.length > 0 ? (
+          <label>
+            <p className="mt-4">Division</p>
+            <Select
+              value={filters.division}
+              onChange={(e) =>
+                setFiltersField(
+                  "division",
+                  isNaN(Number.parseInt(e.currentTarget.value))
+                    ? undefined
+                    : Number.parseInt(e.currentTarget.value)
+                )
+              }
+              className="w-full"
+            >
+              <option value={undefined}>Pick Division</option>
+              {divisions
+                .sort((a, b) => a.order - b.order)
+                .map((div) => (
+                  <option value={div.id}>{div.name}</option>
+                ))}
+            </Select>
+          </label>
+        ) : null}
       </DialogBody>
       <Button mode="primary" onClick={onClickApply}>
         Apply
@@ -130,6 +156,13 @@ export const EventSummaryPage: React.FC = () => {
         filters.rules.length < 1 ||
         filters.rules.some((rule) => incident.rules.includes(rule.rule));
       if (!hasRule) {
+        return false;
+      }
+
+      if (
+        typeof filters.division === "number" &&
+        filters.division !== incident.division
+      ) {
         return false;
       }
 

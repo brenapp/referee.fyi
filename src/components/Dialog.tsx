@@ -101,7 +101,7 @@ export const Dialog: React.FC<DialogProps> = ({
       ref={ref}
       onClose={onClose}
       className={twMerge(
-        "bg-zinc-900 flex-col p-2 gap-2 z-50 w-screen h-screen overscroll-none text-zinc-100",
+        "bg-zinc-900 flex-col p-2 gap-2 z-50 w-screen h-screen max-w-3xl max-h-[1152px] overscroll-none text-zinc-100 rounded-md m-auto",
         props.className,
         open ? "flex" : ""
       )}

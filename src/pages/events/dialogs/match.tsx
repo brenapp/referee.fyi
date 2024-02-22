@@ -23,8 +23,9 @@ import { MatchData } from "robotevents/out/endpoints/matches";
 import { MatchContext } from "~components/Context";
 import { Incident } from "~components/Incident";
 import { TeamData } from "robotevents/out/endpoints/teams";
-import { useDrag } from "@use-gesture/react";
 import { MatchTime } from "~components/Match";
+import { TeamIsolationDialog } from "./team";
+import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 
 const OUTCOME_PRIORITY: IncidentOutcome[] = [
   "Major",
@@ -45,6 +46,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
   incidents,
 }) => {
   const [open, setOpen] = useState(false);
+  const [isolationOpen, setIsolationOpen] = useState(false);
 
   const { data: event } = useCurrentEvent();
   const team = useEventTeam(event, number);
@@ -145,6 +147,23 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
       {incidents.map((incident) => (
         <Incident incident={incident} key={incident.id} />
       ))}
+      {incidents.length > 0 ? (
+        <>
+          <TeamIsolationDialog
+            team={team?.number}
+            open={isolationOpen}
+            setOpen={setIsolationOpen}
+          />
+          <Button
+            mode="normal"
+            className="flex gap-2 items-center mt-2 justify-center"
+            onClick={() => setIsolationOpen(true)}
+          >
+            <ArrowsPointingOutIcon height={20} />
+            <p>Isolate Team</p>
+          </Button>
+        </>
+      ) : null}
     </details>
   );
 };
@@ -241,18 +260,6 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
     }
   }, [nextMatch, setMatchId]);
 
-  const bind = useDrag(
-    ({ direction, first }) => {
-      if (!first) return;
-      if (direction[0] > 0) {
-        onClickPrevMatch();
-      } else if (direction[0] < 0) {
-        onClickNextMatch();
-      }
-    },
-    { axis: "x", threshold: 1 }
-  );
-
   const { data: incidentsByTeam } = useTeamIncidentsByMatch(match);
 
   const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
@@ -264,7 +271,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
       />
       <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
         <DialogHeader title="Matches" onClose={() => setOpen(false)} />
-        <DialogBody className="relative touch-none" {...bind()}>
+        <DialogBody className="relative">
           <Spinner show={!match} />
           <nav className="flex items-center mx-2 gap-4">
             <IconButton

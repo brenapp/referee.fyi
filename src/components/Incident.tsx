@@ -14,9 +14,14 @@ const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
 
 export type IncidentProps = {
   incident: IncidentWithID;
+  readonly?: boolean;
 } & React.HTMLProps<HTMLDivElement>;
 
-export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
+export const Incident: React.FC<IncidentProps> = ({
+  incident,
+  readonly,
+  ...props
+}) => {
   const [editIncidentOpen, setEditIncidentOpen] = useState(false);
   const key = incident.id + (incident.revision?.count ?? -1).toString();
   return (
@@ -52,11 +57,13 @@ export const Incident: React.FC<IncidentProps> = ({ incident, ...props }) => {
             ))}
           </ul>
         </div>
-        <IconButton
-          icon={<PencilSquareIcon height={20} />}
-          className="bg-transparent text-black/75"
-          onClick={() => setEditIncidentOpen(true)}
-        />
+        {!readonly ? (
+          <IconButton
+            icon={<PencilSquareIcon height={20} />}
+            className="bg-transparent text-black/75"
+            onClick={() => setEditIncidentOpen(true)}
+          />
+        ) : null}
       </div>
     </>
   );

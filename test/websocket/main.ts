@@ -8,7 +8,7 @@ const TEAMS = readFileSync("./teams.txt").toString().split("\n");
 const START_DATE = new Date();
 
 const SKU = "RE-VRC-22-9725";
-const CODE = "DBA-4C5"
+const CODE = "F4F-49B"
 
 function createMockIncident(creator: ShareUser): Incident {
     return {
@@ -137,8 +137,8 @@ function clientBody({ ws, user, signal }: ClientBodyOptions) {
 
     ws.addEventListener("message", handleMessage);
 
-    const EDIT_INTERVAL = 150000 + (Math.random() * 10000);
-    const ADD_INTERVAL = 150000 + (Math.random() * 10000);
+    const EDIT_INTERVAL = 50000 + (Math.random() * 10000);
+    const ADD_INTERVAL = 25000 + (Math.random() * 5000);
 
     const editTimer = setInterval(() => {
         if (incidents.length < 1) {
@@ -175,7 +175,7 @@ const url = new URL(`wss://referee-fyi-share.bren.workers.dev/api/share/${SKU}/$
 
 const controller = new AbortController();
 
-for (let i = 0; i < 100; i++) {
+for (let i = 0; i < 50; i++) {
 
     const name = `U${i}`;
     const id = crypto.randomUUID();

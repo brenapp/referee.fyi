@@ -16,7 +16,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { Spinner } from "~components/Spinner";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
-import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
+import {
+  usePendingIncidents,
+  useTeamIncidentsByMatch,
+} from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
 import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
 import { MatchData } from "robotevents/out/endpoints/matches";
@@ -43,10 +46,24 @@ type TeamSummaryProps = {
 const TeamSummary: React.FC<TeamSummaryProps> = ({
   number,
   match,
-  incidents,
+  incidents: rawIncidents,
 }) => {
   const [open, setOpen] = useState(false);
   const [isolationOpen, setIsolationOpen] = useState(false);
+
+  // Optimistic Updates
+  const pending = usePendingIncidents((t) => t.team === number);
+  const incidents = useMemo(() => {
+    return rawIncidents
+      .filter((i) => !pending.deleteIncident.includes(i.id))
+      .map((current) => {
+        return (
+          pending.editIncident.find((incident) => incident.id === current.id) ??
+          current
+        );
+      })
+      .concat(pending.newIncident);
+  }, [rawIncidents, pending]);
 
   const { data: event } = useCurrentEvent();
   const team = useEventTeam(event, number);
@@ -90,6 +107,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
   return (
     <details
       open={open}
+      key={number}
       onToggle={(e) => setOpen(e.currentTarget.open)}
       className="p-1 rounded-md mb-2 max-w-full"
     >

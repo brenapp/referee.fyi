@@ -4,13 +4,8 @@ import { Button } from "~components/Button";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { Input, RulesMultiSelect, Select, TextArea } from "~components/Input";
 import { toast } from "~components/Toast";
-import {
-  IncidentOutcome,
-  IncidentWithID,
-  editIncident,
-} from "~utils/data/incident";
-import { queryClient } from "~utils/data/query";
-import { useDeleteIncident } from "~utils/hooks/incident";
+import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
+import { useDeleteIncident, useEditIncident } from "~utils/hooks/incident";
 import { useEventMatchesForTeam, useEventTeam } from "~utils/hooks/robotevents";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 import { useCurrentEvent } from "~utils/hooks/state";
@@ -27,7 +22,8 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
   incident: initialIncident,
 }) => {
   const [incident, setIncident] = useState(initialIncident);
-  const { mutateAsync: deleteIncident } = useDeleteIncident(incident.id);
+  const { mutateAsync: deleteIncident } = useDeleteIncident();
+  const { mutateAsync: editIncident } = useEditIncident();
 
   const mostRecentUser = useMemo(() => {
     if (!incident.revision) {
@@ -121,19 +117,18 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
 
   const onClickDelete = useCallback(async () => {
     setOpen(false);
-    await deleteIncident();
+    await deleteIncident(incident.id);
     toast({ type: "info", message: "Deleted Incident" });
-  }, [deleteIncident, setOpen]);
+  }, [deleteIncident, setOpen, incident.id]);
 
   const onClickSave = useCallback(async () => {
     setOpen(false);
     try {
-      await editIncident(incident.id, incident);
+      await editIncident(incident);
       toast({ type: "info", message: "Saved Incident" });
     } catch (e) {
       toast({ type: "error", message: `${e}` });
     }
-    await queryClient.invalidateQueries({ queryKey: ["incidents"] });
   }, [incident, setOpen]);
 
   return (

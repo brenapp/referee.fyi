@@ -26,7 +26,7 @@ export type CreateShareResponse = Pick<ShareMetadata, "code">
 
 // PATCH /api/share/:sku:/:code:/incident
 export type EditIncidentResponse = Exclude<Incident["revision"], undefined>;
-export type ShareGetDataResponse = WebSocketMessageData[""]
+export type ShareGetDataResponse = WebSocketMessageData["server_share_info"];
 
 // WebSocket communications
 

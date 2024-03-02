@@ -1,6 +1,6 @@
 import { useCallback, useId, useMemo, useState } from "react";
 import { EventData } from "robotevents/out/endpoints/events";
-import { Button, LinkButton } from "~components/Button";
+import { Button, IconButton, LinkButton } from "~components/Button";
 import { Spinner } from "~components/Spinner";
 import { toast } from "~components/Toast";
 import { deleteIncident, getIncidentsByEvent } from "~utils/data/incident";
@@ -22,6 +22,8 @@ import {
 import { Dialog, DialogBody } from "~components/Dialog";
 import { Input } from "~components/Input";
 import { QRCode } from "~components/QRCode";
+import { EyeIcon } from "@heroicons/react/24/outline";
+import { twMerge } from "tailwind-merge";
 
 export type ManageTabProps = {
   event: EventData;
@@ -39,6 +41,8 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
 
   const { data: shareCode } = useShareCode(event.sku);
   const isSharing = !!shareCode;
+
+  const [showShareCode, setShowShareCode] = useState(false);
 
   const connection = useShareConnection();
   const activeUsers = useActiveUsers();
@@ -106,11 +110,27 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
               <p>Allow others to join by using the QR Code below.</p>
               <p className="mt-4">Share Name: {shareName}</p>
 
-              <QRCode
-                config={{ text: joinURL.href }}
-                className="mt-2"
-                onClick={onClickShareCode}
-              />
+              <div className="overflow-hidden rounded-md relative">
+                <QRCode
+                  config={{ text: joinURL.href }}
+                  className={twMerge(
+                    "mt-2",
+                    showShareCode ? "blur-none" : "blur-xl"
+                  )}
+                  onClick={onClickShareCode}
+                />
+                {!showShareCode ? (
+                  <section className="absolute top-0 left-0 right-0 bottom-0 p-4 flex items-center">
+                    <Button
+                      className="bg-transparent flex justify-center"
+                      onClick={() => setShowShareCode(true)}
+                    >
+                      <EyeIcon height={24} />
+                      <span className="ml-2">Reveal QR Code</span>
+                    </Button>
+                  </section>
+                ) : null}
+              </div>
               <Button
                 className="w-full font-mono text-5xl mt-4 text-center"
                 onClick={onClickShareCode}

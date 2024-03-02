@@ -29,6 +29,8 @@ import { TeamData } from "robotevents/out/endpoints/teams";
 import { MatchTime } from "~components/Match";
 import { TeamIsolationDialog } from "./team";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
+import { useMatchNote } from "~utils/hooks/notes";
+import { Checkbox } from "~components/Input";
 
 const OUTCOME_PRIORITY: IncidentOutcome[] = [
   "Major",
@@ -221,6 +223,29 @@ const TeamFlagButton: React.FC<TeamFlagButtonProps> = ({
   );
 };
 
+export type MatchNotesProps = {
+  match: MatchData;
+};
+
+export const MatchNotes: React.FC<MatchNotesProps> = ({ match }) => {
+  const { data: event } = useCurrentEvent();
+  const { data: notes } = useMatchNote(event, match);
+
+  return (
+    <div>
+      <div className="bg-zinc-800 rounded-md p-2 flex items-center mt-2 gap-2">
+        <span className="flex-1">AWP</span>
+        <Checkbox label="Red" type="checkbox" color="red" />
+        <Checkbox label="Blue" type="checkbox" color="blue" />
+      </div>
+      <div className="bg-zinc-800 rounded-md p-2 flex items-center mt-2">
+        <span className="flex-1">Auto Winner</span>
+      </div>
+      <div className="flex justify-between mt-2"></div>
+    </div>
+  );
+};
+
 type EventMatchDialogProps = {
   matchId: number;
   setMatchId: (matchId: number) => void;
@@ -323,6 +348,9 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                     number={number}
                   />
                 ))}
+              </section>
+              <section className="mt-4">
+                <MatchNotes match={match} />
               </section>
             </div>
           ) : null}

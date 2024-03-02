@@ -1,19 +1,55 @@
 import { twMerge } from "tailwind-merge";
 import { Game, Rule } from "~utils/hooks/rules";
-import React, { useCallback } from "react";
+import React, { useCallback, useId } from "react";
 import { IconButton } from "./Button";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
+export type CheckboxColor = "emerald" | "red" | "blue";
+
 export type CheckboxProps = React.HTMLProps<HTMLInputElement> & {
+  label: string;
   type: "checkbox" | "radio";
+  color?: CheckboxColor;
 };
-export const Checkbox: React.FC<CheckboxProps> = (props) => {
+export const Checkbox: React.FC<CheckboxProps> = ({
+  label,
+  type,
+  color = "emerald",
+  ...props
+}) => {
+  const id = useId();
+
   return (
-    <input
-      {...props}
-      type={props.type}
-      className={twMerge("accent-emerald-400", props.className)}
-    />
+    <div
+      className={twMerge(
+        "flex gap-2 bg-zinc-600 pl-2 rounded-md",
+        props.className
+      )}
+    >
+      <input
+        {...props}
+        type={type}
+        id={id}
+        className={twMerge(
+          "peer",
+          color === "red" ? "accent-red-400" : "",
+          color === "blue" ? "accent-blue-400" : "",
+          color === "emerald" ? "accent-emerald-400-400" : ""
+        )}
+      />
+      <label
+        htmlFor={id}
+        className={twMerge(
+          "bg-zinc-600 px-2 rounded-md rounded-l-none flex items-center gap-2",
+          color === "red" ? "peer-checked:bg-red-600" : "",
+          color === "blue" ? "peer-checked:bg-blue-600" : "",
+          color === "emerald" ? "peer-checked:bg-red-600" : "",
+          props.className
+        )}
+      >
+        <span>{label}</span>
+      </label>
+    </div>
   );
 };
 

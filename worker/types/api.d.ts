@@ -1,6 +1,7 @@
 import { EventIncidents, ShareMetadata, Incident, ShareUser } from "./EventIncidents";
 
 export * from "./EventIncidents";
+export * from "./MatchNotes";
 
 export type ShareResponseSuccess<T> = {
     success: true;

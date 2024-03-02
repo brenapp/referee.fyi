@@ -1,6 +1,8 @@
 import { DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 import { useCallback } from "react";
 import { Button } from "~components/Button";
+import { toast } from "~components/Toast";
+import { queryClient } from "~utils/data/query";
 import { useShareUserId } from "~utils/hooks/share";
 
 export const SettingsPage: React.FC = () => {
@@ -9,6 +11,11 @@ export const SettingsPage: React.FC = () => {
   const onClickCopyBuild = useCallback(() => {
     if (userSecret) navigator.clipboard.writeText(userSecret);
   }, [userSecret]);
+
+  const onClickRemoveRobotEvents = useCallback(() => {
+    queryClient.cancelQueries({ type: "all" });
+    toast({ type: "info", message: "Deleted RobotEvents cache." });
+  }, []);
 
   return (
     <main className="mt-4">
@@ -30,7 +37,11 @@ export const SettingsPage: React.FC = () => {
       <section className="mt-4">
         <h2 className="font-bold">Delete RobotEvents Data</h2>
         <p>Delete all cached match lists, team lists, and event records.</p>
-        <Button className="mt-2" mode="dangerous">
+        <Button
+          className="mt-2"
+          mode="dangerous"
+          onClick={onClickRemoveRobotEvents}
+        >
           Delete Cache
         </Button>
       </section>

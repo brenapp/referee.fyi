@@ -24,7 +24,7 @@ export default defineConfig({
         display: "standalone",
         background_color: "#27272A",
         theme_color: "#34d399",
-        description: "Helpful tools for VRC and VIQC Referees",
+        description: "Digital anomaly log for Head Referees in VRC, VIQRC, and VEX U. Referee FYI allows you to quickly record violations, see summaries before a match, and share your log with others.",
         orientation: "portrait-primary",
         launch_handler: {
           client_mode: ["navigate-existing", "auto"]

@@ -1,4 +1,5 @@
 {
+  "id": "app.bren.kv.v1",
   "name": "Referee FYI",
   "short_name": "Referee",
   "start_url": "/",
@@ -7,36 +8,80 @@
   "theme_color": "#34d399",
   "description": "Helpful tools for VRC and VIQC Referees",
   "orientation": "portrait-primary",
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "auto"]
+  },
   "icons": [
     {
-      "src": "/icons/kv-48x48.png",
+      "src": "/icons/referee-fyi-48x48.png",
       "sizes": "48x48",
       "type": "image/png"
     },
     {
-      "src": "/icons/kv-72x72.png",
+      "src": "/icons/referee-fyi-72x72.png",
       "sizes": "72x72",
       "type": "image/png"
     },
     {
-      "src": "/icons/kv-96x96.png",
+      "src": "/icons/referee-fyi-96x96.png",
       "sizes": "96x96",
       "type": "image/png"
     },
     {
-      "src": "/icons/kv-144x144.png",
+      "src": "/icons/referee-fyi-144x144.png",
       "sizes": "144x144",
       "type": "image/png"
     },
     {
-      "src": "/icons/kv-168x168.png",
+      "src": "/icons/referee-fyi-168x168.png",
       "sizes": "168x168",
       "type": "image/png"
     },
     {
-      "src": "/icons/kv-192x192.png",
+      "src": "/icons/referee-fyi-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
+    },
+    {
+      "src": "/icons/referee-fyi-256x256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/referee-fyi-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/referee-fyi.svg",
+      "sizes": "512x512",
+      "type": "image/svg"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/screenshot1.png",
+      "sizes": "1080x2400",
+      "form_factor": "narrow",
+      "label": "The match list view for the 2023 VEX Robotics World Championship High School Division."
+    },
+    {
+      "src": "/screenshots/screenshot2.png",
+      "sizes": "1080x2400",
+      "form_factor": "narrow",
+      "label": "The match dialog, containing a general note and a major violation on a team."
+    },
+    {
+      "src": "/screenshots/screenshot3.png",
+      "sizes": "1080x2400",
+      "form_factor": "narrow",
+      "label": "The manage tab, which allows you to share the anomaly log with others."
+    },
+    {
+      "src": "/screenshots/screenshot4.png",
+      "sizes": "1080x2400",
+      "form_factor": "narrow",
+      "label": "The home screen, where you select relevant events."
     }
   ]
 }

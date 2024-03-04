@@ -36,7 +36,6 @@ export class EventIncidents implements DurableObject {
             .get("/csv", this.handleCSV.bind(this))
             .get("/json", this.handleJSON.bind(this))
             .post("/init", this.handleInit.bind(this))
-            .get("/incident", () => response({ success: true, data: "success" }))
             .put("/incident", this.handleAddIncident.bind(this))
             .patch("/incident", this.handleEditIncident.bind(this))
             .delete("/incident", this.handleDeleteIncident.bind(this))
@@ -195,7 +194,6 @@ export class EventIncidents implements DurableObject {
             data: incidents
         })
     };
-
 
     async handleAddIncident(request: Request) {
 

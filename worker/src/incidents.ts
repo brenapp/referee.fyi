@@ -34,6 +34,7 @@ export class EventIncidents implements DurableObject {
             .get("/join", this.handleWebsocket.bind(this))
             .get("/get", this.handleGet.bind(this))
             .get("/csv", this.handleCSV.bind(this))
+            .get("/json", this.handleJSON.bind(this))
             .post("/init", this.handleInit.bind(this))
             .get("/incident", () => response({ success: true, data: "success" }))
             .put("/incident", this.handleAddIncident.bind(this))
@@ -185,6 +186,15 @@ export class EventIncidents implements DurableObject {
         const response = new Response(output, { headers: corsHeaders });
         return response;
     }
+
+    async handleJSON() {
+        const incidents = await this.getAllIncidents();
+
+        return response({
+            success: true,
+            data: incidents
+        })
+    };
 
 
     async handleAddIncident(request: Request) {

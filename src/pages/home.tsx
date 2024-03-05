@@ -1,4 +1,4 @@
-import { Button, LinkButton } from "~components/Button";
+import { Button, IconButton, LinkButton } from "~components/Button";
 import { useRecentEvents } from "~utils/hooks/history";
 import { useCallback, useEffect, useState } from "react";
 import { Dialog, DialogHeader, DialogBody } from "~components/Dialog";
@@ -6,12 +6,18 @@ import Markdown from "react-markdown";
 import { version } from "../../package.json";
 import "./markdown.css";
 import DocumentDuplicateIcon from "@heroicons/react/24/outline/DocumentDuplicateIcon";
+import {
+  Cog8ToothIcon,
+  EllipsisVerticalIcon,
+} from "@heroicons/react/24/outline";
+import { Link } from "react-router-dom";
 
 export const HomePage: React.FC = () => {
   const { data: recentEvents } = useRecentEvents(5);
 
   const [markdownContent, setMarkdownContent] = useState<string>("");
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(true);
 
   useEffect(() => {
     const fetchMarkdownContent = async () => {
@@ -42,15 +48,21 @@ export const HomePage: React.FC = () => {
   return (
     <>
       <div>
-        <aside className="text-right">
+        <nav className="flex justify-between items-center gap-4 mt-4">
           <Button
             mode="primary"
-            className="text-right ml-auto w-max mt-4"
+            className="text-right w-max "
             onClick={() => setUpdateDialogOpen(true)}
           >
             Update Notes
           </Button>
-        </aside>
+          <Link to="/settings">
+            <IconButton
+              icon={<Cog8ToothIcon height={24} />}
+              className="bg-transparent"
+            />
+          </Link>
+        </nav>
 
         <section className="max-w-full">
           {recentEvents?.map((event) => (

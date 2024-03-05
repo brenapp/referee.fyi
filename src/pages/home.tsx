@@ -6,10 +6,7 @@ import Markdown from "react-markdown";
 import { version } from "../../package.json";
 import "./markdown.css";
 import DocumentDuplicateIcon from "@heroicons/react/24/outline/DocumentDuplicateIcon";
-import {
-  Cog8ToothIcon,
-  EllipsisVerticalIcon,
-} from "@heroicons/react/24/outline";
+import { Cog8ToothIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 
 export const HomePage: React.FC = () => {
@@ -17,7 +14,6 @@ export const HomePage: React.FC = () => {
 
   const [markdownContent, setMarkdownContent] = useState<string>("");
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(true);
 
   useEffect(() => {
     const fetchMarkdownContent = async () => {

@@ -48,7 +48,7 @@ router
 
         try {
             const body = await request.json() as CreateShareRequest;
-            const code = generateCode(2, 6);
+            const code = generateCode(3, 4);
 
             const kv: ShareMetadata = { ...body, code };
             await env.SHARES.put(`${sku}#${code}`, JSON.stringify(kv));

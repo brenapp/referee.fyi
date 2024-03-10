@@ -28,6 +28,10 @@
       "~share/*": ["../worker/types/*"]
     }
   },
-  "include": ["src", "node_modules/vite-plugin-pwa/client.d.ts"],
+  "include": [
+    "src",
+    "node_modules/vite-plugin-pwa/client.d.ts",
+    "src/types/barcode.d.ts"
+  ],
   "exclude": ["backend/**/*"]
 }

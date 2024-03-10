@@ -1,12 +1,157 @@
 import { FlagIcon, KeyIcon, UserCircleIcon } from "@heroicons/react/20/solid";
-import React, { useCallback, useEffect, useId, useMemo, useState } from "react";
+import { CameraIcon } from "@heroicons/react/24/outline";
+import React, {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "~components/Button";
+import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { Input } from "~components/Input";
 import { Error, Success } from "~components/Warning";
 import { joinShare } from "~utils/data/share";
 import { useShareCode, useShareData, useShareName } from "~utils/hooks/share";
 import { useCurrentEvent } from "~utils/hooks/state";
+import * as robotevents from "robotevents";
+
+function isValidCode(code: string) {
+  return code.match(/[A-Z0-9]{5}-[A-Z0-9]{5}/g);
+}
+
+type JoinInfo = {
+  sku: string;
+  code: string;
+};
+
+function extractJoinInformation(url: URL): JoinInfo | null {
+  if (!url.pathname.endsWith("join")) {
+    return null;
+  }
+
+  if (!url.searchParams.has("code")) {
+    return null;
+  }
+
+  const sku = url.pathname.split("/")[1];
+  const code = url.searchParams.get("code")!;
+
+  if (!isValidCode(code)) {
+    return null;
+  }
+
+  return { sku, code };
+}
+
+export type BarcodeReaderProps = {
+  onFoundCode: (info: JoinInfo) => void;
+};
+
+export const BarcodeReader: React.FC<BarcodeReaderProps> = ({
+  onFoundCode,
+}) => {
+  const [open, setOpen] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [error, setError] = useState<string>("");
+
+  const onScanButtonClick = useCallback(async () => {
+    setOpen(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+      });
+      setStream(stream);
+    } catch (e) {
+      setError(`Cannot access camera! ${e}`);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play();
+
+      const detector = new BarcodeDetector({ formats: ["qr_code"] });
+      const onLoadedMetadata = async () => {
+        if (!videoRef.current) return;
+        let canvas = document.createElement("canvas");
+
+        canvas.width = videoRef.current.videoWidth;
+        canvas.height = videoRef.current.videoHeight;
+        const context = canvas.getContext("2d");
+
+        const searchLoop = async () => {
+          if (!videoRef.current) return;
+          context?.drawImage(
+            videoRef.current,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+
+          const barcodes = await detector.detect(canvas);
+          for (const code of barcodes) {
+            try {
+              const url = new URL(code.rawValue);
+              const info = extractJoinInformation(url);
+              if (info) {
+                console.log(info);
+                onFoundCode(info);
+                setOpen(false);
+              }
+            } catch (e) {
+              continue;
+            }
+          }
+
+          requestAnimationFrame(searchLoop);
+        };
+
+        searchLoop();
+      };
+
+      videoRef.current.addEventListener("loadedmetadata", onLoadedMetadata);
+      return () =>
+        videoRef.current?.removeEventListener(
+          "loadedmetadata",
+          onLoadedMetadata
+        );
+    }
+  }, [stream, videoRef]);
+
+  if (
+    !navigator.mediaDevices ||
+    !navigator.mediaDevices.getUserMedia ||
+    !window.BarcodeDetector
+  ) {
+    return null;
+  }
+
+  return (
+    <>
+      <Button
+        mode="primary"
+        className="flex items-center gap-2 justify-center"
+        onClick={onScanButtonClick}
+      >
+        <CameraIcon height={24} />
+        <p>Scan</p>
+      </Button>
+      <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
+        <DialogHeader title="Scan QR Code" onClose={() => setOpen(false)} />
+        <DialogBody>
+          {error ? <Error message={error} /> : null}
+          <video ref={videoRef} className="w-full rounded-md"></video>
+        </DialogBody>
+      </Dialog>
+    </>
+  );
+};
 
 export const EventJoinPage: React.FC = () => {
   const [params] = useSearchParams();
@@ -50,6 +195,21 @@ export const EventJoinPage: React.FC = () => {
     []
   );
 
+  const onFoundCode = useCallback(async ({ sku, code }: JoinInfo) => {
+    if (sku === event?.sku) {
+      setCode(code);
+      return;
+    }
+
+    const otherEvent = await robotevents.events.get(sku);
+    if (!otherEvent) {
+      return;
+    }
+
+    navigate(`/${otherEvent.sku}/join?code=${code}`);
+    setCode(code);
+  }, []);
+
   const onClickJoin = useCallback(async () => {
     if (event && event.sku && code && isActiveCode) {
       await joinShare({ sku: event.sku, code });
@@ -77,14 +237,16 @@ export const EventJoinPage: React.FC = () => {
       </label>
       <label htmlFor={shareId}>
         <p>Enter Share Code</p>
-        <Input
-          id={shareId}
-          value={code ?? ""}
-          onChange={onChangeCode}
-          // aria-invalid={!isValidCode(code)}
-          maxLength={7}
-          className="text-6xl w-full font-mono text-center"
-        />
+        <div className="flex w-full gap-4">
+          <Input
+            id={shareId}
+            value={code ?? ""}
+            onChange={onChangeCode}
+            maxLength={7}
+            className="font-mono flex-1 text-center"
+          />
+          <BarcodeReader onFoundCode={onFoundCode} />
+        </div>
       </label>
       {isInvalidCode ? (
         <>
@@ -113,8 +275,9 @@ export const EventJoinPage: React.FC = () => {
             </p>
           </nav>
           <Button
+            mode="primary"
             onClick={onClickJoin}
-            className="w-full mt-4 bg-emerald-600 disabled:bg-zinc-400 text-center text-black"
+            className="w-full mt-4 disabled:bg-zinc-400 text-center"
           >
             Join
           </Button>

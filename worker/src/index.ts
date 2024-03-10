@@ -38,9 +38,7 @@ router
 
         try {
             const body = await request.json() as CreateShareRequest;
-
-            const base = crypto.randomUUID();
-            const code = base.slice(0, 3).toUpperCase() + "-" + base.slice(3, 6).toUpperCase();
+            const code = crypto.randomUUID();
 
             const kv: ShareMetadata = { ...body, code };
             await env.SHARES.put(`${sku}#${code}`, JSON.stringify(kv));

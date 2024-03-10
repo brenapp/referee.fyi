@@ -13,13 +13,23 @@ export const { preflight, corsify } = createCors({
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"]
 });
 
-async function logFailedRequests(request: Request, response: Response): Promise<Response> {
-    if (!response.ok) {
-        console.log(`${request.url},${await response.text()}`);
-    }
-    return response;
-};
+function generateCode(components: number, componentLength: number): string {
 
+    let output: string[] = [];
+
+    for (let i = 0; i < components; i++) {
+        const values = new Uint8Array(Math.ceil(componentLength / 2));
+        crypto.getRandomValues(values);
+
+        let string = "";
+        for (const value of values) {
+            string += value.toString(16).toUpperCase();
+        }
+
+        output.push(string);
+    };
+    return output.join("-");
+};
 
 const router = Router<IRequest, [Env]>();
 
@@ -38,9 +48,7 @@ router
 
         try {
             const body = await request.json() as CreateShareRequest;
-
-            const base = crypto.randomUUID();
-            const code = base.slice(0, 3).toUpperCase() + "-" + base.slice(3, 6).toUpperCase();
+            const code = generateCode(2, 6);
 
             const kv: ShareMetadata = { ...body, code };
             await env.SHARES.put(`${sku}#${code}`, JSON.stringify(kv));

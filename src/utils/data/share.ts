@@ -188,6 +188,11 @@ export class ShareConnection extends EventEmitter {
   users: string[] = [];
 
   public setup(sku: string, code: string, user: Omit<ShareUser, "id">) {
+
+    if (!this.owner) {
+      this.fetchInfo();
+    };
+
     if (
       this.sku === sku &&
       this.code === code &&
@@ -219,6 +224,18 @@ export class ShareConnection extends EventEmitter {
 
     return newCode;
   }
+
+  async fetchInfo() {
+    const url = new URL(`/api/share/${this.sku}/${this.code}/get`, URL_BASE);
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      return;
+    }
+
+    const json: WebSocketServerShareInfoMessage = await response.json();
+    this.owner = json.data.owner;
+  };
 
   async connect(user: Omit<ShareUser, "id">) {
     const id = await ShareConnection.getUserId();

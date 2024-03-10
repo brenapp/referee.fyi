@@ -19,7 +19,7 @@ import { useCurrentEvent } from "~utils/hooks/state";
 import * as robotevents from "robotevents";
 
 function isValidCode(code: string) {
-  return code.match(/[A-Z0-9]{5}-[A-Z0-9]{5}/g);
+  return !!code.match(/[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}/g);
 }
 
 type JoinInfo = {
@@ -136,7 +136,7 @@ export const BarcodeReader: React.FC<BarcodeReaderProps> = ({
     <>
       <Button
         mode="primary"
-        className="flex items-center gap-2 justify-center"
+        className="flex items-center gap-2 justify-center w-24"
         onClick={onScanButtonClick}
       >
         <CameraIcon height={24} />
@@ -169,8 +169,11 @@ export const EventJoinPage: React.FC = () => {
 
   const { data: shareData, isSuccess: isShareSuccess } = useShareData(
     event?.sku,
-    code
+    code,
+    { enabled: isValidCode(code) }
   );
+
+  const isCodeValidForm = useMemo(() => isValidCode(code), [code]);
 
   const isActiveCode = useMemo(
     () => (isShareSuccess && shareData?.success) ?? false,
@@ -185,12 +188,7 @@ export const EventJoinPage: React.FC = () => {
   const onChangeCode: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
       let value = event.target.value.toUpperCase();
-
-      if (value.length === 3) {
-        value += "-";
-      }
-
-      setCode(value.slice(0, 7));
+      setCode(value);
     },
     []
   );
@@ -242,13 +240,12 @@ export const EventJoinPage: React.FC = () => {
             id={shareId}
             value={code ?? ""}
             onChange={onChangeCode}
-            maxLength={7}
             className="font-mono flex-1 text-center"
           />
           <BarcodeReader onFoundCode={onFoundCode} />
         </div>
       </label>
-      {isInvalidCode ? (
+      {isInvalidCode && isCodeValidForm ? (
         <>
           <Error message="Invalid Code!" />
         </>

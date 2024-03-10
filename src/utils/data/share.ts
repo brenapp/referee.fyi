@@ -23,9 +23,7 @@ import { toast } from "~components/Toast";
 import { queryClient } from "./query";
 import { EventEmitter } from "events";
 
-const URL_BASE = import.meta.env.DEV
-  ? "http://localhost:8787"
-  : "https://referee-fyi-share.bren.workers.dev";
+const URL_BASE = import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER ?? "https://share.referee.fyi";
 
 export async function getShareName() {
   return (await get<string>("share_name")) ?? "";

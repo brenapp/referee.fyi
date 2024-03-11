@@ -131,7 +131,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
               ) : null}
             </div>
             <Button
-              className="w-full font-mono text-5xl mt-4 text-center"
+              className="w-full font-mono text-4xl mt-4 text-center"
               onClick={onClickShareCode}
             >
               {shareCode}

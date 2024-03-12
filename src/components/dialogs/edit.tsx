@@ -1,4 +1,3 @@
-import { ArrowLeftOnRectangleIcon } from "@heroicons/react/20/solid";
 import React, { ReactNode, useCallback, useMemo, useState } from "react";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { Button } from "~components/Button";
@@ -103,7 +102,7 @@ export const RevisionList: React.FC<RevisionListProps> = ({ incident }) => {
       <h2 className="font-bold">Revision History</h2>
       <p>Last to Edit: {lastToEdit}</p>
 
-      {incident.revision.history.map((log, i) => (
+      {incident.revision.history.map((log) => (
         <details className="p-2 bg-zinc-800 mt-2 rounded-md">
           <summary>
             <p className="inline-flex ml-2 items-center justify-between w-max">

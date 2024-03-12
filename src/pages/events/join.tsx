@@ -1,8 +1,13 @@
-import { FlagIcon, KeyIcon, UserCircleIcon } from "@heroicons/react/20/solid";
-import { CameraIcon } from "@heroicons/react/24/outline";
+import {
+  FlagIcon,
+  KeyIcon,
+  UserCircleIcon,
+  CameraIcon,
+  XMarkIcon,
+} from "@heroicons/react/20/solid";
 import React, { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Button } from "~components/Button";
+import { Button, IconButton } from "~components/Button";
 import { Input } from "~components/Input";
 import { Error, Success } from "~components/Warning";
 import { joinShare } from "~utils/data/share";
@@ -46,6 +51,13 @@ export const EventJoinPage: React.FC = () => {
   const onChangeCode: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
       let value = event.target.value.toUpperCase();
+
+      // - insertion
+      if (value.length > code.length) {
+        if (value.length === 4) value += "-";
+        if (value.length === 9) value += "-";
+      }
+
       setCode(value);
     },
     []
@@ -94,12 +106,19 @@ export const EventJoinPage: React.FC = () => {
       <label htmlFor={shareId}>
         <p>Enter Share Code</p>
         <div className="flex w-full gap-4">
-          <Input
-            id={shareId}
-            value={code ?? ""}
-            onChange={onChangeCode}
-            className="font-mono flex-1 text-center"
-          />
+          <div className="relative flex-1">
+            <Input
+              id={shareId}
+              value={code ?? ""}
+              onChange={onChangeCode}
+              className="font-mono w-full"
+            />
+            <IconButton
+              icon={<XMarkIcon height={20} />}
+              onClick={() => setCode("")}
+              className="absolute top-0 bottom-0 right-0 bg-transparent"
+            />
+          </div>
           <BarcodeReader onFoundCode={onFoundCode}>
             {(props) => (
               <Button
@@ -107,7 +126,7 @@ export const EventJoinPage: React.FC = () => {
                 className="flex items-center gap-2 justify-center w-24"
                 {...props}
               >
-                <CameraIcon height={24} />
+                <CameraIcon height={20} />
                 <p>Scan</p>
               </Button>
             )}

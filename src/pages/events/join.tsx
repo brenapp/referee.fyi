@@ -1,157 +1,21 @@
-import { FlagIcon, KeyIcon, UserCircleIcon } from "@heroicons/react/20/solid";
-import { CameraIcon } from "@heroicons/react/24/outline";
-import React, {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import {
+  FlagIcon,
+  KeyIcon,
+  UserCircleIcon,
+  CameraIcon,
+  XMarkIcon,
+  ChatBubbleLeftEllipsisIcon,
+} from "@heroicons/react/20/solid";
+import React, { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Button } from "~components/Button";
-import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
+import { Button, IconButton } from "~components/Button";
 import { Input } from "~components/Input";
 import { Error, Success } from "~components/Warning";
 import { joinShare } from "~utils/data/share";
 import { useShareCode, useShareData, useShareName } from "~utils/hooks/share";
 import { useCurrentEvent } from "~utils/hooks/state";
 import * as robotevents from "robotevents";
-
-function isValidCode(code: string) {
-  return !!code.match(/[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}/g);
-}
-
-type JoinInfo = {
-  sku: string;
-  code: string;
-};
-
-function extractJoinInformation(url: URL): JoinInfo | null {
-  if (!url.pathname.endsWith("join")) {
-    return null;
-  }
-
-  if (!url.searchParams.has("code")) {
-    return null;
-  }
-
-  const sku = url.pathname.split("/")[1];
-  const code = url.searchParams.get("code")!;
-
-  if (!isValidCode(code)) {
-    return null;
-  }
-
-  return { sku, code };
-}
-
-export type BarcodeReaderProps = {
-  onFoundCode: (info: JoinInfo) => void;
-};
-
-export const BarcodeReader: React.FC<BarcodeReaderProps> = ({
-  onFoundCode,
-}) => {
-  const [open, setOpen] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
-  const [error, setError] = useState<string>("");
-
-  const onScanButtonClick = useCallback(async () => {
-    setOpen(true);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-      });
-      setStream(stream);
-    } catch (e) {
-      setError(`Cannot access camera! ${e}`);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
-      videoRef.current.play();
-
-      const detector = new BarcodeDetector({ formats: ["qr_code"] });
-      const onLoadedMetadata = async () => {
-        if (!videoRef.current) return;
-        let canvas = document.createElement("canvas");
-
-        canvas.width = videoRef.current.videoWidth;
-        canvas.height = videoRef.current.videoHeight;
-        const context = canvas.getContext("2d");
-
-        const searchLoop = async () => {
-          if (!videoRef.current) return;
-          context?.drawImage(
-            videoRef.current,
-            0,
-            0,
-            canvas.width,
-            canvas.height
-          );
-
-          const barcodes = await detector.detect(canvas);
-          for (const code of barcodes) {
-            try {
-              const url = new URL(code.rawValue);
-              const info = extractJoinInformation(url);
-              if (info) {
-                console.log(info);
-                onFoundCode(info);
-                setOpen(false);
-              }
-            } catch (e) {
-              continue;
-            }
-          }
-
-          requestAnimationFrame(searchLoop);
-        };
-
-        searchLoop();
-      };
-
-      videoRef.current.addEventListener("loadedmetadata", onLoadedMetadata);
-      return () =>
-        videoRef.current?.removeEventListener(
-          "loadedmetadata",
-          onLoadedMetadata
-        );
-    }
-  }, [stream, videoRef]);
-
-  if (
-    !navigator.mediaDevices ||
-    !navigator.mediaDevices.getUserMedia ||
-    !window.BarcodeDetector
-  ) {
-    return null;
-  }
-
-  return (
-    <>
-      <Button
-        mode="primary"
-        className="flex items-center gap-2 justify-center w-24"
-        onClick={onScanButtonClick}
-      >
-        <CameraIcon height={24} />
-        <p>Scan</p>
-      </Button>
-      <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
-        <DialogHeader title="Scan QR Code" onClose={() => setOpen(false)} />
-        <DialogBody>
-          {error ? <Error message={error} /> : null}
-          <video ref={videoRef} className="w-full rounded-md"></video>
-        </DialogBody>
-      </Dialog>
-    </>
-  );
-};
+import { BarcodeReader, JoinInfo, isValidCode } from "pages/dialogs/qrcode";
 
 export const EventJoinPage: React.FC = () => {
   const [params] = useSearchParams();
@@ -188,6 +52,13 @@ export const EventJoinPage: React.FC = () => {
   const onChangeCode: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
       let value = event.target.value.toUpperCase();
+
+      // - insertion
+      if (value.length > code.length) {
+        if (value.length === 4) value += "-";
+        if (value.length === 9) value += "-";
+      }
+
       setCode(value);
     },
     []
@@ -236,13 +107,31 @@ export const EventJoinPage: React.FC = () => {
       <label htmlFor={shareId}>
         <p>Enter Share Code</p>
         <div className="flex w-full gap-4">
-          <Input
-            id={shareId}
-            value={code ?? ""}
-            onChange={onChangeCode}
-            className="font-mono flex-1 text-center"
-          />
-          <BarcodeReader onFoundCode={onFoundCode} />
+          <div className="relative flex-1">
+            <Input
+              id={shareId}
+              value={code ?? ""}
+              onChange={onChangeCode}
+              className="font-mono w-full"
+            />
+            <IconButton
+              icon={<XMarkIcon height={20} />}
+              onClick={() => setCode("")}
+              className="absolute top-0 bottom-0 right-0 bg-transparent"
+            />
+          </div>
+          <BarcodeReader onFoundCode={onFoundCode}>
+            {(props) => (
+              <Button
+                mode="normal"
+                className="flex items-center gap-2 justify-center w-24"
+                {...props}
+              >
+                <CameraIcon height={20} />
+                <p>Scan</p>
+              </Button>
+            )}
+          </BarcodeReader>
         </div>
       </label>
       {isInvalidCode && isCodeValidForm ? (
@@ -274,8 +163,9 @@ export const EventJoinPage: React.FC = () => {
           <Button
             mode="primary"
             onClick={onClickJoin}
-            className="w-full mt-4 disabled:bg-zinc-400 text-center"
+            className="w-full mt-4 disabled:bg-zinc-400 text-center flex justify-center items-center gap-2"
           >
+            <ChatBubbleLeftEllipsisIcon height={20} />
             Join
           </Button>
         </>

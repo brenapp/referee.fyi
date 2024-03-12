@@ -9,7 +9,7 @@ import {
   editServerIncident,
   getShareName,
 } from "./share";
-import { IncidentOutcome, Incident as ServerIncident } from "~share/api";
+import { EditIncident, IncidentOutcome, Revision, Incident as ServerIncident } from "~share/api";
 
 export type Incident = Omit<ServerIncident, "id">;
 export type IncidentWithID = ServerIncident;
@@ -41,9 +41,9 @@ export function packIncident(incident: RichIncident): Incident {
     ...incident,
     match: incident.match
       ? {
-          id: incident.match.id,
-          name: incident.match.name,
-        }
+        id: incident.match.id,
+        name: incident.match.name,
+      }
       : undefined,
     team: incident.team?.number,
     rules: incident.rules.map((rule) => rule.rule),
@@ -134,9 +134,10 @@ export async function newIncident(
   return id;
 }
 
+
 export async function editIncident(
   id: string,
-  incident: Omit<IncidentWithID, "team" | "event">,
+  incident: EditIncident,
   updateRemote: boolean = true
 ) {
   const current = await getIncident(id);
@@ -146,13 +147,36 @@ export async function editIncident(
     return;
   }
 
+  // Annoying type coercion to support the strongly typed revision array
+  const changes: Revision[] = [];
+  for (const [key, currentValue] of Object.entries(current)) {
+    if (key === "revision" || key === "team" || key === "event") continue;
+
+    const newValue = incident[key as keyof EditIncident];
+
+    if (JSON.stringify(currentValue) != JSON.stringify(newValue)) {
+      changes.push({
+        property: key,
+        old: currentValue,
+        new: newValue
+      } as Revision);
+    };
+
+  };
+
   const revision = current.revision ?? {
     count: 0,
     user: { type: "client", name },
+    history: []
   };
 
   revision.count += 1;
   revision.user = { type: "client", name };
+  revision.history.push({
+    user: { type: "client", name },
+    date: new Date(),
+    changes
+  });
 
   const updatedIncident = { ...current, ...incident, revision };
   await setIncident(id, updatedIncident);

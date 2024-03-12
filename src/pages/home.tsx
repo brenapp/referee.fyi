@@ -6,11 +6,14 @@ import Markdown from "react-markdown";
 import { version } from "../../package.json";
 import "./markdown.css";
 import DocumentDuplicateIcon from "@heroicons/react/24/outline/DocumentDuplicateIcon";
-import { Cog8ToothIcon } from "@heroicons/react/24/outline";
-import { Link } from "react-router-dom";
+import { CameraIcon, Cog8ToothIcon } from "@heroicons/react/24/outline";
+import { Link, useNavigate } from "react-router-dom";
+import { BarcodeReader, JoinInfo } from "./dialogs/qrcode";
+import * as robotevents from "robotevents";
 
 export const HomePage: React.FC = () => {
   const { data: recentEvents } = useRecentEvents(5);
+  const navigate = useNavigate();
 
   const [markdownContent, setMarkdownContent] = useState<string>("");
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
@@ -37,6 +40,16 @@ export const HomePage: React.FC = () => {
     localStorage.setItem("version", version);
   }, []);
 
+  const onFoundJoinCode = useCallback(async ({ sku, code }: JoinInfo) => {
+    const event = await robotevents.events.get(sku);
+
+    if (!event) {
+      return;
+    }
+
+    navigate(`/${sku}/join?code=${code}`);
+  }, []);
+
   const onClickCopyBuild = useCallback(() => {
     navigator.clipboard.writeText(__REFEREE_FYI_VERSION__);
   }, []);
@@ -44,14 +57,25 @@ export const HomePage: React.FC = () => {
   return (
     <>
       <div>
-        <nav className="flex justify-between items-center gap-4 mt-4">
-          <Button
-            mode="primary"
-            className="text-right w-max "
-            onClick={() => setUpdateDialogOpen(true)}
-          >
-            Update Notes
-          </Button>
+        <nav className="flex items-center gap-4 mt-4">
+          <div className="flex-1">
+            <Button
+              mode="primary"
+              className="text-right w-max"
+              onClick={() => setUpdateDialogOpen(true)}
+            >
+              Update Notes
+            </Button>
+          </div>
+          <BarcodeReader onFoundCode={onFoundJoinCode}>
+            {(props) => (
+              <IconButton
+                icon={<CameraIcon height={24} />}
+                className="bg-transparent"
+                {...props}
+              />
+            )}
+          </BarcodeReader>
           <Link to="/settings">
             <IconButton
               icon={<Cog8ToothIcon height={24} />}

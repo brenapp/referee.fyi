@@ -4,6 +4,7 @@ import {
   UserCircleIcon,
   CameraIcon,
   XMarkIcon,
+  ChatBubbleLeftEllipsisIcon,
 } from "@heroicons/react/20/solid";
 import React, { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -122,7 +123,7 @@ export const EventJoinPage: React.FC = () => {
           <BarcodeReader onFoundCode={onFoundCode}>
             {(props) => (
               <Button
-                mode="primary"
+                mode="normal"
                 className="flex items-center gap-2 justify-center w-24"
                 {...props}
               >
@@ -162,8 +163,9 @@ export const EventJoinPage: React.FC = () => {
           <Button
             mode="primary"
             onClick={onClickJoin}
-            className="w-full mt-4 disabled:bg-zinc-400 text-center"
+            className="w-full mt-4 disabled:bg-zinc-400 text-center flex justify-center items-center gap-2"
           >
+            <ChatBubbleLeftEllipsisIcon height={20} />
             Join
           </Button>
         </>

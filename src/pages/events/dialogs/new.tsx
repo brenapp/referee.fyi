@@ -253,6 +253,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       incident.revision = {
         count: 0,
         user: { type: "client", name: shareName },
+        history: [],
       };
 
       const packed = packIncident(incident);

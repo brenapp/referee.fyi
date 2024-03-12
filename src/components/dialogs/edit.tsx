@@ -1,14 +1,131 @@
-import { useCallback, useMemo, useState } from "react";
+import { ArrowLeftOnRectangleIcon } from "@heroicons/react/20/solid";
+import React, { ReactNode, useCallback, useMemo, useState } from "react";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { Button } from "~components/Button";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { Input, RulesMultiSelect, Select, TextArea } from "~components/Input";
 import { toast } from "~components/Toast";
+import { Revision, WebSocketSender } from "~share/api";
 import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
 import { useDeleteIncident, useEditIncident } from "~utils/hooks/incident";
 import { useEventMatchesForTeam, useEventTeam } from "~utils/hooks/robotevents";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 import { useCurrentEvent } from "~utils/hooks/state";
+
+function userString(user?: WebSocketSender) {
+  if (!user) {
+    return null;
+  }
+
+  switch (user.type) {
+    case "server": {
+      return "Server";
+    }
+    case "client": {
+      return user.name;
+    }
+  }
+}
+
+function timeAgo(date: Date) {
+  const formatter = new Intl.RelativeTimeFormat("en");
+  const ranges = {
+    years: 3600 * 24 * 365,
+    months: 3600 * 24 * 30,
+    weeks: 3600 * 24 * 7,
+    days: 3600 * 24,
+    hours: 3600,
+    minutes: 60,
+    seconds: 1,
+  };
+  const secondsElapsed = (date.getTime() - Date.now()) / 1000;
+  for (const [key, value] of Object.entries(ranges)) {
+    if (value < Math.abs(secondsElapsed)) {
+      const delta = secondsElapsed / value;
+      return formatter.format(
+        Math.round(delta),
+        key as Intl.RelativeTimeFormatUnit
+      );
+    }
+  }
+  return formatter.format(-1, "seconds");
+}
+
+export const RevisionEntry: React.FC<{ revision: Revision }> = ({
+  revision,
+}) => {
+  const values: [ReactNode, ReactNode] = useMemo(() => {
+    switch (revision.property) {
+      case "time": {
+        return [revision.old.toLocaleString(), revision.new.toLocaleString()];
+      }
+      case "match": {
+        return [
+          revision.old?.name ?? "No Match",
+          revision.new?.name ?? "No Match",
+        ];
+      }
+      case "rules": {
+        return [revision.old.join(" "), revision.new.join(" ")];
+      }
+      case "notes":
+      case "outcome":
+      case "division":
+      case "id": {
+        return [revision.old, revision.new];
+      }
+    }
+  }, [revision]);
+
+  return (
+    <p>
+      {revision.property}: {values[0]} to {values[1]}
+    </p>
+  );
+};
+
+export type RevisionListProps = {
+  incident: IncidentWithID;
+};
+
+export const RevisionList: React.FC<RevisionListProps> = ({ incident }) => {
+  const lastToEdit = useMemo(
+    () => userString(incident.revision?.user),
+    [incident.revision?.user]
+  );
+
+  if (!incident.revision) {
+    return null;
+  }
+
+  return (
+    <section className="mt-2">
+      <h2 className="font-bold">Revision History</h2>
+      <p>Last to Edit: {lastToEdit}</p>
+
+      {incident.revision.history.map((log, i) => (
+        <details className="p-2 bg-zinc-800 mt-2 rounded-md">
+          <summary>
+            <p className="inline-flex ml-2 items-center justify-between w-max">
+              <span className="flex-1">{userString(log.user)}</span>,&nbsp;
+              <span>{timeAgo(log.date)}</span>
+            </p>
+          </summary>
+          <ul className="list-disc">
+            {log.changes.map((revision) => (
+              <li key={revision.property} className="ml-4">
+                <RevisionEntry revision={revision} />
+              </li>
+            ))}
+            {log.changes.length < 1 ? (
+              <li className="ml-4">No Changes Made</li>
+            ) : null}
+          </ul>
+        </details>
+      ))}
+    </section>
+  );
+};
 
 export type EditIncidentDialogProps = {
   open: boolean;
@@ -24,21 +141,6 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
   const [incident, setIncident] = useState(initialIncident);
   const { mutateAsync: deleteIncident } = useDeleteIncident();
   const { mutateAsync: editIncident } = useEditIncident();
-
-  const mostRecentUser = useMemo(() => {
-    if (!incident.revision) {
-      return null;
-    }
-
-    switch (incident.revision.user.type) {
-      case "client": {
-        return incident.revision.user.name;
-      }
-      case "server": {
-        return "System";
-      }
-    }
-  }, [incident]);
 
   const { data: eventData } = useCurrentEvent();
   const teamData = useEventTeam(eventData, incident.team);
@@ -198,13 +300,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             onChange={onChangeIncidentNotes}
           />
         </label>
-        {incident.revision ? (
-          <section className="p-2">
-            <h3 className="font-bold">Revision History</h3>
-            <p>Edit Count: {incident.revision.count}</p>
-            <p>Last User: {mostRecentUser}</p>
-          </section>
-        ) : null}
+        <RevisionList incident={incident} />
       </DialogBody>
       <nav className="flex gap-4 p-2">
         <Button mode="dangerous" onClick={onClickDelete}>

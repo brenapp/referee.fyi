@@ -26,7 +26,8 @@ function userString(user?: WebSocketSender) {
   }
 }
 
-function timeAgo(date: Date) {
+function timeAgo(input: Date) {
+  const date = new Date(input)
   const formatter = new Intl.RelativeTimeFormat("en");
   const ranges = {
     years: 3600 * 24 * 365,

@@ -69,19 +69,16 @@ export const HomePage: React.FC = () => {
           </div>
           <BarcodeReader onFoundCode={onFoundJoinCode}>
             {(props) => (
-              <IconButton
-                icon={<CameraIcon height={24} />}
-                className="bg-transparent"
-                {...props}
-              />
+              <Button className="flex items-center gap-2 w-min" {...props}>
+                <CameraIcon height={24} />
+                <p>Scan</p>
+              </Button>
             )}
           </BarcodeReader>
-          <Link to="/settings">
-            <IconButton
-              icon={<Cog8ToothIcon height={24} />}
-              className="bg-transparent"
-            />
-          </Link>
+          <LinkButton to="/settings" className="flex items-center gap-2">
+            <Cog8ToothIcon height={24} />
+            <p>Settings</p>
+          </LinkButton>
         </nav>
 
         <section className="max-w-full">

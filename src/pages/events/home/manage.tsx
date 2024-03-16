@@ -73,7 +73,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
     [shareCode]
   );
 
-  const onClickShareCode = useCallback(async () => {
+  const onClickShareQR = useCallback(async () => {
     const shareData = {
       url: joinURL.href,
     };
@@ -82,6 +82,14 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
       navigator.share(shareData);
     } else if (navigator.clipboard) {
       navigator.clipboard.writeText(joinURL.href);
+      toast({ type: "info", message: "Copied to Clipboard!" });
+    }
+  }, [shareCode, event.sku, joinURL]);
+
+  const onClickShareCode = useCallback(async () => {
+    if (navigator.clipboard && shareCode) {
+      navigator.clipboard.writeText(shareCode);
+      toast({ type: "info", message: "Copied to Clipboard!" });
     }
   }, [shareCode, event.sku, joinURL]);
 
@@ -115,7 +123,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
                   "mt-2",
                   showShareCode ? "blur-none" : "blur-xl"
                 )}
-                onClick={onClickShareCode}
+                onClick={onClickShareQR}
               />
               {!showShareCode ? (
                 <section className="absolute top-0 left-0 right-0 bottom-0 p-4 flex items-center">
@@ -155,6 +163,16 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
                 </span>
               </p>
             </nav>
+            <section className="mt-4">
+              <h2 className="font-bold">Active Users</h2>
+              <ul>
+                {activeUsers.map((u) => (
+                  <li key={u} className="ml-6 list-disc">
+                    {u}
+                  </li>
+                ))}
+              </ul>
+            </section>
           </section>
         ) : (
           <div className="mt-2">
@@ -197,16 +215,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
           <ArrowRightIcon height={20} className="text-emerald-400" />
         </LinkButton>
       </section>
-      <section className="mt-4">
-        <h2 className="font-bold">Active Users</h2>
-        <ul>
-          {activeUsers.map((u) => (
-            <li key={u} className="ml-6 list-disc">
-              {u}
-            </li>
-          ))}
-        </ul>
-      </section>
+
       <section className="mt-4 relative">
         <h2 className="font-bold">Delete Event Data</h2>
         <p>

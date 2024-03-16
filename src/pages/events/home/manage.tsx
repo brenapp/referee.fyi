@@ -16,7 +16,6 @@ import {
 import {
   ArrowRightIcon,
   FlagIcon,
-  KeyIcon,
   UserCircleIcon,
 } from "@heroicons/react/20/solid";
 import { Dialog, DialogBody } from "~components/Dialog";
@@ -143,10 +142,6 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
               {isOwner ? "Stop Sharing" : "Leave Share"}
             </Button>
             <nav className="flex gap-2 justify-evenly mt-4">
-              <p className="text-lg">
-                <KeyIcon height={20} className="inline mr-2" />
-                <span className="text-zinc-400">{connection.owner}</span>
-              </p>
               <p className="text-lg">
                 <FlagIcon height={20} className="inline mr-2" />
                 <span className="text-zinc-400">

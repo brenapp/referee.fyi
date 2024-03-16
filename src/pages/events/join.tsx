@@ -1,6 +1,5 @@
 import {
   FlagIcon,
-  KeyIcon,
   UserCircleIcon,
   CameraIcon,
   XMarkIcon,
@@ -143,10 +142,6 @@ export const EventJoinPage: React.FC = () => {
         <>
           <Success message="Active Group!"></Success>
           <nav className="flex gap-2 justify-evenly">
-            <p className="text-lg">
-              <KeyIcon height={20} className="inline mr-2" />
-              <span className="text-zinc-400">{shareData.data.data.owner}</span>
-            </p>
             <p className="text-lg">
               <FlagIcon height={20} className="inline mr-2" />
               <span className="text-zinc-400">

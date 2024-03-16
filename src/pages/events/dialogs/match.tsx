@@ -209,7 +209,7 @@ const TeamFlagButton: React.FC<TeamFlagButtonProps> = ({
         mode="primary"
         {...props}
         className={twMerge(
-          "flex items-center w-min flex-shrink-0 mt-2",
+          "flex items-center w-min flex-shrink-0 my-2",
           props.className
         )}
         onClick={() => setOpen(true)}

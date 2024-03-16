@@ -6,7 +6,7 @@ import Markdown from "react-markdown";
 import { version } from "../../package.json";
 import "./markdown.css";
 import DocumentDuplicateIcon from "@heroicons/react/24/outline/DocumentDuplicateIcon";
-import { CameraIcon, Cog8ToothIcon } from "@heroicons/react/24/outline";
+import { CameraIcon, Cog8ToothIcon } from "@heroicons/react/20/solid";
 import { useNavigate } from "react-router-dom";
 import { BarcodeReader, JoinInfo } from "./dialogs/qrcode";
 import * as robotevents from "robotevents";
@@ -70,13 +70,13 @@ export const HomePage: React.FC = () => {
           <BarcodeReader onFoundCode={onFoundJoinCode}>
             {(props) => (
               <Button className="flex items-center gap-2 w-min" {...props}>
-                <CameraIcon height={24} />
+                <CameraIcon height={20} />
                 <p>Scan</p>
               </Button>
             )}
           </BarcodeReader>
           <LinkButton to="/settings" className="flex items-center gap-2">
-            <Cog8ToothIcon height={24} />
+            <Cog8ToothIcon height={20} />
             <p>Settings</p>
           </LinkButton>
         </nav>

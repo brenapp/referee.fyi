@@ -197,6 +197,16 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
           <ArrowRightIcon height={20} className="text-emerald-400" />
         </LinkButton>
       </section>
+      <section className="mt-4">
+        <h2 className="font-bold">Active Users</h2>
+        <ul>
+          {activeUsers.map((u) => (
+            <li key={u} className="ml-6 list-disc">
+              {u}
+            </li>
+          ))}
+        </ul>
+      </section>
       <section className="mt-4 relative">
         <h2 className="font-bold">Delete Event Data</h2>
         <p>

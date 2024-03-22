@@ -12,13 +12,23 @@ export type Invitation = {
     sku: string;
     instance_secret: string;
     user: string;
+    from: string;
     admin: boolean;
+    accepted: boolean;
 };
 
-type AuthenticatedRequest = IRequest & {
+export type User = {
+    key: string;
+    name: string;
+};
+
+export type SignedRequest = IRequest & {
     key: CryptoKey;
     keyHex: string;
 };
+export type AuthenticatedRequest = SignedRequest & {
+    user: User;
+}
 
 export type RequestHasInvitation = AuthenticatedRequest & {
     invitation: Invitation;
@@ -28,5 +38,6 @@ export type RequestHasInvitation = AuthenticatedRequest & {
 export interface Env {
     SHARES: KVNamespace;
     INVITATIONS: KVNamespace;
+    USERS: KVNamespace;
     INCIDENTS: DurableObjectNamespace;
 };

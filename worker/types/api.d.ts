@@ -20,8 +20,12 @@ export type ShareResponseFailure = {
 
 export type ShareResponse<T> = ShareResponseSuccess<T> | ShareResponseFailure;
 
+// POST /api/user
+export type APIRegisterUserResponseBody = {
+    user: User;
+}
+
 // POST /api/:sku/create
-export type APICreateRequestBody = {};
 export type APICreateResponseBody = {
     invitation: string;
     admin: true
@@ -31,7 +35,11 @@ export type APICreateResponseBody = {
 export type APIGetInvitationResponseBody = {
     invitation: string;
     admin: boolean;
+    from: User;
 }
+
+// PUT /:sku/accept
+export type APIPutInvitationAcceptResponseBody = {}
 
 // PUT /:sku/invite
 export type APIPutInviteResponseBody = {};

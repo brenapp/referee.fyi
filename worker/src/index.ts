@@ -1,8 +1,8 @@
 import { IRequest, Router, createCors, error, json, withParams } from "itty-router";
 import { response } from "./utils";
 
-import { Env, Invitation, ShareInstance, AuthenticatedRequest, RequestHasInvitation } from "../types/server";
-import { APICreateResponseBody, APIGetInvitationResponseBody, APIPutInviteResponseBody } from "../types/api";
+import { Env, Invitation, ShareInstance, AuthenticatedRequest, RequestHasInvitation, SignedRequest, User } from "../types/server";
+import { APICreateResponseBody, APIGetInvitationResponseBody, APIPutInvitationAcceptResponseBody, APIPutInviteResponseBody, APIRegisterUserResponseBody } from "../types/api";
 
 
 export const { preflight, corsify } = createCors({
@@ -95,7 +95,6 @@ const verifySignature = async (request: IRequest & Request) => {
     const message = [
         dateToVerify.toISOString(),
         request.url,
-        await request.text()
     ].join("");
 
     const encoder = new TextEncoder();
@@ -125,47 +124,45 @@ const verifySignature = async (request: IRequest & Request) => {
     request.keyHex = publicKeyRaw.slice(KEY_PREFIX.length);
 };
 
-const verifyInvitation = async (request: AuthenticatedRequest, env: Env) => {
+const verifyUser = async (request: SignedRequest, env: Env) => {
 
-    const sku = request.params.sku;
-    const invitationId = request.query.invitation;
+    const user: User | null = await env.USERS.get(request.keyHex, "json");
 
-    if (typeof invitationId !== "string") {
+    if (!user) {
         return response({
             success: false,
             reason: "bad_request",
-            details: "Must specify invitation and user."
+            details: "You must register to perform this action."
         });
     };
 
-    const key = `${request}`;
+    request.user = user;
+};
+
+const verifyInvitation = async (request: AuthenticatedRequest, env: Env) => {
+
+    const sku = request.params.sku;
+
+    const key = `${request.keyHex}#${sku}`;
     const invitation: Invitation | null = await env.INVITATIONS.get(key, "json");
 
     if (!invitation) {
         return response({
             success: false,
             reason: "incorrect_code",
-            details: "Invalid invitation code."
+            details: "User does not have an active invitation for that event."
         });
     }
 
-    if (invitation.user != request.keyHex) {
+    if (!invitation.accepted) {
         return response({
             success: false,
-            reason: "incorrect_code",
-            details: "Invitation is not valid for this user."
-        })
-    };
-
-    if (invitation.sku !== sku) {
-        return response({
-            success: false,
-            reason: "incorrect_code",
-            details: "Invitation is not valid for this event"
+            reason: "bad_request",
+            details: "Cannot perform this action until this invitation is accepted."
         })
     }
 
-    const instance: ShareInstance | null = await env.SHARES.get(key, "json");
+    const instance: ShareInstance | null = await env.SHARES.get(`${sku}#${invitation.instance_secret}`, "json");
 
     if (!instance) {
         return response({
@@ -185,7 +182,31 @@ router
     .all("*", preflight)
     .all("*", withParams)
     .all("*", verifySignature)
-    .get("/", () => response({ success: true, data: "ok" }))
+    .post("/api/user", async (request: AuthenticatedRequest, env: Env) => {
+
+        const name = request.query.name;
+        if (typeof name !== "string") {
+            return response({
+                success: false,
+                reason: "bad_request",
+                details: "Must specify name when registering "
+            });
+        }
+
+        const user: User = {
+            key: request.keyHex,
+            name
+        }
+
+        await env.USERS.put(request.keyHex, JSON.stringify(user));
+
+        return response<APIRegisterUserResponseBody>({
+            success: true,
+            data: { user }
+        });
+
+    })
+    .all("*", verifyUser)
     .post("/api/:sku/create", async (request: AuthenticatedRequest, env: Env) => {
 
         const sku = request.params.sku;
@@ -211,7 +232,9 @@ router
             admin: true,
             user: request.keyHex,
             sku,
-            instance_secret: secret
+            instance_secret: secret,
+            accepted: true,
+            from: request.keyHex
         }
 
         instance.invitations.push(invitation.id);
@@ -248,21 +271,68 @@ router
             });
         };
 
+        const from: User | null = await env.USERS.get(invitation.from, "json");
+
+        if (!from) {
+            return response({
+                success: false,
+                reason: "server_error",
+                details: "Could not get information about inviter."
+            });
+        }
+
         return response<APIGetInvitationResponseBody>({
             success: true,
             data: {
                 invitation: invitation.id,
-                admin: invitation.admin
+                admin: invitation.admin,
+                from
             }
         });
     })
+    .put("/api/:sku/accept", async (request: AuthenticatedRequest, env: Env) => {
 
+        const sku = request.params.sku;
+        const id = request.query.invitation;
 
+        if (typeof id !== "string") {
+            return response({
+                success: false,
+                reason: "bad_request",
+                details: "Must specify invitation to accept."
+            })
+        }
 
+        const invitation: Invitation | null = await env.INVITATIONS.get(`${request.keyHex}#${sku}`, "json");
 
+        if (!invitation) {
+            return response({
+                success: false,
+                reason: "incorrect_code",
+                details: "No invitation exists for this user and event"
+            })
+        }
 
-    .all("/api/:sku+", verifyInvitation)
-    .put("/api/:sku/invite", async (request: RequestHasInvitation, env: Env) => {
+        if (invitation.id !== id) {
+            return response({
+                success: false,
+                reason: "incorrect_code",
+                details: "A newer invitation is available."
+            });
+        }
+
+        invitation.accepted = true;
+
+        await env.INVITATIONS.put(`${request.keyHex}#${sku}`, JSON.stringify(invitation));
+
+        return response<APIPutInvitationAcceptResponseBody>({
+            success: true,
+            data: {}
+        })
+
+    })
+    .all("/api/:sku/manage/*", verifyInvitation)
+    .put("/api/:sku/manage/invite", async (request: RequestHasInvitation, env: Env) => {
 
         const sku = request.params.sku;
         const user = request.query.user;
@@ -285,13 +355,26 @@ router
             });
         };
 
+
         const newInvitation: Invitation = {
             id: crypto.randomUUID(),
             admin: false,
             user,
             sku,
-            instance_secret: invitation.instance_secret
+            instance_secret: invitation.instance_secret,
+            accepted: false,
+            from: request.keyHex
         }
+
+        const currentInvitation: Invitation | null = await env.INVITATIONS.get(`${newInvitation.user}#${newInvitation.sku}`, "json");
+
+        if (currentInvitation) {
+            return response({
+                success: false,
+                reason: "bad_request",
+                details: "User must leave current invitation for this event first."
+            });
+        };
 
         const instance = request.instance;
         instance.invitations.push(newInvitation.id);
@@ -303,7 +386,7 @@ router
             data: {}
         });
     })
-    .delete("/api/:sku/invite", async (request: RequestHasInvitation, env: Env) => {
+    .delete("/api/:sku/manage/invite", async (request: RequestHasInvitation, env: Env) => {
         const user = request.query.user;
 
         if (typeof user !== "string") {
@@ -342,7 +425,14 @@ router
         await env.INVITATIONS.delete(`${user}#${invitation.sku}`);
         await env.SHARES.put(`${invitation.sku}#${invitation.instance_secret}`, JSON.stringify(instance));
     })
+    .all("/api/:sku/:path+", async (request: RequestHasInvitation, env: Env) => {
 
+        console.log(request.instance);
+
+        const id = env.INCIDENTS.idFromName(`${request.instance.sku}#${request.instance.secret}`);
+        const object = await env.INCIDENTS.get(id);
+
+    })
     .all("*", () => response({
         success: false,
         reason: "bad_request",

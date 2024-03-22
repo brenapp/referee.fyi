@@ -1,3 +1,5 @@
+import type { IRequest } from "itty-router";
+
 export type ShareInstance = {
     sku: string;
     admins: string[];
@@ -16,6 +18,11 @@ export type Invitation = {
 type AuthenticatedRequest = IRequest & {
     key: CryptoKey;
     keyHex: string;
+};
+
+export type RequestHasInvitation = AuthenticatedRequest & {
+    invitation: Invitation;
+    instance: ShareInstance;
 };
 
 export interface Env {

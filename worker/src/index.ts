@@ -1,8 +1,8 @@
 import { IRequest, Router, createCors, error, json, withParams } from "itty-router";
 import { response } from "./utils";
 
-import { Env, Invitation, ShareInstance, AuthenticatedRequest } from "../types/server";
-import { APICreateResponseBody } from "../types/api";
+import { Env, Invitation, ShareInstance, AuthenticatedRequest, RequestHasInvitation } from "../types/server";
+import { APICreateResponseBody, APIGetInvitationResponseBody, APIPutInviteResponseBody } from "../types/api";
 
 
 export const { preflight, corsify } = createCors({
@@ -125,6 +125,60 @@ const verifySignature = async (request: IRequest & Request) => {
     request.keyHex = publicKeyRaw.slice(KEY_PREFIX.length);
 };
 
+const verifyInvitation = async (request: AuthenticatedRequest, env: Env) => {
+
+    const sku = request.params.sku;
+    const invitationId = request.query.invitation;
+
+    if (typeof invitationId !== "string") {
+        return response({
+            success: false,
+            reason: "bad_request",
+            details: "Must specify invitation and user."
+        });
+    };
+
+    const key = `${request}`;
+    const invitation: Invitation | null = await env.INVITATIONS.get(key, "json");
+
+    if (!invitation) {
+        return response({
+            success: false,
+            reason: "incorrect_code",
+            details: "Invalid invitation code."
+        });
+    }
+
+    if (invitation.user != request.keyHex) {
+        return response({
+            success: false,
+            reason: "incorrect_code",
+            details: "Invitation is not valid for this user."
+        })
+    };
+
+    if (invitation.sku !== sku) {
+        return response({
+            success: false,
+            reason: "incorrect_code",
+            details: "Invitation is not valid for this event"
+        })
+    }
+
+    const instance: ShareInstance | null = await env.SHARES.get(key, "json");
+
+    if (!instance) {
+        return response({
+            success: false,
+            reason: "server_error",
+            details: "Could not get share instance."
+        })
+    }
+
+    request.invitation = invitation;
+    request.instance = instance;
+};
+
 const router = Router<IRequest, [Env]>();
 
 router
@@ -132,7 +186,7 @@ router
     .all("*", withParams)
     .all("*", verifySignature)
     .get("/", () => response({ success: true, data: "ok" }))
-    .post("/api/share/create/:sku", async (request: AuthenticatedRequest, env: Env) => {
+    .post("/api/:sku/create", async (request: AuthenticatedRequest, env: Env) => {
 
         const sku = request.params.sku;
         if (!sku) {
@@ -167,11 +221,128 @@ router
         return response<APICreateResponseBody>({
             success: true,
             data: {
-                invitation: invitation.id
+                invitation: invitation.id,
+                admin: true,
             }
         })
 
     })
+    .get("/api/:sku/invitation", async (request: AuthenticatedRequest, env: Env) => {
+        const sku = request.params.sku;
+        if (!sku) {
+            return response({
+                success: false,
+                reason: "bad_request",
+                details: "Must specify SKU to get invitation for."
+            })
+        };
+
+        const key = `${request.keyHex}#${request.params.sku}`
+        const invitation: Invitation | null = await env.INVITATIONS.get(key, "json");
+
+        if (!invitation) {
+            return response({
+                success: false,
+                reason: "incorrect_code",
+                details: "No invitation for that user and that event."
+            });
+        };
+
+        return response<APIGetInvitationResponseBody>({
+            success: true,
+            data: {
+                invitation: invitation.id,
+                admin: invitation.admin
+            }
+        });
+    })
+
+
+
+
+
+    .all("/api/:sku+", verifyInvitation)
+    .put("/api/:sku/invite", async (request: RequestHasInvitation, env: Env) => {
+
+        const sku = request.params.sku;
+        const user = request.query.user;
+
+        if (typeof user !== "string") {
+            return response({
+                success: false,
+                reason: "bad_request",
+                details: "Must specify user to invite."
+            })
+        };
+
+        const invitation = request.invitation;
+
+        if (!invitation.admin) {
+            return response({
+                success: false,
+                reason: "incorrect_code",
+                details: "This action requires admin permissions."
+            });
+        };
+
+        const newInvitation: Invitation = {
+            id: crypto.randomUUID(),
+            admin: false,
+            user,
+            sku,
+            instance_secret: invitation.instance_secret
+        }
+
+        const instance = request.instance;
+        instance.invitations.push(newInvitation.id);
+        await env.SHARES.put(`${sku}#${invitation.instance_secret}`, JSON.stringify(instance));
+        await env.INVITATIONS.put(`${newInvitation.user}#${newInvitation.sku}`, JSON.stringify(newInvitation));
+
+        return response<APIPutInviteResponseBody>({
+            success: true,
+            data: {}
+        });
+    })
+    .delete("/api/:sku/invite", async (request: RequestHasInvitation, env: Env) => {
+        const user = request.query.user;
+
+        if (typeof user !== "string") {
+            return response({
+                success: false,
+                reason: "bad_request",
+                details: "Must specify user to uninvite."
+            })
+        };
+
+        const invitation = request.invitation;
+
+        if (!invitation.admin && user !== request.keyHex) {
+            return response({
+                success: false,
+                reason: "incorrect_code",
+                details: "This action requires admin permissions."
+            });
+        };
+
+        const userInvitation: Invitation | null = await env.INVITATIONS.get(`${user}#${invitation.sku}`, "json");
+
+        if (!userInvitation) {
+            return response({
+                success: false,
+                reason: "bad_request",
+                details: "Could not find user invitation."
+            })
+        };
+
+        const instance = request.instance;
+
+        const index = instance.invitations.findIndex(i => i === userInvitation.id);
+        instance.invitations.splice(index, 1);
+
+        await env.INVITATIONS.delete(`${user}#${invitation.sku}`);
+        await env.SHARES.put(`${invitation.sku}#${invitation.instance_secret}`, JSON.stringify(instance));
+    })
+
     .all("*", () => response({
         success: false,
         reason: "bad_request",

@@ -261,7 +261,8 @@ export class EventIncidents implements DurableObject {
         if (!incident.revision) {
             incident.revision = {
                 count: 1,
-                user: sender
+                user: sender,
+                history: []
             }
         }
 

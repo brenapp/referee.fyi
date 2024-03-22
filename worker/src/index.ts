@@ -23,7 +23,7 @@ function generateCode(components: number, componentLength: number): string {
 
         let string = "";
         for (const value of values) {
-            string += value.toString(16).toUpperCase();
+            string += value.toString(16).padStart(2, '0').toUpperCase();
         }
 
         output.push(string);

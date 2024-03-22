@@ -20,13 +20,13 @@ export type ShareResponseFailure = {
 
 export type ShareResponse<T> = ShareResponseSuccess<T> | ShareResponseFailure;
 
-// /api/create/:sku
-export type CreateShareRequest = Omit<ShareMetadata, "code">;
-export type CreateShareResponse = Pick<ShareMetadata, "code">
+// POST /api/create/:sku
+export type APICreateRequestBody = {};
+export type APICreateResponseBody = {
+    invitation: string;
+};
 
-// PATCH /api/share/:sku:/:code:/incident
-export type EditIncidentResponse = Exclude<Incident["revision"], undefined>;
-export type ShareGetDataResponse = WebSocketMessageData["server_share_info"];
+
 
 // WebSocket communications
 

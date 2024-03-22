@@ -2,6 +2,7 @@ import { Router } from "itty-router"
 import type { ShareUser, EventIncidents as EventIncidentsData, Incident } from "../types/EventIncidents"
 import { corsHeaders, response } from "./utils"
 import type { ShareMetadata, WebSocketMessage, WebSocketPayload, WebSocketPeerMessage, WebSocketSender, WebSocketServerShareInfoMessage } from "../types/api";
+import { AuthenticatedRequest } from "../types/server";
 
 export type SessionClient = {
     user: ShareUser;
@@ -141,7 +142,7 @@ export class EventIncidents implements DurableObject {
         return { ...message, sender, date: new Date().toISOString() }
     };
 
-    async fetch(request: Request) {
+    async fetch(request: AuthenticatedRequest) {
         return this.router.handle(request);
     }
 

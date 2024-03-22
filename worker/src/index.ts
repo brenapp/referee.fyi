@@ -1,100 +1,176 @@
-import { IRequest, Router, createCors, error, json } from "itty-router";
+import { IRequest, Router, createCors, error, json, withParams } from "itty-router";
 import { response } from "./utils";
-import { CreateShareRequest, CreateShareResponse, ShareMetadata } from "../types/api";
-import { EventIncidents } from "../types/EventIncidents";
 
-interface Env {
-    SHARES: KVNamespace;
-    INCIDENTS: DurableObjectNamespace
-}
+import { Env, Invitation, ShareInstance, AuthenticatedRequest } from "../types/server";
+import { APICreateResponseBody } from "../types/api";
+
 
 export const { preflight, corsify } = createCors({
     origins: ["*"],
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"]
 });
 
-function generateCode(components: number, componentLength: number): string {
+const KEY_PREFIX = "ECDSA:";
+const KEY_ALGORITHM = { name: "ECDSA", namedCurve: "P-384" }
 
-    let output: string[] = [];
+function ingestHex(hex: string): Uint8Array | null {
+    const keyBuffer = new Uint8Array(hex.length / 2);
 
-    for (let i = 0; i < components; i++) {
-        const values = new Uint8Array(Math.ceil(componentLength / 2));
-        crypto.getRandomValues(values);
+    for (let i = 0; i < hex.length; i += 2) {
+        const value = Number.parseInt(hex[i] + hex[i + 1], 16);
 
-        let string = "";
-        for (const value of values) {
-            string += value.toString(16).padStart(2, '0').toUpperCase();
+        if (!Number.isFinite(value)) {
+            return null;
         }
 
-        output.push(string);
+        keyBuffer[i / 2] = value;
     };
-    return output.join("-");
+
+    return keyBuffer;
+};
+
+const verifySignature = async (request: IRequest & Request) => {
+    const now = new Date();
+
+    const signature = request.headers.get("X-Referee-Signature");
+    const publicKeyRaw = request.headers.get("X-Referee-Public-Key");
+    const isoDate = request.headers.get("X-Referee-Date");
+
+    if (!signature || !publicKeyRaw || !isoDate) {
+        return response({
+            success: false,
+            reason: "incorrect_code",
+            details: "Request must contain signature, public key, and date headers."
+        });
+    };
+
+    const dateToVerify = new Date(isoDate);
+
+    const skew = Math.abs(now.getTime() - dateToVerify.getTime());
+    if (skew > 60 * 1000) {
+        return response({
+            success: false,
+            reason: "bad_request",
+            details: `Skew between reported date (${dateToVerify.toISOString()}) and actual date (${now.toISOString()}) too large.`
+        })
+    };
+
+    if (!publicKeyRaw.startsWith(KEY_PREFIX)) {
+        return response({
+            success: false,
+            reason: "bad_request",
+            details: "Incorrect public key form."
+        })
+    };
+
+    const keyBuffer = ingestHex(publicKeyRaw.slice(KEY_PREFIX.length));
+
+    if (!keyBuffer) {
+        return response({
+            success: false,
+            reason: "bad_request",
+            details: "Invalid public key."
+        });
+    }
+
+    let key: CryptoKey | null = null;
+    try {
+        key = await crypto.subtle.importKey("raw", keyBuffer, KEY_ALGORITHM, true, ["verify"]);
+    } catch (e) {
+        return response({
+            success: false,
+            reason: "bad_request",
+            details: "Invalid public key."
+        });
+    }
+
+    if (!key) {
+        return response({
+            success: false,
+            reason: "bad_request",
+            details: "Invalid public key."
+        });
+    };
+
+    const message = [
+        dateToVerify.toISOString(),
+        request.url,
+        await request.text()
+    ].join("");
+
+    const encoder = new TextEncoder();
+
+    const messageBuffer = encoder.encode(message);
+    const signatureBuffer = ingestHex(signature);
+
+    if (!signatureBuffer) {
+        return response({
+            success: false,
+            reason: "incorrect_code",
+            details: "Invalid signature."
+        })
+    }
+
+    const valid = await crypto.subtle.verify({ ...KEY_ALGORITHM, hash: "SHA-256" }, key, signatureBuffer, messageBuffer)
+
+    if (!valid) {
+        return response({
+            success: false,
+            reason: "incorrect_code",
+            details: "Invalid signature."
+        })
+    };
+
+    request.key = key;
+    request.keyHex = publicKeyRaw.slice(KEY_PREFIX.length);
 };
 
 const router = Router<IRequest, [Env]>();
 
 router
     .all("*", preflight)
-    .post("/api/create/:sku", async (request, env: Env) => {
-        const sku = request.params.sku;
+    .all("*", withParams)
+    .all("*", verifySignature)
+    .get("/", () => response({ success: true, data: "ok" }))
+    .post("/api/share/create/:sku", async (request: AuthenticatedRequest, env: Env) => {
 
+        const sku = request.params.sku;
         if (!sku) {
             return response({
                 success: false,
                 reason: "bad_request",
-                details: "Must supply SKU"
-            })
-        };
-
-        try {
-            const body = await request.json() as CreateShareRequest;
-            const code = generateCode(3, 4);
-
-            const kv: ShareMetadata = { ...body, code };
-            await env.SHARES.put(`${sku}#${code}`, JSON.stringify(kv));
-
-            // Initialize the Durable Object
-            const id = env.INCIDENTS.idFromName(`${sku}#${code}`);
-            const share = env.INCIDENTS.get(id);
-
-            await share.fetch(`https://share/init`, {
-                method: "POST",
-                body: JSON.stringify(body)
+                details: "Must specify event sku"
             });
-
-            return response<CreateShareResponse>({
-                success: true,
-                data: { code }
-            });
-
-        } catch (e) {
-            return response({
-                success: false,
-                reason: "server_error",
-                details: `${e}`
-            })
-        };
-    })
-    .all("/api/share/:sku/:code/:path+", async (request, env: Env) => {
-        const sku = request.params.sku;
-        const code = request.params.code;
-
-        const entry = await env.SHARES.get(`${sku}#${code}`);
-
-        if (!entry) {
-            return response({
-                success: false,
-                reason: "incorrect_code",
-                details: "No share exists with that SKU and code!"
-            })
         }
 
-        const id = env.INCIDENTS.idFromName(`${sku}#${code}`);
-        const share = env.INCIDENTS.get(id);
+        const secret = crypto.randomUUID();
 
-        const search = new URL(request.url).search;
+        const instance: ShareInstance = {
+            secret,
+            admins: [request.keyHex],
+            invitations: [],
+            sku
+        }
 
-        return share.fetch(`https://share/${request.params.path}${search}`, request)
+        const invitation: Invitation = {
+            id: crypto.randomUUID(),
+            admin: true,
+            user: request.keyHex,
+            sku,
+            instance_secret: secret
+        }
+
+        instance.invitations.push(invitation.id);
+        await env.INVITATIONS.put(`${request.keyHex}#${sku}`, JSON.stringify(invitation));
+        await env.SHARES.put(`${sku}#${secret}`, JSON.stringify(instance));
+
+        return response<APICreateResponseBody>({
+            success: true,
+            data: {
+                invitation: invitation.id
+            }
+        })
+
     })
     .all("*", () => response({
         success: false,

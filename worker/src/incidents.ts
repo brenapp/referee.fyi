@@ -20,7 +20,6 @@ export class EventIncidents implements DurableObject {
     clients: SessionClient[] = [];
     state: DurableObjectState;
     owner?: ShareUser;
-    trusted?: string[];
 
     sku: string = "";
     code: string = "";
@@ -151,7 +150,6 @@ export class EventIncidents implements DurableObject {
         this.sku = data.sku;
         this.code = data.code;
         this.owner = data.owner;
-        this.trusted = data.trusted;
     };
 
     async handleGet() {
@@ -204,7 +202,7 @@ export class EventIncidents implements DurableObject {
         const client = this.clients.find(client => client.user.id === userId);
 
         const sender: WebSocketSender = client ? {
-            type: "client", name: client.user.name
+            type: "client", name: client.user.name, id: client.user.id
         } : { type: "server" };
 
         const incident = await request.json<Incident>();
@@ -247,7 +245,7 @@ export class EventIncidents implements DurableObject {
         const currentIncident = await this.getIncident(incident.id);
 
         const sender: WebSocketSender = client ? {
-            type: "client", name: client.user.name
+            type: "client", name: client.user.name, id: client.user.id
         } : { type: "server" };
 
         const currentRevision = currentIncident?.revision?.count ?? 0;
@@ -292,7 +290,7 @@ export class EventIncidents implements DurableObject {
         const client = this.clients.find(client => client.user.id === userId);
 
         const sender: WebSocketSender = client ? {
-            type: "client", name: client.user.name
+            type: "client", name: client.user.name, id: client.user.id
         } : { type: "server" };
 
         const id = params.get("id");
@@ -374,22 +372,22 @@ export class EventIncidents implements DurableObject {
                     case "add_incident": {
                         const incident = data.incident;
                         await this.addIncident(incident);
-                        this.broadcast({ type: "add_incident", incident }, { type: "client", name: client.user.name });
+                        this.broadcast({ type: "add_incident", incident }, { type: "client", name: client.user.name, id: client.user.id });
                         break;
                     }
                     case "update_incident": {
                         const incident = data.incident;
                         await this.editIncident(incident);
-                        this.broadcast({ type: "update_incident", incident }, { type: "client", name: client.user.name });
+                        this.broadcast({ type: "update_incident", incident }, { type: "client", name: client.user.name, id: client.user.id });
                         break;
                     }
                     case "remove_incident": {
                         await this.deleteIncident(data.id);
-                        this.broadcast({ type: "remove_incident", id: data.id }, { type: "client", name: client.user.name });
+                        this.broadcast({ type: "remove_incident", id: data.id }, { type: "client", name: client.user.name, id: client.user.id });
                         break;
                     }
                     case "message": {
-                        this.broadcast({ type: "message", message: data.message }, { type: "client", name: client.user.name })
+                        this.broadcast({ type: "message", message: data.message }, { type: "client", name: client.user.name, id: client.user.id })
                         break;
                     }
 

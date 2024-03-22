@@ -20,12 +20,25 @@ export type ShareResponseFailure = {
 
 export type ShareResponse<T> = ShareResponseSuccess<T> | ShareResponseFailure;
 
-// POST /api/create/:sku
+// POST /api/:sku/create
 export type APICreateRequestBody = {};
 export type APICreateResponseBody = {
     invitation: string;
+    admin: true
 };
 
+// GET /:sku/invitation
+export type APIGetInvitationResponseBody = {
+    invitation: string;
+    admin: boolean;
+}
+
+// PUT /:sku/invite
+export type APIPutInviteResponseBody = {};
+
+
+// DELETE /:sku/invite
+export type APIDeleteInviteResponseBody = {};
 
 
 // WebSocket communications
@@ -84,7 +97,7 @@ export type WebSocketMessageData = {
 };
 
 
-export type WebSocketSender = { type: "server" } | { type: "client", name: string }
+export type WebSocketSender = { type: "server" } | { type: "client", name: string, id: string }
 export type WebSocketPayload<T extends WebSocketMessage> = T & {
     date: string; // ISO string
     sender: WebSocketSender;

@@ -25,15 +25,15 @@ export const HomePage: React.FC = () => {
       }
     };
 
-    fetchMarkdownContent();
+    fetchMarkdownContent().then(() => {
+      const userVersion = localStorage.getItem("version");
 
-    const userVersion = localStorage.getItem("version");
+      if (userVersion && userVersion !== version) {
+        setUpdateDialogOpen(true);
+      }
 
-    if (userVersion && userVersion !== version) {
-      setUpdateDialogOpen(true);
-    }
-
-    localStorage.setItem("version", version);
+      localStorage.setItem("version", version);
+    });
   }, []);
 
   const onClickCopyBuild = useCallback(() => {

@@ -2,7 +2,7 @@ import { IRequest, Router, createCors, error, json, withParams } from "itty-rout
 import { response } from "./utils";
 
 import { Env, Invitation, ShareInstance, AuthenticatedRequest, RequestHasInvitation, SignedRequest, User } from "../types/server";
-import { APICreateResponseBody, APIGetInvitationResponseBody, APIPutInvitationAcceptResponseBody, APIPutInviteResponseBody, APIRegisterUserResponseBody } from "../types/api";
+import { APIPostCreateResponseBody, APIGetInvitationResponseBody, APIPutInvitationAcceptResponseBody, APIPutInviteResponseBody, APIRegisterUserResponseBody, EventIncidentsInitData } from "../types/api";
 
 
 export const { preflight, corsify } = createCors({
@@ -241,11 +241,23 @@ router
         await env.INVITATIONS.put(`${request.keyHex}#${sku}`, JSON.stringify(invitation));
         await env.SHARES.put(`${sku}#${secret}`, JSON.stringify(instance));
 
-        return response<APICreateResponseBody>({
+        const id = env.INCIDENTS.idFromName(secret);
+        const share = env.INCIDENTS.get(id);
+
+        const body: EventIncidentsInitData = { sku };
+
+        await share.fetch(`https://share/init`, {
+            method: "POST",
+            body: JSON.stringify(body)
+        });
+
+        return response<APIPostCreateResponseBody>({
             success: true,
             data: {
-                invitation: invitation.id,
-                admin: true,
+                id: invitation.id,
+                admin: invitation.admin,
+                accepted: invitation.accepted,
+                from: request.user,
             }
         })
 
@@ -284,9 +296,10 @@ router
         return response<APIGetInvitationResponseBody>({
             success: true,
             data: {
-                invitation: invitation.id,
+                id: invitation.id,
                 admin: invitation.admin,
-                from
+                from,
+                accepted: invitation.accepted
             }
         });
     })
@@ -321,18 +334,33 @@ router
             });
         }
 
+        const from: User | null = await env.USERS.get(invitation.from, "json");
+
+        if (!from) {
+            return response({
+                success: false,
+                reason: "server_error",
+                details: "Could not get information about inviter."
+            });
+        }
+
         invitation.accepted = true;
 
         await env.INVITATIONS.put(`${request.keyHex}#${sku}`, JSON.stringify(invitation));
 
         return response<APIPutInvitationAcceptResponseBody>({
             success: true,
-            data: {}
+            data: {
+                id: invitation.id,
+                accepted: invitation.accepted,
+                admin: invitation.admin,
+                from: from
+            }
         })
 
     })
-    .all("/api/:sku/manage/*", verifyInvitation)
-    .put("/api/:sku/manage/invite", async (request: RequestHasInvitation, env: Env) => {
+    .all("/api/:sku/*", verifyInvitation)
+    .put("/api/:sku/invite", async (request: RequestHasInvitation, env: Env) => {
 
         const sku = request.params.sku;
         const user = request.query.user;
@@ -386,7 +414,7 @@ router
             data: {}
         });
     })
-    .delete("/api/:sku/manage/invite", async (request: RequestHasInvitation, env: Env) => {
+    .delete("/api/:sku/invite", async (request: RequestHasInvitation, env: Env) => {
         const user = request.query.user;
 
         if (typeof user !== "string") {
@@ -417,6 +445,15 @@ router
             })
         };
 
+        // Admins can't be uninvited
+        if (userInvitation.admin) {
+            return response({
+                success: false,
+                reason: "bad_request",
+                details: "Admins cannot be uninvited."
+            })
+        };
+
         const instance = request.instance;
 
         const index = instance.invitations.findIndex(i => i === userInvitation.id);
@@ -426,12 +463,11 @@ router
         await env.SHARES.put(`${invitation.sku}#${invitation.instance_secret}`, JSON.stringify(instance));
     })
     .all("/api/:sku/:path+", async (request: RequestHasInvitation, env: Env) => {
-
-        console.log(request.instance);
-
         const id = env.INCIDENTS.idFromName(`${request.instance.sku}#${request.instance.secret}`);
         const object = await env.INCIDENTS.get(id);
 
+        const search = new URL(request.url).search;
+        return object.fetch(`https://share/${request.params.path}${search}`, request);
     })
     .all("*", () => response({
         success: false,

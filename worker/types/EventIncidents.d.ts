@@ -46,15 +46,13 @@ export type ShareUser = {
     name: string;
 }
 
-export type EventIncidents = {
+export type EventIncidentsData = {
     sku: string;
-    owner?: ShareUser;
     incidents: Incident[];
     deleted: string[];
-}
+};
 
-export type ShareMetadata = {
+
+export type EventIncidentsInitData = {
     sku: string;
-    code: string;
-    owner: ShareUser;
 };

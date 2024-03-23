@@ -29,7 +29,7 @@ import {
 import { toast } from "~components/Toast";
 import { queryClient } from "./query";
 import { EventEmitter } from "events";
-import { exportPublicKey, getKeyPair, getSignRequestHeaders } from "./crypto";
+import { exportPublicKey, getKeyPair, getSignRequestHeaders, signWebSocketConnectionURL } from "./crypto";
 
 const URL_BASE = import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER ?? "https://share.referee.fyi";
 
@@ -39,8 +39,8 @@ export async function getShareName() {
 
 export async function signedFetch(input: RequestInfo | URL, init?: RequestInit) {
 
-  const url = input instanceof Request ? input.url : input.toString();
-  const signatureHeaders = await getSignRequestHeaders(url);
+  const request = new Request(input, init);
+  const signatureHeaders = await getSignRequestHeaders(request);
 
   let headers: Headers;
   if (init?.headers) {
@@ -53,9 +53,8 @@ export async function signedFetch(input: RequestInfo | URL, init?: RequestInit) 
 
   signatureHeaders.forEach((value, key) => headers.set(key, value));
 
-  return fetch(input, {
-    ...init,
-    headers,
+  return fetch(request, {
+    headers
   });
 };
 
@@ -84,7 +83,7 @@ export async function createInstance(sku: string): Promise<ShareResponse<APIPost
 
   if (body.success) {
     await set(`invitation_${sku}`, body.data);
-    queryClient.invalidateQueries({ queryKey: [`invitation_${sku}`] });
+    queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
   };
 
   return body;
@@ -109,7 +108,7 @@ export async function getEventInvitation(sku: string): Promise<UserInvitation | 
   }
 
   await set(`invitation_${sku}`, body.data);
-  queryClient.invalidateQueries({ queryKey: [`invitation_${sku}`] });
+  queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
 
   return body.data;
 };
@@ -128,12 +127,12 @@ export async function verifyEventInvitation(sku: string): Promise<UserInvitation
 
   if (!body.success && body.reason !== "server_error") {
     await del(`invitation_${sku}`);
-    queryClient.invalidateQueries({ queryKey: [`invitation_${sku}`] });
+    queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
   }
 
   if (body.success) {
     await set(`invitation_${sku}`, body.data);
-    queryClient.invalidateQueries({ queryKey: [`invitation_${sku}`] });
+    queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
     return body.data
   }
 
@@ -153,12 +152,12 @@ export async function acceptEventInvitation(sku: string, invitationId: string): 
 
   if (!body.success && body.reason !== "server_error") {
     await del(`invitation_${sku}`);
-    queryClient.invalidateQueries({ queryKey: [`invitation_${sku}`] });
+    queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
   }
 
   if (body.success) {
     await set(`invitation_${sku}`, body.data);
-    queryClient.invalidateQueries({ queryKey: [`invitation_${sku}`] });
+    queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
   }
 
   return body;
@@ -268,6 +267,10 @@ export class ShareConnection extends EventEmitter {
 
     const invitation = await getEventInvitation(sku);
 
+    if (!invitation) {
+      return;
+    };
+
     if (
       this.sku === sku &&
       this.invitation &&
@@ -305,7 +308,7 @@ export class ShareConnection extends EventEmitter {
   async connect(user: ShareUser) {
     const { name, id } = await ShareConnection.getSender();
 
-    const url = new URL(`/api/share/${this.sku}/join`, URL_BASE);
+    const url = new URL(`/api/${this.sku}/join`, URL_BASE);
 
     if (url.protocol === "https:") {
       url.protocol = "wss:";
@@ -316,7 +319,10 @@ export class ShareConnection extends EventEmitter {
     url.searchParams.set("id", id);
     url.searchParams.set("name", name);
 
-    this.ws = new WebSocket(url);
+
+    const signedURL = await signWebSocketConnectionURL(url);
+
+    this.ws = new WebSocket(signedURL);
     this.ws.onmessage = this.handleMessage.bind(this);
 
     this.ws.onopen = () => this.emit("connect");

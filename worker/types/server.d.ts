@@ -25,6 +25,7 @@ export type User = {
 export type SignedRequest = IRequest & {
     key: CryptoKey;
     keyHex: string;
+    payload: string;
 };
 export type AuthenticatedRequest = SignedRequest & {
     user: User;

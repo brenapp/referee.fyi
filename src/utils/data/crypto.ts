@@ -41,17 +41,27 @@ export async function getKeyPair(): Promise<CryptoKeyPair> {
     return { publicKey, privateKey };
 };
 
-export async function getSignRequestHeaders(url: string): Promise<Headers> {
+export async function getSignRequestHeaders(request: Request): Promise<Headers> {
 
     const keys = await getKeyPair();
 
     const headers = new Headers();
     const date = new Date();
 
+    const canonicalURL = new URL(request.url);
+    canonicalURL.searchParams.delete("signature");
+    canonicalURL.searchParams.delete("publickey");
+    canonicalURL.searchParams.delete("signature_date");
+    canonicalURL.searchParams.sort();
+
     const message = [
         date.toISOString(),
-        url,
-    ].join("");
+        request.method,
+        canonicalURL.host,
+        canonicalURL.pathname,
+        canonicalURL.search,
+    ].join("\n");
+
 
     const messageBuffer = new TextEncoder().encode(message);
     const signature = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, keys.privateKey, messageBuffer);
@@ -63,4 +73,17 @@ export async function getSignRequestHeaders(url: string): Promise<Headers> {
     headers.set("X-Referee-Signature", hexSignature);
 
     return headers;
+};
+
+export async function signWebSocketConnectionURL(url: URL): Promise<URL> {
+    const request = new Request(url);
+    console.log(request);
+    const headers = await getSignRequestHeaders(request);
+
+    const output = new URL(url);
+    output.searchParams.set("signature_date", headers.get("X-Referee-Date")!);
+    output.searchParams.set("publickey", headers.get("X-Referee-Public-Key")!);
+    output.searchParams.set("signature", headers.get("X-Referee-Signature")!);
+
+    return output;
 };

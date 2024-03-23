@@ -32,11 +32,11 @@ function ingestHex(hex: string): Uint8Array | null {
 const verifySignature = async (request: IRequest & Request) => {
     const now = new Date();
 
-    const signature = request.headers.get("X-Referee-Signature");
-    const publicKeyRaw = request.headers.get("X-Referee-Public-Key");
-    const isoDate = request.headers.get("X-Referee-Date");
+    const signature = request.headers.get("X-Referee-Signature") ?? request.query.signature;
+    const publicKeyRaw = request.headers.get("X-Referee-Public-Key") ?? request.query.publickey;
+    const isoDate = request.headers.get("X-Referee-Date") ?? request.query.signature_date;
 
-    if (!signature || !publicKeyRaw || !isoDate) {
+    if (typeof signature !== "string" || typeof publicKeyRaw !== "string" || typeof isoDate !== "string") {
         return response({
             success: false,
             reason: "incorrect_code",
@@ -92,10 +92,19 @@ const verifySignature = async (request: IRequest & Request) => {
         });
     };
 
+    const canonicalURL = new URL(request.url);
+    canonicalURL.searchParams.delete("signature");
+    canonicalURL.searchParams.delete("publickey");
+    canonicalURL.searchParams.delete("signature_date");
+    canonicalURL.searchParams.sort();
+
     const message = [
         dateToVerify.toISOString(),
-        request.url,
-    ].join("");
+        request.method,
+        canonicalURL.host,
+        canonicalURL.pathname,
+        canonicalURL.search,
+    ].join("\n");
 
     const encoder = new TextEncoder();
 
@@ -464,10 +473,11 @@ router
     })
     .all("/api/:sku/:path+", async (request: RequestHasInvitation, env: Env) => {
         const id = env.INCIDENTS.idFromName(`${request.instance.sku}#${request.instance.secret}`);
-        const object = await env.INCIDENTS.get(id);
+        const stub = env.INCIDENTS.get(id)
 
         const search = new URL(request.url).search;
-        return object.fetch(`https://share/${request.params.path}${search}`, request);
+
+        return stub.fetch(`https://share/${request.params.path}${search}`, request);
     })
     .all("*", () => response({
         success: false,

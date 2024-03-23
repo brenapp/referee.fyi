@@ -6,14 +6,10 @@ import Markdown from "react-markdown";
 import { version } from "../../package.json";
 import "./markdown.css";
 import DocumentDuplicateIcon from "@heroicons/react/24/outline/DocumentDuplicateIcon";
-import { CameraIcon, Cog8ToothIcon } from "@heroicons/react/20/solid";
-import { useNavigate } from "react-router-dom";
-import { BarcodeReader, JoinInfo } from "./dialogs/qrcode";
-import * as robotevents from "robotevents";
+import { Cog8ToothIcon } from "@heroicons/react/20/solid";
 
 export const HomePage: React.FC = () => {
   const { data: recentEvents } = useRecentEvents(5);
-  const navigate = useNavigate();
 
   const [markdownContent, setMarkdownContent] = useState<string>("");
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
@@ -40,16 +36,6 @@ export const HomePage: React.FC = () => {
     localStorage.setItem("version", version);
   }, []);
 
-  const onFoundJoinCode = useCallback(async ({ sku, code }: JoinInfo) => {
-    const event = await robotevents.events.get(sku);
-
-    if (!event) {
-      return;
-    }
-
-    navigate(`/${sku}/join?code=${code}`);
-  }, []);
-
   const onClickCopyBuild = useCallback(() => {
     navigator.clipboard.writeText(__REFEREE_FYI_VERSION__);
   }, []);
@@ -67,14 +53,6 @@ export const HomePage: React.FC = () => {
               Update Notes
             </Button>
           </div>
-          <BarcodeReader onFoundCode={onFoundJoinCode}>
-            {(props) => (
-              <Button className="flex items-center gap-2 w-min" {...props}>
-                <CameraIcon height={20} />
-                <p>Scan</p>
-              </Button>
-            )}
-          </BarcodeReader>
           <LinkButton to="/settings" className="flex items-center gap-2">
             <Cog8ToothIcon height={20} />
             <p>Settings</p>

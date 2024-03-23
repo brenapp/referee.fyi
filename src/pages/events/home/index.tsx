@@ -13,7 +13,6 @@ import {
   connection,
   useEventInvitation,
 } from "~utils/hooks/share";
-import { registerUser, ShareConnection } from "~utils/data/share";
 
 export const ShareProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const { data: event } = useCurrentEvent();
@@ -30,11 +29,6 @@ export const ShareProvider: React.FC<PropsWithChildren> = ({ children }) => {
   );
 };
 
-async function register() {
-  const { name } = await ShareConnection.getSender();
-  registerUser(name);
-}
-
 export const EventPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
   const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
@@ -45,10 +39,6 @@ export const EventPage: React.FC = () => {
       addEvent(event);
     }
   }, [event, isSuccess, addEvent]);
-
-  useEffect(() => {
-    register();
-  }, []);
 
   return event ? (
     <ShareProvider>

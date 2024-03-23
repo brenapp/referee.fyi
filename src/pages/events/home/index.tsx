@@ -11,26 +11,29 @@ import { EventManageTab } from "./manage";
 import {
   ShareContext,
   connection,
-  useShareCode,
-  useShareName,
+  useEventInvitation,
 } from "~utils/hooks/share";
+import { registerUser, ShareConnection } from "~utils/data/share";
 
 export const ShareProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const { data: event } = useCurrentEvent();
-  const { data: code } = useShareCode(event?.sku);
-
-  const { name } = useShareName();
+  const { data: invitation } = useEventInvitation(event?.sku);
 
   useEffect(() => {
-    if (event && code && name) {
-      connection.setup(event.sku, code, { name });
+    if (event && invitation && invitation.accepted) {
+      connection.setup(event.sku);
     }
-  }, [event, code, name]);
+  }, [event, invitation]);
 
   return (
     <ShareContext.Provider value={connection}>{children}</ShareContext.Provider>
   );
 };
+
+async function register() {
+  const { name } = await ShareConnection.getSender();
+  registerUser(name);
+}
 
 export const EventPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
@@ -42,6 +45,10 @@ export const EventPage: React.FC = () => {
       addEvent(event);
     }
   }, [event, isSuccess, addEvent]);
+
+  useEffect(() => {
+    register();
+  }, []);
 
   return event ? (
     <ShareProvider>

@@ -167,7 +167,13 @@ const verifyInvitation = async (request: AuthenticatedRequest, env: Env) => {
         });
     }
 
-    if (!invitation.accepted) {
+    // Allow bypassing the acceptance check if they are rejecting their own invitation
+    const canBypassAcceptance =
+        request.method === "DELETE" &&
+        new URL(request.url).pathname === `/api/${sku}/invite` &&
+        request.query.user === request.keyHex;
+
+    if (!invitation.accepted && !canBypassAcceptance) {
         return response({
             success: false,
             reason: "bad_request",
@@ -408,8 +414,8 @@ router
         }
 
         const currentInvitation: Invitation | null = await env.INVITATIONS.get(`${newInvitation.user}#${newInvitation.sku}`, "json");
-
-        if (currentInvitation) {
+        console.log(currentInvitation);
+        if (currentInvitation && currentInvitation.accepted) {
             return response({
                 success: false,
                 reason: "bad_request",

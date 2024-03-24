@@ -25,14 +25,14 @@ export const SettingsPage: React.FC = () => {
       navigator.clipboard.writeText(joinRequest);
       toast({ type: "info", message: "Copied join request to clipboard!" });
     }
-  }, []);
+  }, [joinRequest]);
 
   const onClickCopyKey = useCallback(() => {
     if (navigator.clipboard && publicKey) {
       navigator.clipboard.writeText(publicKey);
       toast({ type: "info", message: "Copied public key to clipboard!" });
     }
-  }, []);
+  }, [publicKey]);
 
   const onClickRemoveRobotEvents = useCallback(() => {
     queryClient.cancelQueries({ type: "all" });

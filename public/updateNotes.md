@@ -1,3 +1,9 @@
+### 24 March 2024
+
+- Introduced new authorization system for the sharing server that significantly improves upon
+  system security.
+- Added force sync button to the event summary page
+
 ### 17 Feb 2024
 
 - Add timer to current and future matches that shows how far ahead or behind that match was. For

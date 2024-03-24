@@ -364,6 +364,8 @@ export class ShareConnection extends EventEmitter {
       data: response.data,
       sender: { type: "server" }
     });
+
+    toast({ type: "info", message: "Synchronized with the server!" })
   };
 
   async connect(user: ShareUser) {

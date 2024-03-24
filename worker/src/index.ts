@@ -2,7 +2,7 @@ import { IRequest, Router, createCors, error, json, withParams } from "itty-rout
 import { response } from "./utils";
 
 import { Env, Invitation, ShareInstance, AuthenticatedRequest, RequestHasInvitation, SignedRequest, User } from "../types/server";
-import { APIPostCreateResponseBody, APIGetInvitationResponseBody, APIPutInvitationAcceptResponseBody, APIPutInviteResponseBody, APIRegisterUserResponseBody, EventIncidentsInitData } from "../types/api";
+import { APIPostCreateResponseBody, APIGetInvitationResponseBody, APIPutInvitationAcceptResponseBody, APIPutInviteResponseBody, APIRegisterUserResponseBody, EventIncidentsInitData, APIDeleteInviteResponseBody } from "../types/api";
 
 
 export const { preflight, corsify } = createCors({
@@ -92,6 +92,8 @@ const verifySignature = async (request: IRequest & Request) => {
         });
     };
 
+    const body = await request.text();
+
     const canonicalURL = new URL(request.url);
     canonicalURL.searchParams.delete("signature");
     canonicalURL.searchParams.delete("publickey");
@@ -104,6 +106,7 @@ const verifySignature = async (request: IRequest & Request) => {
         canonicalURL.host,
         canonicalURL.pathname,
         canonicalURL.search,
+        body
     ].join("\n");
 
     const encoder = new TextEncoder();
@@ -131,6 +134,7 @@ const verifySignature = async (request: IRequest & Request) => {
 
     request.key = key;
     request.keyHex = publicKeyRaw.slice(KEY_PREFIX.length);
+    request.payload = body;
 };
 
 const verifyUser = async (request: SignedRequest, env: Env) => {
@@ -414,7 +418,7 @@ router
         };
 
         const instance = request.instance;
-        instance.invitations.push(newInvitation.id);
+        instance.invitations.push(newInvitation.user);
         await env.SHARES.put(`${sku}#${invitation.instance_secret}`, JSON.stringify(instance));
         await env.INVITATIONS.put(`${newInvitation.user}#${newInvitation.sku}`, JSON.stringify(newInvitation));
 
@@ -454,22 +458,26 @@ router
             })
         };
 
-        // Admins can't be uninvited
-        if (userInvitation.admin) {
-            return response({
-                success: false,
-                reason: "bad_request",
-                details: "Admins cannot be uninvited."
-            })
-        };
-
         const instance = request.instance;
 
-        const index = instance.invitations.findIndex(i => i === userInvitation.id);
+        const index = instance.invitations.findIndex(i => i === userInvitation.user);
         instance.invitations.splice(index, 1);
+
+        // If the last admin leaves, remove everyone's invitations, functionally ending this session.
+        if (userInvitation.admin && instance.admins.length < 1) {
+            for (const user of instance.invitations) {
+                await env.INVITATIONS.delete(`${user}#${instance.sku}`);
+            }
+            instance.invitations = []
+        };
 
         await env.INVITATIONS.delete(`${user}#${invitation.sku}`);
         await env.SHARES.put(`${invitation.sku}#${invitation.instance_secret}`, JSON.stringify(instance));
+
+        return response<APIDeleteInviteResponseBody>({
+            success: true,
+            data: {}
+        })
     })
     .all("/api/:sku/:path+", async (request: RequestHasInvitation, env: Env) => {
         const id = env.INCIDENTS.idFromName(`${request.instance.sku}#${request.instance.secret}`);
@@ -477,7 +485,17 @@ router
 
         const search = new URL(request.url).search;
 
-        return stub.fetch(`https://share/${request.params.path}${search}`, request);
+        const headers = new Headers(request.headers);
+
+        // Pass extra informational headers to the Durable Object
+        headers.set("X-Referee-Content", request.payload);
+        headers.set("X-Referee-User-Name", request.user.name);
+        headers.set("X-Referee-User-Key", request.user.name);
+
+        return stub.fetch(`https://share/${request.params.path}${search}`, {
+            method: request.method,
+            headers,
+        });
     })
     .all("*", () => response({
         success: false,

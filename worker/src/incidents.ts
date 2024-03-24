@@ -1,7 +1,7 @@
 import { Router } from "itty-router"
 import { corsHeaders, response } from "./utils"
 import type { ShareUser, Incident, EventIncidentsData as EventIncidentsData, WebSocketMessage, WebSocketPayload, WebSocketPeerMessage, WebSocketSender, WebSocketServerShareInfoMessage, EventIncidentsInitData } from "../types/api";
-import { RequestHasInvitation } from "../types/server";
+import { User } from "../types/server";
 
 export type SessionClient = {
     user: ShareUser;
@@ -36,7 +36,7 @@ export class EventIncidents implements DurableObject {
             .put("/incident", this.handleAddIncident.bind(this))
             .patch("/incident", this.handleEditIncident.bind(this))
             .delete("/incident", this.handleDeleteIncident.bind(this))
-            .all("*", () => response({ success: false, reason: "bad_request", details: "unknown action", }))
+            .all("*", () => response({ success: false, reason: "bad_request", details: "durable object unknown action", }))
     }
 
     // Storage
@@ -120,7 +120,28 @@ export class EventIncidents implements DurableObject {
         return { ...message, sender, date: new Date().toISOString() }
     };
 
-    async fetch(request: RequestHasInvitation) {
+    getRequestBody<T = unknown>(request: Request): T | null {
+        const content = request.headers.get("X-Referee-Content");
+
+        if (!content) {
+            return null;
+        }
+
+        try {
+            return JSON.parse(content);
+        } catch (e) {
+            return null;
+        }
+    };
+
+    getRequestUser(request: Request): User {
+        const name = request.headers.get("X-Referee-User-Name")!;
+        const key = request.headers.get("X-Referee-User-Key")!;
+
+        return { name, key }
+    };
+
+    async fetch(request: Request) {
         return this.router.handle(request);
     }
 
@@ -171,14 +192,24 @@ export class EventIncidents implements DurableObject {
         })
     };
 
-    async handleAddIncident(request: RequestHasInvitation) {
-        const client = this.clients.find(v => v.user.id === request.user.key);
+    async handleAddIncident(request: Request) {
+        const user = this.getRequestUser(request);
+        const client = this.clients.find(v => v.user.id === user.key);
 
         const sender: WebSocketSender = client ? {
             type: "client", name: client.user.name, id: client.user.id
         } : { type: "server" };
 
-        const incident = await request.json<Incident>();
+        const incident = this.getRequestBody<Incident>(request);
+
+        if (!incident) {
+            return response({
+                success: false,
+                reason: "bad_request",
+                details: "Must specify a valid incident."
+            })
+        };
+
         const deleted = await this.getDeletedIncidents();
 
         if (deleted.includes(incident.id)) {
@@ -198,8 +229,16 @@ export class EventIncidents implements DurableObject {
         })
     };
 
-    async handleEditIncident(request: RequestHasInvitation): Promise<Response> {
-        const incident = await request.json<Incident>();
+    async handleEditIncident(request: Request): Promise<Response> {
+        const incident = this.getRequestBody<Incident>(request);
+
+        if (!incident) {
+            return response({
+                success: false,
+                reason: "bad_request",
+                details: "Must specify a valid incident to edit."
+            })
+        };
 
         const deletedIncidents = await this.getDeletedIncidents();
         if (deletedIncidents.includes(incident.id)) {
@@ -210,7 +249,8 @@ export class EventIncidents implements DurableObject {
             })
         };
 
-        const client = this.clients.find(v => v.user.id === request.user.key);
+        const user = this.getRequestUser(request);
+        const client = this.clients.find(v => v.user.id === user.key);
         const currentIncident = await this.getIncident(incident.id);
 
         const sender: WebSocketSender = client ? {
@@ -252,9 +292,10 @@ export class EventIncidents implements DurableObject {
         })
     };
 
-    async handleDeleteIncident(request: RequestHasInvitation) {
+    async handleDeleteIncident(request: Request) {
         const params = new URL(request.url).searchParams;
-        const client = this.clients.find(v => v.user.id === request.user.key);
+        const user = this.getRequestUser(request);
+        const client = this.clients.find(v => v.user.id === user.key);
 
         const sender: WebSocketSender = client ? {
             type: "client", name: client.user.name, id: client.user.id

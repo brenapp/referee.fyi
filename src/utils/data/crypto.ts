@@ -54,12 +54,15 @@ export async function getSignRequestHeaders(request: Request): Promise<Headers> 
     canonicalURL.searchParams.delete("signature_date");
     canonicalURL.searchParams.sort();
 
+    const body = await request.clone().text();
+
     const message = [
         date.toISOString(),
         request.method,
         canonicalURL.host,
         canonicalURL.pathname,
         canonicalURL.search,
+        body,
     ].join("\n");
 
 

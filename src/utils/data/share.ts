@@ -89,6 +89,25 @@ export async function createInstance(sku: string): Promise<ShareResponse<APIPost
   return body;
 };
 
+export async function fetchInvitation(sku: string) {
+  try {
+    const response = await signedFetch(
+      new URL(`/api/${sku}/invitation`, URL_BASE), {
+      method: "GET"
+    })
+
+    const body: ShareResponse<APIGetInvitationResponseBody> = await response.json();
+
+    if (!body.success) {
+      return null;
+    }
+
+    return body;
+  } catch (e) {
+    return null;
+  }
+}
+
 export async function getEventInvitation(sku: string): Promise<UserInvitation | null> {
   const current = await get<APIGetInvitationResponseBody>(`invitation_${sku}`);
 
@@ -96,14 +115,9 @@ export async function getEventInvitation(sku: string): Promise<UserInvitation | 
     return current;
   }
 
-  const response = await signedFetch(
-    new URL(`/api/${sku}/invitation`, URL_BASE), {
-    method: "GET"
-  });
+  const body = await fetchInvitation(sku);
 
-  const body: ShareResponse<APIGetInvitationResponseBody> = await response.json();
-
-  if (!body.success) {
+  if (!body || !body.success) {
     return null;
   }
 
@@ -130,7 +144,7 @@ export async function verifyEventInvitation(sku: string): Promise<UserInvitation
     queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
   }
 
-  if (body.success) {
+  if (body.success && body.data.accepted) {
     await set(`invitation_${sku}`, body.data);
     queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
     return body.data
@@ -179,7 +193,14 @@ export async function removeInvitation(sku: string, user?: string): Promise<Shar
   url.searchParams.set("user", user ?? id);
 
   const response = await signedFetch(url, { method: "DELETE" });
-  return response.json();
+  const body: ShareResponse<APIDeleteInviteResponseBody> = await response.json();
+
+  if (body.success) {
+    await del(`invitation_${sku}`);
+    queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
+  }
+
+  return body;
 };
 
 export async function getShareData(sku: string): Promise<ShareResponse<APIGetShareDataResponseBody>> {
@@ -274,7 +295,6 @@ export class ShareConnection extends EventEmitter {
     if (
       this.sku === sku &&
       this.invitation &&
-      invitation &&
       this.invitation.id === invitation.id &&
       this.ws &&
       this.ws.readyState === this.ws.OPEN
@@ -373,7 +393,7 @@ export class ShareConnection extends EventEmitter {
           break;
         }
 
-        // Sent when you first join, and also when owner changes. We definitely don't want to
+        // Sent when you first join, We definitely don't want to
         // *delete* incidents the user creates before joining the share, unless they are listed as
         // being deleted on the server.
         case "server_share_info": {
@@ -427,14 +447,14 @@ export class ShareConnection extends EventEmitter {
         }
 
         case "server_user_add": {
-          toast({ type: "info", message: `${data.user} joined.` });
-          if (this.users.indexOf(data.user) < 0) {
+          toast({ type: "info", message: `${data.user.name} joined.` });
+          if (this.users.findIndex(u => u.id === data.user.id) < 0) {
             this.users.push(data.user);
           }
           break;
         }
         case "server_user_remove": {
-          toast({ type: "warn", message: `${data.user} left.` });
+          toast({ type: "info", message: `${data.user.name} left.` });
           const index = this.users.findIndex((u) => u === data.user);
           if (index > -1) {
             this.users.splice(index, 1);

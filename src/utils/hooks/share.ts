@@ -74,7 +74,6 @@ export function useEventInvitation(sku?: string | null) {
       return getEventInvitation(sku);
     },
     staleTime: 1000 * 60,
-    refetchOnMount: true,
   })
 };
 
@@ -88,7 +87,7 @@ export function useActiveUsers() {
   const connection = useShareConnection();
 
   const activeUsers = useQuery({
-    queryKey: ["active_users", connection.sku, connection.invitation?.id],
+    queryKey: ["active_users", connection.sku],
     queryFn: () => connection.users,
     staleTime: 0,
     gcTime: 0,

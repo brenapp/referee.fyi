@@ -309,8 +309,6 @@ export class ShareConnection extends EventEmitter {
   user: ShareUser | null = null;
   users: ShareUser[] = [];
 
-  invitation: UserInvitation | null = null;
-
   public async setup(sku: string) {
 
     const invitation = await getEventInvitation(sku);
@@ -319,13 +317,7 @@ export class ShareConnection extends EventEmitter {
       return;
     };
 
-    if (
-      this.sku === sku &&
-      this.invitation &&
-      this.invitation.id === invitation.id &&
-      this.ws &&
-      this.ws.readyState === this.ws.OPEN
-    ) {
+    if (this.isConnected()) {
       return;
     }
 
@@ -339,6 +331,7 @@ export class ShareConnection extends EventEmitter {
 
   static reconnectTimer?: NodeJS.Timeout = undefined;
 
+
   public static async getUserId() {
     const { publicKey } = await getKeyPair();
     return exportPublicKey(publicKey, false);
@@ -351,6 +344,29 @@ export class ShareConnection extends EventEmitter {
 
     return { type: "client", name, id };
   }
+
+  public isConnected() {
+    return !!this.ws && this.ws.readyState === this.ws.OPEN;
+  };
+
+  public async forceSyncIncidents() {
+    const response = await getShareData(this.sku);
+
+    if (!response.success) {
+      toast({ type: "error", message: `Error when communicating with sharing server. ${response.details}` })
+      return;
+    };
+
+    await this.handleWebsocketPayload({
+      type: "server_share_info",
+      users: this.users,
+      date: new Date().toISOString(),
+      data: response.data,
+      sender: { type: "server" }
+    });
+
+    toast({ type: "info", message: "Synchronized with the server!" })
+  };
 
   async connect(user: ShareUser) {
     const { name, id } = await ShareConnection.getSender();
@@ -397,105 +413,108 @@ export class ShareConnection extends EventEmitter {
     this.ws?.send(JSON.stringify(payload));
   }
 
+  private async handleWebsocketPayload(data: WebSocketPayload<WebSocketMessage>) {
+    switch (data.type) {
+      case "add_incident": {
+        const has = await hasIncident(data.incident.id);
+        if (!has) {
+          await newIncident(data.incident, false, data.incident.id);
+          queryClient.invalidateQueries({ queryKey: ["incidents"] });
+        }
+        break;
+      }
+      case "update_incident": {
+        await setIncident(data.incident.id, data.incident);
+        queryClient.invalidateQueries({ queryKey: ["incidents"] });
+        break;
+      }
+      case "remove_incident": {
+        await deleteIncident(data.id, false);
+        queryClient.invalidateQueries({ queryKey: ["incidents"] });
+        break;
+      }
+
+      // Sent when you first join, We definitely don't want to
+      // *delete* incidents the user creates before joining the share, unless they are listed as
+      // being deleted on the server.
+      case "server_share_info": {
+        this.users = data.users;
+
+        for (const incident of data.data.incidents) {
+          const has = await hasIncident(incident.id);
+
+          // Handle newly created incidents
+          if (!has) {
+            await newIncident(incident, false, incident.id);
+
+            // Handle any incidents with different revisions while offline
+          } else {
+            const current = (await getIncident(incident.id))!;
+
+            const localRevision = current.revision?.count ?? 0;
+            const remoteRevision = incident.revision?.count ?? 0;
+
+            if (localRevision > remoteRevision) {
+              const response = await editServerIncident(current);
+              if (response?.success) {
+                current.revision = response.data;
+              }
+              await setIncident(incident.id, current);
+              queryClient.invalidateQueries({ queryKey: ["incidents"] });
+            }
+
+            if (remoteRevision > localRevision) {
+              await setIncident(incident.id, incident);
+              queryClient.invalidateQueries({ queryKey: ["incidents"] });
+            }
+          }
+        }
+
+        // Explicitly delete incidents marked as deleted first.
+        for (const id of data.data.deleted) {
+          await deleteIncident(id, false);
+        }
+
+        const eventIncidents = await getIncidentsByEvent(this.sku);
+        const localOnly = eventIncidents.filter((local) =>
+          data.data.incidents.every((remote) => local.id !== remote.id)
+        );
+
+        for (const incident of localOnly) {
+          await this.send({ type: "add_incident", incident });
+        }
+
+        break;
+      }
+
+      case "server_user_add": {
+        toast({ type: "info", message: `${data.user.name} joined.` });
+        if (this.users.findIndex(u => u.id === data.user.id) < 0) {
+          this.users.push(data.user);
+        }
+        break;
+      }
+      case "server_user_remove": {
+        toast({ type: "info", message: `${data.user.name} left.` });
+        const index = this.users.findIndex((u) => u === data.user);
+        if (index > -1) {
+          this.users.splice(index, 1);
+        }
+        break;
+      }
+      case "message": {
+        const sender =
+          data.sender.type === "server" ? "Server" : data.sender.name;
+        toast({ type: "info", message: `${sender}: ${data.message}` });
+        break;
+      }
+    }
+  }
+
   private async handleMessage(event: MessageEvent) {
     try {
       const data = JSON.parse(event.data) as WebSocketPayload<WebSocketMessage>;
-      switch (data.type) {
-        case "add_incident": {
-          const has = await hasIncident(data.incident.id);
-          if (!has) {
-            await newIncident(data.incident, false, data.incident.id);
-            queryClient.invalidateQueries({ queryKey: ["incidents"] });
-          }
-          break;
-        }
-        case "update_incident": {
-          await setIncident(data.incident.id, data.incident);
-          queryClient.invalidateQueries({ queryKey: ["incidents"] });
-          break;
-        }
-        case "remove_incident": {
-          await deleteIncident(data.id, false);
-          queryClient.invalidateQueries({ queryKey: ["incidents"] });
-          break;
-        }
-
-        // Sent when you first join, We definitely don't want to
-        // *delete* incidents the user creates before joining the share, unless they are listed as
-        // being deleted on the server.
-        case "server_share_info": {
-          this.users = data.users;
-
-          for (const incident of data.data.incidents) {
-            const has = await hasIncident(incident.id);
-
-            // Handle newly created incidents
-            if (!has) {
-              await newIncident(incident, false, incident.id);
-
-              // Handle any incidents with different revisions while offline
-            } else {
-              const current = (await getIncident(incident.id))!;
-
-              const localRevision = current.revision?.count ?? 0;
-              const remoteRevision = incident.revision?.count ?? 0;
-
-              if (localRevision > remoteRevision) {
-                const response = await editServerIncident(current);
-                if (response?.success) {
-                  current.revision = response.data;
-                }
-                await setIncident(incident.id, current);
-                queryClient.invalidateQueries({ queryKey: ["incidents"] });
-              }
-
-              if (remoteRevision > localRevision) {
-                await setIncident(incident.id, incident);
-                queryClient.invalidateQueries({ queryKey: ["incidents"] });
-              }
-            }
-          }
-
-          // Explicitly delete incidents marked as deleted first.
-          for (const id of data.data.deleted) {
-            await deleteIncident(id, false);
-          }
-
-          const eventIncidents = await getIncidentsByEvent(this.sku);
-          const localOnly = eventIncidents.filter((local) =>
-            data.data.incidents.every((remote) => local.id !== remote.id)
-          );
-
-          for (const incident of localOnly) {
-            await this.send({ type: "add_incident", incident });
-          }
-
-          break;
-        }
-
-        case "server_user_add": {
-          toast({ type: "info", message: `${data.user.name} joined.` });
-          if (this.users.findIndex(u => u.id === data.user.id) < 0) {
-            this.users.push(data.user);
-          }
-          break;
-        }
-        case "server_user_remove": {
-          toast({ type: "info", message: `${data.user.name} left.` });
-          const index = this.users.findIndex((u) => u === data.user);
-          if (index > -1) {
-            this.users.splice(index, 1);
-          }
-          break;
-        }
-        case "message": {
-          const sender =
-            data.sender.type === "server" ? "Server" : data.sender.name;
-          toast({ type: "info", message: `${sender}: ${data.message}` });
-          break;
-        }
-      }
-
+      await this.handleWebsocketPayload(data);
       this.emit("message", data);
     } catch (e) {
       toast({ type: "error", message: `${e}` });

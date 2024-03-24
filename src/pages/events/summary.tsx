@@ -4,7 +4,10 @@ import { useAddEventVisited } from "~utils/hooks/history";
 import { useCurrentEvent } from "~utils/hooks/state";
 import { ShareProvider } from "./home";
 import { Button, IconButton } from "~components/Button";
-import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
+import {
+  AdjustmentsHorizontalIcon,
+  ArrowPathIcon,
+} from "@heroicons/react/24/outline";
 import { useEventIncidents } from "~utils/hooks/incident";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -15,6 +18,8 @@ import { Dialog, DialogBody } from "~components/Dialog";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 import { Checkbox, RulesMultiSelect, Select } from "~components/Input";
 import { twMerge } from "tailwind-merge";
+import { useMutation } from "@tanstack/react-query";
+import { useShareConnection } from "~utils/hooks/share";
 
 export type Filters = {
   outcomes: Record<IncidentOutcome, boolean>;
@@ -141,10 +146,17 @@ export const EventSummaryPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
   const game = useRulesForProgram(event?.program.code);
   const { mutateAsync: addEvent, isSuccess } = useAddEventVisited();
+  const connection = useShareConnection();
 
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const { data: allIncidents } = useEventIncidents(event?.sku);
+
+  const { mutateAsync: forceSync, isPending: isForceSyncPending } = useMutation(
+    {
+      mutationFn: () => connection.forceSyncIncidents(),
+    }
+  );
 
   const incidents = useMemo(() => {
     const results = allIncidents?.filter((incident) => {
@@ -211,6 +223,16 @@ export const EventSummaryPage: React.FC = () => {
       <section className="mt-4 flex flex-col">
         <nav className="flex gap-4 p-2 rounded-md">
           <p className="flex-1">{incidents?.length} Incidents</p>
+          {connection.isConnected() ? (
+            <IconButton
+              className={twMerge(
+                "bg-transparent",
+                isForceSyncPending ? "animate-spin" : "animate-none"
+              )}
+              onClick={() => forceSync()}
+              icon={<ArrowPathIcon height={24} />}
+            />
+          ) : null}
           <IconButton
             className="bg-transparent"
             onClick={() => setFilterDialogOpen(true)}

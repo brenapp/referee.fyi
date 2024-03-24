@@ -33,6 +33,35 @@ import { exportPublicKey, getKeyPair, getSignRequestHeaders, signWebSocketConnec
 
 const URL_BASE = import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER ?? "https://share.referee.fyi";
 
+export type JoinRequest = {
+  client_version: string;
+  user: {
+    name: string;
+    key: string;
+  };
+};
+
+export function isValidJoinRequest(
+  value: Record<string, unknown>
+): value is JoinRequest {
+  const versionMatch =
+    Object.hasOwn(value, "client_version") &&
+    value.client_version === __REFEREE_FYI_VERSION__;
+
+  const hasUser =
+    Object.hasOwn(value, "user") &&
+    Object.hasOwn(value.user as Record<string, string>, "name") &&
+    Object.hasOwn(value.user as Record<string, string>, "key") &&
+    typeof (value.user as Record<string, string>).name === "string" &&
+    typeof (value.user as Record<string, string>).key === "string";
+
+  return versionMatch && hasUser;
+}
+
+export function getJoinRequest({ id, name }: ShareUser): JoinRequest {
+  return { client_version: __REFEREE_FYI_VERSION__, user: { name, key: id } };
+};
+
 export async function getShareName() {
   return (await get<string>("share_name")) ?? "";
 }

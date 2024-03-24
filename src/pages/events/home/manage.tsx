@@ -10,7 +10,10 @@ import { deleteIncident, getIncidentsByEvent } from "~utils/data/incident";
 import {
   acceptEventInvitation,
   fetchInvitation,
+  getJoinRequest,
   inviteUser,
+  isValidJoinRequest,
+  JoinRequest,
   removeInvitation,
 } from "~utils/data/share";
 import {
@@ -35,35 +38,10 @@ import { Info, Error } from "~components/Warning";
 import { Spinner } from "~components/Spinner";
 import { useEventIncidents } from "~utils/hooks/incident";
 
-export type InvitationInfo = {
-  client_version: string;
-  user: {
-    name: string;
-    key: string;
-  };
-};
-
-function isValidInvitationInfo(
-  value: Record<string, unknown>
-): value is InvitationInfo {
-  const versionMatch =
-    Object.hasOwn(value, "client_version") &&
-    value.client_version === __REFEREE_FYI_VERSION__;
-
-  const hasUser =
-    Object.hasOwn(value, "user") &&
-    Object.hasOwn(value.user as Record<string, string>, "name") &&
-    Object.hasOwn(value.user as Record<string, string>, "key") &&
-    typeof (value.user as Record<string, string>).name === "string" &&
-    typeof (value.user as Record<string, string>).key === "string";
-
-  return versionMatch && hasUser;
-}
-
 export type InviteDialogProps = {
   children: React.FC<ButtonProps>;
-  confirmationStep: React.FC<{ info: InvitationInfo; pass: () => void }>;
-  onFoundCode: (info: InvitationInfo) => void;
+  confirmationStep: React.FC<{ info: JoinRequest; pass: () => void }>;
+  onFoundCode: (info: JoinRequest) => void;
 };
 
 export const InviteDialog: React.FC<InviteDialogProps> = ({
@@ -76,7 +54,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string>("");
 
-  const [info, setInfo] = useState<InvitationInfo | null>(null);
+  const [info, setInfo] = useState<JoinRequest | null>(null);
 
   const [joinRequestValue, setJoinRequestValue] = useState("");
 
@@ -123,7 +101,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({
         for (const code of barcodes) {
           try {
             const value = JSON.parse(code.rawValue);
-            if (isValidInvitationInfo(value)) {
+            if (isValidJoinRequest(value)) {
               setInfo(value);
             }
           } catch (e) {
@@ -149,6 +127,16 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({
     stream?.getTracks().forEach((t) => t.stop());
   }, [open]);
 
+  const parseJoinRequest = useCallback((text: string) => {
+    try {
+      const value = JSON.parse(decodeURIComponent(text));
+      if (isValidJoinRequest(value)) {
+        setJoinRequestValue(text);
+        onFoundCode(value);
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
     if (!open) {
       return;
@@ -156,11 +144,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({
     const extractJoinRequest = async () => {
       try {
         const text = await navigator.clipboard.readText();
-        const value = JSON.parse(decodeURIComponent(text));
-        if (isValidInvitationInfo(value)) {
-          setJoinRequestValue(text);
-          onFoundCode(value);
-        }
+        parseJoinRequest(text);
       } catch {}
     };
 
@@ -180,6 +164,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({
               className="w-full"
               value={joinRequestValue}
               onChange={(e) => setJoinRequestValue(e.currentTarget.value)}
+              onBlur={(e) => parseJoinRequest(e.currentTarget.value)}
             />
           </section>
           <video ref={videoRef} className="w-full rounded-md mt-4"></video>
@@ -241,15 +226,8 @@ export const JoinCodeDialog: React.FC<JoinCodeDialogProps> = ({
     if (!isSuccess) {
       return null;
     }
-
-    const payload = JSON.stringify({
-      client_version: __REFEREE_FYI_VERSION__,
-      user: {
-        name,
-        key,
-      },
-    });
-
+    const joinRequest = getJoinRequest({ name, id: key });
+    const payload = JSON.stringify(joinRequest);
     return { text: payload };
   }, [name, key, isSuccess]);
 
@@ -347,7 +325,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
     }
   }, []);
 
-  const onInviteUser = useCallback(async (invitation: InvitationInfo) => {
+  const onInviteUser = useCallback(async (invitation: JoinRequest) => {
     await inviteUser(event.sku, invitation.user.key);
   }, []);
 

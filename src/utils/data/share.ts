@@ -44,9 +44,7 @@ export type JoinRequest = {
 export function isValidJoinRequest(
   value: Record<string, unknown>
 ): value is JoinRequest {
-  const versionMatch =
-    Object.hasOwn(value, "client_version") &&
-    value.client_version === __REFEREE_FYI_VERSION__;
+  const versionMatch = Object.hasOwn(value, "client_version");
 
   const hasUser =
     Object.hasOwn(value, "user") &&

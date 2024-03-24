@@ -1,5 +1,4 @@
 import { Button, LinkButton } from "~components/Button";
-import { useRecentEvents } from "~utils/hooks/history";
 import { useCallback, useEffect, useState } from "react";
 import { Dialog, DialogHeader, DialogBody } from "~components/Dialog";
 import Markdown from "react-markdown";
@@ -7,9 +6,19 @@ import { version } from "../../package.json";
 import "./markdown.css";
 import DocumentDuplicateIcon from "@heroicons/react/24/outline/DocumentDuplicateIcon";
 import { Cog8ToothIcon } from "@heroicons/react/20/solid";
+import { useEventSearch } from "~utils/hooks/robotevents";
 
 export const HomePage: React.FC = () => {
-  const { data: recentEvents } = useRecentEvents(5);
+  const { data: events } = useEventSearch({
+    sku: [
+      "RE-VRC-23-3690",
+      "RE-VRC-23-3691",
+      "RE-VEXU-23-3692",
+      "RE-VRC-23-3695",
+      "RE-VIQRC-23-3693",
+      "RE-VIQRC-23-3694",
+    ],
+  });
 
   const [markdownContent, setMarkdownContent] = useState<string>("");
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
@@ -58,9 +67,8 @@ export const HomePage: React.FC = () => {
             <p>Settings</p>
           </LinkButton>
         </nav>
-
-        <section className="max-w-full">
-          {recentEvents?.map((event) => (
+        <section className="max-w-full mb-4">
+          {events?.map((event) => (
             <LinkButton
               to={`/${event.sku}`}
               className="w-full max-w-full mt-4"

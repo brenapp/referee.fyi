@@ -1,3 +1,4 @@
+import { GlobeAmericasIcon } from "@heroicons/react/20/solid";
 import { DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 import { useCallback, useMemo } from "react";
 import { Button, IconButton } from "~components/Button";
@@ -40,6 +41,13 @@ export const SettingsPage: React.FC = () => {
 
   return (
     <main className="mt-4">
+      <p className="bg-purple-500 text-zinc-300 p-2 rounded-md flex items-center gap-2 mt-2">
+        <GlobeAmericasIcon height={20} />
+        Worlds Build
+        <span className="flex-1 text-right font-mono">
+          {__REFEREE_FYI_VERSION__}
+        </span>
+      </p>
       <section className="mt-4">
         <h2 className="font-bold">Name</h2>
         <Input

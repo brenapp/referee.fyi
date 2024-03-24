@@ -14,6 +14,7 @@ import {
   inviteUser,
   isValidJoinRequest,
   JoinRequest,
+  registerUser,
   removeInvitation,
 } from "~utils/data/share";
 import {
@@ -33,7 +34,7 @@ import {
 import { Input } from "~components/Input";
 import { toast } from "~components/Toast";
 import { QRCode, QRCodeProps } from "~components/QRCode";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Info, Error } from "~components/Warning";
 import { Spinner } from "~components/Spinner";
 import { useEventIncidents } from "~utils/hooks/incident";
@@ -215,12 +216,12 @@ export const JoinCodeDialog: React.FC<JoinCodeDialogProps> = ({
     }
     await acceptEventInvitation(sku, invitation.data.id);
     onClose();
-  }, []);
+  }, [sku, invitation]);
 
   const onClearInvitation = useCallback(async () => {
     await removeInvitation(sku);
     setHasInvitation(false);
-  }, []);
+  }, [sku]);
 
   const config: QRCodeProps["config"] | null = useMemo(() => {
     if (!isSuccess) {
@@ -315,22 +316,28 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
     [invitation]
   );
 
-  const onClickBeginSharing = useCallback(async () => {
-    const response = await createInstance();
+  const {
+    mutateAsync: onClickBeginSharing,
+    isPending: isCreateInstancePending,
+  } = useMutation({
+    mutationFn: async () => {
+      await registerUser(name);
+      const response = await createInstance();
 
-    if (response.success) {
-      toast({ type: "info", message: "Sharing!" });
-    } else {
-      toast({ type: "error", message: response.details });
-    }
-  }, []);
+      if (response.success) {
+        toast({ type: "info", message: "Sharing!" });
+      } else {
+        toast({ type: "error", message: response.details });
+      }
+    },
+  });
+
+  const { mutateAsync: onClickLeave, isPending: isLeavePending } = useMutation({
+    mutationFn: () => removeInvitation(event.sku),
+  });
 
   const onInviteUser = useCallback(async (invitation: JoinRequest) => {
     await inviteUser(event.sku, invitation.user.key);
-  }, []);
-
-  const onClickLeave = useCallback(async () => {
-    await removeInvitation(event.sku);
   }, []);
 
   const onConfirmDeleteData = useCallback(async () => {
@@ -349,6 +356,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
         open={joinCodeDialogOpen}
         onClose={() => setJoinCodeDialogOpen(false)}
       />
+      <Spinner show={isCreateInstancePending || isLeavePending} />
       {isSharing ? (
         <section>
           <h2 className="font-bold">Sharing</h2>
@@ -368,7 +376,11 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
                 {(props) => <Button {...props}>Invite</Button>}
               </InviteDialog>
             ) : null}
-            <Button mode="dangerous" className="mt-2" onClick={onClickLeave}>
+            <Button
+              mode="dangerous"
+              className="mt-2"
+              onClick={() => onClickLeave()}
+            >
               Leave
             </Button>
             <nav className="flex gap-2 justify-evenly mt-4">
@@ -403,7 +415,11 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
               onBlur={() => persist()}
             />
           </section>
-          <Button mode="primary" className="mt-2" onClick={onClickBeginSharing}>
+          <Button
+            mode="primary"
+            className="mt-2"
+            onClick={() => onClickBeginSharing()}
+          >
             Begin Sharing
           </Button>
           <Button

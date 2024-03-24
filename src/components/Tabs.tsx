@@ -2,7 +2,6 @@ import { twMerge } from "tailwind-merge";
 import { useCallback, useId, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useDrag } from "@use-gesture/react";
 
 export type TabsNavigationState = {
   tab?: number;
@@ -19,17 +18,6 @@ export const Tabs: React.FC<TabsProps> = ({ children, ...props }) => {
   const tabs = useMemo(() => Object.entries(children), []);
 
   const [activeTab, setActiveTab] = useState<number>(location?.state?.tab ?? 0);
-  const bind = useDrag(
-    ({ direction, first }) => {
-      if (!first) return;
-      if (direction[0] > 0) {
-        setActiveTab((t) => Math.max(0, t - 1));
-      } else if (direction[0] < 0) {
-        setActiveTab((t) => Math.min(tabs.length - 1, t + 1));
-      }
-    },
-    { axis: "x", threshold: 1 }
-  );
 
   const onClickTab = useCallback(
     (index: number) => {
@@ -70,7 +58,7 @@ export const Tabs: React.FC<TabsProps> = ({ children, ...props }) => {
           </button>
         ))}
       </nav>
-      <div role="tabpanel" className="contents touch-none" {...bind()}>
+      <div role="tabpanel" className="contents">
         {tabs[activeTab][1]}
       </div>
     </div>

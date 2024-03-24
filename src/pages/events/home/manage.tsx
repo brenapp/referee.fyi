@@ -1,28 +1,299 @@
-import { useCallback, useId, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { EventData } from "robotevents/out/endpoints/events";
-import { Button, LinkButton } from "~components/Button";
-import { Spinner } from "~components/Spinner";
-import { toast } from "~components/Toast";
-import { deleteIncident, getIncidentsByEvent } from "~utils/data/incident";
-import { ShareConnection, leaveShare } from "~utils/data/share";
-import { useEventIncidents } from "~utils/hooks/incident";
 import {
-  useActiveUsers,
-  useCreateShare,
-  useShareCode,
-  useShareConnection,
-  useShareName,
-} from "~utils/hooks/share";
+  Button,
+  ButtonProps,
+  IconButton,
+  LinkButton,
+} from "~components/Button";
+import { deleteIncident, getIncidentsByEvent } from "~utils/data/incident";
+import {
+  acceptEventInvitation,
+  fetchInvitation,
+  getJoinRequest,
+  inviteUser,
+  isValidJoinRequest,
+  JoinRequest,
+  removeInvitation,
+} from "~utils/data/share";
 import {
   ArrowRightIcon,
+  DocumentDuplicateIcon,
   FlagIcon,
   UserCircleIcon,
 } from "@heroicons/react/20/solid";
-import { Dialog, DialogBody } from "~components/Dialog";
+import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
+import {
+  useActiveUsers,
+  useCreateInstance,
+  useEventInvitation,
+  useShareID,
+  useShareProfile,
+} from "~utils/hooks/share";
 import { Input } from "~components/Input";
-import { QRCode } from "~components/QRCode";
-import { EyeIcon } from "@heroicons/react/24/outline";
-import { twMerge } from "tailwind-merge";
+import { toast } from "~components/Toast";
+import { QRCode, QRCodeProps } from "~components/QRCode";
+import { useQuery } from "@tanstack/react-query";
+import { Info, Error } from "~components/Warning";
+import { Spinner } from "~components/Spinner";
+import { useEventIncidents } from "~utils/hooks/incident";
+
+export type InviteDialogProps = {
+  children: React.FC<ButtonProps>;
+  confirmationStep: React.FC<{ info: JoinRequest; pass: () => void }>;
+  onFoundCode: (info: JoinRequest) => void;
+};
+
+export const InviteDialog: React.FC<InviteDialogProps> = ({
+  children,
+  onFoundCode,
+  confirmationStep,
+}) => {
+  const [open, setOpen] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [error, setError] = useState<string>("");
+
+  const [info, setInfo] = useState<JoinRequest | null>(null);
+
+  const [joinRequestValue, setJoinRequestValue] = useState("");
+
+  const onScanButtonClick = useCallback(async () => {
+    setOpen(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+      });
+
+      setStream(stream);
+    } catch (e) {
+      setError(`Cannot access camera! ${e}`);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (
+      !videoRef.current ||
+      !stream ||
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia ||
+      !window.BarcodeDetector
+    ) {
+      return;
+    }
+    videoRef.current.srcObject = stream;
+    videoRef.current.play();
+
+    const detector = new BarcodeDetector({ formats: ["qr_code"] });
+    const onLoadedMetadata = async () => {
+      if (!videoRef.current) return;
+      let canvas = document.createElement("canvas");
+
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      const context = canvas.getContext("2d");
+
+      const searchLoop = async () => {
+        if (!videoRef.current) return;
+        context?.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+
+        const barcodes = await detector.detect(canvas);
+        for (const code of barcodes) {
+          try {
+            const value = JSON.parse(code.rawValue);
+            if (isValidJoinRequest(value)) {
+              setInfo(value);
+            }
+          } catch (e) {
+            continue;
+          }
+        }
+
+        requestAnimationFrame(searchLoop);
+      };
+
+      searchLoop();
+    };
+
+    videoRef.current.addEventListener("loadedmetadata", onLoadedMetadata);
+    return () =>
+      videoRef.current?.removeEventListener("loadedmetadata", onLoadedMetadata);
+  }, [stream, videoRef]);
+
+  useEffect(() => {
+    if (open) {
+      return;
+    }
+    stream?.getTracks().forEach((t) => t.stop());
+  }, [open]);
+
+  const parseJoinRequest = useCallback((text: string) => {
+    try {
+      const value = JSON.parse(decodeURIComponent(text));
+      if (isValidJoinRequest(value)) {
+        setJoinRequestValue(text);
+        onFoundCode(value);
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+    const extractJoinRequest = async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        parseJoinRequest(text);
+      } catch {}
+    };
+
+    extractJoinRequest();
+  }, [open]);
+
+  return (
+    <>
+      {children({ onClick: onScanButtonClick })}
+      <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
+        <DialogHeader title="Invite User" onClose={() => setOpen(false)} />
+        <DialogBody>
+          {error ? <Error message={error} /> : null}
+          <section className="mt-4">
+            <h2>Join Request</h2>
+            <Input
+              className="w-full"
+              value={joinRequestValue}
+              onChange={(e) => setJoinRequestValue(e.currentTarget.value)}
+              onBlur={(e) => parseJoinRequest(e.currentTarget.value)}
+            />
+          </section>
+          <video ref={videoRef} className="w-full rounded-md mt-4"></video>
+          {info
+            ? confirmationStep({ info, pass: () => onFoundCode(info) })
+            : null}
+        </DialogBody>
+      </Dialog>
+    </>
+  );
+};
+
+export type JoinCodeDialogProps = {
+  open: boolean;
+  onClose: () => void;
+  sku: string;
+};
+
+export const JoinCodeDialog: React.FC<JoinCodeDialogProps> = ({
+  open,
+  onClose,
+  sku,
+}) => {
+  const { name } = useShareProfile();
+  const { data: key, isSuccess } = useShareID();
+
+  const [hasInvitation, setHasInvitation] = useState(false);
+
+  const { data: invitation } = useQuery({
+    queryKey: ["join_custom_get_invite"],
+    queryFn: () => fetchInvitation(sku),
+    refetchInterval: 5000,
+    networkMode: "always",
+    enabled: open && !hasInvitation,
+  });
+
+  useEffect(() => {
+    if (invitation?.success && invitation.data) {
+      setHasInvitation(true);
+    } else {
+      setHasInvitation(false);
+    }
+  }, [invitation]);
+
+  const onAcceptInvitation = useCallback(async () => {
+    if (!invitation || !invitation.success) {
+      return;
+    }
+    await acceptEventInvitation(sku, invitation.data.id);
+    onClose();
+  }, []);
+
+  const onClearInvitation = useCallback(async () => {
+    await removeInvitation(sku);
+    setHasInvitation(false);
+  }, []);
+
+  const config: QRCodeProps["config"] | null = useMemo(() => {
+    if (!isSuccess) {
+      return null;
+    }
+    const joinRequest = getJoinRequest({ name, id: key });
+    const payload = JSON.stringify(joinRequest);
+    return { text: payload };
+  }, [name, key, isSuccess]);
+
+  const joinRequestCode = useMemo(
+    () => encodeURIComponent(config?.text ?? ""),
+    [config]
+  );
+
+  const onClickCopyJoinRequest = useCallback(() => {
+    navigator.clipboard.writeText(joinRequestCode);
+  }, [joinRequestCode]);
+
+  return (
+    <Dialog open={open} onClose={onClose} mode="modal">
+      <DialogHeader onClose={onClose} title="Join Request" />
+      <DialogBody className="px-2">
+        {config ? (
+          <>
+            <p>
+              Copy the join request below and send it to the instance owner.
+            </p>
+            <div className="mt-2 flex gap-2 w-full">
+              <IconButton
+                className="p-3"
+                onClick={onClickCopyJoinRequest}
+                icon={<DocumentDuplicateIcon height={20} />}
+              />
+              <div className="p-3 px-4 text-ellipsis overflow-hidden bg-zinc-700 rounded-md flex-1">
+                {joinRequestCode}
+              </div>
+            </div>
+            <QRCode config={config} className="mt-4" />
+            {hasInvitation ? (
+              <section className="mt-4">
+                <nav className="flex justify-between items-center">
+                  <Info
+                    message={`Invitation From ${invitation?.data.from.name}`}
+                  />
+                  {invitation?.data.admin ? (
+                    <p className="text-sm text-emerald-400">Admin</p>
+                  ) : null}
+                </nav>
+                <Button
+                  mode="primary"
+                  className="mt-2"
+                  onClick={onAcceptInvitation}
+                >
+                  Accept & Join
+                </Button>
+                <Button
+                  mode="dangerous"
+                  className="mt-2"
+                  onClick={onClearInvitation}
+                >
+                  Clear Invitation
+                </Button>
+              </section>
+            ) : (
+              <Spinner className="mt-4" show />
+            )}
+          </>
+        ) : null}
+      </DialogBody>
+    </Dialog>
+  );
+};
 
 export type ManageTabProps = {
   event: EventData;
@@ -30,76 +301,41 @@ export type ManageTabProps = {
 
 export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
   const [deleteDataDialogOpen, setDeleteDataDialogOpen] = useState(false);
+  const [joinCodeDialogOpen, setJoinCodeDialogOpen] = useState(false);
 
-  const {
-    name: shareName,
-    setName,
-    persist: persistShareName,
-  } = useShareName();
-  const shareNameId = useId();
+  const { name, setName, persist } = useShareProfile();
 
-  const { data: shareCode } = useShareCode(event.sku);
-  const isSharing = !!shareCode;
+  const { mutateAsync: createInstance } = useCreateInstance(event.sku);
+  const { data: invitation } = useEventInvitation(event.sku);
 
-  const [showShareCode, setShowShareCode] = useState(false);
-
-  const connection = useShareConnection();
+  const { data: entries } = useEventIncidents(event.sku);
   const activeUsers = useActiveUsers();
-  const isOwner = useMemo(() => {
-    return connection.owner === shareName;
-  }, [connection, shareName]);
+  const isSharing = useMemo(
+    () => !!invitation && invitation.accepted,
+    [invitation]
+  );
 
-  const { data: entries } = useEventIncidents(event?.sku);
-
-  const { mutateAsync: beginSharing, isPending: isPendingShare } =
-    useCreateShare();
-  const onClickShare = useCallback(async () => {
-    const shareId = await ShareConnection.getUserId();
-
-    const response = await beginSharing({
-      owner: { id: shareId, name: shareName ?? "" },
-      sku: event.sku,
-    });
+  const onClickBeginSharing = useCallback(async () => {
+    const response = await createInstance();
 
     if (response.success) {
-      toast({ type: "info", message: "Sharing Enabled" });
+      toast({ type: "info", message: "Sharing!" });
     } else {
       toast({ type: "error", message: response.details });
     }
-  }, [beginSharing, event.sku, shareName]);
+  }, []);
 
-  const joinURL = useMemo(
-    () => new URL(`/${event.sku}/join?code=${shareCode}`, location.href),
-    [shareCode]
-  );
+  const onInviteUser = useCallback(async (invitation: JoinRequest) => {
+    await inviteUser(event.sku, invitation.user.key);
+  }, []);
 
-  const onClickShareQR = useCallback(async () => {
-    const shareData = {
-      url: joinURL.href,
-    };
-
-    if (navigator.share && navigator.canShare(shareData)) {
-      navigator.share(shareData);
-    } else if (navigator.clipboard) {
-      navigator.clipboard.writeText(joinURL.href);
-      toast({ type: "info", message: "Copied to Clipboard!" });
-    }
-  }, [shareCode, event.sku, joinURL]);
-
-  const onClickShareCode = useCallback(async () => {
-    if (navigator.clipboard && shareCode) {
-      navigator.clipboard.writeText(shareCode);
-      toast({ type: "info", message: "Copied to Clipboard!" });
-    }
-  }, [shareCode, event.sku, joinURL]);
-
-  const onClickStopSharing = useCallback(async () => {
-    await leaveShare(event.sku);
-  }, [event.sku]);
+  const onClickLeave = useCallback(async () => {
+    await removeInvitation(event.sku);
+  }, []);
 
   const onConfirmDeleteData = useCallback(async () => {
     const incidents = await getIncidentsByEvent(event.sku);
-    await leaveShare(event.sku);
+    await removeInvitation(event.sku);
     for (const incident of incidents) {
       await deleteIncident(incident.id);
     }
@@ -108,46 +344,32 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
 
   return (
     <section className="max-w-xl mx-auto">
-      <section className="mt-4">
-        <h2 className="font-bold">Share Event Data</h2>
-        <Spinner show={isPendingShare} />
-        {isSharing ? (
-          <section>
-            <p>Allow others to join by using the QR Code below.</p>
-            <p className="mt-4">Share Name: {shareName}</p>
-
-            <div className="overflow-hidden rounded-md relative">
-              <QRCode
-                config={{ text: joinURL.href }}
-                className={twMerge(
-                  "mt-2",
-                  showShareCode ? "blur-none" : "blur-xl"
+      <JoinCodeDialog
+        sku={event.sku}
+        open={joinCodeDialogOpen}
+        onClose={() => setJoinCodeDialogOpen(false)}
+      />
+      {isSharing ? (
+        <section>
+          <h2 className="font-bold">Sharing</h2>
+          <p>Share Name: {name} </p>
+          <div className="mt-2">
+            {invitation?.admin ? (
+              <InviteDialog
+                onFoundCode={onInviteUser}
+                confirmationStep={({ info, pass }) => (
+                  <div>
+                    <Button mode="primary" onClick={pass} className="mt-4">
+                      Invite {info.user.name}
+                    </Button>
+                  </div>
                 )}
-                onClick={onClickShareQR}
-              />
-              {!showShareCode ? (
-                <section className="absolute top-0 left-0 right-0 bottom-0 p-4 flex items-center">
-                  <Button
-                    className="bg-transparent flex justify-center"
-                    onClick={() => setShowShareCode(true)}
-                  >
-                    <EyeIcon height={24} />
-                    <span className="ml-2">Reveal QR Code</span>
-                  </Button>
-                </section>
-              ) : null}
-            </div>
-            <Button
-              className="w-full font-mono text-4xl mt-4 text-center"
-              onClick={onClickShareCode}
-            >
-              {shareCode}
-            </Button>
-            <Button
-              className="w-full mt-4 bg-red-500 text-center"
-              onClick={onClickStopSharing}
-            >
-              {isOwner ? "Stop Sharing" : "Leave Share"}
+              >
+                {(props) => <Button {...props}>Invite</Button>}
+              </InviteDialog>
+            ) : null}
+            <Button mode="dangerous" className="mt-2" onClick={onClickLeave}>
+              Leave
             </Button>
             <nav className="flex gap-2 justify-evenly mt-4">
               <p className="text-lg">
@@ -163,47 +385,36 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
                 </span>
               </p>
             </nav>
-            <section className="mt-4">
-              <h2 className="font-bold">Active Users</h2>
-              <ul>
-                {activeUsers.map((u) => (
-                  <li key={u} className="ml-6 list-disc">
-                    {u}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          </section>
-        ) : (
-          <div className="mt-2">
-            <label htmlFor={shareNameId}>
-              <p>Your Name</p>
-              <Input
-                id={shareNameId}
-                required
-                value={shareName}
-                onChange={(e) => setName(e.currentTarget.value)}
-                onBlur={persistShareName}
-                className="w-full"
-              />
-            </label>
-            <Button
-              className="disabled:bg-zinc-400 mt-4"
-              mode="primary"
-              disabled={!shareName}
-              onClick={onClickShare}
-            >
-              Begin Sharing
-            </Button>
-            <LinkButton
-              to={`/${event.sku}/join`}
-              className="mt-4 w-full text-center"
-            >
-              Join Share
-            </LinkButton>
           </div>
-        )}
-      </section>
+        </section>
+      ) : (
+        <section>
+          <h2 className="font-bold">Sharing</h2>
+          <p>
+            Create or join a sharing instance to synchronize the anomaly log
+            between devices.
+          </p>
+          <section className="mt-2">
+            <h2 className="font-bold">Name</h2>
+            <Input
+              className="w-full"
+              value={name}
+              onChange={(e) => setName(e.currentTarget.value)}
+              onBlur={() => persist()}
+            />
+          </section>
+          <Button mode="primary" className="mt-2" onClick={onClickBeginSharing}>
+            Begin Sharing
+          </Button>
+          <Button
+            mode="normal"
+            className="mt-2"
+            onClick={() => setJoinCodeDialogOpen(true)}
+          >
+            Join Existing
+          </Button>
+        </section>
+      )}
       <section className="mt-4">
         <h2 className="font-bold">Event Summary</h2>
         <p>See a summary of all entries at the event.</p>

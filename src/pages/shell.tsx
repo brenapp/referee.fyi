@@ -241,7 +241,10 @@ export const AppShell: React.FC = () => {
   return (
     <main
       className="p-4 w-screen h-screen grid"
-      style={{ gridTemplateRows: "4rem 1fr" }}
+      style={{
+        gridTemplateRows: "4rem 1fr",
+        gridTemplateColumns: "calc(100vw - 32px)",
+      }}
     >
       <Toaster />
       <nav className="h-16 flex gap-4 max-w-full">

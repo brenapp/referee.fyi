@@ -5,7 +5,6 @@ import { EventPage } from "./pages/events/home";
 import { EventTeamsPage } from "./pages/events/team";
 import { EventDivisionPickerPage } from "./pages/events/division";
 import { HomePage } from "./pages/home";
-import { EventJoinPage } from "./pages/events/join";
 import { EventSkillsPage } from "./pages/events/skills";
 import { EventSummaryPage } from "./pages/events/summary";
 import { SettingsPage } from "./pages/settings";
@@ -22,7 +21,6 @@ function App() {
             <Route path="/:sku/skills/" element={<EventSkillsPage />} />
             <Route path="/:sku/summary/" element={<EventSummaryPage />} />
             <Route path="/:sku/:division" element={<EventPage />} />
-            <Route path="/:sku/join" element={<EventJoinPage />} />
             <Route path="/:sku/team/:number" element={<EventTeamsPage />} />
           </Route>
         </Route>

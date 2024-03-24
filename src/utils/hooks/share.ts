@@ -1,4 +1,4 @@
-import { get, set } from "idb-keyval";
+import { set } from "idb-keyval";
 import {
   createContext,
   useCallback,
@@ -6,19 +6,15 @@ import {
   useEffect,
   useState,
 } from "react";
-import { UseQueryOptions, useMutation, useQuery } from "@tanstack/react-query";
-import {
-  CreateShareRequest,
-  CreateShareResponse,
-  ShareResponse,
-  WebSocketServerShareInfoMessage,
-} from "~share/api";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "~utils/data/query";
 import {
   ShareConnection,
-  createShare,
-  getShareData,
+  acceptEventInvitation,
+  createInstance,
+  getEventInvitation,
   getShareName,
+  registerUser,
 } from "~utils/data/share";
 
 export const connection = new ShareConnection();
@@ -28,7 +24,7 @@ export function useShareConnection() {
   return useContext(ShareContext);
 }
 
-export function useShareName() {
+export function useShareProfile() {
   const [name, setName] = useState("");
 
   const query = useQuery({
@@ -44,70 +40,55 @@ export function useShareName() {
 
   const persist = useCallback(async () => {
     await set("share_name", name);
+    await registerUser(name);
     queryClient.invalidateQueries({ exact: true, queryKey: ["share_name"] });
   }, [name]);
 
   return { name, setName, persist };
 }
 
-export function useCreateShare() {
+export function useShareID() {
+  return useQuery({
+    queryKey: ["share_id"],
+    queryFn: () => ShareConnection.getUserId()
+  })
+};
+
+export type UseCreateShareOptions = {
+  sku: string;
+};
+
+export function useCreateInstance(sku: string) {
   return useMutation({
-    mutationFn: async (
-      data: CreateShareRequest
-    ): Promise<ShareResponse<CreateShareResponse>> => {
-      return createShare(data);
-    },
+    mutationFn: () => createInstance(sku)
   });
 }
 
-export function useShareCode(sku: string | null | undefined) {
+export function useEventInvitation(sku?: string | null) {
   return useQuery({
-    queryKey: ["share_code", sku],
-    queryFn: async () => {
+    queryKey: ["event_invitation", sku],
+    queryFn: () => {
       if (!sku) {
         return null;
       }
-      const value = await get<string>(`share_${sku}`);
-      return value ?? null;
+      return getEventInvitation(sku);
     },
-    staleTime: 0,
-  });
-}
+    staleTime: 1000 * 60,
+    refetchOnMount: true,
+  })
+};
 
-export function useShareData(
-  sku: string | null | undefined,
-  code: string | null | undefined,
-  options?: Omit<
-    UseQueryOptions<ShareResponse<WebSocketServerShareInfoMessage> | null>,
-    "queryKey" | "queryFn"
-  >
-) {
-  return useQuery({
-    queryKey: ["share_data", sku, code],
-    queryFn: async () => {
-      if (!sku || !code) {
-        return null;
-      }
-      return getShareData(sku, code);
-    },
-    staleTime: 1000,
-    networkMode: "online",
-    ...options,
+export function useAcceptInvitation(sku: string, id: string) {
+  return useMutation({
+    mutationFn: () => acceptEventInvitation(sku, id)
   });
-}
-
-export function useShareUserId() {
-  return useQuery({
-    queryKey: ["share_user_id"],
-    queryFn: async () => ShareConnection.getUserId(),
-  });
-}
+};
 
 export function useActiveUsers() {
   const connection = useShareConnection();
 
   const activeUsers = useQuery({
-    queryKey: ["active_users", connection.sku, connection.code],
+    queryKey: ["active_users", connection.sku, connection.invitation?.id],
     queryFn: () => connection.users,
     staleTime: 0,
     gcTime: 0,

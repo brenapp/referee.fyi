@@ -7,7 +7,7 @@ import {
   addServerIncident,
   deleteServerIncident,
   editServerIncident,
-  getShareName,
+  ShareConnection,
 } from "./share";
 import { EditIncident, IncidentOutcome, Revision, Incident as ServerIncident } from "~share/api";
 
@@ -141,7 +141,6 @@ export async function editIncident(
   updateRemote: boolean = true
 ) {
   const current = await getIncident(id);
-  const name = await getShareName();
 
   if (!current) {
     return;
@@ -164,16 +163,18 @@ export async function editIncident(
 
   };
 
+  const user = await ShareConnection.getSender();
+
   const revision = current.revision ?? {
     count: 0,
-    user: { type: "client", name },
+    user,
     history: []
   };
 
   revision.count += 1;
-  revision.user = { type: "client", name };
+  revision.user = user;
   revision.history.push({
-    user: { type: "client", name },
+    user,
     date: new Date(),
     changes
   });

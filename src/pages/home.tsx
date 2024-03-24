@@ -1,19 +1,24 @@
 import { Button, LinkButton } from "~components/Button";
-import { useRecentEvents } from "~utils/hooks/history";
 import { useCallback, useEffect, useState } from "react";
 import { Dialog, DialogHeader, DialogBody } from "~components/Dialog";
 import Markdown from "react-markdown";
 import { version } from "../../package.json";
 import "./markdown.css";
 import DocumentDuplicateIcon from "@heroicons/react/24/outline/DocumentDuplicateIcon";
-import { CameraIcon, Cog8ToothIcon } from "@heroicons/react/20/solid";
-import { useNavigate } from "react-router-dom";
-import { BarcodeReader, JoinInfo } from "./dialogs/qrcode";
-import * as robotevents from "robotevents";
+import { Cog8ToothIcon } from "@heroicons/react/20/solid";
+import { useEventSearch } from "~utils/hooks/robotevents";
 
 export const HomePage: React.FC = () => {
-  const { data: recentEvents } = useRecentEvents(5);
-  const navigate = useNavigate();
+  const { data: events } = useEventSearch({
+    sku: [
+      "RE-VRC-23-3690",
+      "RE-VRC-23-3691",
+      "RE-VEXU-23-3692",
+      "RE-VRC-23-3695",
+      "RE-VIQRC-23-3693",
+      "RE-VIQRC-23-3694",
+    ],
+  });
 
   const [markdownContent, setMarkdownContent] = useState<string>("");
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
@@ -29,25 +34,15 @@ export const HomePage: React.FC = () => {
       }
     };
 
-    fetchMarkdownContent();
+    fetchMarkdownContent().then(() => {
+      const userVersion = localStorage.getItem("version");
 
-    const userVersion = localStorage.getItem("version");
+      if (userVersion && userVersion !== version) {
+        setUpdateDialogOpen(true);
+      }
 
-    if (userVersion && userVersion !== version) {
-      setUpdateDialogOpen(true);
-    }
-
-    localStorage.setItem("version", version);
-  }, []);
-
-  const onFoundJoinCode = useCallback(async ({ sku, code }: JoinInfo) => {
-    const event = await robotevents.events.get(sku);
-
-    if (!event) {
-      return;
-    }
-
-    navigate(`/${sku}/join?code=${code}`);
+      localStorage.setItem("version", version);
+    });
   }, []);
 
   const onClickCopyBuild = useCallback(() => {
@@ -67,22 +62,13 @@ export const HomePage: React.FC = () => {
               Update Notes
             </Button>
           </div>
-          <BarcodeReader onFoundCode={onFoundJoinCode}>
-            {(props) => (
-              <Button className="flex items-center gap-2 w-min" {...props}>
-                <CameraIcon height={20} />
-                <p>Scan</p>
-              </Button>
-            )}
-          </BarcodeReader>
           <LinkButton to="/settings" className="flex items-center gap-2">
             <Cog8ToothIcon height={20} />
             <p>Settings</p>
           </LinkButton>
         </nav>
-
-        <section className="max-w-full">
-          {recentEvents?.map((event) => (
+        <section className="max-w-full mb-4">
+          {events?.map((event) => (
             <LinkButton
               to={`/${event.sku}`}
               className="w-full max-w-full mt-4"

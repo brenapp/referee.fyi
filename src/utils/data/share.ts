@@ -1,14 +1,21 @@
 import { del, get, set } from "idb-keyval";
 import type {
   ShareResponse,
-  CreateShareResponse,
   ShareUser,
   WebSocketPayload,
   WebSocketMessage,
   WebSocketPeerMessage,
-  WebSocketServerShareInfoMessage,
-  EditIncidentResponse,
-  CreateShareRequest,
+  WebSocketSender,
+  APIRegisterUserResponseBody,
+  APIPostCreateResponseBody,
+  APIGetInvitationResponseBody,
+  APIPutInvitationAcceptResponseBody,
+  UserInvitation,
+  APIPutInviteResponseBody,
+  APIDeleteInviteResponseBody,
+  APIGetShareDataResponseBody,
+  APIPutIncidentResponseBody,
+  APIPatchIncidentResponseBody,
 } from "~share/api";
 import {
   IncidentWithID,
@@ -22,136 +29,256 @@ import {
 import { toast } from "~components/Toast";
 import { queryClient } from "./query";
 import { EventEmitter } from "events";
+import { exportPublicKey, getKeyPair, getSignRequestHeaders, signWebSocketConnectionURL } from "./crypto";
 
 const URL_BASE = import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER ?? "https://share.referee.fyi";
+
+export type JoinRequest = {
+  client_version: string;
+  user: {
+    name: string;
+    key: string;
+  };
+};
+
+export function isValidJoinRequest(
+  value: Record<string, unknown>
+): value is JoinRequest {
+  const versionMatch =
+    Object.hasOwn(value, "client_version") &&
+    value.client_version === __REFEREE_FYI_VERSION__;
+
+  const hasUser =
+    Object.hasOwn(value, "user") &&
+    Object.hasOwn(value.user as Record<string, string>, "name") &&
+    Object.hasOwn(value.user as Record<string, string>, "key") &&
+    typeof (value.user as Record<string, string>).name === "string" &&
+    typeof (value.user as Record<string, string>).key === "string";
+
+  return versionMatch && hasUser;
+}
+
+export function getJoinRequest({ id, name }: ShareUser): JoinRequest {
+  return { client_version: __REFEREE_FYI_VERSION__, user: { name, key: id } };
+};
 
 export async function getShareName() {
   return (await get<string>("share_name")) ?? "";
 }
 
-export async function getShareData(sku: string, code: string) {
-  const response = await fetch(
-    new URL(`/api/share/${sku}/${code}/get`, URL_BASE)
-  );
+export async function signedFetch(input: RequestInfo | URL, init?: RequestInit) {
 
-  if (!response.ok) {
-    return null;
+  const request = new Request(input, init);
+  const signatureHeaders = await getSignRequestHeaders(request);
+
+  let headers: Headers;
+  if (init?.headers) {
+    headers = new Headers(init.headers);
+  } else if (input instanceof Request) {
+    headers = new Headers(input.headers);
+  } else {
+    headers = new Headers();
   }
 
-  return response.json() as Promise<
-    ShareResponse<WebSocketServerShareInfoMessage>
-  >;
-}
+  signatureHeaders.forEach((value, key) => headers.set(key, value));
 
-export type JoinShareOptions = {
-  sku: string;
-  code: string;
+  return fetch(request, {
+    headers
+  });
 };
 
-export async function joinShare({ sku, code }: JoinShareOptions) {
-  await set(`share_${sku}`, code);
-  queryClient.invalidateQueries({ queryKey: ["share_code"] });
-}
 
-export async function leaveShare(sku: string) {
-  await del(`share_${sku}`);
-  queryClient.invalidateQueries({ queryKey: ["share_code"] });
-}
+export async function registerUser(name: string): Promise<ShareResponse<APIRegisterUserResponseBody>> {
 
-export async function createShare(
-  incidents: CreateShareRequest
-): Promise<ShareResponse<CreateShareResponse>> {
+  const url = new URL("/api/user", URL_BASE);
+  url.searchParams.set("name", name);
+
+  const response = await signedFetch(
+    url, {
+    method: "POST"
+  });
+
+  return response.json();
+};
+
+
+export async function createInstance(sku: string): Promise<ShareResponse<APIPostCreateResponseBody>> {
+  const response = await signedFetch(
+    new URL(`/api/${sku}/create`, URL_BASE), {
+    method: "POST"
+  });
+
+  const body: ShareResponse<APIPostCreateResponseBody> = await response.json();
+
+  if (body.success) {
+    await set(`invitation_${sku}`, body.data);
+    queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
+  };
+
+  return body;
+};
+
+export async function fetchInvitation(sku: string) {
   try {
-    const response = await fetch(
-      new URL(`/api/create/${incidents.sku}`, URL_BASE),
-      {
-        method: "POST",
-        body: JSON.stringify(incidents),
-      }
-    );
+    const response = await signedFetch(
+      new URL(`/api/${sku}/invitation`, URL_BASE), {
+      method: "GET"
+    })
 
-    if (!response.ok) {
-      return response.json();
-    }
-
-    const body = (await response.json()) as ShareResponse<CreateShareResponse>;
+    const body: ShareResponse<APIGetInvitationResponseBody> = await response.json();
 
     if (!body.success) {
-      return body;
+      return null;
     }
-
-    await set(`share_${incidents.sku}`, body.data.code);
-    queryClient.invalidateQueries({ queryKey: ["share_code"] });
 
     return body;
   } catch (e) {
-    return {
-      success: false,
-      reason: "bad_request",
-      details: `${e}`,
-    };
+    return null;
   }
 }
 
-export async function addServerIncident(incident: IncidentWithID) {
-  const code = await get<string>(`share_${incident.event}`);
-  const userId = await ShareConnection.getUserId();
+export async function getEventInvitation(sku: string): Promise<UserInvitation | null> {
+  const current = await get<APIGetInvitationResponseBody>(`invitation_${sku}`);
 
-  if (!code) {
-    return;
+  if (current) {
+    return current;
   }
 
+  const body = await fetchInvitation(sku);
+
+  if (!body || !body.success) {
+    return null;
+  }
+
+  await set(`invitation_${sku}`, body.data);
+  queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
+
+  return body.data;
+};
+
+export async function verifyEventInvitation(sku: string): Promise<UserInvitation | null> {
+  const response = await signedFetch(
+    new URL(`/api/${sku}/invitation`, URL_BASE), {
+    method: "GET"
+  });
+
+  if (response.type !== "basic" && response.type !== "default") {
+    return null;
+  }
+
+  const body: ShareResponse<APIGetInvitationResponseBody> = await response.json();
+
+  if (!body.success && body.reason !== "server_error") {
+    await del(`invitation_${sku}`);
+    queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
+  }
+
+  if (body.success && body.data.accepted) {
+    await set(`invitation_${sku}`, body.data);
+    queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
+    return body.data
+  }
+
+  return null;
+};
+
+export async function acceptEventInvitation(sku: string, invitationId: string): Promise<ShareResponse<APIPutInvitationAcceptResponseBody>> {
+  const url = new URL(`/api/${sku}/accept`, URL_BASE);
+  url.searchParams.set("invitation", invitationId);
+
+  const response = await signedFetch(
+    url, {
+    method: "PUT"
+  });
+
+  const body: ShareResponse<APIPutInvitationAcceptResponseBody> = await response.json();
+
+  if (!body.success && body.reason !== "server_error") {
+    await del(`invitation_${sku}`);
+    queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
+  }
+
+  if (body.success) {
+    await set(`invitation_${sku}`, body.data);
+    queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
+  }
+
+  return body;
+};
+
+export async function inviteUser(sku: string, user: string): Promise<ShareResponse<APIPutInviteResponseBody>> {
+
+  const url = new URL(`/api/${sku}/invite`, URL_BASE);
+  url.searchParams.set("user", user);
+
+  const response = await signedFetch(url, { method: "PUT" });
+  return response.json();
+};
+
+export async function removeInvitation(sku: string, user?: string): Promise<ShareResponse<APIDeleteInviteResponseBody>> {
+  const { id } = await ShareConnection.getSender();
+
+  const url = new URL(`/api/${sku}/invite`, URL_BASE);
+  url.searchParams.set("user", user ?? id);
+
+  const response = await signedFetch(url, { method: "DELETE" });
+  const body: ShareResponse<APIDeleteInviteResponseBody> = await response.json();
+
+  if (body.success) {
+    await del(`invitation_${sku}`);
+    queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
+  }
+
+  return body;
+};
+
+export async function getShareData(sku: string): Promise<ShareResponse<APIGetShareDataResponseBody>> {
+  const url = new URL(`/api/${sku}/get`, URL_BASE);
+
+  const response = await signedFetch(url);
+  return response.json();
+};
+
+export async function addServerIncident(incident: IncidentWithID): Promise<ShareResponse<APIPutIncidentResponseBody>> {
   const url = new URL(
-    `/api/share/${incident.event}/${code}/incident`,
+    `/api/${incident.event}/incident`,
     URL_BASE
   );
 
-  url.searchParams.set("user_id", userId);
-
-  return fetch(url, {
+  const response = await signedFetch(url, {
     method: "PUT",
     body: JSON.stringify(incident),
   });
+  return response.json();
 }
 
-export async function editServerIncident(incident: IncidentWithID) {
-  const code = await get<string>(`share_${incident.event}`);
-  const userId = await ShareConnection.getUserId();
-
-  if (!code) {
-    return;
-  }
-
+export async function editServerIncident(incident: IncidentWithID): Promise<ShareResponse<APIPatchIncidentResponseBody>> {
   const url = new URL(
-    `/api/share/${incident.event}/${code}/incident`,
+    `/api/${incident.event}/incident`,
     URL_BASE
   );
 
-  url.searchParams.set("user_id", userId);
-
-  const response = await fetch(url, {
+  const response = await signedFetch(url, {
     method: "PATCH",
     body: JSON.stringify(incident),
   });
-
-  return response.json() as Promise<ShareResponse<EditIncidentResponse>>;
+  return response.json();
 }
 
-export async function deleteServerIncident(id: string, sku: string) {
-  const code = await get<string>(`share_${sku}`);
-  const userId = await ShareConnection.getUserId();
-
-  if (!code) {
-    return;
-  }
-
-  const url = new URL(`/api/share/${sku}/${code}/incident`, URL_BASE);
+export async function deleteServerIncident(id: string, sku: string): Promise<ShareResponse<APIPatchIncidentResponseBody>> {
+  const url = new URL(
+    `/api/${sku}/incident`,
+    URL_BASE
+  );
   url.searchParams.set("id", id);
-  url.searchParams.set("user_id", userId);
-  return fetch(url, {
+
+  const response = await signedFetch(url, {
     method: "DELETE",
   });
+  return response.json();
 }
+
+
 interface ShareConnectionEvents {
   connect: () => void;
   disconnect: () => void;
@@ -180,22 +307,24 @@ export class ShareConnection extends EventEmitter {
   ws: WebSocket | null = null;
 
   sku: string = "";
-  code: string = "";
 
   user: ShareUser | null = null;
-  owner: string | null = null;
+  users: ShareUser[] = [];
 
-  users: string[] = [];
+  invitation: UserInvitation | null = null;
 
-  public setup(sku: string, code: string, user: Omit<ShareUser, "id">) {
+  public async setup(sku: string) {
 
-    if (!this.owner) {
-      this.fetchInfo();
+    const invitation = await getEventInvitation(sku);
+
+    if (!invitation) {
+      return;
     };
 
     if (
       this.sku === sku &&
-      this.code === code &&
+      this.invitation &&
+      this.invitation.id === invitation.id &&
       this.ws &&
       this.ws.readyState === this.ws.OPEN
     ) {
@@ -205,43 +334,30 @@ export class ShareConnection extends EventEmitter {
     this.cleanup();
 
     this.sku = sku;
-    this.code = code;
 
-    return this.connect(user);
+    const { name, id } = await ShareConnection.getSender();
+    return this.connect({ name, id });
   }
 
   static reconnectTimer?: NodeJS.Timeout = undefined;
 
   public static async getUserId() {
-    const code = await get<string>("user_id");
-
-    if (code) {
-      return code;
-    }
-
-    const newCode = crypto.randomUUID();
-    await set("user_id", newCode);
-
-    return newCode;
-  }
-
-  async fetchInfo() {
-    const url = new URL(`/api/share/${this.sku}/${this.code}/get`, URL_BASE);
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      return;
-    }
-
-    const json: WebSocketServerShareInfoMessage = await response.json();
-    this.owner = json.data.owner;
+    const { publicKey } = await getKeyPair();
+    return exportPublicKey(publicKey, false);
   };
 
-  async connect(user: Omit<ShareUser, "id">) {
-    const id = await ShareConnection.getUserId();
-    this.user = { id, ...user };
+  public static async getSender(): Promise<WebSocketSender & { type: "client" }> {
 
-    const url = new URL(`/api/share/${this.sku}/${this.code}/join`, URL_BASE);
+    const name = await getShareName();
+    const id = await this.getUserId();
+
+    return { type: "client", name, id };
+  }
+
+  async connect(user: ShareUser) {
+    const { name, id } = await ShareConnection.getSender();
+
+    const url = new URL(`/api/${this.sku}/join`, URL_BASE);
 
     if (url.protocol === "https:") {
       url.protocol = "wss:";
@@ -250,9 +366,12 @@ export class ShareConnection extends EventEmitter {
     }
 
     url.searchParams.set("id", id);
-    url.searchParams.set("name", this.user.name);
+    url.searchParams.set("name", name);
 
-    this.ws = new WebSocket(url);
+
+    const signedURL = await signWebSocketConnectionURL(url);
+
+    this.ws = new WebSocket(signedURL);
     this.ws.onmessage = this.handleMessage.bind(this);
 
     this.ws.onopen = () => this.emit("connect");
@@ -271,9 +390,10 @@ export class ShareConnection extends EventEmitter {
   }
 
   async send(message: WebSocketPeerMessage) {
+    const sender = await ShareConnection.getSender();
     const payload: WebSocketPayload<WebSocketPeerMessage> = {
       ...message,
-      sender: { type: "client", name: this.user?.name ?? "" },
+      sender,
       date: new Date().toISOString(),
     };
     this.ws?.send(JSON.stringify(payload));
@@ -302,11 +422,10 @@ export class ShareConnection extends EventEmitter {
           break;
         }
 
-        // Sent when you first join, and also when owner changes. We definitely don't want to
+        // Sent when you first join, We definitely don't want to
         // *delete* incidents the user creates before joining the share, unless they are listed as
         // being deleted on the server.
         case "server_share_info": {
-          this.owner = data.data.owner;
           this.users = data.users;
 
           for (const incident of data.data.incidents) {
@@ -357,14 +476,14 @@ export class ShareConnection extends EventEmitter {
         }
 
         case "server_user_add": {
-          toast({ type: "info", message: `${data.user} joined.` });
-          if (this.users.indexOf(data.user) < 0) {
+          toast({ type: "info", message: `${data.user.name} joined.` });
+          if (this.users.findIndex(u => u.id === data.user.id) < 0) {
             this.users.push(data.user);
           }
           break;
         }
         case "server_user_remove": {
-          toast({ type: "warn", message: `${data.user} left.` });
+          toast({ type: "info", message: `${data.user.name} left.` });
           const index = this.users.findIndex((u) => u === data.user);
           if (index > -1) {
             this.users.splice(index, 1);

@@ -1,7 +1,7 @@
 import { Router } from "itty-router"
-import type { ShareUser, EventIncidents as EventIncidentsData, Incident } from "../types/EventIncidents"
 import { corsHeaders, response } from "./utils"
-import type { ShareMetadata, WebSocketMessage, WebSocketPayload, WebSocketPeerMessage, WebSocketSender, WebSocketServerShareInfoMessage } from "../types/api";
+import type { ShareUser, Incident, EventIncidentsData as EventIncidentsData, WebSocketMessage, WebSocketPayload, WebSocketPeerMessage, WebSocketSender, WebSocketServerShareInfoMessage, EventIncidentsInitData } from "../types/api";
+import { User } from "../types/server";
 
 export type SessionClient = {
     user: ShareUser;
@@ -18,11 +18,8 @@ export class EventIncidents implements DurableObject {
     router = Router()
     clients: SessionClient[] = [];
     state: DurableObjectState;
-    owner?: ShareUser;
-    trusted?: string[];
 
     sku: string = "";
-    code: string = "";
 
     env: Env
 
@@ -39,27 +36,10 @@ export class EventIncidents implements DurableObject {
             .put("/incident", this.handleAddIncident.bind(this))
             .patch("/incident", this.handleEditIncident.bind(this))
             .delete("/incident", this.handleDeleteIncident.bind(this))
-            .all("*", () => response({ success: false, reason: "bad_request", details: "unknown action", }))
+            .all("*", () => response({ success: false, reason: "bad_request", details: "durable object unknown action", }))
     }
 
     // Storage
-    async getOwner() {
-        return this.owner;
-    };
-
-    async setOwner(owner: ShareUser) {
-        this.owner = owner;
-
-        const value = await this.env.SHARES.get(`${this.sku}#${this.code}`);
-
-        if (!value) {
-            return;
-        }
-
-        const body: ShareMetadata = JSON.parse(value);
-        body.owner = owner;
-    };
-
     async getSKU() {
         return this.sku;
     };
@@ -121,19 +101,18 @@ export class EventIncidents implements DurableObject {
 
     async getData(): Promise<EventIncidentsData> {
         const sku = await this.getSKU();
-        const owner = await this.getOwner();
         const incidents = await this.getAllIncidents();
         const deleted = await this.getDeletedIncidents();
 
-        return { sku: sku ?? "", owner, incidents, deleted };
+        return { sku: sku ?? "", incidents, deleted };
     };
 
     async createServerShareMessage(): Promise<WebSocketServerShareInfoMessage> {
         const data = await this.getData();
         return {
             type: "server_share_info",
-            users: this.clients.map(client => client.user.name),
-            data: { ...data, owner: data.owner?.name ?? "" },
+            users: this.clients.map(client => client.user),
+            data,
         }
     };
 
@@ -141,16 +120,34 @@ export class EventIncidents implements DurableObject {
         return { ...message, sender, date: new Date().toISOString() }
     };
 
+    getRequestBody<T = unknown>(request: Request): T | null {
+        const content = request.headers.get("X-Referee-Content");
+
+        if (!content) {
+            return null;
+        }
+
+        try {
+            return JSON.parse(content);
+        } catch (e) {
+            return null;
+        }
+    };
+
+    getRequestUser(request: Request): User {
+        const name = request.headers.get("X-Referee-User-Name")!;
+        const key = request.headers.get("X-Referee-User-Key")!;
+
+        return { name, key }
+    };
+
     async fetch(request: Request) {
         return this.router.handle(request);
     }
 
     async handleInit(request: Request) {
-        const data = await request.json<ShareMetadata>();
+        const data = await request.json<EventIncidentsInitData>();
         this.sku = data.sku;
-        this.code = data.code;
-        this.owner = data.owner;
-        this.trusted = data.trusted;
     };
 
     async handleGet() {
@@ -196,17 +193,23 @@ export class EventIncidents implements DurableObject {
     };
 
     async handleAddIncident(request: Request) {
-
-        const params = new URL(request.url).searchParams;
-
-        const userId = params.get("user_id");
-        const client = this.clients.find(client => client.user.id === userId);
+        const user = this.getRequestUser(request);
+        const client = this.clients.find(v => v.user.id === user.key);
 
         const sender: WebSocketSender = client ? {
-            type: "client", name: client.user.name
+            type: "client", name: client.user.name, id: client.user.id
         } : { type: "server" };
 
-        const incident = await request.json<Incident>();
+        const incident = this.getRequestBody<Incident>(request);
+
+        if (!incident) {
+            return response({
+                success: false,
+                reason: "bad_request",
+                details: "Must specify a valid incident."
+            })
+        };
+
         const deleted = await this.getDeletedIncidents();
 
         if (deleted.includes(incident.id)) {
@@ -216,7 +219,6 @@ export class EventIncidents implements DurableObject {
                 details: "That incident has been deleted."
             })
         };
-
 
         await this.addIncident(incident);
         await this.broadcast({ type: "add_incident", incident }, sender);
@@ -228,7 +230,15 @@ export class EventIncidents implements DurableObject {
     };
 
     async handleEditIncident(request: Request): Promise<Response> {
-        const incident = await request.json<Incident>();
+        const incident = this.getRequestBody<Incident>(request);
+
+        if (!incident) {
+            return response({
+                success: false,
+                reason: "bad_request",
+                details: "Must specify a valid incident to edit."
+            })
+        };
 
         const deletedIncidents = await this.getDeletedIncidents();
         if (deletedIncidents.includes(incident.id)) {
@@ -239,14 +249,12 @@ export class EventIncidents implements DurableObject {
             })
         };
 
-        const params = new URL(request.url).searchParams;
-
-        const userId = params.get("user_id");
-        const client = this.clients.find(client => client.user.id === userId);
+        const user = this.getRequestUser(request);
+        const client = this.clients.find(v => v.user.id === user.key);
         const currentIncident = await this.getIncident(incident.id);
 
         const sender: WebSocketSender = client ? {
-            type: "client", name: client.user.name
+            type: "client", name: client.user.name, id: client.user.id
         } : { type: "server" };
 
         const currentRevision = currentIncident?.revision?.count ?? 0;
@@ -286,12 +294,11 @@ export class EventIncidents implements DurableObject {
 
     async handleDeleteIncident(request: Request) {
         const params = new URL(request.url).searchParams;
-
-        const userId = params.get("user_id");
-        const client = this.clients.find(client => client.user.id === userId);
+        const user = this.getRequestUser(request);
+        const client = this.clients.find(v => v.user.id === user.key);
 
         const sender: WebSocketSender = client ? {
-            type: "client", name: client.user.name
+            type: "client", name: client.user.name, id: client.user.id
         } : { type: "server" };
 
         const id = params.get("id");
@@ -373,22 +380,22 @@ export class EventIncidents implements DurableObject {
                     case "add_incident": {
                         const incident = data.incident;
                         await this.addIncident(incident);
-                        this.broadcast({ type: "add_incident", incident }, { type: "client", name: client.user.name });
+                        this.broadcast({ type: "add_incident", incident }, { type: "client", name: client.user.name, id: client.user.id });
                         break;
                     }
                     case "update_incident": {
                         const incident = data.incident;
                         await this.editIncident(incident);
-                        this.broadcast({ type: "update_incident", incident }, { type: "client", name: client.user.name });
+                        this.broadcast({ type: "update_incident", incident }, { type: "client", name: client.user.name, id: client.user.id });
                         break;
                     }
                     case "remove_incident": {
                         await this.deleteIncident(data.id);
-                        this.broadcast({ type: "remove_incident", id: data.id }, { type: "client", name: client.user.name });
+                        this.broadcast({ type: "remove_incident", id: data.id }, { type: "client", name: client.user.name, id: client.user.id });
                         break;
                     }
                     case "message": {
-                        this.broadcast({ type: "message", message: data.message }, { type: "client", name: client.user.name })
+                        this.broadcast({ type: "message", message: data.message }, { type: "client", name: client.user.name, id: client.user.id })
                         break;
                     }
 
@@ -403,14 +410,14 @@ export class EventIncidents implements DurableObject {
         const payload = this.createPayload(state, { type: "server" });
 
         await socket.send(JSON.stringify(payload));
-        await this.broadcast({ type: "server_user_add", user: user.name }, { type: "server" })
+        await this.broadcast({ type: "server_user_add", user }, { type: "server" })
 
         const quitHandler = async () => {
             client.active = false
             this.clients = this.clients.filter((member) => member !== client)
 
             if (client.user) {
-                await this.broadcast({ type: "server_user_remove", user: client.user.name }, { type: "server" })
+                await this.broadcast({ type: "server_user_remove", user }, { type: "server" })
             }
         }
 
@@ -438,7 +445,7 @@ export class EventIncidents implements DurableObject {
 
         clientLefts.forEach((client) => {
             if (client.user) {
-                this.broadcast({ type: "server_user_remove", user: client.user.name }, { type: "server" });
+                this.broadcast({ type: "server_user_remove", user: client.user }, { type: "server" });
             }
         });
     };

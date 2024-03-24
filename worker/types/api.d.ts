@@ -1,4 +1,5 @@
-import { EventIncidents, ShareMetadata, Incident, ShareUser } from "./EventIncidents";
+import { EventIncidentsData, ShareMetadata, Incident, ShareUser, EventIncidentsInitData } from "./EventIncidents";
+import { Invitation, User } from "./server";
 
 export * from "./EventIncidents";
 
@@ -20,13 +21,41 @@ export type ShareResponseFailure = {
 
 export type ShareResponse<T> = ShareResponseSuccess<T> | ShareResponseFailure;
 
-// /api/create/:sku
-export type CreateShareRequest = Omit<ShareMetadata, "code">;
-export type CreateShareResponse = Pick<ShareMetadata, "code">
+export type UserInvitation = Pick<Invitation, "id" | "admin" | "accepted"> & {
+    from: User
+}
 
-// PATCH /api/share/:sku:/:code:/incident
-export type EditIncidentResponse = Exclude<Incident["revision"], undefined>;
-export type ShareGetDataResponse = WebSocketMessageData["server_share_info"];
+// POST /api/user
+export type APIRegisterUserResponseBody = {
+    user: User;
+}
+
+// POST /api/:sku/create
+export type APIPostCreateResponseBody = UserInvitation
+
+// GET /api/:sku/invitation
+export type APIGetInvitationResponseBody = UserInvitation
+
+// PUT /api/:sku/accept
+export type APIPutInvitationAcceptResponseBody = UserInvitation
+
+// PUT /api/:sku/invite
+export type APIPutInviteResponseBody = {};
+
+// DELETE /api/:sku/invite
+export type APIDeleteInviteResponseBody = {};
+
+// GET /api/:sku/get
+export type APIGetShareDataResponseBody = EventIncidentsData;
+
+// PUT /api/:sku/incident
+export type APIPutIncidentResponseBody = Incident;
+
+// PATCH /api/:sku/incident
+export type APIPatchIncidentResponseBody = Incident["revision"];
+
+// DELETE /api/:sku/incident
+export type APIDeleteIncidentResponseBody = {};
 
 // WebSocket communications
 
@@ -58,18 +87,18 @@ export type WebSocketPeerMessage =
 
 export type WebSocketServerShareInfoMessage = {
     type: "server_share_info",
-    data: Omit<EventIncidents, "owner"> & { owner: string };
-    users: ShareUser["name"][]
+    data: EventIncidentsData;
+    users: ShareUser[]
 }
 
 export type WebsocketServerUserAddMessage = {
     type: "server_user_add";
-    user: ShareUser["name"];
+    user: ShareUser;
 }
 
 export type WebsocketServerUserRemoveMessage = {
     type: "server_user_remove";
-    user: ShareUser["name"];
+    user: ShareUser;
 }
 
 export type WebSocketServerMessage =
@@ -84,7 +113,7 @@ export type WebSocketMessageData = {
 };
 
 
-export type WebSocketSender = { type: "server" } | { type: "client", name: string }
+export type WebSocketSender = { type: "server" } | { type: "client", name: string, id: string }
 export type WebSocketPayload<T extends WebSocketMessage> = T & {
     date: string; // ISO string
     sender: WebSocketSender;

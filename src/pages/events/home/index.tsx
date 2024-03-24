@@ -11,21 +11,18 @@ import { EventManageTab } from "./manage";
 import {
   ShareContext,
   connection,
-  useShareCode,
-  useShareName,
+  useEventInvitation,
 } from "~utils/hooks/share";
 
 export const ShareProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const { data: event } = useCurrentEvent();
-  const { data: code } = useShareCode(event?.sku);
-
-  const { name } = useShareName();
+  const { data: invitation } = useEventInvitation(event?.sku);
 
   useEffect(() => {
-    if (event && code && name) {
-      connection.setup(event.sku, code, { name });
+    if (event && invitation && invitation.accepted) {
+      connection.setup(event.sku);
     }
-  }, [event, code, name]);
+  }, [event, invitation]);
 
   return (
     <ShareContext.Provider value={connection}>{children}</ShareContext.Provider>

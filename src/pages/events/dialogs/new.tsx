@@ -24,7 +24,8 @@ import { toast } from "~components/Toast";
 import { Spinner } from "~components/Spinner";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { queryClient } from "~utils/data/query";
-import { useShareName } from "~utils/hooks/share";
+import { useShareProfile } from "~utils/hooks/share";
+import { ShareConnection } from "~utils/data/share";
 
 export type EventNewIncidentDialogProps = {
   open: boolean;
@@ -37,7 +38,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   setOpen,
   initial,
 }) => {
-  const { name: shareName } = useShareName();
+  const { name: shareName } = useShareProfile();
   const { mutateAsync: createIncident } = useNewIncident();
 
   const sku = useSKU();
@@ -250,9 +251,11 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     async (e: React.FormEvent<HTMLFormElement> | React.MouseEvent) => {
       e.preventDefault();
 
+      const user = await ShareConnection.getSender();
+
       incident.revision = {
         count: 0,
-        user: { type: "client", name: shareName },
+        user,
         history: [],
       };
 

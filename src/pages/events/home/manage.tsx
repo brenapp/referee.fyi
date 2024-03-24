@@ -72,6 +72,13 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({
     }
   }, []);
 
+  const onConfirmFoundInfo = useCallback(() => {
+    if (info) {
+      onFoundCode(info);
+      setInfo(null);
+    }
+  }, [info, onFoundCode]);
+
   useEffect(() => {
     if (
       !videoRef.current ||
@@ -169,9 +176,7 @@ export const InviteDialog: React.FC<InviteDialogProps> = ({
             />
           </section>
           <video ref={videoRef} className="w-full rounded-md mt-4"></video>
-          {info
-            ? confirmationStep({ info, pass: () => onFoundCode(info) })
-            : null}
+          {info ? confirmationStep({ info, pass: onConfirmFoundInfo }) : null}
         </DialogBody>
       </Dialog>
     </>
@@ -336,9 +341,12 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
     mutationFn: () => removeInvitation(event.sku),
   });
 
-  const onInviteUser = useCallback(async (invitation: JoinRequest) => {
-    await inviteUser(event.sku, invitation.user.key);
-  }, []);
+  const onInviteUser = useCallback(
+    async (invitation: JoinRequest) => {
+      await inviteUser(event.sku, invitation.user.key);
+    },
+    [event, invitation]
+  );
 
   const onConfirmDeleteData = useCallback(async () => {
     const incidents = await getIncidentsByEvent(event.sku);

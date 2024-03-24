@@ -3,47 +3,48 @@ import { ButtonProps } from "~components/Button";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { Error } from "~components/Warning";
 
-export function isValidCode(code: string) {
-  return !!code.match(/[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}/g);
-}
-
-export type JoinInfo = {
-  sku: string;
-  code: string;
+export type InvitationInfo = {
+  client_version: string;
+  user: {
+    name: string;
+    key: string;
+  };
 };
 
-function extractJoinInformation(url: URL): JoinInfo | null {
-  if (!url.pathname.endsWith("join")) {
-    return null;
-  }
+function isValidInvitationInfo(
+  value: Record<string, unknown>
+): value is InvitationInfo {
+  const versionMatch =
+    Object.hasOwn(value, "client_version") &&
+    value.client_version === __REFEREE_FYI_VERSION__;
 
-  if (!url.searchParams.has("code")) {
-    return null;
-  }
+  const hasUser =
+    Object.hasOwn(value, "user") &&
+    Object.hasOwn(value.user as Record<string, string>, "name") &&
+    Object.hasOwn(value.user as Record<string, string>, "key") &&
+    typeof (value.user as Record<string, string>).name === "string" &&
+    typeof (value.user as Record<string, string>).key === "string";
 
-  const sku = url.pathname.split("/")[1];
-  const code = url.searchParams.get("code")!;
-
-  if (!isValidCode(code)) {
-    return null;
-  }
-
-  return { sku, code };
+  return versionMatch && hasUser;
 }
 
 export type BarcodeReaderProps = {
   children: React.FC<ButtonProps>;
-  onFoundCode: (info: JoinInfo) => void;
+  confirmationStep: React.FC<{ info: InvitationInfo; pass: () => void }>;
+  onFoundCode: (info: InvitationInfo) => void;
 };
 
 export const BarcodeReader: React.FC<BarcodeReaderProps> = ({
   children,
   onFoundCode,
+  confirmationStep,
 }) => {
   const [open, setOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string>("");
+
+  const [info, setInfo] = useState<InvitationInfo | null>(null);
 
   const onScanButtonClick = useCallback(async () => {
     setOpen(true);
@@ -84,12 +85,9 @@ export const BarcodeReader: React.FC<BarcodeReaderProps> = ({
           const barcodes = await detector.detect(canvas);
           for (const code of barcodes) {
             try {
-              const url = new URL(code.rawValue);
-              const info = extractJoinInformation(url);
-              if (info) {
-                console.log(info);
-                onFoundCode(info);
-                setOpen(false);
+              const value = JSON.parse(code.rawValue);
+              if (isValidInvitationInfo(value)) {
+                setInfo(value);
               }
             } catch (e) {
               continue;
@@ -133,6 +131,9 @@ export const BarcodeReader: React.FC<BarcodeReaderProps> = ({
         <DialogBody>
           {error ? <Error message={error} /> : null}
           <video ref={videoRef} className="w-full rounded-md"></video>
+          {info
+            ? confirmationStep({ info, pass: () => onFoundCode(info) })
+            : null}
         </DialogBody>
       </Dialog>
     </>

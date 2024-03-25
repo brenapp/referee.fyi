@@ -2,7 +2,7 @@ import { IRequest, Router, createCors, error, json, withParams } from "itty-rout
 import { response } from "./utils";
 
 import { Env, Invitation, ShareInstance, AuthenticatedRequest, RequestHasInvitation, SignedRequest, User } from "../types/server";
-import { APIPostCreateResponseBody, APIGetInvitationResponseBody, APIPutInvitationAcceptResponseBody, APIPutInviteResponseBody, APIRegisterUserResponseBody, EventIncidentsInitData, APIDeleteInviteResponseBody } from "../types/api";
+import { APIPostCreateResponseBody, APIGetInvitationResponseBody, APIPutInvitationAcceptResponseBody, APIPutInviteResponseBody, APIRegisterUserResponseBody, EventIncidentsInitData, APIDeleteInviteResponseBody, UserInvitation, InvitationListItem, APIGetInvitationsResponseBody } from "../types/api";
 
 
 export const { preflight, corsify } = createCors({
@@ -256,7 +256,7 @@ router
             from: request.keyHex
         }
 
-        instance.invitations.push(invitation.id);
+        instance.invitations.push(invitation.user);
         await env.INVITATIONS.put(`${request.keyHex}#${sku}`, JSON.stringify(invitation));
         await env.SHARES.put(`${sku}#${secret}`, JSON.stringify(instance));
 
@@ -379,6 +379,31 @@ router
 
     })
     .all("/api/:sku/*", verifyInvitation)
+    .get("/api/:sku/invitations", async (request: RequestHasInvitation, env: Env) => {
+        const sku = request.params.sku;
+
+        const instance = request.instance;
+        const invitations: InvitationListItem[] = [];
+
+        const users = instance.invitations.filter((u, i) => instance.invitations.indexOf(u) === i);
+        for (const user of users) {
+            const invitation = await env.INVITATIONS.get<Invitation>(`${user}#${sku}`, "json");
+            const profile = await env.USERS.get<User>(user, "json");
+
+            if (!invitation || !profile) { continue; }
+
+            invitations.push({
+                id: invitation.id, accepted: invitation.accepted, admin: invitation.admin, user: profile
+            })
+        };
+
+        return response<APIGetInvitationsResponseBody>({
+            success: true,
+            data: {
+                invitations
+            }
+        });
+    })
     .put("/api/:sku/invite", async (request: RequestHasInvitation, env: Env) => {
 
         const sku = request.params.sku;
@@ -414,7 +439,6 @@ router
         }
 
         const currentInvitation: Invitation | null = await env.INVITATIONS.get(`${newInvitation.user}#${newInvitation.sku}`, "json");
-        console.log(currentInvitation);
         if (currentInvitation && currentInvitation.accepted) {
             return response({
                 success: false,
@@ -424,7 +448,9 @@ router
         };
 
         const instance = request.instance;
-        instance.invitations.push(newInvitation.user);
+        if (!instance.invitations.includes(newInvitation.user)) {
+            instance.invitations.push(newInvitation.user);
+        }
         await env.SHARES.put(`${sku}#${invitation.instance_secret}`, JSON.stringify(instance));
         await env.INVITATIONS.put(`${newInvitation.user}#${newInvitation.sku}`, JSON.stringify(newInvitation));
 
@@ -469,6 +495,11 @@ router
         const index = instance.invitations.findIndex(i => i === userInvitation.user);
         instance.invitations.splice(index, 1);
 
+        if (userInvitation.admin) {
+            const index = instance.admins.findIndex(i => i === userInvitation.user)
+            instance.admins.splice(index, 1)
+        };
+
         // If the last admin leaves, remove everyone's invitations, functionally ending this session.
         if (userInvitation.admin && instance.admins.length < 1) {
             for (const user of instance.invitations) {
@@ -476,6 +507,7 @@ router
             }
             instance.invitations = []
         };
+
 
         await env.INVITATIONS.delete(`${user}#${invitation.sku}`);
         await env.SHARES.put(`${invitation.sku}#${invitation.instance_secret}`, JSON.stringify(instance));
@@ -488,6 +520,8 @@ router
     .all("/api/:sku/:path+", async (request: RequestHasInvitation, env: Env) => {
         const id = env.INCIDENTS.idFromName(`${request.instance.sku}#${request.instance.secret}`);
         const stub = env.INCIDENTS.get(id)
+
+        console.log(request.instance);
 
         const search = new URL(request.url).search;
 

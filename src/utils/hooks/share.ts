@@ -12,6 +12,7 @@ import {
   ShareConnection,
   acceptEventInvitation,
   createInstance,
+  getAllEventInvitations,
   getEventInvitation,
   getShareName,
   registerUser,
@@ -74,6 +75,20 @@ export function useEventInvitation(sku?: string | null) {
       return getEventInvitation(sku);
     },
     staleTime: 1000 * 60,
+  })
+};
+
+export function useAllEventInvitations(sku?: string | null) {
+  return useQuery({
+    queryKey: ["event_invitation_all", sku],
+    queryFn: () => {
+      if (!sku) {
+        return null;
+      }
+      return getAllEventInvitations(sku);
+    },
+    staleTime: 1000 * 60,
+    refetchOnMount: true,
   })
 };
 

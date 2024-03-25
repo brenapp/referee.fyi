@@ -26,6 +26,7 @@ import {
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import {
   useActiveUsers,
+  useAllEventInvitations,
   useCreateInstance,
   useEventInvitation,
   useShareID,
@@ -38,6 +39,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Info, Error } from "~components/Warning";
 import { Spinner } from "~components/Spinner";
 import { useEventIncidents } from "~utils/hooks/incident";
+import { TrashIcon } from "@heroicons/react/24/outline";
+import { queryClient } from "~utils/data/query";
 
 export type InviteDialogProps = {
   children: React.FC<ButtonProps>;
@@ -314,8 +317,10 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
   const { mutateAsync: createInstance } = useCreateInstance(event.sku);
   const { data: invitation } = useEventInvitation(event.sku);
 
-  const { data: entries } = useEventIncidents(event.sku);
+  const { data: users } = useAllEventInvitations(event.sku);
   const activeUsers = useActiveUsers();
+
+  const { data: entries } = useEventIncidents(event.sku);
   const isSharing = useMemo(
     () => !!invitation && invitation.accepted,
     [invitation]
@@ -341,6 +346,13 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
     mutationFn: () => removeInvitation(event.sku),
   });
 
+  const { mutateAsync: removeUser } = useMutation({
+    mutationFn: async (user: string) => {
+      await removeInvitation(event.sku, user);
+      queryClient.invalidateQueries({ queryKey: ["event_invitation_all"] });
+    },
+  });
+
   const onInviteUser = useCallback(
     async (invitation: JoinRequest) => {
       await inviteUser(event.sku, invitation.user.key);
@@ -358,7 +370,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
   }, [event.sku]);
 
   return (
-    <section className="max-w-xl mx-auto">
+    <section className="max-w-xl mx-auto flex-1">
       <JoinCodeDialog
         sku={event.sku}
         open={joinCodeDialogOpen}
@@ -406,6 +418,37 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
               </p>
             </nav>
           </div>
+          <section className="mt-4">
+            {users?.map((user) => (
+              <div key={user.id} className="py-2 px-4 rounded-md mt-2 flex">
+                <div className="flex gap-2 items-center flex-1">
+                  <UserCircleIcon height={24} />
+                  <p>{user.user.name}</p>
+                  {user.admin ? (
+                    <span className="text-xs  bg-purple-600 px-2 py-0.5 rounded-md">
+                      Admin
+                    </span>
+                  ) : null}
+                  {activeUsers.find((u) => u.id === user.user.key) ? (
+                    <span className="text-xs  bg-emerald-600 px-2 py-0.5 rounded-md">
+                      Connected
+                    </span>
+                  ) : (
+                    <span className="text-xs  bg-zinc-700 px-2 py-0.5 rounded-md">
+                      Offline
+                    </span>
+                  )}
+                </div>
+                {invitation?.admin && !user.admin ? (
+                  <IconButton
+                    icon={<TrashIcon height={20} />}
+                    onClick={() => removeUser(user.user.key)}
+                    className="bg-transparent"
+                  />
+                ) : null}
+              </div>
+            ))}
+          </section>
         </section>
       ) : (
         <section>

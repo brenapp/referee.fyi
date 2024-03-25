@@ -39,6 +39,15 @@ export type APIGetInvitationResponseBody = UserInvitation
 // PUT /api/:sku/accept
 export type APIPutInvitationAcceptResponseBody = UserInvitation
 
+// GET /api/:sku/invitations
+export type InvitationListItem = Pick<Invitation, "id" | "admin" | "accepted"> & {
+    user: User;
+};
+
+export type APIGetInvitationsResponseBody = {
+    invitations: InvitationListItem[];
+};
+
 // PUT /api/:sku/invite
 export type APIPutInviteResponseBody = {};
 

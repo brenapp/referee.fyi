@@ -16,6 +16,8 @@ import type {
   APIGetShareDataResponseBody,
   APIPutIncidentResponseBody,
   APIPatchIncidentResponseBody,
+  InvitationListItem,
+  APIGetInvitationsResponseBody,
 } from "~share/api";
 import {
   IncidentWithID,
@@ -154,6 +156,21 @@ export async function getEventInvitation(sku: string): Promise<UserInvitation | 
   return body.data;
 };
 
+export async function getAllEventInvitations(sku: string): Promise<InvitationListItem[] | null> {
+  const response = await signedFetch(
+    new URL(`/api/${sku}/invitations`, URL_BASE), {
+    method: "GET"
+  });
+
+  const body: ShareResponse<APIGetInvitationsResponseBody> = await response.json();
+
+  if (!body.success) {
+    return null;
+  }
+
+  return body.data.invitations;
+};
+
 export async function verifyEventInvitation(sku: string): Promise<UserInvitation | null> {
   const response = await signedFetch(
     new URL(`/api/${sku}/invitation`, URL_BASE), {
@@ -222,10 +239,8 @@ export async function removeInvitation(sku: string, user?: string): Promise<Shar
   const response = await signedFetch(url, { method: "DELETE" });
   const body: ShareResponse<APIDeleteInviteResponseBody> = await response.json();
 
-  if (body.success) {
-    await del(`invitation_${sku}`);
-    queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
-  }
+  await del(`invitation_${sku}`);
+  queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
 
   return body;
 };
@@ -492,6 +507,7 @@ export class ShareConnection extends EventEmitter {
         if (this.users.findIndex(u => u.id === data.user.id) < 0) {
           this.users.push(data.user);
         }
+        queryClient.invalidateQueries({ queryKey: ["event_invitation_all"] });
         break;
       }
       case "server_user_remove": {
@@ -500,6 +516,7 @@ export class ShareConnection extends EventEmitter {
         if (index > -1) {
           this.users.splice(index, 1);
         }
+        queryClient.invalidateQueries({ queryKey: ["event_invitation_all"] });
         break;
       }
       case "message": {

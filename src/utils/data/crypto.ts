@@ -80,7 +80,6 @@ export async function getSignRequestHeaders(request: Request): Promise<Headers> 
 
 export async function signWebSocketConnectionURL(url: URL): Promise<URL> {
     const request = new Request(url);
-    console.log(request);
     const headers = await getSignRequestHeaders(request);
 
     const output = new URL(url);

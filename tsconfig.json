@@ -25,6 +25,7 @@
       "~utils/*": ["./utils/*"],
       "~hooks/*": ["./utils/hooks/*"],
       "~components/*": ["./components/*"],
+      "~models/*": ["./models/*"],
       "~share/*": ["../worker/types/*"]
     }
   },

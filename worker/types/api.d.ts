@@ -21,7 +21,7 @@ export type ShareResponseFailure = {
 
 export type ShareResponse<T> = ShareResponseSuccess<T> | ShareResponseFailure;
 
-export type UserInvitation = Pick<Invitation, "id" | "admin" | "accepted"> & {
+export type UserInvitation = Pick<Invitation, "id" | "admin" | "accepted" | "sku"> & {
     from: User
 }
 

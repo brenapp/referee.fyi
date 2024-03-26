@@ -1,5 +1,4 @@
 import { useCurrentEvent } from "~utils/hooks/state";
-import { ShareProvider } from "./home";
 import { useEffect, useMemo, useState } from "react";
 import { useAddEventVisited } from "~utils/hooks/history";
 import { Button } from "~components/Button";
@@ -127,23 +126,21 @@ export const EventSkillsPage: React.FC = () => {
   }
 
   return (
-    <ShareProvider>
-      <section className="mt-4 flex flex-col">
-        <Button onClick={() => setIncidentDialogOpen(true)} mode="primary">
-          <FlagIcon height={20} className="inline mr-2 " />
-          New Entry
-        </Button>
-        <EventNewIncidentDialog
-          open={incidentDialogOpen}
-          setOpen={setIncidentDialogOpen}
-        />
-        <Tabs className="flex-1">
-          {{
-            Teams: <TeamSkillsTab event={event} />,
-            Manage: <EventManageTab event={event} />,
-          }}
-        </Tabs>
-      </section>
-    </ShareProvider>
+    <section className="mt-4 flex flex-col">
+      <Button onClick={() => setIncidentDialogOpen(true)} mode="primary">
+        <FlagIcon height={20} className="inline mr-2 " />
+        New Entry
+      </Button>
+      <EventNewIncidentDialog
+        open={incidentDialogOpen}
+        setOpen={setIncidentDialogOpen}
+      />
+      <Tabs className="flex-1">
+        {{
+          Teams: <TeamSkillsTab event={event} />,
+          Manage: <EventManageTab event={event} />,
+        }}
+      </Tabs>
+    </section>
   );
 };

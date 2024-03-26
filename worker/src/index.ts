@@ -277,6 +277,7 @@ router
                 admin: invitation.admin,
                 accepted: invitation.accepted,
                 from: request.user,
+                sku
             }
         })
 
@@ -318,7 +319,8 @@ router
                 id: invitation.id,
                 admin: invitation.admin,
                 from,
-                accepted: invitation.accepted
+                accepted: invitation.accepted,
+                sku
             }
         });
     })
@@ -373,7 +375,8 @@ router
                 id: invitation.id,
                 accepted: invitation.accepted,
                 admin: invitation.admin,
-                from: from
+                from: from,
+                sku
             }
         })
 
@@ -484,9 +487,8 @@ router
 
         if (!userInvitation) {
             return response({
-                success: false,
-                reason: "bad_request",
-                details: "Could not find user invitation."
+                success: true,
+                data: {}
             })
         };
 
@@ -520,8 +522,6 @@ router
     .all("/api/:sku/:path+", async (request: RequestHasInvitation, env: Env) => {
         const id = env.INCIDENTS.idFromName(`${request.instance.sku}#${request.instance.secret}`);
         const stub = env.INCIDENTS.get(id)
-
-        console.log(request.instance);
 
         const search = new URL(request.url).search;
 

@@ -2,10 +2,6 @@ import { del, get, set } from "idb-keyval";
 import type {
   ShareResponse,
   ShareUser,
-  WebSocketPayload,
-  WebSocketMessage,
-  WebSocketPeerMessage,
-  WebSocketSender,
   APIRegisterUserResponseBody,
   APIPostCreateResponseBody,
   APIGetInvitationResponseBody,
@@ -18,22 +14,15 @@ import type {
   APIPatchIncidentResponseBody,
   InvitationListItem,
   APIGetInvitationsResponseBody,
+  WebSocketSender,
 } from "~share/api";
 import {
   IncidentWithID,
-  deleteIncident,
-  getIncident,
-  getIncidentsByEvent,
-  hasIncident,
-  newIncident,
-  setIncident,
 } from "./incident";
-import { toast } from "~components/Toast";
 import { queryClient } from "./query";
-import { EventEmitter } from "events";
-import { exportPublicKey, getKeyPair, getSignRequestHeaders, signWebSocketConnectionURL } from "./crypto";
+import { exportPublicKey, getKeyPair, getSignRequestHeaders } from "./crypto";
 
-const URL_BASE = import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER ?? "https://share.referee.fyi";
+export const URL_BASE = import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER ?? "https://share.referee.fyi";
 
 export type JoinRequest = {
   client_version: string;
@@ -65,6 +54,17 @@ export function getJoinRequest({ id, name }: ShareUser): JoinRequest {
 export async function getShareName() {
   return (await get<string>("share_name")) ?? "";
 }
+
+export async function getShareId() {
+  const { publicKey } = await getKeyPair();
+  return exportPublicKey(publicKey, false);
+};
+
+export async function getSender(): Promise<WebSocketSender> {
+  const name = await getShareName();
+  const id = await getShareId();
+  return { type: "client", id, name };
+};
 
 export async function signedFetch(input: RequestInfo | URL, init?: RequestInit) {
 
@@ -231,7 +231,7 @@ export async function inviteUser(sku: string, user: string): Promise<ShareRespon
 };
 
 export async function removeInvitation(sku: string, user?: string): Promise<ShareResponse<APIDeleteInviteResponseBody>> {
-  const { id } = await ShareConnection.getSender();
+  const id = await getShareId();
 
   const url = new URL(`/api/${sku}/invite`, URL_BASE);
   url.searchParams.set("user", user ?? id);
@@ -289,256 +289,4 @@ export async function deleteServerIncident(id: string, sku: string): Promise<Sha
     method: "DELETE",
   });
   return response.json();
-}
-
-
-interface ShareConnectionEvents {
-  connect: () => void;
-  disconnect: () => void;
-  error: () => void;
-  message: (data: WebSocketPayload<WebSocketMessage>) => void;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
-export interface ShareConnection {
-  on<U extends keyof ShareConnectionEvents>(
-    event: U,
-    listener: ShareConnectionEvents[U]
-  ): this;
-  once<U extends keyof ShareConnectionEvents>(
-    event: U,
-    listener: ShareConnectionEvents[U]
-  ): this;
-  off<U extends keyof ShareConnectionEvents>(
-    event: U,
-    listener: ShareConnectionEvents[U]
-  ): this;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
-export class ShareConnection extends EventEmitter {
-  ws: WebSocket | null = null;
-
-  sku: string = "";
-
-  user: ShareUser | null = null;
-  users: ShareUser[] = [];
-
-  public async setup(sku: string) {
-
-    const invitation = await getEventInvitation(sku);
-
-    if (!invitation) {
-      return;
-    };
-
-    if (this.isConnected()) {
-      return;
-    }
-
-    this.cleanup();
-
-    this.sku = sku;
-
-    const { name, id } = await ShareConnection.getSender();
-    return this.connect({ name, id });
-  }
-
-  static reconnectTimer?: NodeJS.Timeout = undefined;
-
-
-  public static async getUserId() {
-    const { publicKey } = await getKeyPair();
-    return exportPublicKey(publicKey, false);
-  };
-
-  public static async getSender(): Promise<WebSocketSender & { type: "client" }> {
-
-    const name = await getShareName();
-    const id = await this.getUserId();
-
-    return { type: "client", name, id };
-  }
-
-  public isConnected() {
-    return !!this.ws && this.ws.readyState === this.ws.OPEN;
-  };
-
-  public async forceSyncIncidents() {
-    const response = await getShareData(this.sku);
-
-    if (!response.success) {
-      toast({ type: "error", message: `Error when communicating with sharing server. ${response.details}` })
-      return;
-    };
-
-    await this.handleWebsocketPayload({
-      type: "server_share_info",
-      users: this.users,
-      date: new Date().toISOString(),
-      data: response.data,
-      sender: { type: "server" }
-    });
-
-    toast({ type: "info", message: "Synchronized with the server!" })
-  };
-
-  async connect(user: ShareUser) {
-    const { name, id } = await ShareConnection.getSender();
-
-    const url = new URL(`/api/${this.sku}/join`, URL_BASE);
-
-    if (url.protocol === "https:") {
-      url.protocol = "wss:";
-    } else {
-      url.protocol = "ws:";
-    }
-
-    url.searchParams.set("id", id);
-    url.searchParams.set("name", name);
-
-
-    const signedURL = await signWebSocketConnectionURL(url);
-
-    this.ws = new WebSocket(signedURL);
-    this.ws.onmessage = this.handleMessage.bind(this);
-
-    this.ws.onopen = () => this.emit("connect");
-    this.ws.onclose = () => {
-      clearTimeout(ShareConnection.reconnectTimer);
-      ShareConnection.reconnectTimer = setTimeout(
-        () => this.connect(user),
-        5000
-      );
-      this.emit("disconnect");
-    };
-    this.ws.onerror = () => {
-      toast({ type: "error", message: "Could not connect to sharing server." });
-      this.emit("error");
-    };
-  }
-
-  async send(message: WebSocketPeerMessage) {
-    const sender = await ShareConnection.getSender();
-    const payload: WebSocketPayload<WebSocketPeerMessage> = {
-      ...message,
-      sender,
-      date: new Date().toISOString(),
-    };
-    this.ws?.send(JSON.stringify(payload));
-  }
-
-  private async handleWebsocketPayload(data: WebSocketPayload<WebSocketMessage>) {
-    switch (data.type) {
-      case "add_incident": {
-        const has = await hasIncident(data.incident.id);
-        if (!has) {
-          await newIncident(data.incident, false, data.incident.id);
-          queryClient.invalidateQueries({ queryKey: ["incidents"] });
-        }
-        break;
-      }
-      case "update_incident": {
-        await setIncident(data.incident.id, data.incident);
-        queryClient.invalidateQueries({ queryKey: ["incidents"] });
-        break;
-      }
-      case "remove_incident": {
-        await deleteIncident(data.id, false);
-        queryClient.invalidateQueries({ queryKey: ["incidents"] });
-        break;
-      }
-
-      // Sent when you first join, We definitely don't want to
-      // *delete* incidents the user creates before joining the share, unless they are listed as
-      // being deleted on the server.
-      case "server_share_info": {
-        this.users = data.users;
-
-        for (const incident of data.data.incidents) {
-          const has = await hasIncident(incident.id);
-
-          // Handle newly created incidents
-          if (!has) {
-            await newIncident(incident, false, incident.id);
-
-            // Handle any incidents with different revisions while offline
-          } else {
-            const current = (await getIncident(incident.id))!;
-
-            const localRevision = current.revision?.count ?? 0;
-            const remoteRevision = incident.revision?.count ?? 0;
-
-            if (localRevision > remoteRevision) {
-              const response = await editServerIncident(current);
-              if (response?.success) {
-                current.revision = response.data;
-              }
-              await setIncident(incident.id, current);
-              queryClient.invalidateQueries({ queryKey: ["incidents"] });
-            }
-
-            if (remoteRevision > localRevision) {
-              await setIncident(incident.id, incident);
-              queryClient.invalidateQueries({ queryKey: ["incidents"] });
-            }
-          }
-        }
-
-        // Explicitly delete incidents marked as deleted first.
-        for (const id of data.data.deleted) {
-          await deleteIncident(id, false);
-        }
-
-        const eventIncidents = await getIncidentsByEvent(this.sku);
-        const localOnly = eventIncidents.filter((local) =>
-          data.data.incidents.every((remote) => local.id !== remote.id)
-        );
-
-        for (const incident of localOnly) {
-          await this.send({ type: "add_incident", incident });
-        }
-
-        break;
-      }
-
-      case "server_user_add": {
-        toast({ type: "info", message: `${data.user.name} joined.` });
-        if (this.users.findIndex(u => u.id === data.user.id) < 0) {
-          this.users.push(data.user);
-        }
-        queryClient.invalidateQueries({ queryKey: ["event_invitation_all"] });
-        break;
-      }
-      case "server_user_remove": {
-        toast({ type: "info", message: `${data.user.name} left.` });
-        const index = this.users.findIndex((u) => u === data.user);
-        if (index > -1) {
-          this.users.splice(index, 1);
-        }
-        queryClient.invalidateQueries({ queryKey: ["event_invitation_all"] });
-        break;
-      }
-      case "message": {
-        const sender =
-          data.sender.type === "server" ? "Server" : data.sender.name;
-        toast({ type: "info", message: `${sender}: ${data.message}` });
-        break;
-      }
-    }
-  }
-
-  private async handleMessage(event: MessageEvent) {
-    try {
-      const data = JSON.parse(event.data) as WebSocketPayload<WebSocketMessage>;
-      await this.handleWebsocketPayload(data);
-      this.emit("message", data);
-    } catch (e) {
-      toast({ type: "error", message: `${e}` });
-    }
-  }
-
-  public cleanup() {
-    this.ws?.close();
-  }
 }

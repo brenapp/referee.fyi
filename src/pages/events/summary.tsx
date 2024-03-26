@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Spinner } from "~components/Spinner";
 import { useAddEventVisited } from "~utils/hooks/history";
 import { useCurrentEvent } from "~utils/hooks/state";
-import { ShareProvider } from "./home";
 import { Button, IconButton } from "~components/Button";
 import {
   AdjustmentsHorizontalIcon,
@@ -19,7 +18,7 @@ import { XMarkIcon } from "@heroicons/react/20/solid";
 import { Checkbox, RulesMultiSelect, Select } from "~components/Input";
 import { twMerge } from "tailwind-merge";
 import { useMutation } from "@tanstack/react-query";
-import { useShareConnection } from "~utils/hooks/share";
+import { useShareConnection } from "~models/ShareConnection";
 
 export type Filters = {
   outcomes: Record<IncidentOutcome, boolean>;
@@ -146,15 +145,18 @@ export const EventSummaryPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
   const game = useRulesForProgram(event?.program.code);
   const { mutateAsync: addEvent, isSuccess } = useAddEventVisited();
-  const connection = useShareConnection();
+
+  const isConnected =
+    useShareConnection((c) => c.readyState) === WebSocket.OPEN;
 
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const { data: allIncidents } = useEventIncidents(event?.sku);
 
+  const connectionForceSync = useShareConnection((c) => c.forceSync);
   const { mutateAsync: forceSync, isPending: isForceSyncPending } = useMutation(
     {
-      mutationFn: () => connection.forceSyncIncidents(),
+      mutationFn: connectionForceSync,
     }
   );
 
@@ -214,7 +216,7 @@ export const EventSummaryPage: React.FC = () => {
   }
 
   return (
-    <ShareProvider>
+    <>
       <FilterDialog
         open={filterDialogOpen}
         setOpen={setFilterDialogOpen}
@@ -223,7 +225,7 @@ export const EventSummaryPage: React.FC = () => {
       <section className="mt-4 flex flex-col">
         <nav className="flex gap-4 p-2 rounded-md">
           <p className="flex-1">{incidents?.length} Incidents</p>
-          {connection.isConnected() ? (
+          {isConnected ? (
             <IconButton
               className={twMerge(
                 "bg-transparent",
@@ -277,6 +279,6 @@ export const EventSummaryPage: React.FC = () => {
           </AutoSizer>
         </section>
       </section>
-    </ShareProvider>
+    </>
   );
 };

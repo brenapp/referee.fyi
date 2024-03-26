@@ -25,7 +25,7 @@ import { Spinner } from "~components/Spinner";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { queryClient } from "~utils/data/query";
 import { useShareProfile } from "~utils/hooks/share";
-import { ShareConnection } from "~utils/data/share";
+import { getSender } from "~utils/data/share";
 
 export type EventNewIncidentDialogProps = {
   open: boolean;
@@ -251,7 +251,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     async (e: React.FormEvent<HTMLFormElement> | React.MouseEvent) => {
       e.preventDefault();
 
-      const user = await ShareConnection.getSender();
+      const user = await getSender();
 
       incident.revision = {
         count: 0,

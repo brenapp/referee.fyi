@@ -7,7 +7,7 @@ import {
   addServerIncident,
   deleteServerIncident,
   editServerIncident,
-  ShareConnection,
+  getSender,
 } from "./share";
 import { EditIncident, IncidentOutcome, Revision, Incident as ServerIncident } from "~share/api";
 
@@ -163,7 +163,7 @@ export async function editIncident(
 
   };
 
-  const user = await ShareConnection.getSender();
+  const user = await getSender();
 
   const revision = current.revision ?? {
     count: 0,

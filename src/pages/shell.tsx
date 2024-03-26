@@ -20,6 +20,8 @@ import { ProgramAbbr } from "robotevents/out/endpoints/programs";
 import { Input, RulesSelect, Select } from "~components/Input";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 import { Toaster } from "react-hot-toast";
+import { useEventInvitation } from "~utils/hooks/share";
+import { useShareConnection } from "~models/ShareConnection";
 
 function isValidSKU(sku: string) {
   return !!sku.match(/RE-(VRC|VIQRC|VEXU|VIQC)-[0-9]{2}-[0-9]{4}/g);
@@ -234,6 +236,28 @@ const Rules: React.FC = () => {
   );
 };
 
+const ConnectionManager: React.FC = () => {
+  const { data: event } = useCurrentEvent();
+  const { data: invitation } = useEventInvitation(event?.sku);
+
+  const connect = useShareConnection((c) => c.connect);
+  const disconnect = useShareConnection((c) => c.disconnect);
+
+  useEffect(() => {
+    if (invitation) {
+      connect(invitation);
+    } else {
+      disconnect();
+    }
+
+    return () => {
+      disconnect();
+    };
+  }, [invitation]);
+
+  return null;
+};
+
 export const AppShell: React.FC = () => {
   const { isLoading } = useCurrentEvent();
   const navigate = useNavigate();
@@ -247,6 +271,7 @@ export const AppShell: React.FC = () => {
       }}
     >
       <Toaster />
+      <ConnectionManager />
       <nav className="h-16 flex gap-4 max-w-full">
         <IconButton
           onClick={() => navigate(-1)}

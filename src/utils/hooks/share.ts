@@ -1,29 +1,20 @@
 import { set } from "idb-keyval";
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useState,
 } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "~utils/data/query";
 import {
-  ShareConnection,
   acceptEventInvitation,
   createInstance,
   getAllEventInvitations,
   getEventInvitation,
+  getShareId,
   getShareName,
   registerUser,
 } from "~utils/data/share";
-
-export const connection = new ShareConnection();
-export const ShareContext = createContext(connection);
-
-export function useShareConnection() {
-  return useContext(ShareContext);
-}
 
 export function useShareProfile() {
   const [name, setName] = useState("");
@@ -51,7 +42,7 @@ export function useShareProfile() {
 export function useShareID() {
   return useQuery({
     queryKey: ["share_id"],
-    queryFn: () => ShareConnection.getUserId()
+    queryFn: () => getShareId()
   })
 };
 
@@ -97,19 +88,3 @@ export function useAcceptInvitation(sku: string, id: string) {
     mutationFn: () => acceptEventInvitation(sku, id)
   });
 };
-
-export function useActiveUsers() {
-  const connection = useShareConnection();
-
-  const activeUsers = useQuery({
-    queryKey: ["active_users", connection.sku],
-    queryFn: () => connection.users,
-    staleTime: 0,
-    gcTime: 0,
-    refetchInterval: 1000,
-    refetchOnMount: true,
-    networkMode: "always",
-  });
-
-  return activeUsers.data ?? [];
-}

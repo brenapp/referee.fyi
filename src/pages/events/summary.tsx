@@ -282,3 +282,5 @@ export const EventSummaryPage: React.FC = () => {
     </>
   );
 };
+
+export default EventSummaryPage;

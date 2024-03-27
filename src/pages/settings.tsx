@@ -97,3 +97,5 @@ export const SettingsPage: React.FC = () => {
     </main>
   );
 };
+
+export default SettingsPage;

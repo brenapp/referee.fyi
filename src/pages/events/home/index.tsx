@@ -9,7 +9,7 @@ import { EventMatchesTab } from "./matches";
 import { EventTeamsTab } from "./teams";
 import { EventManageTab } from "./manage";
 
-export const EventPage: React.FC = () => {
+export const EventHome: React.FC = () => {
   const { data: event } = useCurrentEvent();
   const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
   const { mutateAsync: addEvent, isSuccess } = useAddEventVisited();
@@ -40,3 +40,5 @@ export const EventPage: React.FC = () => {
     </section>
   ) : null;
 };
+
+export default EventHome;

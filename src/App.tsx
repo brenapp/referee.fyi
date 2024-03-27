@@ -1,28 +1,43 @@
-import "./App.css";
+import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AppShell } from "./pages/shell";
-import { EventPage } from "./pages/events/home";
-import { EventTeamsPage } from "./pages/events/team";
-import { EventDivisionPickerPage } from "./pages/events/division";
-import { HomePage } from "./pages/home";
-import { EventSkillsPage } from "./pages/events/skills";
-import { EventSummaryPage } from "./pages/events/summary";
-import { SettingsPage } from "./pages/settings";
+import { Spinner } from "~components/Spinner";
+
+import "./App.css";
+
+const HomePage = React.lazy(() => import("./pages/home"));
+const SettingsPage = React.lazy(() => import("./pages/settings"));
+const EventPage = React.lazy(() => import("./pages/events"));
 
 function App() {
   return (
     <BrowserRouter basename="/">
       <Routes>
         <Route element={<AppShell />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/:sku">
-            <Route index path="/:sku" element={<EventDivisionPickerPage />} />
-            <Route path="/:sku/skills/" element={<EventSkillsPage />} />
-            <Route path="/:sku/summary/" element={<EventSummaryPage />} />
-            <Route path="/:sku/:division" element={<EventPage />} />
-            <Route path="/:sku/team/:number" element={<EventTeamsPage />} />
-          </Route>
+          <Route
+            path="/"
+            element={
+              <React.Suspense fallback={<Spinner show />}>
+                <HomePage />
+              </React.Suspense>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <React.Suspense fallback={<Spinner show />}>
+                <SettingsPage />
+              </React.Suspense>
+            }
+          />
+          <Route
+            path="/:sku/*"
+            element={
+              <React.Suspense fallback={<Spinner show />}>
+                <EventPage />
+              </React.Suspense>
+            }
+          />
         </Route>
       </Routes>
     </BrowserRouter>

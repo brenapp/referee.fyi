@@ -144,3 +144,5 @@ export const EventSkillsPage: React.FC = () => {
     </section>
   );
 };
+
+export default EventSkillsPage;

@@ -215,6 +215,12 @@ export const JoinCodeDialog: React.FC<JoinCodeDialogProps> = ({
     enabled: open && !hasInvitation,
   });
 
+  // Register user on join
+  const { mutateAsync: register } = useMutation({ mutationFn: registerUser });
+  useEffect(() => {
+    register(name);
+  }, [name]);
+
   useEffect(() => {
     if (invitation?.success && invitation.data) {
       setHasInvitation(true);

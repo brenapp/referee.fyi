@@ -91,7 +91,7 @@ export const ClickableMatch: React.FC<ClickableMatch> = ({
   const match = useMemo(() => new Match(matchData), [matchData]);
 
   return (
-    <li
+    <div
       key={match.id}
       className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
     >
@@ -108,6 +108,6 @@ export const ClickableMatch: React.FC<ClickableMatch> = ({
       <label htmlFor={id}>
         <MatchContext match={match} />
       </label>
-    </li>
+    </div>
   );
 };

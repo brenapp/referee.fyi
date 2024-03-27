@@ -41,7 +41,8 @@ export const Tabs: React.FC<TabsProps> = ({ children, ...props }) => {
             key={key}
             role="tab"
             aria-selected={index === activeTab}
-            aria-controls={`panel-${key}`}
+            aria-controls={`tabpanel-${key}`}
+            id={`tab-${key}`}
             onClick={() => onClickTab(index)}
             className={twMerge(
               "text-zinc-50 flex-1 text-center my-2 pt-2 active:bg-zinc-600 first:rounded-tl-md last:rounded-tr-md"
@@ -58,7 +59,12 @@ export const Tabs: React.FC<TabsProps> = ({ children, ...props }) => {
           </button>
         ))}
       </nav>
-      <div role="tabpanel" className="contents">
+      <div
+        role="tabpanel"
+        className="contents"
+        id={`tabpanel-${tabs[activeTab][0]}`}
+        aria-labelledby={`tab-${tabs[activeTab][0]}}`}
+      >
         {tabs[activeTab][1]}
       </div>
     </div>

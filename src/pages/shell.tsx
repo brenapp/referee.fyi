@@ -231,6 +231,7 @@ const Rules: React.FC = () => {
       <IconButton
         onClick={() => setOpen(true)}
         icon={<BookOpenIcon height={24} />}
+        aria-label="Rules Reference"
       />
     </>
   );
@@ -277,6 +278,7 @@ export const AppShell: React.FC = () => {
           onClick={() => navigate(-1)}
           icon={<ChevronLeftIcon height={24} />}
           className="aspect-auto bg-transparent"
+          aria-label="Back"
         />
         <EventPicker />
         <Rules />

@@ -130,3 +130,5 @@ export const EventTeamsPage: React.FC = () => {
     </section>
   );
 };
+
+export default EventTeamsPage;

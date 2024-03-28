@@ -140,7 +140,7 @@ export async function fetchInvitation(sku: string) {
 export async function getEventInvitation(sku: string): Promise<UserInvitation | null> {
   const current = await get<APIGetInvitationResponseBody>(`invitation_${sku}`);
 
-  if (current) {
+  if (current && current.accepted) {
     return current;
   }
 
@@ -150,8 +150,10 @@ export async function getEventInvitation(sku: string): Promise<UserInvitation | 
     return null;
   }
 
-  await set(`invitation_${sku}`, body.data);
-  queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
+  if (body.data.accepted) {
+    await set(`invitation_${sku}`, body.data);
+    queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
+  }
 
   return body.data;
 };

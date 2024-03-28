@@ -1,31 +1,15 @@
 import { GlobeAmericasIcon } from "@heroicons/react/20/solid";
 import { DocumentDuplicateIcon } from "@heroicons/react/24/outline";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { Button, IconButton } from "~components/Button";
 import { Input } from "~components/Input";
 import { toast } from "~components/Toast";
 import { queryClient } from "~utils/data/query";
-import { getJoinRequest } from "~utils/data/share";
 import { useShareID, useShareProfile } from "~utils/hooks/share";
 
 export const SettingsPage: React.FC = () => {
   const { name, setName, persist } = useShareProfile();
   const { data: publicKey } = useShareID();
-
-  const joinRequest = useMemo(() => {
-    if (!publicKey) {
-      return "";
-    }
-    const request = getJoinRequest({ id: publicKey, name });
-    return encodeURIComponent(JSON.stringify(request));
-  }, [publicKey, name]);
-
-  const onClickCopyJoinRequest = useCallback(() => {
-    if (navigator.clipboard && joinRequest) {
-      navigator.clipboard.writeText(joinRequest);
-      toast({ type: "info", message: "Copied join request to clipboard!" });
-    }
-  }, [joinRequest]);
 
   const onClickCopyKey = useCallback(() => {
     if (navigator.clipboard && publicKey) {
@@ -67,19 +51,6 @@ export const SettingsPage: React.FC = () => {
           />
           <div className="p-3 px-4 text-ellipsis overflow-hidden bg-zinc-700 rounded-md flex-1">
             {publicKey}
-          </div>
-        </div>
-      </section>
-      <section className="mt-4">
-        <h2 className="font-bold">Join Request</h2>
-        <div className="mt-2 flex gap-2 w-full">
-          <IconButton
-            className="p-3"
-            onClick={onClickCopyJoinRequest}
-            icon={<DocumentDuplicateIcon height={20} />}
-          />
-          <div className="p-3 px-4 text-ellipsis overflow-hidden bg-zinc-700 rounded-md flex-1">
-            {joinRequest}
           </div>
         </div>
       </section>

@@ -342,7 +342,6 @@ export class EventIncidents implements DurableObject {
             const id = search.get("id");
 
             if (!name || !id) {
-                console.log(name, id);
                 const socket = pair[1];
                 socket.accept();
 

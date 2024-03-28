@@ -47,7 +47,7 @@ const verifySignature = async (request: IRequest & Request) => {
     const dateToVerify = new Date(isoDate);
 
     const skew = Math.abs(now.getTime() - dateToVerify.getTime());
-    if (skew > 1000) {
+    if (skew > 60 * 1000) {
         return response({
             success: false,
             reason: "bad_request",

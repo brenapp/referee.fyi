@@ -7,18 +7,31 @@ import "./markdown.css";
 import DocumentDuplicateIcon from "@heroicons/react/24/outline/DocumentDuplicateIcon";
 import { Cog8ToothIcon } from "@heroicons/react/20/solid";
 import { useEventSearch } from "~utils/hooks/robotevents";
+import { useRecentEvents } from "~utils/hooks/history";
+import { isWorldsBuild } from "~utils/data/state";
+
+export function useHomeEvents() {
+  const { data: worldsEvents } = useEventSearch(
+    {
+      sku: [
+        "RE-VRC-23-3690",
+        "RE-VRC-23-3691",
+        "RE-VEXU-23-3692",
+        "RE-VRC-23-3695",
+        "RE-VIQRC-23-3693",
+        "RE-VIQRC-23-3694",
+      ],
+    },
+    { enabled: isWorldsBuild() }
+  );
+
+  const { data: recentUser } = useRecentEvents(5);
+
+  return isWorldsBuild() ? worldsEvents : recentUser;
+}
 
 export const HomePage: React.FC = () => {
-  const { data: events } = useEventSearch({
-    sku: [
-      "RE-VRC-23-3690",
-      "RE-VRC-23-3691",
-      "RE-VEXU-23-3692",
-      "RE-VRC-23-3695",
-      "RE-VIQRC-23-3693",
-      "RE-VIQRC-23-3694",
-    ],
-  });
+  const events = useHomeEvents();
 
   const [markdownContent, setMarkdownContent] = useState<string>("");
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);

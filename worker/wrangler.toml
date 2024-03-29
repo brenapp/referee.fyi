@@ -1,4 +1,10 @@
+[env.prod]
 name = "referee-fyi-share"
+compatibility_date = "2023-12-18"
+main = "./src/index.ts"
+
+[env.staging]
+name = "referee-fyi-share-staging"
 compatibility_date = "2023-12-18"
 main = "./src/index.ts"
 
@@ -11,7 +17,11 @@ kv_namespaces = [
 [build]
 command = "npm install && npm run build"
 
-[[durable_objects.bindings]]
+[[env.staging.durable_objects.bindings]]
+name = "INCIDENTS"
+class_name = "EventIncidents"
+
+[[env.prod.durable_objects.bindings]]
 name = "INCIDENTS"
 class_name = "EventIncidents"
 

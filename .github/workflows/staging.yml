@@ -1,14 +1,14 @@
-name: Deploy Prod
+name: Deploy Staging
 
 on:
   push:
-    branches:
+    branches-ignore:
       - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deploy
+    name: Deploy Staging
     steps:
       - uses: actions/checkout@v3
       - name: Deploy
@@ -16,4 +16,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: "worker"
-          environment: "prod"
+          environment: "staging"

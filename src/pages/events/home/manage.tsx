@@ -42,6 +42,7 @@ import { useEventIncidents } from "~utils/hooks/incident";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { queryClient } from "~utils/data/query";
 import { useShareConnection } from "~models/ShareConnection";
+import { isWorldsBuild } from "~utils/data/state";
 
 export const InviteDialog: React.FC<ButtonProps & { sku: string }> = ({
   sku,
@@ -479,43 +480,44 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
           <ArrowRightIcon height={20} className="text-emerald-400" />
         </LinkButton>
       </section>
-
-      <section className="mt-4 relative">
-        <h2 className="font-bold">Delete Event Data</h2>
-        <p>
-          This will delete all anomaly logs associated with this event. This
-          action cannot be undone.
-        </p>
-        <Button
-          className="w-full mt-4 bg-red-500 text-center"
-          onClick={() => setDeleteDataDialogOpen(true)}
-        >
-          Delete Event Data
-        </Button>
-        <Dialog
-          open={deleteDataDialogOpen}
-          mode="nonmodal"
-          className="absolute w-full rounded-md h-min mt-4 bg-zinc-100 text-zinc-900"
-          onClose={() => setDeleteDataDialogOpen(false)}
-        >
-          <DialogBody>
-            <p>Really delete all event data? This action cannot be undone.</p>
-            <Button
-              className="w-full mt-4 bg-red-500 text-center"
-              onClick={onConfirmDeleteData}
-            >
-              Confirm Deletion
-            </Button>
-            <Button
-              className="w-full mt-4 text-center"
-              onClick={() => setDeleteDataDialogOpen(false)}
-              autoFocus
-            >
-              Cancel
-            </Button>
-          </DialogBody>
-        </Dialog>
-      </section>
+      {!isWorldsBuild() ? (
+        <section className="mt-4 relative">
+          <h2 className="font-bold">Delete Event Data</h2>
+          <p>
+            This will delete all anomaly logs associated with this event. This
+            action cannot be undone.
+          </p>
+          <Button
+            className="w-full mt-4 bg-red-500 text-center"
+            onClick={() => setDeleteDataDialogOpen(true)}
+          >
+            Delete Event Data
+          </Button>
+          <Dialog
+            open={deleteDataDialogOpen}
+            mode="nonmodal"
+            className="absolute w-full rounded-md h-min mt-4 bg-zinc-100 text-zinc-900"
+            onClose={() => setDeleteDataDialogOpen(false)}
+          >
+            <DialogBody>
+              <p>Really delete all event data? This action cannot be undone.</p>
+              <Button
+                className="w-full mt-4 bg-red-500 text-center"
+                onClick={onConfirmDeleteData}
+              >
+                Confirm Deletion
+              </Button>
+              <Button
+                className="w-full mt-4 text-center"
+                onClick={() => setDeleteDataDialogOpen(false)}
+                autoFocus
+              >
+                Cancel
+              </Button>
+            </DialogBody>
+          </Dialog>
+        </section>
+      ) : null}
     </section>
   );
 };

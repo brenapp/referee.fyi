@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Sync Service for Referee FYI",
   "scripts": {
-    "dev": "npx wrangler dev --ip 0.0.0.0",
+    "dev": "npx wrangler dev --ip 0.0.0.0 --env staging",
     "build": "rollup -c",
     "publish": "npx wrangler publish",
     "format": "prettier --write  '*.{json,js}' 'src/**/*.{js,ts}'",

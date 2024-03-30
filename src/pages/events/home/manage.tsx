@@ -370,7 +370,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
   }, [event.sku]);
 
   return (
-    <section className="max-w-xl mx-auto flex-1">
+    <section className="max-w-xl w-full mx-auto flex-1">
       <JoinCodeDialog
         sku={event.sku}
         open={joinCodeDialogOpen}

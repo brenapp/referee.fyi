@@ -2,12 +2,16 @@
 name = "referee-fyi-share"
 compatibility_date = "2023-12-18"
 main = "./src/index.ts"
+kv_namespaces = [
+    { binding = "SHARES", id = "667b3f219f284aa7b4a88d37044ae9d9" },
+    { binding = "INVITATIONS", id = "bf2c971507354390ba314b8e18b4e908" },
+    { binding = "USERS", id = "5af999adc77a401880ed7339dd3c02c2" }
+]
 
 [env.staging]
 name = "referee-fyi-share-staging"
 compatibility_date = "2023-12-18"
 main = "./src/index.ts"
-
 kv_namespaces = [
     { binding = "SHARES", id = "667b3f219f284aa7b4a88d37044ae9d9" },
     { binding = "INVITATIONS", id = "bf2c971507354390ba314b8e18b4e908" },

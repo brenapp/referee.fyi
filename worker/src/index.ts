@@ -530,7 +530,7 @@ router
         // Pass extra informational headers to the Durable Object
         headers.set("X-Referee-Content", request.payload);
         headers.set("X-Referee-User-Name", request.user.name);
-        headers.set("X-Referee-User-Key", request.user.name);
+        headers.set("X-Referee-User-Key", request.user.key);
 
         return stub.fetch(`https://share/${request.params.path}${search}`, {
             method: request.method,

@@ -216,11 +216,15 @@ export const JoinCodeDialog: React.FC<JoinCodeDialogProps> = ({
     enabled: open && !hasInvitation,
   });
 
-  // Register user on join
+  // Register user when they open
   const { mutateAsync: register } = useMutation({ mutationFn: registerUser });
   useEffect(() => {
+    if (!name || !open) {
+      return;
+    }
+
     register(name);
-  }, [name]);
+  }, [open]);
 
   useEffect(() => {
     if (invitation?.success && invitation.data) {
@@ -324,7 +328,9 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
   const { mutateAsync: createInstance } = useCreateInstance(event.sku);
   const { data: invitation } = useEventInvitation(event.sku);
 
-  const { data: users } = useAllEventInvitations(event.sku);
+  const { data: users, isLoading: isLoadingUsers } = useAllEventInvitations(
+    event.sku
+  );
   const activeUsers = useShareConnection((c) => c.activeUsers);
 
   const { data: entries } = useEventIncidents(event.sku);
@@ -406,6 +412,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
             </nav>
           </div>
           <section className="mt-4">
+            <Spinner show={isLoadingUsers} />
             {users?.map((user) => (
               <div key={user.id} className="py-2 px-4 rounded-md mt-2 flex">
                 <div className="flex gap-2 items-center flex-1">

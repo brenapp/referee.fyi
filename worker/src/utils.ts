@@ -3,7 +3,8 @@ import { type ShareResponse } from "../types/api"
 
 export const corsHeaders = new Headers({
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, PATCH, PUT, DELETE"
+    "Access-Control-Allow-Methods": "GET, POST, PATCH, PUT, DELETE",
+    "Access-Control-Max-Age": "86400"
 });
 
 

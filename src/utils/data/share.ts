@@ -22,7 +22,7 @@ import {
 import { queryClient } from "./query";
 import { exportPublicKey, getKeyPair, getSignRequestHeaders } from "./crypto";
 
-export const URL_BASE = import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER ?? "https://share.referee.fyi";
+export const URL_BASE = import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER ?? "https://referee.fyi/api";
 
 export type JoinRequest = {
   client_version: string;

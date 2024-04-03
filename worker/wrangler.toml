@@ -9,7 +9,7 @@ kv_namespaces = [
 ]
 routes = [
     { pattern = "share.referee.fyi", custom_domain = true },
-    { pattern = "referee.fyi/*", zone_name = "referee.fyi" },
+    { pattern = "referee.fyi/api/*", zone_name = "referee.fyi" },
 ]
 
 [env.staging]

@@ -1,4 +1,4 @@
-import { ShareUser, UserInvitation, WebSocketMessage, WebSocketPayload, WebSocketPeerMessage } from "~share/api";
+import { InvitationListItem, ShareUser, UserInvitation, WebSocketMessage, WebSocketPayload, WebSocketPeerMessage } from "~share/api";
 import { create } from "zustand";
 import { editServerIncident, getShareData, getShareId, getShareName, URL_BASE } from "~utils/data/share";
 import { signWebSocketConnectionURL } from "~utils/data/crypto";
@@ -11,6 +11,7 @@ export type ShareConnectionData = {
     websocket: WebSocket | null;
     invitation: UserInvitation | null;
     activeUsers: ShareUser[];
+    invitations: InvitationListItem[];
 };
 
 export type ShareConnectionActions = {
@@ -28,7 +29,9 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
     readyState: WebSocket.CLOSED,
     websocket: null,
     invitation: null,
+
     activeUsers: [],
+    invitations: [],
 
     forceSync: async () => {
         const sku = get().invitation?.sku;
@@ -45,7 +48,8 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
 
         await get().handleWebsocketMessage({
             type: "server_share_info",
-            users: get().activeUsers,
+            activeUsers: get().activeUsers,
+            invitations: get().invitations,
             date: new Date().toISOString(),
             data: response.data,
             sender: { type: "server" }
@@ -55,7 +59,6 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
     },
 
     handleWebsocketMessage: async (data: WebSocketPayload<WebSocketMessage>) => {
-        const users = get().activeUsers;
         switch (data.type) {
             case "add_incident": {
                 const has = await hasIncident(data.incident.id);
@@ -80,7 +83,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
             // *delete* incidents the user creates before joining the share, unless they are listed as
             // being deleted on the server.
             case "server_share_info": {
-                set({ activeUsers: data.users });
+                set({ activeUsers: data.activeUsers, invitations: data.invitations });
 
                 for (const incident of data.data.incidents) {
                     const has = await hasIncident(incident.id);
@@ -131,16 +134,12 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
 
             case "server_user_add": {
                 toast({ type: "info", message: `${data.user.name} joined.` });
-                if (users.findIndex(u => u.id === data.user.id) < 0) {
-                    set({ activeUsers: [...users, data.user] });
-                }
-                queryClient.invalidateQueries({ queryKey: ["event_invitation_all"] });
+                set({ activeUsers: data.activeUsers, invitations: data.invitations });
                 break;
             }
             case "server_user_remove": {
                 toast({ type: "info", message: `${data.user.name} left.` });
-                set(d => ({ activeUsers: d.activeUsers.filter(u => u.id !== data.user.id) }))
-                queryClient.invalidateQueries({ queryKey: ["event_invitation_all"] });
+                set({ activeUsers: data.activeUsers, invitations: data.invitations });
                 break;
             }
             case "message": {

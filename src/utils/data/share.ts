@@ -12,8 +12,6 @@ import type {
   APIGetShareDataResponseBody,
   APIPutIncidentResponseBody,
   APIPatchIncidentResponseBody,
-  InvitationListItem,
-  APIGetInvitationsResponseBody,
   WebSocketSender,
 } from "~share/api";
 import {
@@ -156,21 +154,6 @@ export async function getEventInvitation(sku: string): Promise<UserInvitation | 
   }
 
   return body.data;
-};
-
-export async function getAllEventInvitations(sku: string): Promise<InvitationListItem[] | null> {
-  const response = await signedFetch(
-    new URL(`/api/${sku}/invitations`, URL_BASE), {
-    method: "GET"
-  });
-
-  const body: ShareResponse<APIGetInvitationsResponseBody> = await response.json();
-
-  if (!body.success) {
-    return null;
-  }
-
-  return body.data.invitations;
 };
 
 export async function verifyEventInvitation(sku: string): Promise<UserInvitation | null> {

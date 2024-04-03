@@ -39,15 +39,6 @@ export type APIGetInvitationResponseBody = UserInvitation
 // PUT /api/:sku/accept
 export type APIPutInvitationAcceptResponseBody = UserInvitation
 
-// GET /api/:sku/invitations
-export type InvitationListItem = Pick<Invitation, "id" | "admin" | "accepted"> & {
-    user: User;
-};
-
-export type APIGetInvitationsResponseBody = {
-    invitations: InvitationListItem[];
-};
-
 // PUT /api/:sku/invite
 export type APIPutInviteResponseBody = {};
 
@@ -94,20 +85,29 @@ export type WebSocketPeerMessage =
     WebSocketRemoveIncidentMessage |
     WebSocketBroadcastMessage;
 
+export type InvitationListItem = Pick<Invitation, "id" | "admin" | "accepted"> & {
+    user: User;
+};
+
 export type WebSocketServerShareInfoMessage = {
     type: "server_share_info",
     data: EventIncidentsData;
-    users: ShareUser[]
+    activeUsers: ShareUser[];
+    invitations: InvitationListItem[];
 }
 
 export type WebsocketServerUserAddMessage = {
     type: "server_user_add";
     user: ShareUser;
+    activeUsers: ShareUser[];
+    invitations: InvitationListItem[];
 }
 
 export type WebsocketServerUserRemoveMessage = {
     type: "server_user_remove";
     user: ShareUser;
+    activeUsers: ShareUser[];
+    invitations: InvitationListItem[];
 }
 
 export type WebSocketServerMessage =

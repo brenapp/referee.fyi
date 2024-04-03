@@ -1,7 +1,7 @@
 import { Router } from "itty-router"
 import { corsHeaders, response } from "./utils"
-import type { ShareUser, Incident, EventIncidentsData as EventIncidentsData, WebSocketMessage, WebSocketPayload, WebSocketPeerMessage, WebSocketSender, WebSocketServerShareInfoMessage, EventIncidentsInitData } from "../types/api";
-import { User } from "../types/server";
+import type { ShareUser, Incident, EventIncidentsData as EventIncidentsData, WebSocketMessage, WebSocketPayload, WebSocketPeerMessage, WebSocketSender, WebSocketServerShareInfoMessage, EventIncidentsInitData, InvitationListItem } from "../types/api";
+import { Env, Invitation, ShareInstance, User } from "../types/server";
 
 export type SessionClient = {
     user: ShareUser;
@@ -10,16 +10,10 @@ export type SessionClient = {
     active: boolean
 }
 
-export interface Env {
-    SHARES: KVNamespace;
-};
-
 export class EventIncidents implements DurableObject {
     router = Router()
     clients: SessionClient[] = [];
     state: DurableObjectState;
-
-    sku: string = "";
 
     env: Env
 
@@ -28,21 +22,36 @@ export class EventIncidents implements DurableObject {
         this.env = env
 
         this.router
-            .get("/join", this.handleWebsocket.bind(this))
-            .get("/get", this.handleGet.bind(this))
-            .get("/csv", this.handleCSV.bind(this))
-            .get("/json", this.handleJSON.bind(this))
-            .post("/init", this.handleInit.bind(this))
-            .put("/incident", this.handleAddIncident.bind(this))
-            .patch("/incident", this.handleEditIncident.bind(this))
-            .delete("/incident", this.handleDeleteIncident.bind(this))
+            .post("/init", r => this.handleInit(r))
+            .get("/join", r => this.handleWebsocket(r))
+            .get("/get", r => this.handleGet())
+            .get("/csv", r => this.handleCSV())
+            .get("/json", r => this.handleJSON())
+            .put("/incident", r => this.handleAddIncident(r))
+            .patch("/incident", r => this.handleEditIncident(r))
+            .delete("/incident", r => this.handleDeleteIncident(r))
             .all("*", () => response({ success: false, reason: "bad_request", details: "durable object unknown action", }))
     }
 
     // Storage
+    async setSKU(sku: string) {
+        await this.state.blockConcurrencyWhile(async () => {
+            await this.state.storage.put("sku", sku);
+        });
+    }
+
     async getSKU() {
-        return this.sku;
+        return this.state.storage.get<string>("sku");
     };
+
+    async setInstanceSecret(secret: string) {
+        await this.state.blockConcurrencyWhile(async () => {
+            await this.state.storage.put("instance_secret", secret);
+        });
+    }
+    async getInstanceSecret() {
+        return this.state.storage.get<string>("instance_secret");
+    }
 
     async addIncident(incident: Incident) {
         await this.state.blockConcurrencyWhile(async () => {
@@ -109,9 +118,12 @@ export class EventIncidents implements DurableObject {
 
     async createServerShareMessage(): Promise<WebSocketServerShareInfoMessage> {
         const data = await this.getData();
+        const activeUsers = await this.getActiveUsers();
+        const invitations = await this.getInvitationList();
         return {
             type: "server_share_info",
-            users: this.clients.map(client => client.user),
+            activeUsers,
+            invitations,
             data,
         }
     };
@@ -141,13 +153,50 @@ export class EventIncidents implements DurableObject {
         return { name, key }
     };
 
+    async getInstance(): Promise<ShareInstance> {
+        const sku = await this.getSKU();
+        const secret = await this.getInstanceSecret();
+
+        const instance = await this.env.SHARES.get<ShareInstance>(`${sku}#${secret}`, "json");
+        return instance!;
+    };
+
+    async getInvitationList(): Promise<InvitationListItem[]> {
+        const sku = await this.getSKU();
+        const instance = await this.getInstance();
+        const invitations: InvitationListItem[] = [];
+
+
+        const users = instance.invitations.filter((u, i) => instance.invitations.indexOf(u) === i);
+        for (const user of users) {
+            const invitation = await this.env.INVITATIONS.get<Invitation>(`${user}#${sku}`, "json");
+            const profile = await this.env.USERS.get<User>(user, "json");
+
+            if (!invitation || !profile) { continue; }
+
+            invitations.push({
+                id: invitation.id, accepted: invitation.accepted, admin: invitation.admin, user: profile
+            })
+        };
+
+        return invitations;
+    };
+
+    async getActiveUsers(): Promise<ShareUser[]> {
+        return this.clients.filter(client => client.active).map(client => client.user);
+    };
+
     async fetch(request: Request) {
         return this.router.handle(request);
     }
 
     async handleInit(request: Request) {
         const data = await request.json<EventIncidentsInitData>();
-        this.sku = data.sku;
+
+        await this.setInstanceSecret(data.instance);
+        await this.setSKU(data.sku);
+
+        return response({ success: true, data: null });
     };
 
     async handleGet() {
@@ -405,18 +454,25 @@ export class EventIncidents implements DurableObject {
             }
         });
 
+        const activeUsers = await this.getActiveUsers();
+        const invitations = await this.getInvitationList();
+
+
         const state = await this.createServerShareMessage();
         const payload = this.createPayload(state, { type: "server" });
 
         await socket.send(JSON.stringify(payload));
-        await this.broadcast({ type: "server_user_add", user }, { type: "server" })
+        await this.broadcast({ type: "server_user_add", user, invitations, activeUsers }, { type: "server" })
 
         const quitHandler = async () => {
             client.active = false
             this.clients = this.clients.filter((member) => member !== client)
 
+            const activeUsers = await this.getActiveUsers();
+            const invitations = await this.getInvitationList();
+
             if (client.user) {
-                await this.broadcast({ type: "server_user_remove", user }, { type: "server" })
+                await this.broadcast({ type: "server_user_remove", user, invitations, activeUsers }, { type: "server" })
             }
         }
 
@@ -442,9 +498,12 @@ export class EventIncidents implements DurableObject {
             }
         })
 
+        const activeUsers = await this.getActiveUsers();
+        const invitations = await this.getInvitationList();
+
         clientLefts.forEach((client) => {
             if (client.user) {
-                this.broadcast({ type: "server_user_remove", user: client.user }, { type: "server" });
+                this.broadcast({ type: "server_user_remove", user: client.user, activeUsers, invitations }, { type: "server" });
             }
         });
     };

@@ -55,4 +55,5 @@ export type EventIncidentsData = {
 
 export type EventIncidentsInitData = {
     sku: string;
+    instance: string;
 };

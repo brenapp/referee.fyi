@@ -21,9 +21,6 @@ kv_namespaces = [
     { binding = "INVITATIONS", id = "bf2c971507354390ba314b8e18b4e908" },
     { binding = "USERS", id = "5af999adc77a401880ed7339dd3c02c2" }
 ]
-routes = [
-    { pattern = "staging.share.referee.fyi", custom_domain = true },
-]
 
 [build]
 command = "npm install && npm run build"

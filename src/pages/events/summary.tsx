@@ -11,7 +11,7 @@ import { useEventIncidents } from "~utils/hooks/incident";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { Incident } from "~components/Incident";
-import { IncidentOutcome } from "~share/EventIncidents";
+import { IncidentOutcome } from "../../../worker/types/EventIncidents";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 import { Dialog, DialogBody } from "~components/Dialog";
 import { XMarkIcon } from "@heroicons/react/20/solid";

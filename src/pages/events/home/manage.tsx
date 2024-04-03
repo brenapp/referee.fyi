@@ -26,7 +26,6 @@ import {
 } from "@heroicons/react/20/solid";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import {
-  useAllEventInvitations,
   useCreateInstance,
   useEventInvitation,
   useShareID,
@@ -328,9 +327,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
   const { mutateAsync: createInstance } = useCreateInstance(event.sku);
   const { data: invitation } = useEventInvitation(event.sku);
 
-  const { data: users, isLoading: isLoadingUsers } = useAllEventInvitations(
-    event.sku
-  );
+  const invitations = useShareConnection((c) => c.invitations);
   const activeUsers = useShareConnection((c) => c.activeUsers);
 
   const { data: entries } = useEventIncidents(event.sku);
@@ -412,8 +409,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
             </nav>
           </div>
           <section className="mt-4">
-            <Spinner show={isLoadingUsers} />
-            {users?.map((user) => (
+            {invitations.map((user) => (
               <div key={user.id} className="py-2 px-4 rounded-md mt-2 flex">
                 <div className="flex gap-2 items-center flex-1">
                   <UserCircleIcon height={24} />

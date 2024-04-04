@@ -8,7 +8,12 @@ import {
   getIncidentsByTeam,
   newIncident,
 } from "../data/incident";
-import { UseQueryResult, useMutation, useMutationState, useQuery } from "@tanstack/react-query";
+import {
+  UseQueryResult,
+  useMutation,
+  useMutationState,
+  useQuery,
+} from "@tanstack/react-query";
 import { Alliance, Match, MatchData } from "robotevents/out/endpoints/matches";
 import { toast } from "~components/Toast";
 import { queryClient } from "~utils/data/query";
@@ -52,7 +57,7 @@ export function useNewIncident() {
     },
     onSettled: () => {
       return queryClient.invalidateQueries({ queryKey: ["incidents"] });
-    }
+    },
   });
 }
 
@@ -69,9 +74,9 @@ export function useEditIncident(updateRemote?: boolean) {
     },
     onSettled: () => {
       return queryClient.invalidateQueries({ queryKey: ["incidents"] });
-    }
+    },
   });
-};
+}
 
 export function useDeleteIncident(updateRemote?: boolean) {
   return useMutation({
@@ -85,43 +90,45 @@ export function useDeleteIncident(updateRemote?: boolean) {
     },
     onSettled: () => {
       return queryClient.invalidateQueries({ queryKey: ["incidents"] });
-    }
+    },
   });
 }
 
-export function usePendingIncidents(predicate: (incident: Incident) => boolean) {
-
+export function usePendingIncidents(
+  predicate: (incident: Incident) => boolean
+) {
   const newIncident = useMutationState({
     filters: {
       mutationKey: ["newIncident"],
-      status: "pending"
+      status: "pending",
     },
-    select: mutation => mutation.state.variables as IncidentWithID
+    select: (mutation) => mutation.state.variables as IncidentWithID,
   });
 
   const editIncident = useMutationState({
     filters: {
       mutationKey: ["editIncident"],
-      status: "pending"
+      status: "pending",
     },
-    select: mutation => mutation.state.variables as IncidentWithID
-  })
+    select: (mutation) => mutation.state.variables as IncidentWithID,
+  });
 
   const deleteIncident = useMutationState({
     filters: {
       mutationKey: ["deleteIncident"],
-      status: "pending"
+      status: "pending",
     },
-    select: mutation => mutation.state.variables as string
+    select: (mutation) => mutation.state.variables as string,
   });
 
-  return { newIncident: newIncident.filter(predicate), editIncident: editIncident.filter(predicate), deleteIncident };
-
-};
-
+  return {
+    newIncident: newIncident.filter(predicate),
+    editIncident: editIncident.filter(predicate),
+    deleteIncident,
+  };
+}
 
 export function useTeamIncidents(team: string | undefined | null) {
-
   return useQuery<IncidentWithID[]>({
     queryKey: ["incidents", "team", team],
     queryFn: () => {

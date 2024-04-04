@@ -85,7 +85,7 @@ export const InviteDialog: React.FC<ButtonProps & { sku: string }> = ({
     const detector = new BarcodeDetector({ formats: ["qr_code"] });
     const onLoadedMetadata = async () => {
       if (!videoRef.current) return;
-      let canvas = document.createElement("canvas");
+      const canvas = document.createElement("canvas");
 
       canvas.width = videoRef.current.videoWidth;
       canvas.height = videoRef.current.videoHeight;
@@ -114,9 +114,10 @@ export const InviteDialog: React.FC<ButtonProps & { sku: string }> = ({
       searchLoop();
     };
 
-    videoRef.current.addEventListener("loadedmetadata", onLoadedMetadata);
-    return () =>
-      videoRef.current?.removeEventListener("loadedmetadata", onLoadedMetadata);
+    const video = videoRef.current;
+
+    video.addEventListener("loadedmetadata", onLoadedMetadata);
+    return () => video?.removeEventListener("loadedmetadata", onLoadedMetadata);
   }, [stream, videoRef]);
 
   const { mutateAsync: invite, isPending: isInvitePending } = useMutation({
@@ -138,7 +139,7 @@ export const InviteDialog: React.FC<ButtonProps & { sku: string }> = ({
       return;
     }
     stream?.getTracks().forEach((t) => t.stop());
-  }, [open]);
+  }, [open, stream]);
 
   return (
     <>
@@ -223,7 +224,7 @@ export const JoinCodeDialog: React.FC<JoinCodeDialogProps> = ({
     }
 
     register(name);
-  }, [open]);
+  }, [name, open, register]);
 
   useEffect(() => {
     if (invitation?.success && invitation.data) {
@@ -239,7 +240,7 @@ export const JoinCodeDialog: React.FC<JoinCodeDialogProps> = ({
     }
     await acceptEventInvitation(sku, invitation.data.id);
     onClose();
-  }, [sku, invitation]);
+  }, [invitation, sku, onClose]);
 
   const onClearInvitation = useCallback(async () => {
     await removeInvitation(sku);

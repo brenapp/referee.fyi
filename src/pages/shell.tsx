@@ -254,7 +254,7 @@ const ConnectionManager: React.FC = () => {
     return () => {
       disconnect();
     };
-  }, [invitation]);
+  }, [connect, disconnect, invitation]);
 
   return null;
 };

@@ -24,7 +24,6 @@ import { toast } from "~components/Toast";
 import { Spinner } from "~components/Spinner";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { queryClient } from "~utils/data/query";
-import { useShareProfile } from "~utils/hooks/share";
 import { getSender } from "~utils/data/share";
 
 export type EventNewIncidentDialogProps = {
@@ -38,7 +37,6 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   setOpen,
   initial,
 }) => {
-  const { name: shareName } = useShareProfile();
   const { mutateAsync: createIncident } = useNewIncident();
 
   const sku = useSKU();
@@ -278,7 +276,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 
       queryClient.invalidateQueries({ queryKey: ["incidents"] });
     },
-    [shareName, incident, createIncident, setOpen, addRecentRules]
+    [incident, createIncident, setOpen, addRecentRules]
   );
 
   return (

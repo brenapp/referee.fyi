@@ -10,7 +10,7 @@ import { useEventSearch } from "~utils/hooks/robotevents";
 import { useRecentEvents } from "~utils/hooks/history";
 import { isWorldsBuild } from "~utils/data/state";
 
-export function useHomeEvents() {
+function useHomeEvents() {
   const { data: worldsEvents } = useEventSearch(
     {
       sku: [

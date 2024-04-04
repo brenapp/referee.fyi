@@ -1,9 +1,5 @@
 import { set } from "idb-keyval";
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "~utils/data/query";
 import {
@@ -41,9 +37,9 @@ export function useShareProfile() {
 export function useShareID() {
   return useQuery({
     queryKey: ["share_id"],
-    queryFn: () => getShareId()
-  })
-};
+    queryFn: () => getShareId(),
+  });
+}
 
 export type UseCreateShareOptions = {
   sku: string;
@@ -51,7 +47,7 @@ export type UseCreateShareOptions = {
 
 export function useCreateInstance(sku: string) {
   return useMutation({
-    mutationFn: () => createInstance(sku)
+    mutationFn: () => createInstance(sku),
   });
 }
 
@@ -65,11 +61,11 @@ export function useEventInvitation(sku?: string | null) {
       return getEventInvitation(sku);
     },
     staleTime: 1000 * 60,
-  })
-};
+  });
+}
 
 export function useAcceptInvitation(sku: string, id: string) {
   return useMutation({
-    mutationFn: () => acceptEventInvitation(sku, id)
+    mutationFn: () => acceptEventInvitation(sku, id),
   });
-};
+}

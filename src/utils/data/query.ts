@@ -15,13 +15,13 @@ export const queryClient = new QueryClient({
       persister: experimental_createPersister<PersistedQuery>({
         buster: CACHE_BUSTER,
         serialize: (query) => query,
-        deserialize: query => query,
+        deserialize: (query) => query,
         storage: {
           getItem: get,
           setItem: set,
-          removeItem: del
-        }
-      })
-    }
+          removeItem: del,
+        },
+      }),
+    },
   },
 });

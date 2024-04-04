@@ -48,17 +48,20 @@ export function useEvent(
   });
 }
 
-export function useEventSearch(query: EventSearchOptions, options?: HookQueryOptions<EventData[] | null | undefined>) {
+export function useEventSearch(
+  query: EventSearchOptions,
+  options?: HookQueryOptions<EventData[] | null | undefined>
+) {
   return useQuery({
     queryKey: ["events_by_level", query],
     queryFn: async () => {
       const events = await robotevents.events.search(query);
-      return events.map(e => e.getData())
+      return events.map((e) => e.getData());
     },
     staleTime: Infinity,
     ...options,
   });
-};
+}
 
 export function useTeam(
   numberOrID: string | number | null | undefined,
@@ -170,7 +173,7 @@ export function logicalMatchComparison(a: MatchData, b: MatchData) {
     Round.Quarterfinals,
     Round.Semifinals,
     Round.Finals,
-    Round.TopN
+    Round.TopN,
   ];
 
   if (a.round !== b.round) {
@@ -239,16 +242,19 @@ export function useEventMatchesForTeam(
   });
 }
 
-export function useMatchTeams(event?: EventData | null, match?: MatchData | null) {
+export function useMatchTeams(
+  event?: EventData | null,
+  match?: MatchData | null
+) {
   const { data: teams } = useEventTeams(event);
 
   if (!teams || !match) {
     return [];
   }
 
-  const teamsInMatch = match?.alliances.flatMap(a => a.teams.map(a => a.team.id)) ?? [];
-  return teamsInMatch.map(id => teams.find(t => t.id === id)!)
-
+  const teamsInMatch =
+    match?.alliances.flatMap((a) => a.teams.map((a) => a.team.id)) ?? [];
+  return teamsInMatch.map((id) => teams.find((t) => t.id === id)!);
 }
 
 export function useEventMatch(

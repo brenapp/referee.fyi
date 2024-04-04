@@ -256,7 +256,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
         setOpen(false);
       }, 100);
     }
-  }, [isLoadingMatchesSuccess, match]);
+  }, [isLoadingMatchesSuccess, match, setOpen]);
 
   const prevMatch = useMemo(() => {
     return matches?.find((_, i) => matches[i + 1]?.id === match?.id);

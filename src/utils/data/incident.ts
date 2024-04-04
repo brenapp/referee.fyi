@@ -9,7 +9,12 @@ import {
   editServerIncident,
   getSender,
 } from "./share";
-import { EditIncident, IncidentOutcome, Revision, Incident as ServerIncident } from "~share/api";
+import {
+  EditIncident,
+  IncidentOutcome,
+  Revision,
+  Incident as ServerIncident,
+} from "~share/api";
 
 export type Incident = Omit<ServerIncident, "id">;
 export type IncidentWithID = ServerIncident;
@@ -41,9 +46,9 @@ export function packIncident(incident: RichIncident): Incident {
     ...incident,
     match: incident.match
       ? {
-        id: incident.match.id,
-        name: incident.match.name,
-      }
+          id: incident.match.id,
+          name: incident.match.name,
+        }
       : undefined,
     team: incident.team?.number,
     rules: incident.rules.map((rule) => rule.rule),
@@ -134,7 +139,6 @@ export async function newIncident(
   return id;
 }
 
-
 export async function editIncident(
   id: string,
   incident: EditIncident,
@@ -157,18 +161,17 @@ export async function editIncident(
       changes.push({
         property: key,
         old: currentValue,
-        new: newValue
+        new: newValue,
       } as Revision);
-    };
-
-  };
+    }
+  }
 
   const user = await getSender();
 
   const revision = current.revision ?? {
     count: 0,
     user,
-    history: []
+    history: [],
   };
 
   revision.count += 1;
@@ -176,7 +179,7 @@ export async function editIncident(
   revision.history.push({
     user,
     date: new Date(),
-    changes
+    changes,
   });
 
   const updatedIncident = { ...current, ...incident, revision };

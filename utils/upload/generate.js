@@ -10,6 +10,8 @@ const values = await fs
 const [header, ...users] = values.split(/\r*\n/g).slice(1);
 const skus = header.split("\t").slice(4);
 
+const secrets = skus.map((sku) => config.invitations[sku]);
+
 const invitations = [];
 
 for (const user of users) {
@@ -28,9 +30,9 @@ for (const user of users) {
       value: {
         id: crypto.randomUUID(),
         sku: skus[i],
-        instance_secret: config.invitations[skus[i]],
+        instance_secret: secrets[i],
         user: publicKey,
-        from: config.from,
+        from: config.from.key,
         admin: adminRaw === "TRUE",
         accepted: true,
       },
@@ -54,7 +56,7 @@ const shares = [];
 
 for (let i = 0; i < skus.length; i++) {
   const sku = skus[i];
-  const secret = config.invitations[skus[i]];
+  const secret = secrets[i];
 
   const admins = invitations
     .filter((inv) => inv.value.admin && inv.value.sku === sku)

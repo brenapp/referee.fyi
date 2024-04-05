@@ -32,6 +32,7 @@ export type ShareConnectionData = {
   invitation: UserInvitation | null;
   activeUsers: ShareUser[];
   invitations: InvitationListItem[];
+  reconnectTimer: NodeJS.Timeout | null;
 };
 
 export type ShareConnectionActions = {
@@ -53,6 +54,8 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
 
   activeUsers: [],
   invitations: [],
+
+  reconnectTimer: null,
 
   forceSync: async () => {
     const sku = get().invitation?.sku;
@@ -224,9 +227,11 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
         toast({ type: "error", message: `${e}` });
       }
     };
-    websocket.onclose = () => {
-      set({ readyState: WebSocket.CLOSING });
-      setTimeout(() => get().connect(invitation), 5000);
+    websocket.onclose = async () => {
+      await get().disconnect();
+      set({
+        reconnectTimer: setTimeout(() => get().connect(invitation), 5000),
+      });
     };
     websocket.onerror = () => {
       toast({ type: "error", message: "Could not connect to sharing server." });
@@ -241,12 +246,19 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
   },
 
   disconnect: async () => {
-    get().websocket?.close();
+    const current = get();
+    current.websocket?.close();
+
+    if (current.reconnectTimer) {
+      clearTimeout(current.reconnectTimer);
+    }
+
     return set({
       readyState: WebSocket.CLOSED,
       activeUsers: [],
       invitation: null,
       websocket: null,
+      reconnectTimer: null,
     });
   },
 }));

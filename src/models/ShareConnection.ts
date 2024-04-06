@@ -26,8 +26,15 @@ import {
 import { queryClient } from "~utils/data/query";
 import { toast } from "~components/Toast";
 
+export enum ReadyState {
+  Closed = WebSocket.CLOSED,
+  Closing = WebSocket.CLOSING,
+  Connecting = WebSocket.CONNECTING,
+  Open = WebSocket.OPEN,
+}
+
 export type ShareConnectionData = {
-  readyState: number;
+  readyState: ReadyState;
   websocket: WebSocket | null;
   invitation: UserInvitation | null;
   activeUsers: ShareUser[];

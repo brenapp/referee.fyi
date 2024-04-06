@@ -40,7 +40,7 @@ import { Spinner } from "~components/Spinner";
 import { useEventIncidents } from "~utils/hooks/incident";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { queryClient } from "~utils/data/query";
-import { useShareConnection } from "~models/ShareConnection";
+import { ReadyState, useShareConnection } from "~models/ShareConnection";
 import { isWorldsBuild } from "~utils/data/state";
 
 export const InviteDialog: React.FC<ButtonProps & { sku: string }> = ({
@@ -331,6 +331,8 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
   const invitations = useShareConnection((c) => c.invitations);
   const activeUsers = useShareConnection((c) => c.activeUsers);
 
+  const connectionStatus = useShareConnection((c) => c.readyState);
+
   const { data: entries } = useEventIncidents(event.sku);
   const isSharing = useMemo(
     () => !!invitation && invitation.accepted,
@@ -409,6 +411,12 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
               </p>
             </nav>
           </div>
+          <Spinner
+            show={
+              connectionStatus === ReadyState.Connecting ||
+              connectionStatus === ReadyState.Closing
+            }
+          />
           <section className="mt-4">
             {invitations.map((user) => (
               <div key={user.id} className="py-2 px-4 rounded-md mt-2 flex">

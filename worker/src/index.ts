@@ -26,6 +26,15 @@ import {
   EventIncidentsInitData,
   APIDeleteInviteResponseBody,
 } from "../types/api";
+import {
+  deleteInvitation,
+  getInstance,
+  getInvitation,
+  getUser,
+  setInstance,
+  setInvitation,
+  setUser,
+} from "./data";
 
 export const { preflight, corsify } = createCors({
   origins: ["*"],
@@ -174,7 +183,7 @@ const verifySignature = async (request: IRequest & Request) => {
 };
 
 const verifyUser = async (request: SignedRequest, env: Env) => {
-  const user: User | null = await env.USERS.get(request.keyHex, "json");
+  const user: User | null = await getUser(env, request.keyHex);
 
   if (!user) {
     return response({
@@ -190,8 +199,11 @@ const verifyUser = async (request: SignedRequest, env: Env) => {
 const verifyInvitation = async (request: AuthenticatedRequest, env: Env) => {
   const sku = request.params.sku;
 
-  const key = `${request.keyHex}#${sku}`;
-  const invitation: Invitation | null = await env.INVITATIONS.get(key, "json");
+  const invitation: Invitation | null = await getInvitation(
+    env,
+    request.user.key,
+    sku
+  );
 
   if (!invitation) {
     return response({
@@ -214,10 +226,10 @@ const verifyInvitation = async (request: AuthenticatedRequest, env: Env) => {
       details: "Cannot perform this action until this invitation is accepted.",
     });
   }
-
-  const instance: ShareInstance | null = await env.SHARES.get(
-    `${sku}#${invitation.instance_secret}`,
-    "json"
+  const instance: ShareInstance | null = await getInstance(
+    env,
+    invitation.instance_secret,
+    sku
   );
 
   if (!instance) {
@@ -253,7 +265,7 @@ router
       name,
     };
 
-    await env.USERS.put(request.keyHex, JSON.stringify(user));
+    await setUser(env, user);
 
     return response<APIRegisterUserResponseBody>({
       success: true,
@@ -284,7 +296,7 @@ router
     const invitation: Invitation = {
       id: crypto.randomUUID(),
       admin: true,
-      user: request.keyHex,
+      user: request.user.key,
       sku,
       instance_secret: secret,
       accepted: true,
@@ -292,17 +304,13 @@ router
     };
 
     instance.invitations.push(invitation.user);
-    await env.INVITATIONS.put(
-      `${request.keyHex}#${sku}`,
-      JSON.stringify(invitation)
-    );
-    await env.SHARES.put(`${sku}#${secret}`, JSON.stringify(instance));
+    await setInvitation(env, invitation);
+    await setInstance(env, instance);
 
-    const share = env.INCIDENTS.get(instanceId);
+    const stub = env.INCIDENTS.get(instanceId);
 
     const body: EventIncidentsInitData = { sku, instance: secret };
-
-    await share.fetch(`https://share/init`, {
+    await stub.fetch(`https://share/init`, {
       body: JSON.stringify(body),
       method: "POST",
     });
@@ -330,10 +338,10 @@ router
         });
       }
 
-      const key = `${request.keyHex}#${request.params.sku}`;
-      const invitation: Invitation | null = await env.INVITATIONS.get(
-        key,
-        "json"
+      const invitation: Invitation | null = await getInvitation(
+        env,
+        request.user.key,
+        sku
       );
 
       if (!invitation) {
@@ -344,7 +352,7 @@ router
         });
       }
 
-      const from: User | null = await env.USERS.get(invitation.from, "json");
+      const from: User | null = await getUser(env, invitation.from);
 
       if (!from) {
         return response({
@@ -378,10 +386,7 @@ router
       });
     }
 
-    const invitation: Invitation | null = await env.INVITATIONS.get(
-      `${request.keyHex}#${sku}`,
-      "json"
-    );
+    const invitation = await getInvitation(env, request.user.key, sku);
 
     if (!invitation) {
       return response({
@@ -399,7 +404,7 @@ router
       });
     }
 
-    const from: User | null = await env.USERS.get(invitation.from, "json");
+    const from: User | null = await getUser(env, invitation.from);
 
     if (!from) {
       return response({
@@ -411,10 +416,7 @@ router
 
     invitation.accepted = true;
 
-    await env.INVITATIONS.put(
-      `${request.keyHex}#${sku}`,
-      JSON.stringify(invitation)
-    );
+    await setInvitation(env, invitation);
 
     return response<APIPutInvitationAcceptResponseBody>({
       success: true,
@@ -460,9 +462,10 @@ router
       from: request.keyHex,
     };
 
-    const currentInvitation: Invitation | null = await env.INVITATIONS.get(
-      `${newInvitation.user}#${newInvitation.sku}`,
-      "json"
+    const currentInvitation: Invitation | null = await getInvitation(
+      env,
+      user,
+      sku
     );
     if (currentInvitation && currentInvitation.accepted) {
       return response({
@@ -476,14 +479,9 @@ router
     if (!instance.invitations.includes(newInvitation.user)) {
       instance.invitations.push(newInvitation.user);
     }
-    await env.SHARES.put(
-      `${sku}#${invitation.instance_secret}`,
-      JSON.stringify(instance)
-    );
-    await env.INVITATIONS.put(
-      `${newInvitation.user}#${newInvitation.sku}`,
-      JSON.stringify(newInvitation)
-    );
+
+    await setInstance(env, instance);
+    await setInvitation(env, newInvitation);
 
     return response<APIPutInviteResponseBody>({
       success: true,
@@ -493,6 +491,7 @@ router
   .delete(
     "/api/:sku/invite",
     async (request: RequestHasInvitation, env: Env) => {
+      const sku = request.params.sku;
       const user = request.query.user;
 
       if (typeof user !== "string") {
@@ -505,7 +504,7 @@ router
 
       const invitation = request.invitation;
 
-      if (!invitation.admin && user !== request.keyHex) {
+      if (!invitation.admin && user !== request.user.key) {
         return response({
           success: false,
           reason: "incorrect_code",
@@ -513,9 +512,10 @@ router
         });
       }
 
-      const userInvitation: Invitation | null = await env.INVITATIONS.get(
-        `${user}#${invitation.sku}`,
-        "json"
+      const userInvitation: Invitation | null = await getInvitation(
+        env,
+        user,
+        sku
       );
 
       if (!userInvitation) {
@@ -542,16 +542,13 @@ router
       // If the last admin leaves, remove everyone's invitations, functionally ending this session.
       if (userInvitation.admin && instance.admins.length < 1) {
         for (const user of instance.invitations) {
-          await env.INVITATIONS.delete(`${user}#${instance.sku}`);
+          await deleteInvitation(env, user, instance.sku);
         }
         instance.invitations = [];
       }
 
-      await env.INVITATIONS.delete(`${user}#${invitation.sku}`);
-      await env.SHARES.put(
-        `${invitation.sku}#${invitation.instance_secret}`,
-        JSON.stringify(instance)
-      );
+      await deleteInvitation(env, user, invitation.sku);
+      await setInstance(env, instance);
 
       return response<APIDeleteInviteResponseBody>({
         success: true,

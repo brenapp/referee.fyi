@@ -13,6 +13,7 @@ import type {
   InvitationListItem,
 } from "../types/api";
 import { Env, Invitation, ShareInstance, User } from "../types/server";
+import { getUser } from "./data";
 
 export type SessionClient = {
   user: ShareUser;
@@ -195,7 +196,7 @@ export class EventIncidents implements DurableObject {
     const instance = await this.getInstance();
 
     if (!instance) {
-        return [];
+      return [];
     }
 
     const invitations: InvitationListItem[] = [];
@@ -208,7 +209,7 @@ export class EventIncidents implements DurableObject {
         `${user}#${sku}`,
         "json"
       );
-      const profile = await this.env.USERS.get<User>(user, "json");
+      const profile = await getUser(this.env, user);
 
       if (!invitation || !profile) {
         continue;

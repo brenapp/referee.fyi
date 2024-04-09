@@ -35,7 +35,7 @@ import { Input } from "~components/Input";
 import { toast } from "~components/Toast";
 import { QRCode, QRCodeProps } from "~components/QRCode";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Info, Error } from "~components/Warning";
+import { Info, Error, Warning } from "~components/Warning";
 import { Spinner } from "~components/Spinner";
 import { useEventIncidents } from "~utils/hooks/incident";
 import { TrashIcon } from "@heroicons/react/24/outline";
@@ -355,8 +355,15 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
     },
   });
 
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+  const disconnect = useShareConnection((c) => c.disconnect);
   const { mutateAsync: onClickLeave, isPending: isLeavePending } = useMutation({
-    mutationFn: () => removeInvitation(event.sku),
+    mutationFn: async () => {
+      await disconnect();
+      await removeInvitation(event.sku);
+      queryClient.invalidateQueries({ queryKey: ["event_invitation_all"] });
+      setLeaveDialogOpen(false);
+    },
   });
 
   const { mutateAsync: removeUser } = useMutation({
@@ -389,10 +396,44 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
           <p>Share Name: {name} </p>
           <div className="mt-2">
             {invitation?.admin ? <InviteDialog sku={event.sku} /> : null}
+            <Dialog
+              mode="nonmodal"
+              open={leaveDialogOpen}
+              className="h-min p-4"
+              onClose={() => setLeaveDialogOpen(false)}
+            >
+              <DialogBody>
+                <p>
+                  Are you sure? If you leave, you will need an admin to invite
+                  you again.
+                </p>
+                {invitation?.admin &&
+                invitations.filter((i) => i.admin).length < 2 ? (
+                  <Warning
+                    className="mt-4"
+                    message="Since you are the last admin, leaving will end this instance and remove all other users."
+                  />
+                ) : null}
+                <Button
+                  mode="dangerous"
+                  className="mt-4"
+                  onClick={() => onClickLeave()}
+                >
+                  Leave
+                </Button>
+                <Button
+                  mode="normal"
+                  className="mt-4"
+                  onClick={() => setLeaveDialogOpen(false)}
+                >
+                  Stay
+                </Button>
+              </DialogBody>
+            </Dialog>
             <Button
               mode="dangerous"
               className="mt-2"
-              onClick={() => onClickLeave()}
+              onClick={() => setLeaveDialogOpen(true)}
             >
               Leave
             </Button>

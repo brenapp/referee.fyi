@@ -85,7 +85,7 @@
             },
             {
               "rule": "<G11>",
-              "description": "Autonomous means “no humans",
+              "description": "Autonomous means “no humans\"",
               "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/G11.html"
             },
             {
@@ -725,7 +725,7 @@
             },
             {
               "rule": "<SC2>",
-              "description": "Scoring of the Autonomous Bonus is evaluated immediately after the Autonomous Period ends (i",
+              "description": "Scoring of the Autonomous Bonus is evaluated immediately after the Autonomous Period ends",
               "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/SC2.html"
             },
             {

@@ -1,6 +1,6 @@
 import { twMerge } from "tailwind-merge";
 import { Game, Rule } from "~utils/hooks/rules";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { IconButton } from "./Button";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
@@ -133,41 +133,47 @@ export type RulesMultiSelectProps = {
 
 export const RulesMultiSelect: React.FC<RulesMultiSelectProps> = ({
   game,
-  value,
+  value: rules,
   onChange,
 }) => {
-  const onPickOtherRule = useCallback(
+  const value = useMemo(() => rules.map((r) => r.rule), [rules]);
+
+  const onPickRule = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const group = e.target.selectedOptions[0].dataset.rulegroup;
-      if (!group) return;
+      const rules: Rule[] = [];
 
-      const rule = game?.ruleGroups
-        .find((g) => g.name === group)
-        ?.rules.find((r) => r.rule === e.target.value);
+      for (let i = 0; i < e.currentTarget.selectedOptions.length; i++) {
+        const option = e.currentTarget.selectedOptions[i];
+        const group = option.dataset.rulegroup;
 
-      if (!rule) return;
-      if (value.some((r) => r.rule === rule.rule)) return;
-      onChange([...value, rule]);
+        const rule = game?.ruleGroups
+          .find((g) => g.name === group)
+          ?.rules.find((r) => r.rule === option.value);
+
+        if (!rule) continue;
+        rules.push(rule);
+      }
+
+      onChange(rules);
     },
-    [game, value, onChange]
+    [onChange, game]
   );
 
   const onRemoveRule = useCallback(
     (rule: Rule) => {
-      const rules = value.filter((r) => r.rule !== rule.rule);
-      onChange(rules);
+      onChange(rules.filter((r) => r.rule !== rule.rule));
     },
-    [value, onChange]
+    [rules, onChange]
   );
 
   return (
     <>
       <Select
         className="max-w-full w-full mt-2"
-        value={""}
-        onChange={onPickOtherRule}
+        multiple
+        value={value}
+        onChange={onPickRule}
       >
-        <option>Pick Rule</option>
         {game?.ruleGroups.map((group) => (
           <optgroup label={group.name} key={group.name}>
             {group.rules.map((rule) => (
@@ -183,7 +189,7 @@ export const RulesMultiSelect: React.FC<RulesMultiSelectProps> = ({
         ))}
       </Select>
       <ul className="mt-4 flex flex-wrap gap-2">
-        {value.map((rule) => (
+        {rules.map((rule) => (
           <li
             key={rule.rule}
             className="p-2 flex w-full items-center bg-zinc-800 rounded-md"

@@ -358,7 +358,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             <option value="Disabled">Disabled</option>
           </Select>
         </label>
-        <label>
+        <div>
           <p className="mt-4">Associated Rules</p>
           <div className="flex mt-2 gap-2 flex-wrap md:flex-nowrap">
             {recentRules?.map((rule) => (
@@ -382,7 +382,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             value={incident.rules}
             onChange={onChangeIncidentRules}
           />
-        </label>
+        </div>
         <label>
           <p className="mt-4">Notes</p>
           <TextArea

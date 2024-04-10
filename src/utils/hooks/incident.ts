@@ -160,6 +160,7 @@ export function useTeamIncidentsByEvent(
       return incidents.filter((incident) => incident.event === sku);
     },
     staleTime: 0,
+    refetchOnMount: "always",
   });
 }
 

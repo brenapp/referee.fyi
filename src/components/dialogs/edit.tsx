@@ -89,7 +89,7 @@ export type RevisionListProps = {
 };
 
 export const RevisionList: React.FC<RevisionListProps> = ({ incident }) => {
-  const lastToEdit = useMemo(
+  const creator = useMemo(
     () => userString(incident.revision?.user),
     [incident.revision?.user]
   );
@@ -101,7 +101,7 @@ export const RevisionList: React.FC<RevisionListProps> = ({ incident }) => {
   return (
     <section className="mt-2">
       <h2 className="font-bold">Revision History</h2>
-      <p>Last to Edit: {lastToEdit}</p>
+      <p>Created By: {creator}</p>
 
       {incident.revision.history.map((log) => (
         <details className="p-2 bg-zinc-800 mt-2 rounded-md">

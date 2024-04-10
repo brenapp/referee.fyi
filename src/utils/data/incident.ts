@@ -175,7 +175,6 @@ export async function editIncident(
   };
 
   revision.count += 1;
-  revision.user = user;
   revision.history.push({
     user,
     date: new Date(),

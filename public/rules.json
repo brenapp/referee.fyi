@@ -6,6 +6,78 @@
       "programs": ["VAIC"],
       "ruleGroups": [
         {
+          "name": "VEX AI Game Rules",
+          "rules": [
+            {
+              "rule": "<VAIG1>",
+              "description": " All <VUGx>, <SCx>, and <Sx> rules apply as written",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIG1.html"
+            },
+
+            {
+              "rule": "<VAIG2>",
+              "description": " Drive Team Members are not permitted to interact with their Robots during Autonomous",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIG2.html"
+            },
+
+            {
+              "rule": "<VAIG3>",
+              "description": " VAIRC Teams are responsible for the actions of their Robots throughout the Match",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIG3.html"
+            },
+
+            {
+              "rule": "<VAIG4>",
+              "description": " Robots are only permitted to \"break the plane\" of an opponent’s Goal if they are Double-Cornered",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIG4.html"
+            }
+          ]
+        },
+        {
+          "name": "VEX AI Tournament Rules",
+          "rules": [
+            {
+              "rule": "<VAIT1>",
+              "description": " The following VEX U rules apply",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIT1.html"
+            },
+
+            {
+              "rule": "<VAIT2>",
+              "description": " VEX AI Robotics Competition Student eligiblity",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIT2.html"
+            },
+
+            {
+              "rule": "<VAIT3>",
+              "description": " Students may only participate on one (1) VAIRC Team in a given season",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIT3.html"
+            }
+          ]
+        },
+        {
+          "name": "VEX AI Robot Rules",
+          "rules": [
+            {
+              "rule": "<VAIR1>",
+              "description": " All <VURx> rules apply as written",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIR1.html"
+            },
+
+            {
+              "rule": "<VAIR2>",
+              "description": " Any components used for AI vision processing are considered Additional Electronics",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIR2.html"
+            },
+
+            {
+              "rule": "<VAIR3>",
+              "description": " The Robot(s) built by a Base Team may be used by their Crossover Team for VAIRC Matches",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIR3.html"
+            }
+          ]
+        },
+        {
           "name": "Specific Game Rules",
           "rules": [
             {
@@ -808,78 +880,6 @@
               "rule": "<VUR14>",
               "description": " Teams may use commercially available bearings on their Robot",
               "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VUR14.html"
-            }
-          ]
-        },
-        {
-          "name": "VEX AI Game Rules",
-          "rules": [
-            {
-              "rule": "<VAIG1>",
-              "description": " All <VUGx>, <SCx>, and <Sx> rules apply as written",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIG1.html"
-            },
-
-            {
-              "rule": "<VAIG2>",
-              "description": " Drive Team Members are not permitted to interact with their Robots during Autonomous",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIG2.html"
-            },
-
-            {
-              "rule": "<VAIG3>",
-              "description": " VAIRC Teams are responsible for the actions of their Robots throughout the Match",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIG3.html"
-            },
-
-            {
-              "rule": "<VAIG4>",
-              "description": " Robots are only permitted to \"break the plane\" of an opponent’s Goal if they are Double-Cornered",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIG4.html"
-            }
-          ]
-        },
-        {
-          "name": "VEX AI Tournament Rules",
-          "rules": [
-            {
-              "rule": "<VAIT1>",
-              "description": " The following VEX U rules apply",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIT1.html"
-            },
-
-            {
-              "rule": "<VAIT2>",
-              "description": " VEX AI Robotics Competition Student eligiblity",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIT2.html"
-            },
-
-            {
-              "rule": "<VAIT3>",
-              "description": " Students may only participate on one (1) VAIRC Team in a given season",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIT3.html"
-            }
-          ]
-        },
-        {
-          "name": "VEX AI Robot Rules",
-          "rules": [
-            {
-              "rule": "<VAIR1>",
-              "description": " All <VURx> rules apply as written",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIR1.html"
-            },
-
-            {
-              "rule": "<VAIR2>",
-              "description": " Any components used for AI vision processing are considered Additional Electronics",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIR2.html"
-            },
-
-            {
-              "rule": "<VAIR3>",
-              "description": " The Robot(s) built by a Base Team may be used by their Crossover Team for VAIRC Matches",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VAIR3.html"
             }
           ]
         }
@@ -1503,6 +1503,52 @@
           ]
         },
         {
+          "name": "VEX U Tournament Rules",
+          "rules": [
+            {
+              "rule": "<VUT1>",
+              "description": " VEX U Matches will be played 1-Team vs. 1-Team",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VUT1.html"
+            },
+
+            {
+              "rule": "<VUT2>",
+              "description": " Qualification Matches will be conducted in the 1v1 format",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VUT2.html"
+            },
+
+            {
+              "rule": "<VUT3>",
+              "description": " Elimination Matches will be conducted without an Alliance Selection",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VUT3.html"
+            },
+
+            {
+              "rule": "<VUT4>",
+              "description": " The Autonomous Period at the beginning of each Head-to-Head Match will be 45 seconds",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VUT4.html"
+            },
+
+            {
+              "rule": "<VUT5>",
+              "description": " The Driver Controlled Period is shortened to 75 seconds",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VUT5.html"
+            },
+
+            {
+              "rule": "<VUT6>",
+              "description": " Each Robot is allowed up to three (3) Drive Team Members in the Alliance Station",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VUT6.html"
+            },
+
+            {
+              "rule": "<VUT7>",
+              "description": " VEX U Student eligibility",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VUT7.html"
+            }
+          ]
+        },
+        {
           "name": "Tournament Rules",
           "rules": [
             {
@@ -1647,52 +1693,6 @@
               "rule": "<T24>",
               "description": " There are two types of field perimeter that may be used",
               "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T24.html"
-            }
-          ]
-        },
-        {
-          "name": "VEX U Tournament Rules",
-          "rules": [
-            {
-              "rule": "<VUT1>",
-              "description": " VEX U Matches will be played 1-Team vs. 1-Team",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VUT1.html"
-            },
-
-            {
-              "rule": "<VUT2>",
-              "description": " Qualification Matches will be conducted in the 1v1 format",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VUT2.html"
-            },
-
-            {
-              "rule": "<VUT3>",
-              "description": " Elimination Matches will be conducted without an Alliance Selection",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VUT3.html"
-            },
-
-            {
-              "rule": "<VUT4>",
-              "description": " The Autonomous Period at the beginning of each Head-to-Head Match will be 45 seconds",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VUT4.html"
-            },
-
-            {
-              "rule": "<VUT5>",
-              "description": " The Driver Controlled Period is shortened to 75 seconds",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VUT5.html"
-            },
-
-            {
-              "rule": "<VUT6>",
-              "description": " Each Robot is allowed up to three (3) Drive Team Members in the Alliance Station",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VUT6.html"
-            },
-
-            {
-              "rule": "<VUT7>",
-              "description": " VEX U Student eligibility",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/VUT7.html"
             }
           ]
         }

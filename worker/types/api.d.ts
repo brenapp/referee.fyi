@@ -99,21 +99,21 @@ export type WebSocketServerShareInfoMessage = {
   type: "server_share_info";
   data: EventIncidentsData;
   activeUsers: ShareUser[];
-  invitations: InvitationListItem[];
+  invitations: Pick<InvitationListItem, "user" | "admin">[];
 };
 
 export type WebsocketServerUserAddMessage = {
   type: "server_user_add";
   user: ShareUser;
   activeUsers: ShareUser[];
-  invitations: InvitationListItem[];
+  invitations: Pick<InvitationListItem, "user" | "admin">[];
 };
 
 export type WebsocketServerUserRemoveMessage = {
   type: "server_user_remove";
   user: ShareUser;
   activeUsers: ShareUser[];
-  invitations: InvitationListItem[];
+  invitations: Pick<InvitationListItem, "user" | "admin">[];
 };
 
 export type WebSocketServerMessage =

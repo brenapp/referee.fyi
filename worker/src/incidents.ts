@@ -12,7 +12,7 @@ import type {
   EventIncidentsInitData,
   InvitationListItem,
 } from "../types/api";
-import { Env, Invitation, ShareInstance, User } from "../types/server";
+import { Env, ShareInstance, User } from "../types/server";
 import { getUser } from "./data";
 
 export type SessionClient = {
@@ -191,42 +191,35 @@ export class EventIncidents implements DurableObject {
     return instance;
   }
 
-  async getInvitationList(): Promise<InvitationListItem[]> {
-    const sku = await this.getSKU();
+  async getInvitationList(): Promise<
+    Pick<InvitationListItem, "user" | "admin">[]
+  > {
     const instance = await this.getInstance();
 
     if (!instance) {
       return [];
     }
 
-    const invitations: InvitationListItem[] = [];
-
     const users = instance.invitations.filter(
       (u, i) => instance.invitations.indexOf(u) === i
     );
-    for (const user of users) {
-      const invitation = await this.env.INVITATIONS.get<Invitation>(
-        `${user}#${sku}`,
-        "json"
+
+    const invitations: Pick<InvitationListItem, "user" | "admin">[] =
+      await Promise.all(
+        users.map(async (key) => {
+          const user = await getUser(this.env, key);
+
+          return {
+            user: user ?? { key, name: "<Unknown User>" },
+            admin: instance.admins.includes(key),
+          };
+        })
       );
-      const profile = await getUser(this.env, user);
-
-      if (!invitation || !profile) {
-        continue;
-      }
-
-      invitations.push({
-        id: invitation.id,
-        accepted: invitation.accepted,
-        admin: invitation.admin,
-        user: profile,
-      });
-    }
 
     return invitations;
   }
 
-  async getActiveUsers(): Promise<ShareUser[]> {
+  getActiveUsers(): ShareUser[] {
     return this.clients
       .filter((client) => client.active)
       .map((client) => client.user);
@@ -531,14 +524,20 @@ export class EventIncidents implements DurableObject {
     const activeUsers = await this.getActiveUsers();
     const invitations = await this.getInvitationList();
 
-    const state = await this.createServerShareMessage();
-    const payload = this.createPayload(state, { type: "server" });
-
-    await socket.send(JSON.stringify(payload));
     await this.broadcast(
       { type: "server_user_add", user, invitations, activeUsers },
       { type: "server" }
     );
+
+    const state: WebSocketServerShareInfoMessage = {
+      type: "server_share_info",
+      activeUsers: this.getActiveUsers(),
+      data: await this.getData(),
+      invitations,
+    };
+
+    const payload = this.createPayload(state, { type: "server" });
+    socket.send(JSON.stringify(payload));
 
     const quitHandler = async () => {
       client.active = false;

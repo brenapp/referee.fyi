@@ -27,7 +27,7 @@ function userString(user?: WebSocketSender) {
 }
 
 function timeAgo(input: Date) {
-  const date = new Date(input)
+  const date = new Date(input);
   const formatter = new Intl.RelativeTimeFormat("en");
   const ranges = {
     years: 3600 * 24 * 365,
@@ -231,7 +231,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
     } catch (e) {
       toast({ type: "error", message: `${e}` });
     }
-  }, [incident, setOpen]);
+  }, [editIncident, incident, setOpen]);
 
   return (
     <Dialog mode="modal" onClose={() => setOpen(false)} open={open}>

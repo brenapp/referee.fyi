@@ -29,7 +29,5 @@ test/**/*.js
 tsconfig.tsbuildinfo
 
 test/websocket/log
-utils/upload/config.json
-utils/upload/headreferees.tsv
-utils/upload/invitations.json
-utils/upload/shares.json
+utils/upload/*.json
+utils/upload/*.tsv

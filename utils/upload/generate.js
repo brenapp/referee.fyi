@@ -13,6 +13,7 @@ const skus = header.split("\t").slice(4);
 const secrets = skus.map((sku) => config.invitations[sku]);
 
 const invitations = [];
+const outputUsers = [];
 
 for (const user of users) {
   const [adminRaw, emailRaw, name, publicKey, ...events] = user.split("\t");
@@ -38,12 +39,26 @@ for (const user of users) {
       },
     });
   }
+
+  outputUsers.push({ key: publicKey, value: { key: publicKey, name } });
 }
 
 await fs.writeFile(
   "./invitations.json",
   JSON.stringify(
     invitations.map(({ key, value }) => ({
+      key,
+      value: JSON.stringify(value),
+    })),
+    null,
+    4
+  )
+);
+
+await fs.writeFile(
+  "./users.json",
+  JSON.stringify(
+    outputUsers.map(({ key, value }) => ({
       key,
       value: JSON.stringify(value),
     })),
@@ -64,8 +79,6 @@ for (let i = 0; i < skus.length; i++) {
   const invs = invitations
     .filter((inv) => inv.value.sku === sku)
     .map((i) => i.value.user);
-
-  console.log(sku, admins, invs);
 
   shares.push({
     key: `${sku}#${secret}`,

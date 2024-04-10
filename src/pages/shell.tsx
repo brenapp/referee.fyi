@@ -265,7 +265,7 @@ export const AppShell: React.FC = () => {
 
   return (
     <main
-      className="p-4 w-screen h-screen grid"
+      className="p-4 w-screen h-screen grid mb-4"
       style={{
         gridTemplateRows: "4rem 1fr",
         gridTemplateColumns: "calc(100vw - 32px)",

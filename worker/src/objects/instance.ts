@@ -1,5 +1,5 @@
 import { Router } from "itty-router";
-import { corsHeaders, response } from "./utils";
+import { corsHeaders, response } from "../utils/request";
 import type {
   ShareUser,
   Incident,
@@ -11,9 +11,9 @@ import type {
   WebSocketServerShareInfoMessage,
   EventIncidentsInitData,
   InvitationListItem,
-} from "../types/api";
-import { Env, Invitation, ShareInstance, User } from "../types/server";
-import { getUser } from "./data";
+} from "../../types/api";
+import { Env, Invitation, ShareInstance, User } from "../../types/server";
+import { getUser } from "../utils/data";
 
 export type SessionClient = {
   user: ShareUser;
@@ -204,6 +204,7 @@ export class EventIncidents implements DurableObject {
     const users = instance.invitations.filter(
       (u, i) => instance.invitations.indexOf(u) === i
     );
+
     for (const user of users) {
       const invitation = await this.env.INVITATIONS.get<Invitation>(
         `${user}#${sku}`,

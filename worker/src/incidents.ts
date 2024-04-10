@@ -191,9 +191,7 @@ export class EventIncidents implements DurableObject {
     return instance;
   }
 
-  async getInvitationList(): Promise<
-    Pick<InvitationListItem, "user" | "admin">[]
-  > {
+  async getInvitationList(): Promise<InvitationListItem[]> {
     const instance = await this.getInstance();
 
     if (!instance) {
@@ -204,17 +202,16 @@ export class EventIncidents implements DurableObject {
       (u, i) => instance.invitations.indexOf(u) === i
     );
 
-    const invitations: Pick<InvitationListItem, "user" | "admin">[] =
-      await Promise.all(
-        users.map(async (key) => {
-          const user = await getUser(this.env, key);
+    const invitations: InvitationListItem[] = await Promise.all(
+      users.map(async (key) => {
+        const user = await getUser(this.env, key);
 
-          return {
-            user: user ?? { key, name: "<Unknown User>" },
-            admin: instance.admins.includes(key),
-          };
-        })
-      );
+        return {
+          user: user ?? { key, name: "<Unknown User>" },
+          admin: instance.admins.includes(key),
+        };
+      })
+    );
 
     return invitations;
   }

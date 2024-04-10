@@ -460,7 +460,10 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
           />
           <section className="mt-4">
             {invitations.map((user) => (
-              <div key={user.id} className="py-2 px-4 rounded-md mt-2 flex">
+              <div
+                key={user.user.key}
+                className="py-2 px-4 rounded-md mt-2 flex"
+              >
                 <div className="flex gap-2 items-center flex-1">
                   <UserCircleIcon height={24} />
                   <p>{user.user.name}</p>

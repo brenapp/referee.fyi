@@ -88,10 +88,7 @@ export type WebSocketPeerMessage =
   | WebSocketRemoveIncidentMessage
   | WebSocketBroadcastMessage;
 
-export type InvitationListItem = Pick<
-  Invitation,
-  "id" | "admin" | "accepted"
-> & {
+export type InvitationListItem = Pick<Invitation, "admin"> & {
   user: User;
 };
 
@@ -99,21 +96,21 @@ export type WebSocketServerShareInfoMessage = {
   type: "server_share_info";
   data: EventIncidentsData;
   activeUsers: ShareUser[];
-  invitations: Pick<InvitationListItem, "user" | "admin">[];
+  invitations: InvitationListItem[];
 };
 
 export type WebsocketServerUserAddMessage = {
   type: "server_user_add";
   user: ShareUser;
   activeUsers: ShareUser[];
-  invitations: Pick<InvitationListItem, "user" | "admin">[];
+  invitations: InvitationListItem[];
 };
 
 export type WebsocketServerUserRemoveMessage = {
   type: "server_user_remove";
   user: ShareUser;
   activeUsers: ShareUser[];
-  invitations: Pick<InvitationListItem, "user" | "admin">[];
+  invitations: InvitationListItem[];
 };
 
 export type WebSocketServerMessage =

@@ -60,7 +60,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const [team, setTeam] = useState<string | undefined>(initial?.team?.number);
   const [match, setMatch] = useState<number | undefined>(initial?.match?.id);
 
-  const teamData = useEventTeam(event, team);
+  const { data: teamData } = useEventTeam(event, team);
   const eventMatchData = useEventMatch(event, division, match);
 
   // Edge-case: if we are not in a specific division (i.e. in the team page), load all matches for

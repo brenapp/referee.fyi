@@ -88,8 +88,7 @@ export const EventTeamsIncidents: React.FC<EventTeamsTabProps> = ({
 export const EventTeamsPage: React.FC = () => {
   const { number } = useParams();
   const { data: event } = useCurrentEvent();
-  const team = useEventTeam(event, number ?? "");
-
+  const { data: team } = useEventTeam(event, number ?? "");
   const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
 
   const teamLocation = useMemo(() => {

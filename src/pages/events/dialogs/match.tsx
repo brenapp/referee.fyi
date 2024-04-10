@@ -66,7 +66,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
   }, [rawIncidents, pending]);
 
   const { data: event } = useCurrentEvent();
-  const team = useEventTeam(event, number);
+  const { data: team } = useEventTeam(event, number);
 
   const teamAlliance = match.alliances.find((alliance) =>
     alliance.teams.some((t) => t.team.name === number)

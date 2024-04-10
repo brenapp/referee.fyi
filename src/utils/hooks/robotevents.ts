@@ -1,5 +1,7 @@
 import * as robotevents from "robotevents";
 import {
+  DefaultError,
+  QueryKey,
   UseQueryOptions,
   UseQueryResult,
   useQuery,
@@ -24,8 +26,13 @@ const ROBOTEVENTS_TOKEN =
 
 robotevents.authentication.setBearer(ROBOTEVENTS_TOKEN);
 
-export type HookQueryOptions<T> = Omit<
-  UseQueryOptions<T>,
+export type HookQueryOptions<
+  TQueryFnData = unknown,
+  TError = Error,
+  TData = TQueryFnData,
+  TQueryKey extends QueryKey = QueryKey,
+> = Omit<
+  UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>,
   "queryKey" | "queryFn"
 >;
 
@@ -83,11 +90,11 @@ export function useTeam(
   });
 }
 
-export function useEventTeams(
+export function useEventTeams<Select = TeamData[]>(
   eventData: EventData | null | undefined,
   options?: TeamOptionsFromEvent,
-  queryOptions?: HookQueryOptions<TeamData[]>
-): UseQueryResult<TeamData[]> {
+  queryOptions?: HookQueryOptions<TeamData[], DefaultError, Select>
+): UseQueryResult<Select> {
   return useQuery({
     queryKey: ["teams", eventData?.sku, options],
     queryFn: async () => {
@@ -270,13 +277,9 @@ export function useEventTeam(
   event: EventData | null | undefined,
   number: string | null | undefined
 ) {
-  const { data: teams } = useEventTeams(event);
-
-  if (!number) {
-    return undefined;
-  }
-
-  return teams?.find((team) => team.number === number);
+  return useEventTeams(event, undefined, {
+    select: (teams) => teams.find((t) => t.number === number),
+  });
 }
 
 export function useEventsToday(

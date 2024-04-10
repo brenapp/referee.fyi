@@ -15,7 +15,7 @@ export const Tabs: React.FC<TabsProps> = ({ children, ...props }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const tabs = useMemo(() => Object.entries(children), []);
+  const tabs = useMemo(() => Object.entries(children), [children]);
 
   const [activeTab, setActiveTab] = useState<number>(location?.state?.tab ?? 0);
 

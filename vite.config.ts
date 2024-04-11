@@ -6,9 +6,6 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  define: {
-    "import.meta.env.VITE_REFEREE_FYI_BUILD_MODE": '"WC"',
-  },
   plugins: [
     react(),
     vitePluginVersionMark({

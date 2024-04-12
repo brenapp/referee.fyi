@@ -12,8 +12,9 @@ import type {
   EventIncidentsInitData,
   InvitationListItem,
 } from "../../types/api";
-import { Env, ShareInstance, User } from "../../types/server";
+import { ShareInstance, User } from "../../types/server";
 import { getUser } from "./data";
+import { Env } from "./types";
 
 export type SessionClient = {
   user: ShareUser;

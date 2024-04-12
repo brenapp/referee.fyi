@@ -8,15 +8,7 @@ import {
 } from "itty-router";
 import { response } from "./utils";
 
-import {
-  Env,
-  Invitation,
-  ShareInstance,
-  AuthenticatedRequest,
-  RequestHasInvitation,
-  SignedRequest,
-  User,
-} from "../../types/server";
+import type { Invitation, ShareInstance, User } from "~types/server";
 import {
   APIPostCreateResponseBody,
   APIGetInvitationResponseBody,
@@ -35,30 +27,19 @@ import {
   setInvitation,
   setUser,
 } from "./data";
+import {
+  AuthenticatedRequest,
+  Env,
+  RequestHasInvitation,
+  SignedRequest,
+} from "./types";
+import { importKey, KEY_PREFIX, verifyKeySignature } from "./crypto";
+import { integrationRouter } from "./integration";
 
 export const { preflight, corsify } = createCors({
   origins: ["*"],
   methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
 });
-
-const KEY_PREFIX = "ECDSA:";
-const KEY_ALGORITHM = { name: "ECDSA", namedCurve: "P-384" };
-
-function ingestHex(hex: string): Uint8Array | null {
-  const keyBuffer = new Uint8Array(hex.length / 2);
-
-  for (let i = 0; i < hex.length; i += 2) {
-    const value = Number.parseInt(hex[i] + hex[i + 1], 16);
-
-    if (!Number.isFinite(value)) {
-      return null;
-    }
-
-    keyBuffer[i / 2] = value;
-  }
-
-  return keyBuffer;
-}
 
 const verifySignature = async (request: IRequest & Request) => {
   const now = new Date();
@@ -93,36 +74,7 @@ const verifySignature = async (request: IRequest & Request) => {
     });
   }
 
-  if (!publicKeyRaw.startsWith(KEY_PREFIX)) {
-    return response({
-      success: false,
-      reason: "bad_request",
-      details: "Incorrect public key form.",
-    });
-  }
-
-  const keyBuffer = ingestHex(publicKeyRaw.slice(KEY_PREFIX.length));
-
-  if (!keyBuffer) {
-    return response({
-      success: false,
-      reason: "bad_request",
-      details: "Invalid public key.",
-    });
-  }
-
-  let key: CryptoKey | null = null;
-  try {
-    key = await crypto.subtle.importKey("raw", keyBuffer, KEY_ALGORITHM, true, [
-      "verify",
-    ]);
-  } catch (e) {
-    return response({
-      success: false,
-      reason: "bad_request",
-      details: "Invalid public key.",
-    });
-  }
+  const key = await importKey(publicKeyRaw);
 
   if (!key) {
     return response({
@@ -149,25 +101,7 @@ const verifySignature = async (request: IRequest & Request) => {
     body,
   ].join("\n");
 
-  const encoder = new TextEncoder();
-
-  const messageBuffer = encoder.encode(message);
-  const signatureBuffer = ingestHex(signature);
-
-  if (!signatureBuffer) {
-    return response({
-      success: false,
-      reason: "incorrect_code",
-      details: "Invalid signature.",
-    });
-  }
-
-  const valid = await crypto.subtle.verify(
-    { ...KEY_ALGORITHM, hash: "SHA-256" },
-    key,
-    signatureBuffer,
-    messageBuffer
-  );
+  const valid = await verifyKeySignature(key, signature, message);
 
   if (!valid) {
     return response({
@@ -249,8 +183,13 @@ const router = Router<IRequest, [Env]>();
 router
   .all("*", preflight)
   .all("*", withParams)
+
+  // Integration API
+  .all("/api/integration/v1/*", integrationRouter.handle)
+
+  // Read Write API
   .all("*", verifySignature)
-  .post("/api/user", async (request: AuthenticatedRequest, env: Env) => {
+  .post("/api/user", async (request: SignedRequest, env: Env) => {
     const name = request.query.name;
     if (typeof name !== "string") {
       return response({

@@ -11,8 +11,8 @@ import type {
   WebSocketServerShareInfoMessage,
   EventIncidentsInitData,
   InvitationListItem,
-} from "../types/api";
-import { Env, ShareInstance, User } from "../types/server";
+} from "../../types/api";
+import { Env, ShareInstance, User } from "../../types/server";
 import { getUser } from "./data";
 
 export type SessionClient = {

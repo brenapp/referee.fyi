@@ -16,7 +16,7 @@ import {
   RequestHasInvitation,
   SignedRequest,
   User,
-} from "../types/server";
+} from "../../types/server";
 import {
   APIPostCreateResponseBody,
   APIGetInvitationResponseBody,
@@ -25,7 +25,7 @@ import {
   APIRegisterUserResponseBody,
   EventIncidentsInitData,
   APIDeleteInviteResponseBody,
-} from "../types/api";
+} from "../../types/api";
 import {
   deleteInvitation,
   getInstance,

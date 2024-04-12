@@ -11,11 +11,11 @@ const verifyBearerToken = async (request: IRequest, env: Env) => {
   const sku = request.params.sku;
   const token = request.query.token;
 
-  if (typeof token !== "string") {
+  if (typeof token !== "string" || typeof sku !== "string") {
     return response({
       success: false,
       reason: "bad_request",
-      details: "Must specify bearer token.",
+      details: "Must specify bearer token and sku.",
     });
   }
 
@@ -77,7 +77,7 @@ const verifyBearerToken = async (request: IRequest, env: Env) => {
     });
   }
 
-  request.userKey = await getUser(env, keyHex);
+  request.user = await getUser(env, keyHex);
   request.invitation = invitation;
   request.instance = instance;
 };
@@ -90,12 +90,12 @@ type VerifiedRequest = IRequest & {
 
 // Integration API (just requires bearer token)
 integrationRouter
-  .all("*", verifyBearerToken)
+  .all("/api/integration/v1/:sku/*", verifyBearerToken)
   .get("/api/integration/v1/:sku/verify", async () => {
     return response({ success: true, data: "Valid Bearer Token" });
   })
   .get(
-    "/api/integrations/v1/:sku/incidents.json",
+    "/api/integration/v1/:sku/incidents.json",
     async (request: VerifiedRequest, env: Env) => {
       const id = env.INCIDENTS.idFromString(request.instance.secret);
       const stub = env.INCIDENTS.get(id);
@@ -112,7 +112,7 @@ integrationRouter
     }
   )
   .get(
-    "/api/integrations/v1/:sku/incidents.csv",
+    "/api/integration/v1/:sku/incidents.csv",
     async (request: VerifiedRequest, env: Env) => {
       const id = env.INCIDENTS.idFromString(request.instance.secret);
       const stub = env.INCIDENTS.get(id);

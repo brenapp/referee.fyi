@@ -581,7 +581,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
       ) : null}
       {isSuccessBearerToken && bearerToken ? (
         <section>
-          <h2 className="mt-4">Integration Bearer</h2>
+          <h2 className="mt-4 font-bold">Integration Bearer</h2>
           <p>
             Use this bearer token to allow external integrations to read data
             from this instance.

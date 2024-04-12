@@ -10,6 +10,7 @@ import {
   getShareName,
   registerUser,
 } from "~utils/data/share";
+import { exportPublicKey, getKeyPair, signMessage } from "~utils/data/crypto";
 
 export function useShareProfile() {
   const [name, setName] = useState("");
@@ -67,5 +68,34 @@ export function useEventInvitation(sku?: string | null) {
 export function useAcceptInvitation(sku: string, id: string) {
   return useMutation({
     mutationFn: () => acceptEventInvitation(sku, id),
+  });
+}
+
+export function useIntegrationBearer(sku: string) {
+  const { data: invitation, isSuccess: isEventInvitationSuccess } =
+    useEventInvitation(sku);
+
+  return useQuery({
+    queryKey: ["integration_bearer", sku, invitation?.id],
+    queryFn: async () => {
+      if (!invitation) {
+        return null;
+      }
+
+      if (!invitation.admin || !invitation.accepted) {
+        return null;
+      }
+
+      const { publicKey, privateKey } = await getKeyPair();
+      const message = await signMessage(
+        privateKey,
+        `${invitation.id}${invitation.sku}`
+      );
+
+      const keyHex = await exportPublicKey(publicKey, true);
+
+      return [keyHex, message].join("|");
+    },
+    enabled: isEventInvitationSuccess && !!invitation,
   });
 }

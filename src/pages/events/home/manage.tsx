@@ -28,6 +28,7 @@ import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import {
   useCreateInstance,
   useEventInvitation,
+  useIntegrationBearer,
   useShareID,
   useShareProfile,
 } from "~utils/hooks/share";
@@ -42,6 +43,7 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 import { queryClient } from "~utils/data/query";
 import { ReadyState, useShareConnection } from "~models/ShareConnection";
 import { isWorldsBuild } from "~utils/data/state";
+import { ClickToCopy } from "~components/ClickToCopy";
 
 export const InviteDialog: React.FC<ButtonProps & { sku: string }> = ({
   sku,
@@ -339,6 +341,9 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
     [invitation]
   );
 
+  const { data: bearerToken, isSuccess: isSuccessBearerToken } =
+    useIntegrationBearer(event.sku);
+
   const {
     mutateAsync: onClickBeginSharing,
     isPending: isCreateInstancePending,
@@ -572,6 +577,16 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
               </Button>
             </DialogBody>
           </Dialog>
+        </section>
+      ) : null}
+      {isSuccessBearerToken && bearerToken ? (
+        <section>
+          <h2 className="mt-4">Integration Bearer</h2>
+          <p>
+            Use this bearer token to allow external integrations to read data
+            from this instance.
+          </p>
+          <ClickToCopy message={bearerToken ?? ""} />
         </section>
       ) : null}
     </section>

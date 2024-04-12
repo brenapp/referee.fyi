@@ -59,6 +59,21 @@ export async function getKeyPair(): Promise<CryptoKeyPair> {
   return { publicKey, privateKey };
 }
 
+export async function signMessage(privateKey: CryptoKey, message: string) {
+  const messageBuffer = new TextEncoder().encode(message);
+  const signature = await crypto.subtle.sign(
+    { name: "ECDSA", hash: "SHA-256" },
+    privateKey,
+    messageBuffer
+  );
+
+  const hexSignature = Array.from(new Uint8Array(signature), (x) =>
+    x.toString(16).padStart(2, "0")
+  ).join("");
+
+  return hexSignature;
+}
+
 export async function getSignRequestHeaders(
   request: Request
 ): Promise<Headers> {
@@ -84,16 +99,7 @@ export async function getSignRequestHeaders(
     body,
   ].join("\n");
 
-  const messageBuffer = new TextEncoder().encode(message);
-  const signature = await crypto.subtle.sign(
-    { name: "ECDSA", hash: "SHA-256" },
-    keys.privateKey,
-    messageBuffer
-  );
-
-  const hexSignature = Array.from(new Uint8Array(signature), (x) =>
-    x.toString(16).padStart(2, "0")
-  ).join("");
+  const hexSignature = await signMessage(keys.privateKey, message);
 
   headers.set("X-Referee-Date", date.toISOString());
   headers.set("X-Referee-Public-Key", await exportPublicKey(keys.publicKey));

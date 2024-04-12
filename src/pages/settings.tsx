@@ -1,7 +1,7 @@
 import { GlobeAmericasIcon } from "@heroicons/react/20/solid";
-import { DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 import { useCallback } from "react";
-import { Button, IconButton } from "~components/Button";
+import { Button } from "~components/Button";
+import { ClickToCopy } from "~components/ClickToCopy";
 import { Input } from "~components/Input";
 import { toast } from "~components/Toast";
 import { queryClient } from "~utils/data/query";
@@ -11,13 +11,6 @@ import { useShareID, useShareProfile } from "~utils/hooks/share";
 export const SettingsPage: React.FC = () => {
   const { name, setName, persist } = useShareProfile();
   const { data: publicKey } = useShareID();
-
-  const onClickCopyKey = useCallback(() => {
-    if (navigator.clipboard && publicKey) {
-      navigator.clipboard.writeText(publicKey);
-      toast({ type: "info", message: "Copied public key to clipboard!" });
-    }
-  }, [publicKey]);
 
   const onClickRemoveRobotEvents = useCallback(() => {
     queryClient.cancelQueries({ type: "all" });
@@ -46,16 +39,7 @@ export const SettingsPage: React.FC = () => {
       </section>
       <section className="mt-4">
         <h2 className="font-bold">Public Key</h2>
-        <div className="mt-2 flex gap-2 w-full">
-          <IconButton
-            className="p-3"
-            onClick={onClickCopyKey}
-            icon={<DocumentDuplicateIcon height={20} />}
-          />
-          <div className="p-3 px-4 text-ellipsis overflow-hidden bg-zinc-700 rounded-md flex-1">
-            {publicKey}
-          </div>
-        </div>
+        <ClickToCopy message={publicKey ?? ""} />
       </section>
       <section className="mt-4">
         <h2 className="font-bold">Delete RobotEvents Data</h2>

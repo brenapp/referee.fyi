@@ -85,7 +85,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
       activeUsers: get().activeUsers,
       invitations: get().invitations,
       date: new Date().toISOString(),
-      data: response.data,
+      data: response.data.data,
       sender: { type: "server" },
     });
 

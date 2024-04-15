@@ -49,7 +49,7 @@ export type APIPutInviteResponseBody = Record<string, never>;
 export type APIDeleteInviteResponseBody = Record<string, never>;
 
 // GET /api/:sku/get
-export type APIGetShareDataResponseBody = EventIncidentsData;
+export type APIGetShareDataResponseBody = WebSocketServerShareInfoMessage;
 
 // PUT /api/:sku/incident
 export type APIPutIncidentResponseBody = Incident;

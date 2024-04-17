@@ -5,10 +5,12 @@ import Markdown from "react-markdown";
 import { version } from "../../package.json";
 import "./markdown.css";
 import DocumentDuplicateIcon from "@heroicons/react/24/outline/DocumentDuplicateIcon";
-import { Cog8ToothIcon } from "@heroicons/react/20/solid";
+import { Cog8ToothIcon, UserGroupIcon } from "@heroicons/react/20/solid";
 import { useEventSearch } from "~utils/hooks/robotevents";
 import { useRecentEvents } from "~utils/hooks/history";
 import { isWorldsBuild } from "~utils/data/state";
+import { useQuery } from "@tanstack/react-query";
+import { getEventInvitation } from "~utils/data/share";
 
 function useHomeEvents() {
   const { data: worldsEvents } = useEventSearch(
@@ -32,6 +34,11 @@ function useHomeEvents() {
 
 export const HomePage: React.FC = () => {
   const events = useHomeEvents();
+  const { data: eventsInvitations } = useQuery({
+    queryKey: ["event_invitations", events],
+    queryFn: () =>
+      Promise.all(events?.map((event) => getEventInvitation(event.sku)) ?? []),
+  });
 
   const [markdownContent, setMarkdownContent] = useState<string>("");
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
@@ -84,13 +91,16 @@ export const HomePage: React.FC = () => {
           {events?.map((event) => (
             <LinkButton
               to={`/${event.sku}`}
-              className="w-full max-w-full mt-4"
+              className="w-full max-w-full mt-4 relative"
               key={event.sku}
             >
-              <p className="text-sm">
-                <span className=" text-emerald-400 font-mono">{event.sku}</span>
-              </p>
-              <p className="">{event.name}</p>
+              <div className="text-sm flex">
+                <p className="text-emerald-400 font-mono flex-1">{event.sku}</p>
+                {eventsInvitations?.find((inv) => inv?.sku === event.sku) ? (
+                  <UserGroupIcon height={20} />
+                ) : null}
+              </div>
+              <p>{event.name}</p>
             </LinkButton>
           ))}
         </section>

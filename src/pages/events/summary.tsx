@@ -11,7 +11,7 @@ import { useEventIncidents } from "~utils/hooks/incident";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { Incident } from "~components/Incident";
-import { IncidentOutcome } from "../../../worker/types/EventIncidents";
+import { IncidentOutcome } from "~share/EventIncidents";
 import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 import { Dialog, DialogBody } from "~components/Dialog";
 import { XMarkIcon } from "@heroicons/react/20/solid";
@@ -141,17 +141,9 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
   );
 };
 
-export const EventSummaryPage: React.FC = () => {
-  const { data: event } = useCurrentEvent();
-  const game = useRulesForProgram(event?.program.code);
-  const { mutateAsync: addEvent, isSuccess } = useAddEventVisited();
-
+export const ForceSyncButton: React.FC = () => {
   const isConnected =
     useShareConnection((c) => c.readyState) === WebSocket.OPEN;
-
-  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
-  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
-  const { data: allIncidents } = useEventIncidents(event?.sku);
 
   const connectionForceSync = useShareConnection((c) => c.forceSync);
   const { mutateAsync: forceSync, isPending: isForceSyncPending } = useMutation(
@@ -159,6 +151,27 @@ export const EventSummaryPage: React.FC = () => {
       mutationFn: connectionForceSync,
     }
   );
+
+  return isConnected ? (
+    <IconButton
+      className={twMerge(
+        "bg-transparent",
+        isForceSyncPending ? "animate-spin" : "animate-none"
+      )}
+      onClick={() => forceSync()}
+      icon={<ArrowPathIcon height={24} />}
+    />
+  ) : null;
+};
+
+export const EventSummaryPage: React.FC = () => {
+  const { data: event } = useCurrentEvent();
+  const game = useRulesForProgram(event?.program.code);
+  const { mutateAsync: addEvent, isSuccess } = useAddEventVisited();
+
+  const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const { data: allIncidents } = useEventIncidents(event?.sku);
 
   const incidents = useMemo(() => {
     const results = allIncidents?.filter((incident) => {
@@ -225,16 +238,7 @@ export const EventSummaryPage: React.FC = () => {
       <section className="mt-4 flex flex-col">
         <nav className="flex gap-4 p-2 rounded-md">
           <p className="flex-1">{incidents?.length} Incidents</p>
-          {isConnected ? (
-            <IconButton
-              className={twMerge(
-                "bg-transparent",
-                isForceSyncPending ? "animate-spin" : "animate-none"
-              )}
-              onClick={() => forceSync()}
-              icon={<ArrowPathIcon height={24} />}
-            />
-          ) : null}
+          <ForceSyncButton />
           <IconButton
             className="bg-transparent"
             onClick={() => setFilterDialogOpen(true)}
@@ -266,7 +270,7 @@ export const EventSummaryPage: React.FC = () => {
                   }
 
                   return (
-                    <div style={style}>
+                    <div style={style} key={incident.id}>
                       <Incident
                         incident={incidents?.[index]}
                         className="h-14 overflow-hidden"

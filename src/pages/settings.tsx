@@ -1,6 +1,5 @@
 import { GlobeAmericasIcon } from "@heroicons/react/20/solid";
 import { useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "~components/Button";
 import { ClickToCopy } from "~components/ClickToCopy";
 import { Input } from "~components/Input";
@@ -13,13 +12,12 @@ async function clearCache() {
   // Invalidate All Queries
   await queryClient.invalidateQueries({ type: "all" });
 
-  // Clear Service Worker Cache
+  // Unregister Service Workers
   if ("serviceWorker" in navigator) {
-    caches.keys().then(function (cacheNames) {
-      cacheNames.forEach(function (cacheName) {
-        caches.delete(cacheName);
-      });
-    });
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    for (const registration of registrations) {
+      await registration.unregister();
+    }
   }
 }
 
@@ -27,13 +25,12 @@ export const SettingsPage: React.FC = () => {
   const { name, setName, persist } = useShareProfile();
   const { data: publicKey } = useShareID();
 
-  const navigate = useNavigate();
-
   const onClickRemoveRobotEvents = useCallback(async () => {
     await clearCache();
     toast({ type: "info", message: "Deleted cache." });
-    navigate("/");
-  }, [navigate]);
+
+    window.location.reload();
+  }, []);
 
   return (
     <main className="mt-4">

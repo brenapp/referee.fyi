@@ -33,6 +33,17 @@ export type APIRegisterUserResponseBody = {
   user: User;
 };
 
+// PUT /api/:sku/request
+export type APIPutInvitationRequestResponseBody = {
+  code: string;
+  ttl: number;
+};
+
+// GET /api/:sku/request?code=<CODE>
+export type APIGetInvitationRequestResponseBody = {
+  user: User;
+};
+
 // POST /api/:sku/create
 export type APIPostCreateResponseBody = UserInvitation;
 

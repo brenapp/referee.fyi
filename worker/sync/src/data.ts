@@ -34,3 +34,21 @@ export async function setInstance(env: Env, instance: ShareInstance) {
 export async function getInstance(env: Env, secret: string, sku: string) {
   return env.SHARES.get<ShareInstance>(`${sku}#${secret}`, "json");
 }
+
+export async function setRequestCode(
+  env: Env,
+  code: string,
+  sku: string,
+  userKey: string,
+  options?: KVNamespacePutOptions
+) {
+  return env.REQUEST_CODES.put(`${sku}#${code}`, userKey, options);
+}
+
+export async function getRequestCodeUserKey(
+  env: Env,
+  code: string,
+  sku: string
+) {
+  return env.REQUEST_CODES.get<string>(`${sku}#${code}`);
+}

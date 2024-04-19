@@ -17,14 +17,18 @@ import {
   APIRegisterUserResponseBody,
   EventIncidentsInitData,
   APIDeleteInviteResponseBody,
-} from "../../types/api";
+  APIGetInvitationRequestResponseBody,
+  APIPutInvitationRequestResponseBody,
+} from "~types/api";
 import {
   deleteInvitation,
   getInstance,
   getInvitation,
+  getRequestCodeUserKey,
   getUser,
   setInstance,
   setInvitation,
+  setRequestCode,
   setUser,
 } from "./data";
 import {
@@ -212,6 +216,77 @@ router
     });
   })
   .all("*", verifyUser)
+
+  // Request Codes (Key Exchange)
+  .put("/api/:sku/request", async (request: AuthenticatedRequest, env: Env) => {
+    const sku = request.params.sku;
+
+    const invitation: Invitation | null = await getInvitation(
+      env,
+      request.user.key,
+      sku
+    );
+
+    if (invitation) {
+      return response({
+        success: false,
+        reason: "bad_request",
+        details: "You must leave your current instance first.",
+      });
+    }
+
+    const buffer = new Uint8Array(2);
+    crypto.getRandomValues(buffer);
+
+    const code = Array.from(new Uint8Array(buffer), (x) =>
+      x.toString(16).padStart(2, "0")
+    )
+      .join("")
+      .toUpperCase();
+
+    await setRequestCode(env, code, sku, request.user.key, {
+      expirationTtl: 600,
+    });
+
+    return response<APIPutInvitationRequestResponseBody>({
+      success: true,
+      data: {
+        code,
+        ttl: 600,
+      },
+    });
+  })
+
+  .get("/api/:sku/request", async (request: AuthenticatedRequest, env: Env) => {
+    const sku = request.params.sku;
+    const code = request.query.code;
+
+    if (typeof sku !== "string" || typeof code !== "string") {
+      return response({
+        success: false,
+        reason: "bad_request",
+        details: "Must specify SKU and Request Code",
+      });
+    }
+
+    const key = await getRequestCodeUserKey(env, code, sku);
+    if (!key) {
+      return response({
+        success: false,
+        reason: "incorrect_code",
+        details: "No such request code.",
+      });
+    }
+
+    const user = await getUser(env, key);
+
+    return response<APIGetInvitationRequestResponseBody>({
+      success: true,
+      data: { user: user ?? { key, name: "<Unknown User>" } },
+    });
+  })
+
+  // Managing Instances
   .post("/api/:sku/create", async (request: AuthenticatedRequest, env: Env) => {
     const sku = request.params.sku;
     if (!sku) {
@@ -495,6 +570,8 @@ router
       });
     }
   )
+
+  // Actions Inside Instances (Pass to Durable Object)
   .all("/api/:sku/:path+", async (request: RequestHasInvitation, env: Env) => {
     const id = env.INCIDENTS.idFromString(request.instance.secret);
     const stub = env.INCIDENTS.get(id);

@@ -1,25 +1,18 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { EventData } from "robotevents/out/endpoints/events";
-import {
-  Button,
-  ButtonProps,
-  IconButton,
-  LinkButton,
-} from "~components/Button";
+import { Button, IconButton, LinkButton } from "~components/Button";
 import { deleteIncident, getIncidentsByEvent } from "~utils/data/incident";
 import {
   acceptEventInvitation,
   fetchInvitation,
-  getJoinRequest,
+  getRequestCodeUserKey,
   inviteUser,
-  isValidJoinRequest,
-  JoinRequest,
+  putRequestCode,
   registerUser,
   removeInvitation,
 } from "~utils/data/share";
 import {
   ArrowRightIcon,
-  DocumentDuplicateIcon,
   FlagIcon,
   UserCircleIcon,
   UserPlusIcon,
@@ -29,14 +22,12 @@ import {
   useCreateInstance,
   useEventInvitation,
   useIntegrationBearer,
-  useShareID,
   useShareProfile,
 } from "~utils/hooks/share";
 import { Input } from "~components/Input";
 import { toast } from "~components/Toast";
-import { QRCode, QRCodeProps } from "~components/QRCode";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Info, Error, Warning } from "~components/Warning";
+import { Error, Info, Success, Warning } from "~components/Warning";
 import { Spinner } from "~components/Spinner";
 import { useEventIncidents } from "~utils/hooks/incident";
 import { TrashIcon } from "@heroicons/react/24/outline";
@@ -44,181 +35,122 @@ import { queryClient } from "~utils/data/query";
 import { ReadyState, useShareConnection } from "~models/ShareConnection";
 import { isWorldsBuild } from "~utils/data/state";
 import { ClickToCopy } from "~components/ClickToCopy";
+import { twMerge } from "tailwind-merge";
 
-export const InviteDialog: React.FC<ButtonProps & { sku: string }> = ({
-  sku,
-  ...props
-}) => {
-  const [open, setOpen] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
-  const [error, setError] = useState<string>("");
-
-  const [info, setInfo] = useState<JoinRequest | null>(null);
-
-  const [publicKeyValue, setPublicKeyValue] = useState("");
-
-  const onInviteButtonClick = useCallback(async () => {
-    setOpen(true);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-      });
-
-      setStream(stream);
-    } catch (e) {
-      setError(`Cannot access camera! ${e}`);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (
-      !videoRef.current ||
-      !stream ||
-      !navigator.mediaDevices ||
-      !navigator.mediaDevices.getUserMedia ||
-      !window.BarcodeDetector
-    ) {
-      return;
-    }
-    videoRef.current.srcObject = stream;
-    videoRef.current.play();
-
-    const detector = new BarcodeDetector({ formats: ["qr_code"] });
-    const onLoadedMetadata = async () => {
-      if (!videoRef.current) return;
-      const canvas = document.createElement("canvas");
-
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
-      const context = canvas.getContext("2d");
-
-      const searchLoop = async () => {
-        if (!videoRef.current) return;
-        context?.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-
-        const barcodes = await detector.detect(canvas);
-        for (const code of barcodes) {
-          try {
-            const value = JSON.parse(code.rawValue);
-            if (isValidJoinRequest(value)) {
-              setPublicKeyValue(value.user.key);
-              setInfo(value);
-            }
-          } catch (e) {
-            continue;
-          }
-        }
-
-        requestAnimationFrame(searchLoop);
-      };
-
-      searchLoop();
-    };
-
-    const video = videoRef.current;
-
-    video.addEventListener("loadedmetadata", onLoadedMetadata);
-    return () => video?.removeEventListener("loadedmetadata", onLoadedMetadata);
-  }, [stream, videoRef]);
-
-  const { mutateAsync: invite, isPending: isInvitePending } = useMutation({
-    mutationFn: async () => {
-      const result = await inviteUser(sku, publicKeyValue);
-
-      if (!result.success) {
-        setError(result.details);
-      }
-
-      setInfo(null);
-      setPublicKeyValue("");
-    },
-    onError: (e) => setError(e.message),
-  });
-
-  useEffect(() => {
-    if (open) {
-      return;
-    }
-    stream?.getTracks().forEach((t) => t.stop());
-  }, [open, stream]);
-
-  return (
-    <>
-      <Button
-        mode="normal"
-        className="flex gap-2 items-center justify-center"
-        onClick={onInviteButtonClick}
-        {...props}
-      >
-        <UserPlusIcon height={20} />
-        <p>Invite</p>
-      </Button>
-      <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
-        <DialogHeader title="Invite User" onClose={() => setOpen(false)} />
-        <DialogBody>
-          {error ? <Error message={error} /> : null}
-          <section className="mt-4">
-            <h2>Public Key</h2>
-            <div className="flex gap-2">
-              <Input
-                className="flex-1"
-                value={publicKeyValue}
-                onChange={(e) => setPublicKeyValue(e.currentTarget.value)}
-              />
-              <Button
-                mode="primary"
-                className="w-max flex items-center gap-2"
-                onClick={() => invite()}
-                disabled={isInvitePending}
-              >
-                <UserPlusIcon height={20} />
-                <p>Invite User</p>
-              </Button>
-            </div>
-          </section>
-          <video ref={videoRef} className="w-full rounded-md mt-4"></video>
-          {info && !isInvitePending ? (
-            <Button
-              mode="primary"
-              className="w-max flex items-center gap-2"
-              onClick={() => invite()}
-            >
-              <UserPlusIcon height={20} />
-              <p>Invite {info.user.name}</p>
-            </Button>
-          ) : null}
-        </DialogBody>
-      </Dialog>
-    </>
-  );
-};
-
-export type JoinCodeDialogProps = {
+export type ManageDialogProps = {
   open: boolean;
   onClose: () => void;
   sku: string;
 };
 
-export const JoinCodeDialog: React.FC<JoinCodeDialogProps> = ({
+export const InviteDialog: React.FC<ManageDialogProps> = ({
   open,
   onClose,
   sku,
 }) => {
-  const { name } = useShareProfile();
-  const { data: key, isSuccess } = useShareID();
+  const [inviteCode, setInviteCode] = useState("");
 
-  const [hasInvitation, setHasInvitation] = useState(false);
-
-  const { data: invitation } = useQuery({
-    queryKey: ["join_custom_get_invite"],
-    queryFn: () => fetchInvitation(sku),
-    refetchInterval: 5000,
-    networkMode: "always",
-    enabled: open && !hasInvitation,
+  const {
+    data: response,
+    isLoading: isLoadingRequestCode,
+    isPending: isGetInvitePending,
+  } = useQuery({
+    queryKey: ["get_invite", sku, inviteCode],
+    queryFn: () => getRequestCodeUserKey(sku, inviteCode),
+    enabled: inviteCode.length > 0,
   });
 
+  const user = useMemo(() => {
+    return response?.success ? response.data.user : null;
+  }, [response]);
+
+  const {
+    mutateAsync: invite,
+    isPending: isInvitePending,
+    isError: isInviteError,
+    isSuccess: isInviteSuccess,
+    error: inviteError,
+    reset: resetInvite,
+  } = useMutation({
+    mutationFn: (key: string) => inviteUser(sku, key),
+  });
+
+  useEffect(() => {
+    if (isInviteSuccess) {
+      setTimeout(() => {
+        if (isInviteSuccess) {
+          setInviteCode("");
+          resetInvite();
+        }
+      }, 2000);
+    }
+  }, [resetInvite, isInviteSuccess]);
+
+  return (
+    <Dialog open={open} onClose={onClose} mode="modal">
+      <DialogHeader onClose={onClose} title="Invite User" />
+      <DialogBody className="px-2">
+        <label>
+          <h1 className="font-bold">Invite Code</h1>
+          <div className="relative">
+            <Input
+              className={twMerge("w-full font-mono text-6xl text-center")}
+              value={inviteCode}
+              onChange={(e) =>
+                setInviteCode(e.currentTarget.value.toUpperCase())
+              }
+            />
+          </div>
+        </label>
+        <Spinner show={isLoadingRequestCode} />
+        {user ? (
+          <div className="mt-4">
+            <Info message={user.name} className="bg-zinc-700" />
+            <ClickToCopy message={user.key} />
+            <Button
+              mode="primary"
+              className="mt-4"
+              onClick={() => invite(user.key)}
+            >
+              Invite {user.name}
+            </Button>
+          </div>
+        ) : null}
+        {!user && !isGetInvitePending ? (
+          <Error message="Invalid Code" className="mt-4" />
+        ) : null}
+        <Spinner show={isInvitePending} className="mt-4" />
+        {isInviteError ? (
+          <Error message={inviteError.message} className="mt-4" />
+        ) : null}
+        {isInviteSuccess ? (
+          <Success message="Sent Invitation!" className="mt-4 bg-emerald-600" />
+        ) : null}
+      </DialogBody>
+    </Dialog>
+  );
+};
+
+export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
+  open,
+  onClose,
+  sku,
+}) => {
+  // Request Code
+  const { data: requestCode, isLoading: isLoadingRequestCode } = useQuery({
+    queryKey: ["request_code", sku],
+    queryFn: () => putRequestCode(sku),
+    enabled: open,
+    gcTime: 600000,
+    refetchInterval: 60000,
+  });
+
+  const code = useMemo(() => {
+    return requestCode?.success ? requestCode.data.code : "";
+  }, [requestCode]);
+
   // Register user when they open
+  const { name } = useShareProfile();
   const { mutateAsync: register } = useMutation({ mutationFn: registerUser });
   useEffect(() => {
     if (!name || !open) {
@@ -227,6 +159,17 @@ export const JoinCodeDialog: React.FC<JoinCodeDialogProps> = ({
 
     register(name);
   }, [name, open, register]);
+
+  // Invitation
+  const [hasInvitation, setHasInvitation] = useState(false);
+
+  const { data: invitation } = useQuery({
+    queryKey: ["join_custom_get_invite"],
+    queryFn: () => fetchInvitation(sku),
+    refetchInterval: 2000,
+    networkMode: "always",
+    enabled: open && !hasInvitation,
+  });
 
   useEffect(() => {
     if (invitation?.success && invitation.data) {
@@ -249,69 +192,45 @@ export const JoinCodeDialog: React.FC<JoinCodeDialogProps> = ({
     setHasInvitation(false);
   }, [sku]);
 
-  const config: QRCodeProps["config"] | null = useMemo(() => {
-    if (!isSuccess) {
-      return null;
-    }
-    const joinRequest = getJoinRequest({ name, id: key });
-    const payload = JSON.stringify(joinRequest);
-    return { text: payload };
-  }, [name, key, isSuccess]);
-
-  const onClickCopyKey = useCallback(() => {
-    if (key) {
-      navigator.clipboard.writeText(key);
-    }
-  }, [key]);
-
   return (
     <Dialog open={open} onClose={onClose} mode="modal">
       <DialogHeader onClose={onClose} title="Join Request" />
       <DialogBody className="px-2">
-        {config ? (
-          <>
-            <p>Copy the public key below and send to owner.</p>
-            <div className="mt-2 flex gap-2 w-full">
-              <IconButton
-                className="p-3"
-                onClick={onClickCopyKey}
-                icon={<DocumentDuplicateIcon height={20} />}
-              />
-              <div className="p-3 px-4 text-ellipsis overflow-hidden bg-zinc-700 rounded-md flex-1">
-                {key}
-              </div>
-            </div>
-            <QRCode config={config} className="mt-4" />
-            {hasInvitation ? (
-              <section className="mt-4">
-                <nav className="flex justify-between items-center">
-                  <Info
-                    message={`Invitation From ${invitation?.data.from.name}`}
-                  />
-                  {invitation?.data.admin ? (
-                    <p className="text-sm text-emerald-400">Admin</p>
-                  ) : null}
-                </nav>
-                <Button
-                  mode="primary"
-                  className="mt-2"
-                  onClick={onAcceptInvitation}
-                >
-                  Accept & Join
-                </Button>
-                <Button
-                  mode="dangerous"
-                  className="mt-2"
-                  onClick={onClearInvitation}
-                >
-                  Clear Invitation
-                </Button>
-              </section>
-            ) : (
-              <Spinner className="mt-4" show />
-            )}
-          </>
-        ) : null}
+        <p className="mb-4">
+          To join an existing instance, you will need an admin to invite you.
+          Have them enter the code shown below on their device.
+        </p>
+        <Spinner show={isLoadingRequestCode} />
+        <ClickToCopy
+          message={code}
+          className="font-mono text-6xl text-center"
+        />
+        {hasInvitation ? (
+          <section className="mt-4">
+            <nav className="flex justify-between items-center">
+              <Info message={`Invitation From ${invitation?.data.from.name}`} />
+              {invitation?.data.admin ? (
+                <p className="text-sm text-emerald-400">Admin</p>
+              ) : null}
+            </nav>
+            <Button
+              mode="primary"
+              className="mt-2"
+              onClick={onAcceptInvitation}
+            >
+              Accept & Join
+            </Button>
+            <Button
+              mode="dangerous"
+              className="mt-2"
+              onClick={onClearInvitation}
+            >
+              Clear Invitation
+            </Button>
+          </section>
+        ) : (
+          <Spinner className="mt-4" show />
+        )}
       </DialogBody>
     </Dialog>
   );
@@ -323,6 +242,7 @@ export type ManageTabProps = {
 
 export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
   const [deleteDataDialogOpen, setDeleteDataDialogOpen] = useState(false);
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [joinCodeDialogOpen, setJoinCodeDialogOpen] = useState(false);
 
   const { name, setName, persist } = useShareProfile();
@@ -394,17 +314,31 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
         open={joinCodeDialogOpen}
         onClose={() => setJoinCodeDialogOpen(false)}
       />
+      <InviteDialog
+        sku={event.sku}
+        open={inviteDialogOpen}
+        onClose={() => setInviteDialogOpen(false)}
+      />
       <Spinner show={isCreateInstancePending || isLeavePending} />
       {isSharing ? (
         <section>
           <h2 className="font-bold">Sharing</h2>
           <p>Share Name: {name} </p>
           <div className="mt-2">
-            {invitation?.admin ? <InviteDialog sku={event.sku} /> : null}
+            {invitation?.admin ? (
+              <Button
+                mode="normal"
+                className="flex gap-2 items-center justify-center"
+                onClick={() => setInviteDialogOpen(true)}
+              >
+                <UserPlusIcon height={20} />
+                <p>Invite</p>
+              </Button>
+            ) : null}
             <Dialog
               mode="nonmodal"
               open={leaveDialogOpen}
-              className="h-min p-4"
+              className="p-4"
               onClose={() => setLeaveDialogOpen(false)}
             >
               <DialogBody>
@@ -557,7 +491,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
           <Dialog
             open={deleteDataDialogOpen}
             mode="nonmodal"
-            className="absolute w-full rounded-md h-min mt-4 bg-zinc-100 text-zinc-900"
+            className="absolute w-full rounded-md mt-4"
             onClose={() => setDeleteDataDialogOpen(false)}
           >
             <DialogBody>

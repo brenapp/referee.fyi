@@ -19,5 +19,6 @@ export interface Env {
   SHARES: KVNamespace;
   INVITATIONS: KVNamespace;
   USERS: KVNamespace;
+  REQUEST_CODES: KVNamespace;
   INCIDENTS: DurableObjectNamespace;
 }

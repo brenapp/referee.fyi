@@ -13,6 +13,8 @@ import type {
   APIPutIncidentResponseBody,
   APIPatchIncidentResponseBody,
   WebSocketSender,
+  APIPutInvitationRequestResponseBody,
+  APIGetInvitationRequestResponseBody,
 } from "~share/api";
 import { IncidentWithID } from "./incident";
 import { queryClient } from "./query";
@@ -292,5 +294,25 @@ export async function deleteServerIncident(
   const response = await signedFetch(url, {
     method: "DELETE",
   });
+  return response.json();
+}
+
+export async function putRequestCode(
+  sku: string
+): Promise<ShareResponse<APIPutInvitationRequestResponseBody>> {
+  const url = new URL(`/api/${sku}/request`, URL_BASE);
+
+  const response = await signedFetch(url, { method: "PUT" });
+  return response.json();
+}
+
+export async function getRequestCodeUserKey(
+  sku: string,
+  code: string
+): Promise<ShareResponse<APIGetInvitationRequestResponseBody>> {
+  const url = new URL(`/api/${sku}/request`, URL_BASE);
+  url.searchParams.set("code", code);
+
+  const response = await signedFetch(url, { method: "GET" });
   return response.json();
 }

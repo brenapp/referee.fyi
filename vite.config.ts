@@ -16,6 +16,7 @@ export default defineConfig({
     tsconfigPaths({}),
     VitePWA({
       registerType: "autoUpdate",
+      injectRegister: "inline",
       manifest: {
         id: "app.bren.kv.v1",
         name: "Referee FYI",

@@ -31,3 +31,4 @@ tsconfig.tsbuildinfo
 test/websocket/log
 utils/upload/*.json
 utils/upload/*.tsv
+utils/dupes/*.json

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "npx wrangler dev --ip 0.0.0.0 --env staging",
     "build": "rollup -c",
-    "publish": "npx wrangler publish",
+    "deploy": "npx wrangler deploy",
     "format": "prettier --write  '*.{json,js}' 'src/**/*.{js,ts}'",
     "lint": "eslint --max-warnings=0 src && prettier --check '*.{json,js}' 'src/**/*.{js,ts}'"
   },

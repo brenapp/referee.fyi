@@ -1,3 +1,5 @@
+compatibility_date = "2024-05-02"
+
 [env.prod]
 name = "referee-fyi-share"
 compatibility_date = "2023-12-18"

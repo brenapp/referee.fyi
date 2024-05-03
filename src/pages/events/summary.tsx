@@ -5,6 +5,7 @@ import { useCurrentEvent } from "~utils/hooks/state";
 import { Button, IconButton } from "~components/Button";
 import {
   AdjustmentsHorizontalIcon,
+  ArrowDownTrayIcon,
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import { useEventIncidents } from "~utils/hooks/incident";
@@ -19,6 +20,7 @@ import { Checkbox, RulesMultiSelect, Select } from "~components/Input";
 import { twMerge } from "tailwind-merge";
 import { useMutation } from "@tanstack/react-query";
 import { useShareConnection } from "~models/ShareConnection";
+import { useShareID, useShareProfile } from "~utils/hooks/share";
 
 export type Filters = {
   outcomes: Record<IncidentOutcome, boolean>;
@@ -164,6 +166,49 @@ export const ForceSyncButton: React.FC = () => {
   ) : null;
 };
 
+export const ExportButton: React.FC = () => {
+  const { name } = useShareProfile();
+  const { data: key } = useShareID();
+
+  const { data: event } = useCurrentEvent();
+  const { data: incidents, isLoading } = useEventIncidents(event?.sku);
+
+  const onClick = useCallback(() => {
+    const sku = event?.sku ?? "";
+    const timestamp = new Date().toISOString();
+
+    const data = JSON.stringify(
+      {
+        meta: {
+          version: __REFEREE_FYI_VERSION__,
+          sku,
+          timestamp,
+          user: { name, key },
+        },
+        incidents,
+      },
+      null,
+      4
+    );
+
+    const blob = new Blob([data], { type: "text/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.setAttribute("download", `incidents-${sku}-${timestamp}.json`);
+    a.click();
+  }, [event?.sku, incidents, key, name]);
+
+  return !isLoading ? (
+    <IconButton
+      className={twMerge("bg-transparent")}
+      onClick={onClick}
+      icon={<ArrowDownTrayIcon height={24} />}
+    />
+  ) : null;
+};
+
 export const EventSummaryPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
   const game = useRulesForProgram(event?.program.code);
@@ -239,6 +284,7 @@ export const EventSummaryPage: React.FC = () => {
         <nav className="flex gap-4 p-2 rounded-md">
           <p className="flex-1">{incidents?.length} Incidents</p>
           <ForceSyncButton />
+          <ExportButton />
           <IconButton
             className="bg-transparent"
             onClick={() => setFilterDialogOpen(true)}

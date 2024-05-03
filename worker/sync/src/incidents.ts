@@ -75,8 +75,14 @@ export class EventIncidents implements DurableObject {
   async addIncident(incident: Incident) {
     await this.state.blockConcurrencyWhile(async () => {
       await this.state.storage.put(incident.id, incident);
+
       const list = (await this.state.storage.get<string[]>("incidents")) ?? [];
-      await this.state.storage.put("incidents", [...list, incident.id]);
+
+      if (!list.includes(incident.id)) {
+        list.push(incident.id);
+      }
+
+      await this.state.storage.put("incidents", list);
     });
   }
 
@@ -127,10 +133,30 @@ export class EventIncidents implements DurableObject {
     return (await this.state.storage.get<string[]>("incidents")) ?? [];
   }
 
+  private groupIds(ids: string[], size: number): string[][] {
+    const chunkCount = Math.ceil(ids.length / size);
+    const chunks: string[][] = new Array(chunkCount);
+
+    for (let i = 0, j = 0, k = size; i < chunkCount; ++i) {
+      chunks[i] = ids.slice(j, k);
+      j = k;
+      k += size;
+    }
+
+    return chunks;
+  }
+
   async getAllIncidents(): Promise<Incident[]> {
     const ids = await this.getIncidentList();
-    const incidents = await Promise.all(ids.map((id) => this.getIncident(id)));
-    return incidents.filter((i) => !!i) as Incident[];
+
+    // Bulk get only supports up to 128
+    const bulkOps = this.groupIds(ids, 128);
+    const result = await Promise.all(
+      bulkOps.map((ids) => this.state.storage.get<Incident>(ids))
+    );
+
+    const incidents = result.map((map) => [...map.values()]).flat();
+    return incidents;
   }
 
   async getData(): Promise<EventIncidentsData> {

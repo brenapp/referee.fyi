@@ -21,6 +21,7 @@ import {
   getIncidentsByEvent,
   hasIncident,
   newIncident,
+  repairIndices,
   setIncident,
 } from "~utils/data/incident";
 import { queryClient } from "~utils/data/query";
@@ -128,6 +129,8 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
 
             // Handle any incidents with different revisions while offline
           } else {
+            await repairIndices(incident.id, incident);
+
             const current = (await getIncident(incident.id))!;
 
             const localRevision = current.revision?.count ?? 0;

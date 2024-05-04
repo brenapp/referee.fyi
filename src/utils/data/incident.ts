@@ -94,8 +94,36 @@ export async function getIncident(
   };
 }
 
+export async function repairIndices(id: string, incident: Incident) {
+  const eventsIndex = await get<IncidentIndex>("event_idx");
+  const teamsIndex = await get<IncidentIndex>("team_idx");
+
+  const eventIndex = eventsIndex?.[incident.event] ?? [];
+  const teamIndex = teamsIndex?.[incident.team ?? ""] ?? [];
+
+  if (!eventIndex.includes(id)) {
+    await set("event_idx", {
+      ...eventsIndex,
+      [incident.event]: [...eventIndex, id],
+    });
+  }
+
+  if (!teamIndex.includes(id)) {
+    await set("team_idx", {
+      ...teamsIndex,
+      [incident.team ?? ""]: [...teamIndex, id],
+    });
+  }
+}
+
 export async function hasIncident(id: string): Promise<boolean> {
-  return get(id).then((incident) => incident !== undefined);
+  const incident = await get<Incident>(id);
+
+  if (!incident) {
+    return false;
+  }
+
+  return true;
 }
 
 export async function setIncident(

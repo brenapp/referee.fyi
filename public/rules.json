@@ -6,7 +6,11 @@
       "ruleGroups": [
         {
           "name": "Scoring Rules",
+<<<<<<< HEAD
           "programs": ["VRC", "VEXU"],
+=======
+          "programs": ["V5RC", "VURC"],
+>>>>>>> c8d548e (Add 24-25 game rules)
           "rules": [
             {
               "rule": "<SC1>",
@@ -52,7 +56,11 @@
         },
         {
           "name": "Safety Rules",
+<<<<<<< HEAD
           "programs": ["VRC", "VEXU"],
+=======
+          "programs": ["V5RC", "VURC"],
+>>>>>>> c8d548e (Add 24-25 game rules)
           "rules": [
             {
               "rule": "<S1>",
@@ -78,7 +86,11 @@
         },
         {
           "name": "General Game Rules",
+<<<<<<< HEAD
           "programs": ["VRC", "VEXU"],
+=======
+          "programs": ["V5RC", "VURC"],
+>>>>>>> c8d548e (Add 24-25 game rules)
           "rules": [
             {
               "rule": "<G1>",
@@ -169,7 +181,11 @@
         },
         {
           "name": "Specific Game Rules",
+<<<<<<< HEAD
           "programs": ["VRC", "VEXU"],
+=======
+          "programs": ["V5RC", "VURC"],
+>>>>>>> c8d548e (Add 24-25 game rules)
           "rules": [
             {
               "rule": "<SG1>",
@@ -225,7 +241,11 @@
         },
         {
           "name": "Robot Rules",
+<<<<<<< HEAD
           "programs": ["VRC", "VEXU"],
+=======
+          "programs": ["V5RC", "VURC"],
+>>>>>>> c8d548e (Add 24-25 game rules)
           "rules": [
             {
               "rule": "<R1>",
@@ -371,7 +391,11 @@
         },
         {
           "name": "Tournament Rules",
+<<<<<<< HEAD
           "programs": ["VRC", "VEXU"],
+=======
+          "programs": ["V5RC", "VURC"],
+>>>>>>> c8d548e (Add 24-25 game rules)
           "rules": [
             {
               "rule": "<T1>",
@@ -490,6 +514,7 @@
             },
             {
               "rule": "<T24>",
+<<<<<<< HEAD
               "description": "There are two types of field perimeter that may be used",
               "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T24.html"
             }
@@ -544,12 +569,67 @@
               "rule": "<RSC8>",
               "description": " Skills Challenge Fields do not require the same modifications as the Head-to-Head Fields",
               "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/RSC8.html"
+=======
+              "description": " There are two types of Field Perimeter that may be used",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/T24.html"
+>>>>>>> c8d548e (Add 24-25 game rules)
+            }
+          ]
+        },
+        {
+<<<<<<< HEAD
+          "name": "VEX U Game Rules",
+          "programs": ["VEXU"],
+=======
+          "name": "Robot Skills Challenge Rules",
+          "programs": ["V5RC", "VURC"],
+          "rules": [
+            {
+              "rule": "<RSC1>",
+              "description": " All rules from “The Game” section still apply, unless otherwise noted",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/RSC1.html"
+            },
+            {
+              "rule": "<RSC2>",
+              "description": " Skills Match Schedule",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/RSC2.html"
+            },
+            {
+              "rule": "<RSC3>",
+              "description": " Robots must start the Robot Skills Match in a legal starting position for the red Alliance",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/RSC3.html"
+            },
+            {
+              "rule": "<RSC4>",
+              "description": " Teams may only utilize the blue Rings as Top Rings on Stakes",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/RSC4.html"
+            },
+            {
+              "rule": "<RSC5>",
+              "description": " Any red Ring Scored above a blue Ring on the same Stake will not have a point value",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/RSC5.html"
+            },
+            {
+              "rule": "<RSC6>",
+              "description": " Top Ring criteria",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/RSC6.html"
+            },
+            {
+              "rule": "<RSC7>",
+              "description": " No Corner Modifiers",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/RSC7.html"
+            },
+            {
+              "rule": "<RSC8>",
+              "description": " Skills Challenge Fields do not require the same modifications as the Head-to-Head Fields",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/RSC8.html"
             }
           ]
         },
         {
           "name": "VEX U Game Rules",
-          "programs": ["VEXU"],
+          "programs": ["VURC"],
+>>>>>>> c8d548e (Add 24-25 game rules)
           "rules": [
             {
               "rule": "<VUG1>",
@@ -570,7 +650,11 @@
         },
         {
           "name": "VEX U Robot Rules",
+<<<<<<< HEAD
           "programs": ["VEXU"],
+=======
+          "programs": ["VURC"],
+>>>>>>> c8d548e (Add 24-25 game rules)
           "rules": [
             {
               "rule": "<VUR1>",
@@ -646,7 +730,11 @@
         },
         {
           "name": "VEX U Tournament Rules",
+<<<<<<< HEAD
           "programs": ["VEXU"],
+=======
+          "programs": ["VURC"],
+>>>>>>> c8d548e (Add 24-25 game rules)
           "rules": [
             {
               "rule": "<VUT1>",
@@ -687,7 +775,11 @@
         },
         {
           "name": "VEX U Robot Skills Rules",
+<<<<<<< HEAD
           "programs": ["VEXU"],
+=======
+          "programs": ["VURC"],
+>>>>>>> c8d548e (Add 24-25 game rules)
           "rules": [
             {
               "rule": "<VURS1>",
@@ -714,9 +806,8 @@
       ]
     },
     {
-      "title": "Over Under",
-      "season": "2023-2024",
-      "programs": ["V5RC"],
+      "title": "Rapid Relay",
+      "season": "2024-2025",
       "ruleGroups": [
         {
           "name": "Scoring Rules",

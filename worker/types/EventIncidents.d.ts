@@ -19,18 +19,20 @@ export type ChangeLog = {
 
 export type IncidentOutcome = "Minor" | "Major" | "Disabled" | "General";
 
-export type IncidentMatch =
-  | {
-      type: "match";
-      division: number;
-      name: string;
-      id: number;
-    }
-  | {
-      type: "skills";
-      skillsType: "driver" | "programming";
-      attempt: number;
-    };
+export type IncidentMatchHeadToHead = {
+  type: "match";
+  division: number;
+  name: string;
+  id: number;
+};
+
+export type IncidentMatchSkills = {
+  type: "skills";
+  skillsType: "driver" | "programming";
+  attempt: number;
+};
+
+export type IncidentMatch = IncidentMatchHeadToHead | IncidentMatchSkills;
 
 export type Incident = {
   id: string;

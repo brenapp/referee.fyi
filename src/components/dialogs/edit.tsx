@@ -144,7 +144,12 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
 
   const { data: eventData } = useCurrentEvent();
   const { data: teamData } = useEventTeam(eventData, incident.team);
-  const { data: teamMatches } = useEventMatchesForTeam(eventData, teamData);
+  const { data: teamMatches } = useEventMatchesForTeam(
+    eventData,
+    teamData,
+    undefined,
+    { enabled: open }
+  );
 
   const teamMatchesByDivision = useMemo(() => {
     const divisions: Record<string, MatchData[]> = {};

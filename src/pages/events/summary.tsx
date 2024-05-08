@@ -223,14 +223,20 @@ export const EventSummaryPage: React.FC = () => {
         return false;
       }
 
-      if (
-        typeof filters.division === "number" &&
-        filters.division !== incident.division
-      ) {
+      if (typeof filters.division !== "number") {
+        return true;
+      }
+
+      // Division Filter
+      if (!incident.match) {
         return false;
       }
 
-      return true;
+      if (incident.match.type !== "match") {
+        return false;
+      }
+
+      return incident.match.division === filters.division;
     });
 
     return results ?? [];

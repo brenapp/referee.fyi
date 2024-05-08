@@ -5,15 +5,45 @@ import { IconButton } from "./Button";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
 export type CheckboxProps = React.HTMLProps<HTMLInputElement> & {
-  type: "checkbox" | "radio";
+  label: string;
 };
 export const Checkbox: React.FC<CheckboxProps> = (props) => {
   return (
-    <input
-      {...props}
-      type={props.type}
-      className={twMerge("accent-emerald-400", props.className)}
-    />
+    <label
+      className={twMerge(
+        "flex mt-4 gap-2 bg-zinc-700 p-2 rounded-md",
+        "has-[:checked]:bg-emerald-800"
+      )}
+    >
+      <input
+        {...props}
+        type="checkbox"
+        className={twMerge("accent-emerald-400", props.className)}
+      />
+      <span>{props.label}</span>
+    </label>
+  );
+};
+
+export type RadioProps = React.HTMLProps<HTMLInputElement> & {
+  label: string;
+};
+
+export const Radio: React.FC<RadioProps> = (props) => {
+  return (
+    <label
+      className={twMerge(
+        `bg-zinc-700 rounded-md p-2 flex gap-2`,
+        "has-[:checked]:bg-emerald-800"
+      )}
+    >
+      <input
+        {...props}
+        type="radio"
+        className={twMerge("accent-emerald-400", props.className)}
+      />
+      <span>{props.label}</span>
+    </label>
   );
 };
 

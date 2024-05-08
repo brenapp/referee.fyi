@@ -22,6 +22,9 @@ import { Rule, useRulesForProgram } from "~utils/hooks/rules";
 import { Toaster } from "react-hot-toast";
 import { useEventInvitation } from "~utils/hooks/share";
 import { useShareConnection } from "~models/ShareConnection";
+import { useMutation } from "@tanstack/react-query";
+import { runMigrations } from "../migrations";
+import { toast } from "~components/Toast";
 
 function isValidSKU(sku: string) {
   return !!sku.match(/RE-(VRC|VIQRC|VEXU|VIQC)-[0-9]{2}-[0-9]{4}/g);
@@ -259,6 +262,27 @@ const ConnectionManager: React.FC = () => {
   return null;
 };
 
+const MigrationManager: React.FC = () => {
+  const { mutateAsync } = useMutation({
+    mutationFn: runMigrations,
+    onSuccess(data) {
+      const applied = Object.values(data).filter(
+        (result) => !result.preapplied
+      );
+
+      if (applied.length > 0) {
+        toast({ type: "info", message: "Applied Migrations!" });
+      }
+    },
+  });
+
+  useEffect(() => {
+    mutateAsync();
+  }, [mutateAsync]);
+
+  return null;
+};
+
 export const AppShell: React.FC = () => {
   const { isLoading } = useCurrentEvent();
   const navigate = useNavigate();
@@ -273,6 +297,7 @@ export const AppShell: React.FC = () => {
     >
       <Toaster />
       <ConnectionManager />
+      <MigrationManager />
       <nav className="h-16 flex gap-4 max-w-full">
         <IconButton
           onClick={() => navigate(-1)}

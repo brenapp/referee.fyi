@@ -18,19 +18,29 @@ export type ChangeLog = {
 };
 
 export type IncidentOutcome = "Minor" | "Major" | "Disabled" | "General";
+
+export type IncidentMatch =
+  | {
+      type: "match";
+      division: number;
+      name: string;
+      id: number;
+    }
+  | {
+      type: "skills";
+      skillsType: "driver" | "programming";
+      attempt: number;
+    };
+
 export type Incident = {
   id: string;
 
   time: Date;
 
   event: string; // SKU
-  division: number; // division ID
 
-  match?: {
-    name: string;
-    id: number;
-  };
-  team?: string; // team number
+  match?: IncidentMatch;
+  team: string; // team number
 
   revision?: {
     count: number;

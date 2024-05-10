@@ -5,7 +5,7 @@ import {
   useEventTeam,
   useEventMatchesForTeam,
 } from "~hooks/robotevents";
-import { Rule, useRulesForProgram } from "~utils/hooks/rules";
+import { Rule, useRulesForEvent } from "~utils/hooks/rules";
 import { RulesMultiSelect, Select, TextArea } from "~components/Input";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "~components/Button";
@@ -43,10 +43,13 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const { data: event, isLoading: isLoadingEvent } = useCurrentEvent();
   const division = useCurrentDivision();
 
-  const rules = useRulesForProgram(event?.program.code);
-  const { data: recentRules } = useRecentRules(event?.program.code ?? "VRC", 4);
+  const rules = useRulesForEvent(event);
+  const { data: recentRules } = useRecentRules(
+    event?.program.code ?? "V5RC",
+    4
+  );
   const { mutateAsync: addRecentRules } = useAddRecentRules(
-    event?.program.code ?? "VRC"
+    event?.program.code ?? "V5RC"
   );
 
   // Find all teams and matches at the event

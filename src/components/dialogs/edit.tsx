@@ -8,7 +8,7 @@ import { Revision, WebSocketSender } from "~share/api";
 import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
 import { useDeleteIncident, useEditIncident } from "~utils/hooks/incident";
 import { useEventMatchesForTeam, useEventTeam } from "~utils/hooks/robotevents";
-import { Rule, useRulesForProgram } from "~utils/hooks/rules";
+import { Rule, useRulesForEvent } from "~utils/hooks/rules";
 import { useCurrentEvent } from "~utils/hooks/state";
 
 function userString(user?: WebSocketSender) {
@@ -169,7 +169,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
     return Object.entries(divisions);
   }, [teamMatches]);
 
-  const game = useRulesForProgram(eventData?.program.code ?? "VRC");
+  const game = useRulesForEvent(eventData);
 
   const onChangeIncidentMatch = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {

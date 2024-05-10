@@ -173,8 +173,8 @@ const Rules: React.FC = () => {
   const { data: event } = useCurrentEvent();
 
   const [open, setOpen] = useState(false);
-  const programs: ProgramAbbr[] = ["VRC", "VIQRC", "VEXU", "VAIC"];
-  const [program, setProgram] = useState<ProgramAbbr>("VRC");
+  const programs: ProgramAbbr[] = ["V5RC", "VIQRC", "VURC", "VAIRC"];
+  const [program, setProgram] = useState<ProgramAbbr>("V5RC");
 
   const rules = useRulesForProgram(program);
   const [rule, setRule] = useState<Rule | null>(null);

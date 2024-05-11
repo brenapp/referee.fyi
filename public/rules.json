@@ -6,7 +6,7 @@
       "ruleGroups": [
         {
           "name": "Scoring Rules",
-          "programs": ["VRC", "VEXU"],
+          "programs": ["V5RC", "VURC"],
           "rules": [
             {
               "rule": "<SC1>",
@@ -52,7 +52,7 @@
         },
         {
           "name": "Safety Rules",
-          "programs": ["VRC", "VEXU"],
+          "programs": ["V5RC", "VURC"],
           "rules": [
             {
               "rule": "<S1>",
@@ -78,7 +78,7 @@
         },
         {
           "name": "General Game Rules",
-          "programs": ["VRC", "VEXU"],
+          "programs": ["V5RC", "VURC"],
           "rules": [
             {
               "rule": "<G1>",
@@ -169,7 +169,7 @@
         },
         {
           "name": "Specific Game Rules",
-          "programs": ["VRC", "VEXU"],
+          "programs": ["V5RC", "VURC"],
           "rules": [
             {
               "rule": "<SG1>",
@@ -225,7 +225,7 @@
         },
         {
           "name": "Robot Rules",
-          "programs": ["VRC", "VEXU"],
+          "programs": ["V5RC", "VURC"],
           "rules": [
             {
               "rule": "<R1>",
@@ -371,7 +371,7 @@
         },
         {
           "name": "Tournament Rules",
-          "programs": ["VRC", "VEXU"],
+          "programs": ["V5RC", "VURC"],
           "rules": [
             {
               "rule": "<T1>",
@@ -497,7 +497,7 @@
         },
         {
           "name": "Robot Skills Challenge Rules",
-          "programs": ["VRC", "VEXU"],
+          "programs": ["V5RC", "VURC"],
           "rules": [
             {
               "rule": "<RSC1>",
@@ -543,7 +543,7 @@
         },
         {
           "name": "VEX U Game Rules",
-          "programs": ["VEXU"],
+          "programs": ["VURC"],
           "rules": [
             {
               "rule": "<VUG1>",
@@ -564,7 +564,7 @@
         },
         {
           "name": "VEX U Robot Rules",
-          "programs": ["VEXU"],
+          "programs": ["VURC"],
           "rules": [
             {
               "rule": "<VUR1>",
@@ -640,7 +640,7 @@
         },
         {
           "name": "VEX U Tournament Rules",
-          "programs": ["VEXU"],
+          "programs": ["VURC"],
           "rules": [
             {
               "rule": "<VUT1>",
@@ -681,7 +681,7 @@
         },
         {
           "name": "VEX U Robot Skills Rules",
-          "programs": ["VEXU"],
+          "programs": ["VURC"],
           "rules": [
             {
               "rule": "<VURS1>",

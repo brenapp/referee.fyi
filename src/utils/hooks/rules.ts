@@ -1,6 +1,8 @@
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
+import { EventData } from "robotevents/out/endpoints/events";
 import { ProgramAbbr } from "robotevents/out/endpoints/programs";
 import { Year } from "robotevents/out/endpoints/seasons";
+import { useSeason } from "./robotevents";
 
 export type Rule = {
   rule: string;
@@ -45,11 +47,25 @@ export function useGameRules(game: string): Game | undefined {
 
 export function useRulesForProgram(
   program?: ProgramAbbr,
-  year: Year = "2023-2024"
+  year: Year = "2024-2025"
 ): Game | undefined {
   const { data: rules } = useRules();
   if (!program) return undefined;
   return rules?.games.find(
     (g) => g.season === year && g.programs.includes(program)
+  ) as Game | undefined;
+}
+
+export function useRulesForEvent(event?: EventData | null) {
+  const { data: rules } = useRules();
+  const { data: season } = useSeason(event?.season.id);
+
+  if (!event || !rules || !season) {
+    return undefined;
+  }
+
+  const year = (season.years_start + "-" + season.years_end) as Year;
+  return rules?.games.find(
+    (g) => g.season === year && g.programs.includes(event.program.code)
   ) as Game | undefined;
 }

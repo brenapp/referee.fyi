@@ -843,7 +843,7 @@
     {
       "title": "Over Under",
       "season": "2023-2024",
-      "programs": ["VEXU"],
+      "programs": ["VURC"],
       "ruleGroups": [
         {
           "name": "Specific Game Rules",
@@ -1626,7 +1626,7 @@
     {
       "title": "Over Under",
       "season": "2023-2024",
-      "programs": ["VRC"],
+      "programs": ["V5RC"],
       "ruleGroups": [
         {
           "name": "Specific Game Rules",

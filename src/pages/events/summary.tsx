@@ -13,7 +13,7 @@ import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { Incident } from "~components/Incident";
 import { IncidentOutcome } from "~share/EventIncidents";
-import { Rule, useRulesForProgram } from "~utils/hooks/rules";
+import { Rule, useRulesForEvent } from "~utils/hooks/rules";
 import { Dialog, DialogBody } from "~components/Dialog";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 import { Checkbox, RulesMultiSelect, Select } from "~components/Input";
@@ -48,7 +48,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
 }) => {
   const { data: event } = useCurrentEvent();
   const divisions = useMemo(() => event?.divisions ?? [], [event]);
-  const game = useRulesForProgram(event?.program.code);
+  const game = useRulesForEvent(event);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const setFiltersField = useCallback(
     <T extends keyof Filters>(key: T, value: Filters[T]) => {
@@ -203,7 +203,7 @@ export const ExportButton: React.FC = () => {
 
 export const EventSummaryPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
-  const game = useRulesForProgram(event?.program.code);
+  const game = useRulesForEvent(event);
   const { mutateAsync: addEvent, isSuccess } = useAddEventVisited();
 
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);

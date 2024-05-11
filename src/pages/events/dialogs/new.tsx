@@ -6,7 +6,7 @@ import {
   useEventMatchesForTeam,
 } from "~hooks/robotevents";
 import { Rule, useRulesForEvent } from "~utils/hooks/rules";
-import { RulesMultiSelect, Select, TextArea } from "~components/Input";
+import { Radio, RulesMultiSelect, Select, TextArea } from "~components/Input";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "~components/Button";
 import { MatchContext } from "~components/Context";

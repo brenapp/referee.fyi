@@ -18,7 +18,7 @@ import {
 } from "~components/Dialog";
 import { ProgramAbbr } from "robotevents/out/endpoints/programs";
 import { Input, RulesSelect, Select } from "~components/Input";
-import { Rule, useRulesForProgram } from "~utils/hooks/rules";
+import { Rule, useRulesForEvent } from "~utils/hooks/rules";
 import { Toaster } from "react-hot-toast";
 import { useEventInvitation } from "~utils/hooks/share";
 import { useShareConnection } from "~models/ShareConnection";
@@ -176,7 +176,7 @@ const Rules: React.FC = () => {
   const programs: ProgramAbbr[] = ["V5RC", "VIQRC", "VURC", "VAIRC"];
   const [program, setProgram] = useState<ProgramAbbr>("V5RC");
 
-  const rules = useRulesForProgram(program);
+  const rules = useRulesForEvent(event);
   const [rule, setRule] = useState<Rule | null>(null);
 
   useEffect(() => {

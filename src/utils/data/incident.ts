@@ -294,7 +294,7 @@ export function matchToString(match: IncidentMatch) {
         programming: "Auto",
         driver: "Driver",
       };
-      return `Skills ${display[match.skillsType]} ${match.attempt}`;
+      return `${display[match.skillsType]} Skills ${match.attempt}`;
     }
   }
 }

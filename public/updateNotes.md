@@ -1,3 +1,10 @@
+### 13 May 2024
+
+- Added support for "Skills" as a match type. Entries marked as "Skills" are not shown on the team summary in the match dialog, but are shown when expanding the team summary.
+- Added option to export list of entries from the event summary page. 
+- Fixed bug where some shared entries were not being displayed for all users.
+- Minor bug fixes and usability improvements.
+
 ### 24 March 2024
 
 - Introduced new authorization system for the sharing server that significantly improves upon

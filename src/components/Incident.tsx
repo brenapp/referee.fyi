@@ -1,5 +1,9 @@
 import { twMerge } from "tailwind-merge";
-import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
+import {
+  IncidentOutcome,
+  IncidentWithID,
+  matchToString,
+} from "~utils/data/incident";
 import { IconButton } from "./Button";
 import { EditIncidentDialog } from "./dialogs/edit";
 import { useState } from "react";
@@ -44,7 +48,7 @@ export const Incident: React.FC<IncidentProps> = ({
           <p className="text-sm">
             {[
               incident.team,
-              incident.match?.name ?? "Non-Match",
+              incident.match ? matchToString(incident.match) : "Non-Match",
               incident.outcome,
             ].join(" • ")}
           </p>

@@ -11,6 +11,8 @@ import {
 } from "./share";
 import {
   EditIncident,
+  IncidentMatch,
+  IncidentMatchSkills,
   IncidentOutcome,
   Revision,
   Incident as ServerIncident,
@@ -28,9 +30,9 @@ export type RichIncidentElements = {
   time: Date;
 
   event: string;
-  division: number;
 
   match?: MatchData | null;
+  skills?: IncidentMatchSkills;
   team?: TeamData | null;
 
   outcome: IncidentOutcome;
@@ -46,11 +48,13 @@ export function packIncident(incident: RichIncident): Incident {
     ...incident,
     match: incident.match
       ? {
+          type: "match",
+          division: incident.match.division.id,
           id: incident.match.id,
           name: incident.match.name,
         }
-      : undefined,
-    team: incident.team?.number,
+      : incident.skills,
+    team: incident.team!.number,
     rules: incident.rules.map((rule) => rule.rule),
   };
 }
@@ -278,4 +282,19 @@ export async function getIncidentsByTeam(
   return Promise.all(
     ids.map((id) => getIncident(id) as Promise<IncidentWithID>)
   );
+}
+
+export function matchToString(match: IncidentMatch) {
+  switch (match.type) {
+    case "match": {
+      return match.name;
+    }
+    case "skills": {
+      const display: Record<typeof match.skillsType, string> = {
+        programming: "Auto",
+        driver: "Driver",
+      };
+      return `${display[match.skillsType]} Skills ${match.attempt}`;
+    }
+  }
 }

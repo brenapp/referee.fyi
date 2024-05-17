@@ -11,6 +11,7 @@ import type {
   WebSocketServerShareInfoMessage,
   EventIncidentsInitData,
   InvitationListItem,
+  IncidentMatch,
 } from "../../types/api";
 import { ShareInstance, User } from "../../types/server";
 import { getUser } from "./data";
@@ -22,6 +23,21 @@ export type SessionClient = {
   ip: string;
   active: boolean;
 };
+
+export function matchToString(match: IncidentMatch) {
+  switch (match.type) {
+    case "match": {
+      return match.name;
+    }
+    case "skills": {
+      const display: Record<typeof match.skillsType, string> = {
+        programming: "Auto",
+        driver: "Driver",
+      };
+      return `${display[match.skillsType]} Skills ${match.attempt}`;
+    }
+  }
+}
 
 export class EventIncidents implements DurableObject {
   router = Router();
@@ -278,13 +294,17 @@ export class EventIncidents implements DurableObject {
     output += incidents
       .map((incident) => {
         const notes = incident.notes.replaceAll(/[\s\r\n]/g, " ");
+
+        const division =
+          incident.match?.type === "match" ? incident.match.division : "";
+
         return [
           new Date(incident.time).toISOString(),
           new Date(incident.time).toISOString(),
           incident.id,
           incident.event,
-          incident.division,
-          incident.match?.name,
+          division,
+          incident.match ? matchToString(incident.match) : "",
           incident.team,
           incident.outcome,
           incident.rules.join(" "),

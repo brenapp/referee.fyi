@@ -46,7 +46,7 @@ export function useGameRules(game: string): Game | undefined {
   return rules?.games.find((g) => g.title === game) as Game | undefined;
 }
 
-export function useRulesForEvent(event?: EventData | null) {
+export function useRulesForEvent(event?: EventData | null): Game | undefined {
   const { data: rules } = useRules();
   const { data: season } = useSeason(event?.season.id);
 
@@ -58,6 +58,10 @@ export function useRulesForEvent(event?: EventData | null) {
     (g) => g.season === year && g.programs.includes(event.program.code)
   ) as Game | undefined;
 
+  if (!currentGame) {
+    return undefined;
+  }
+
   const relevantRuleGroups: RuleGroup[] = [];
 
   currentGame?.ruleGroups.forEach((ruleGroup) => {
@@ -66,5 +70,5 @@ export function useRulesForEvent(event?: EventData | null) {
     }
   });
 
-  return relevantRuleGroups;
+  return { ...currentGame, ruleGroups: relevantRuleGroups };
 }

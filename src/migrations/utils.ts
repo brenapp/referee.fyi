@@ -4,13 +4,16 @@ export type Migration = {
   name: string;
   run_order: number; // The higher run order will always run later
   dependencies: string[]; // List of names of migrations that should have successfully completed prior to running this migration
-  apply: (prev?: MigrationResult) => Promise<Omit<MigrationResult, "date">>;
+  apply: (
+    prev?: MigrationResult
+  ) => Promise<Omit<MigrationResult, "date" | "duration">>;
 };
 
 export type MigrationResult = {
   success: boolean;
   details?: string;
   date: Date;
+  duration: number;
 };
 
 export async function hasAppliedMigration(name: string): Promise<boolean> {
@@ -32,10 +35,14 @@ export async function applyMigration(
     return { ...result, preapplied: true };
   }
 
+  const start = performance.now();
   const output = await migration.apply(result);
+  const end = performance.now();
+
   const newResult: MigrationResult = {
     ...output,
     date: new Date(),
+    duration: end - start,
   };
 
   await set(`migration_${migration.name}`, newResult);
@@ -71,6 +78,7 @@ export async function runMigrations(): Promise<
         success: false,
         details: "Uncompleted dependencies.",
         preapplied: false,
+        duration: 0,
       };
       continue;
     }

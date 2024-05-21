@@ -1,3 +1,8 @@
+### 21 May 2024
+
+- Added support for 2024/25 game rules (V5RC, VURC, and VIQRC).
+- Reduced likelihood of event summary not displaying all incidents correctly
+
 ### 13 May 2024
 
 - Added support for "Skills" as a match type. Entries marked as "Skills" are not shown on the team summary in the match dialog, but are shown when expanding the team summary.

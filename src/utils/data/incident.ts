@@ -1,4 +1,4 @@
-import { get, set } from "idb-keyval";
+import { get, getMany, set, setMany } from "idb-keyval";
 import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
 import { MatchData } from "robotevents/out/endpoints/matches";
@@ -11,6 +11,8 @@ import {
 } from "./share";
 import {
   EditIncident,
+  IncidentMatch,
+  IncidentMatchSkills,
   IncidentOutcome,
   Revision,
   Incident as ServerIncident,
@@ -20,17 +22,13 @@ export type Incident = Omit<ServerIncident, "id">;
 export type IncidentWithID = ServerIncident;
 export type { IncidentOutcome };
 
-export type IncidentIndex = {
-  [key: string]: string[];
-};
-
 export type RichIncidentElements = {
   time: Date;
 
   event: string;
-  division: number;
 
   match?: MatchData | null;
+  skills?: IncidentMatchSkills;
   team?: TeamData | null;
 
   outcome: IncidentOutcome;
@@ -46,11 +44,13 @@ export function packIncident(incident: RichIncident): Incident {
     ...incident,
     match: incident.match
       ? {
+          type: "match",
+          division: incident.match.division.id,
           id: incident.match.id,
           name: incident.match.name,
         }
-      : undefined,
-    team: incident.team?.number,
+      : incident.skills,
+    team: incident.team!.number,
     rules: incident.rules.map((rule) => rule.rule),
   };
 }
@@ -64,18 +64,6 @@ export async function initIncidentStore() {
   const incidents = await get<string[]>("incidents");
   if (!incidents) {
     await set("incidents", []);
-  }
-
-  // Index by event
-  const eventsIndex = await get<IncidentIndex>("event_idx");
-  if (!eventsIndex) {
-    await set("event_idx", {});
-  }
-
-  // Index by team
-  const teamsIndex = await get<IncidentIndex>("team_idx");
-  if (!teamsIndex) {
-    await set("team_idx", {});
   }
 }
 
@@ -94,25 +82,78 @@ export async function getIncident(
   };
 }
 
+export async function getManyIncidents(
+  ids: string[]
+): Promise<(IncidentWithID | undefined)[]> {
+  return (await getMany<Incident>(ids)).map((v, i) =>
+    v ? { id: ids[i], ...v } : undefined
+  );
+}
+
+export type IncidentIndices = {
+  event: string[];
+  team: string[];
+};
+
+export async function getIncidentIndices(
+  incident: Incident
+): Promise<IncidentIndices> {
+  const [event, team] = await getMany<string[] | undefined>([
+    `event_${incident.event}_idx`,
+    `team_${incident.team}_idx`,
+  ]);
+
+  return { event: event ?? [], team: team ?? [] };
+}
+
+export async function setIncidentIndices(
+  incident: Incident,
+  indices: IncidentIndices
+) {
+  return setMany([
+    [`event_${incident.event}_idx`, indices.event],
+    [`team_${incident.team}_idx`, indices.team],
+  ]);
+}
+
+export async function getDeletedIncidentIndices(
+  incident: Incident
+): Promise<IncidentIndices> {
+  const [event, team] = await getMany<string[] | undefined>([
+    `deleted_event_${incident.event}_idx`,
+    `deleted_team_${incident.team}_idx`,
+  ]);
+
+  return { event: event ?? [], team: team ?? [] };
+}
+
+export async function setDeletedIncidentIndices(
+  incident: Incident,
+  indices: IncidentIndices
+) {
+  return setMany([
+    [`deleted_event_${incident.event}_idx`, indices.event],
+    [`deleted_team_${incident.team}_idx`, indices.team],
+  ]);
+}
+
 export async function repairIndices(id: string, incident: Incident) {
-  const eventsIndex = await get<IncidentIndex>("event_idx");
-  const teamsIndex = await get<IncidentIndex>("team_idx");
+  const { event, team } = await getIncidentIndices(incident);
 
-  const eventIndex = eventsIndex?.[incident.event] ?? [];
-  const teamIndex = teamsIndex?.[incident.team ?? ""] ?? [];
+  let dirty = false;
 
-  if (!eventIndex.includes(id)) {
-    await set("event_idx", {
-      ...eventsIndex,
-      [incident.event]: [...eventIndex, id],
-    });
+  if (!event.includes(id)) {
+    event.push(id);
+    dirty = true;
   }
 
-  if (!teamIndex.includes(id)) {
-    await set("team_idx", {
-      ...teamsIndex,
-      [incident.team ?? ""]: [...teamIndex, id],
-    });
+  if (!team.includes(id)) {
+    team.push(id);
+    dirty = true;
+  }
+
+  if (dirty) {
+    return setIncidentIndices(incident, { event, team });
   }
 }
 
@@ -140,21 +181,15 @@ export async function newIncident(
 ): Promise<string> {
   await setIncident(id, incident);
 
-  // Add to all indices
-  const eventsIndex = await get<IncidentIndex>("event_idx");
-  const teamsIndex = await get<IncidentIndex>("team_idx");
+  // Index Properly
+  const { event, team } = await getIncidentIndices(incident);
 
-  const eventIndex = eventsIndex?.[incident.event] ?? [];
-  const teamIndex = teamsIndex?.[incident.team ?? ""] ?? [];
+  event.push(id);
+  team.push(id);
 
-  await set("event_idx", {
-    ...eventsIndex,
-    [incident.event]: [...eventIndex, id],
-  });
-
-  await set("team_idx", {
-    ...teamsIndex,
-    [incident.team ?? ""]: [...teamIndex, id],
+  setIncidentIndices(incident, {
+    event,
+    team,
   });
 
   const all = (await get<string[]>("incidents")) ?? [];
@@ -227,26 +262,23 @@ export async function deleteIncident(
     return;
   }
 
-  // Remove from all indices. Note that we're not *actually* deleted in the incidents, just removed
-  // from indices, so we could recover them in the future.
-  const eventsIndex = await get<IncidentIndex>("event_idx");
-  const teamsIndex = await get<IncidentIndex>("team_idx");
+  const { team, event } = await getIncidentIndices(incident);
 
-  const eventIndex = eventsIndex?.[incident.event] ?? [];
-  const teamIndex = teamsIndex?.[incident.team ?? ""] ?? [];
-
-  await set("event_idx", {
-    ...eventsIndex,
-    [incident.event]: eventIndex.filter((i) => i !== id),
+  await setIncidentIndices(incident, {
+    event: event.filter((i) => i !== id),
+    team: team.filter((i) => i !== id),
   });
 
-  await set("team_idx", {
-    ...teamsIndex,
-    [incident.team ?? ""]: teamIndex.filter((i) => i !== id),
-  });
+  const { event: deletedEvent, team: deletedTeam } =
+    await getDeletedIncidentIndices(incident);
 
-  const all = await get<string[]>("incidents");
-  await set("incidents", all?.filter((i) => i !== id) ?? []);
+  deletedEvent.push(id);
+  deletedTeam.push(id);
+
+  await setDeletedIncidentIndices(incident, {
+    event: deletedEvent,
+    team: deletedTeam,
+  });
 
   if (updateRemote) {
     await deleteServerIncident(id, incident.event);
@@ -254,28 +286,44 @@ export async function deleteIncident(
 }
 
 export async function getAllIncidents(): Promise<IncidentWithID[]> {
-  const all = await get<string[]>("incidents");
-  return Promise.all(
-    all?.map((id) => getIncident(id) as Promise<IncidentWithID>) ?? []
-  );
+  const ids = await get<string[]>(`incidents`);
+  if (!ids) return [];
+  const incidents = await getManyIncidents(ids);
+
+  return incidents.filter((i) => !!i) as IncidentWithID[];
 }
 
 export async function getIncidentsByEvent(
   event: string
 ): Promise<IncidentWithID[]> {
-  const eventsIndex = await get<IncidentIndex>("event_idx");
-  const ids = eventsIndex?.[event] ?? [];
-  return Promise.all(
-    ids.map((id) => getIncident(id) as Promise<IncidentWithID>)
-  );
+  const ids = await get<string[]>(`event_${event}_idx`);
+  if (!ids) return [];
+  const incidents = await getManyIncidents(ids);
+
+  return incidents.filter((i) => !!i) as IncidentWithID[];
 }
 
 export async function getIncidentsByTeam(
   team: string
 ): Promise<IncidentWithID[]> {
-  const teamsIndex = await get<IncidentIndex>("team_idx");
-  const ids = teamsIndex?.[team] ?? [];
-  return Promise.all(
-    ids.map((id) => getIncident(id) as Promise<IncidentWithID>)
-  );
+  const ids = await get<string[]>(`team_${team}_idx`);
+  if (!ids) return [];
+  const incidents = await getManyIncidents(ids);
+
+  return incidents.filter((i) => !!i) as IncidentWithID[];
+}
+
+export function matchToString(match: IncidentMatch) {
+  switch (match.type) {
+    case "match": {
+      return match.name;
+    }
+    case "skills": {
+      const display: Record<typeof match.skillsType, string> = {
+        programming: "Auto",
+        driver: "Driver",
+      };
+      return `${display[match.skillsType]} Skills ${match.attempt}`;
+    }
+  }
 }

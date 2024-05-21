@@ -91,25 +91,17 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
         </label>
         <p>Outcomes</p>
         {OUTCOMES.map((outcome) => (
-          <label
+          <Checkbox
             key={outcome}
-            className={twMerge(
-              "flex mt-4 gap-2 bg-zinc-700 p-2 rounded-md",
-              filters.outcomes[outcome] ? "bg-emerald-800" : ""
-            )}
-          >
-            <Checkbox
-              type="checkbox"
-              checked={filters.outcomes[outcome]}
-              onChange={(e) =>
-                setFiltersField("outcomes", {
-                  ...filters.outcomes,
-                  [outcome]: e.currentTarget.checked,
-                })
-              }
-            />
-            <span>{outcome}</span>
-          </label>
+            label={outcome}
+            checked={filters.outcomes[outcome]}
+            onChange={(e) =>
+              setFiltersField("outcomes", {
+                ...filters.outcomes,
+                [outcome]: e.currentTarget.checked,
+              })
+            }
+          />
         ))}
         {divisions.length > 0 ? (
           <label>
@@ -231,14 +223,20 @@ export const EventSummaryPage: React.FC = () => {
         return false;
       }
 
-      if (
-        typeof filters.division === "number" &&
-        filters.division !== incident.division
-      ) {
+      if (typeof filters.division !== "number") {
+        return true;
+      }
+
+      // Division Filter
+      if (!incident.match) {
         return false;
       }
 
-      return true;
+      if (incident.match.type !== "match") {
+        return false;
+      }
+
+      return incident.match.division === filters.division;
     });
 
     return results ?? [];

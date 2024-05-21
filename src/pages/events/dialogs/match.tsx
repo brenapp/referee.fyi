@@ -80,6 +80,10 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
         continue;
       }
 
+      if (incident.match?.type !== "match") {
+        continue;
+      }
+
       if (incident.rules.length < 1) {
         if (rules["NA"]) {
           rules["NA"].push(incident);

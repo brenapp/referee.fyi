@@ -2,10 +2,20 @@ import React, { ReactNode, useCallback, useMemo, useState } from "react";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { Button } from "~components/Button";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
-import { Input, RulesMultiSelect, Select, TextArea } from "~components/Input";
+import {
+  Input,
+  Radio,
+  RulesMultiSelect,
+  Select,
+  TextArea,
+} from "~components/Input";
 import { toast } from "~components/Toast";
-import { Revision, WebSocketSender } from "~share/api";
-import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
+import { IncidentMatchSkills, Revision, WebSocketSender } from "~share/api";
+import {
+  IncidentOutcome,
+  IncidentWithID,
+  matchToString,
+} from "~utils/data/incident";
 import { useDeleteIncident, useEditIncident } from "~utils/hooks/incident";
 import { useEventMatchesForTeam, useEventTeam } from "~utils/hooks/robotevents";
 import { Rule, useRulesForEvent } from "~utils/hooks/rules";
@@ -61,8 +71,8 @@ export const RevisionEntry: React.FC<{ revision: Revision }> = ({
       }
       case "match": {
         return [
-          revision.old?.name ?? "No Match",
-          revision.new?.name ?? "No Match",
+          revision.old ? matchToString(revision.old) : "No Match",
+          revision.new ? matchToString(revision.new) : "No Match",
         ];
       }
       case "rules": {
@@ -70,7 +80,6 @@ export const RevisionEntry: React.FC<{ revision: Revision }> = ({
       }
       case "notes":
       case "outcome":
-      case "division":
       case "id": {
         return [revision.old, revision.new];
       }
@@ -173,6 +182,20 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
 
   const onChangeIncidentMatch = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
+      // If they set skills, default to driver1
+      if (e.target.value === "Skills") {
+        setIncident((incident) => ({
+          ...incident,
+          match: {
+            type: "skills",
+            skillsType: "driver",
+            attempt: 1,
+          },
+        }));
+
+        return;
+      }
+
       const [division, name] = e.target.value.split("@");
       const match = teamMatches?.find((match) => {
         return (
@@ -181,12 +204,41 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
       });
       setIncident((incident) => ({
         ...incident,
-        division: Number.parseInt(division),
-        match: match ? { id: match.id, name: match.name } : undefined,
+        match: match
+          ? {
+              type: "match",
+              id: match.id,
+              name: match.name,
+              division: match.division.id,
+            }
+          : undefined,
       }));
     },
     [teamMatches]
   );
+
+  const onChangeIncidentSkillsType = useCallback(
+    (type: IncidentMatchSkills["skillsType"]) => {
+      setIncident((incident) => ({
+        ...incident,
+        match:
+          incident.match?.type === "skills"
+            ? { ...incident.match, skillsType: type }
+            : incident.match,
+      }));
+    },
+    []
+  );
+
+  const onChangeIncidentSkillsAttempt = useCallback((attempt: number) => {
+    setIncident((incident) => ({
+      ...incident,
+      match:
+        incident.match?.type === "skills"
+          ? { ...incident.match, attempt }
+          : incident.match,
+    }));
+  }, []);
 
   const onChangeIncidentOutcome = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -253,11 +305,14 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             onChange={onChangeIncidentMatch}
             value={
               incident.match
-                ? incident.division + "@" + incident.match.name
+                ? incident.match.type === "match"
+                  ? `${incident.match.division}@${incident.match.name}`
+                  : "Skills"
                 : undefined
             }
           >
             <option value={undefined}>Non-Match</option>
+            <option value="Skills">Skills</option>
             {teamMatchesByDivision.map(([name, matches]) => {
               return (
                 <optgroup key={name} label={name}>
@@ -274,6 +329,63 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             })}
           </Select>
         </label>
+        {incident.match?.type === "skills" ? (
+          <div className="flex gap-2 mt-2">
+            <Radio
+              name="skillsType"
+              label="Driver"
+              checked={incident.match.skillsType === "driver"}
+              onChange={(e) =>
+                e.currentTarget.checked
+                  ? onChangeIncidentSkillsType("driver")
+                  : null
+              }
+            />
+            <Radio
+              name="skillsType"
+              label="Auto"
+              checked={incident.match.skillsType === "programming"}
+              onChange={(e) =>
+                e.currentTarget.checked
+                  ? onChangeIncidentSkillsType("programming")
+                  : null
+              }
+            />
+            <Radio
+              name="skillsAttempt"
+              label="1"
+              labelProps={{ className: "flex-1 ml-4" }}
+              checked={incident.match.attempt === 1}
+              onChange={(e) =>
+                e.currentTarget.checked
+                  ? onChangeIncidentSkillsAttempt(1)
+                  : null
+              }
+            />
+            <Radio
+              name="skillsAttempt"
+              label="2"
+              labelProps={{ className: "flex-1" }}
+              checked={incident.match.attempt === 2}
+              onChange={(e) =>
+                e.currentTarget.checked
+                  ? onChangeIncidentSkillsAttempt(2)
+                  : null
+              }
+            />
+            <Radio
+              name="skillsAttempt"
+              label="3"
+              labelProps={{ className: "flex-1" }}
+              checked={incident.match.attempt === 3}
+              onChange={(e) =>
+                e.currentTarget.checked
+                  ? onChangeIncidentSkillsAttempt(3)
+                  : null
+              }
+            />
+          </div>
+        ) : null}
         <label>
           <p className="mt-4">Outcome</p>
           <Select

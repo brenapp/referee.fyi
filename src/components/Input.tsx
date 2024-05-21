@@ -5,15 +5,59 @@ import { IconButton } from "./Button";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
 export type CheckboxProps = React.HTMLProps<HTMLInputElement> & {
-  type: "checkbox" | "radio";
+  label: string;
+  labelProps?: React.HTMLProps<HTMLLabelElement>;
 };
-export const Checkbox: React.FC<CheckboxProps> = (props) => {
+export const Checkbox: React.FC<CheckboxProps> = ({
+  label,
+  labelProps,
+  ...props
+}) => {
   return (
-    <input
-      {...props}
-      type={props.type}
-      className={twMerge("accent-emerald-400", props.className)}
-    />
+    <label
+      {...labelProps}
+      className={twMerge(
+        "flex mt-4 gap-2 bg-zinc-700 p-2 rounded-md",
+        "has-[:checked]:bg-emerald-800",
+        labelProps?.className
+      )}
+    >
+      <input
+        {...props}
+        type="checkbox"
+        className={twMerge("accent-emerald-400", props.className)}
+      />
+      <span>{label}</span>
+    </label>
+  );
+};
+
+export type RadioProps = React.HTMLProps<HTMLInputElement> & {
+  label: string;
+  labelProps?: React.HTMLProps<HTMLLabelElement>;
+};
+
+export const Radio: React.FC<RadioProps> = ({
+  labelProps,
+  label,
+  ...props
+}) => {
+  return (
+    <label
+      {...labelProps}
+      className={twMerge(
+        `bg-zinc-700 rounded-md p-2 flex gap-2 justify-center`,
+        "has-[:checked]:bg-emerald-800",
+        labelProps?.className
+      )}
+    >
+      <input
+        {...props}
+        type="radio"
+        className={twMerge("accent-emerald-400", props.className)}
+      />
+      <span>{label}</span>
+    </label>
   );
 };
 

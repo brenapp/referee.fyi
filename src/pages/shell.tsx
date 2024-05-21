@@ -24,7 +24,7 @@ import { useEventInvitation } from "~utils/hooks/share";
 import { useShareConnection } from "~models/ShareConnection";
 
 function isValidSKU(sku: string) {
-  return !!sku.match(/RE-(VRC|VIQRC|VEXU|VIQC)-[0-9]{2}-[0-9]{4}/g);
+  return !!sku.match(/RE-(VRC|V5RC|VEXU|VURC|VIQRC|VIQC)-[0-9]{2}-[0-9]{4}/g);
 }
 
 const EventPicker: React.FC = () => {

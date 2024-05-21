@@ -35,7 +35,8 @@ export function useRules(): UseQueryResult<Rules> {
       if (!response.ok) {
         return { games: [] };
       }
-      return response.json() as Promise<Rules>;
+
+      return response.json();
     },
     staleTime: 1000 * 60 * 60 * 24,
   });

@@ -335,13 +335,13 @@ export function useEventSkills(
 
 export function useSeason(
   id?: number,
-  queryOptions?: HookQueryOptions<Season | undefined>
+  queryOptions?: HookQueryOptions<Season | null>
 ) {
   return useQuery({
     queryKey: ["season", id],
     queryFn: async () => {
       if (!id) {
-        return undefined;
+        return null;
       }
       return robotevents.seasons.fetch(id);
     },

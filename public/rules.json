@@ -3,7 +3,7 @@
     {
       "title": "High Stakes",
       "season": "2024-2025",
-      "prog": ["V5RC", "VURC", "VAIRC"],
+      "programs": ["V5RC", "VURC", "VAIRC"],
       "ruleGroups": [
         {
           "name": "Scoring Rules",
@@ -491,7 +491,6 @@
             },
             {
               "rule": "<T24>",
-<<<<<<< HEAD
               "description": "There are two types of field perimeter that may be used",
               "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T24.html"
             }
@@ -546,18 +545,10 @@
               "rule": "<RSC8>",
               "description": " Skills Challenge Fields do not require the same modifications as the Head-to-Head Fields",
               "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/RSC8.html"
-=======
-              "description": " There are two types of Field Perimeter that may be used",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/T24.html"
->>>>>>> c8d548e (Add 24-25 game rules)
             }
           ]
         },
         {
-<<<<<<< HEAD
-          "name": "VEX U Game Rules",
-          "programs": ["VEXU"],
-=======
           "name": "Robot Skills Challenge Rules",
           "programs": ["V5RC", "VURC", "VAIRC"],
           "rules": [
@@ -772,7 +763,7 @@
     {
       "title": "Rapid Relay",
       "season": "2024-2025",
-      "prog": ["VIQRC"],
+      "programs": ["VIQRC"],
       "ruleGroups": [
         {
           "name": "Scoring Rules",
@@ -1186,7 +1177,7 @@
     {
       "title": "Over Under",
       "season": "2023-2024",
-      "prog": ["V5RC", "VURC", "VAIRC"],
+      "programs": ["V5RC", "VURC", "VAIRC"],
       "ruleGroups": [
         {
           "name": "Scoring Rules",
@@ -1894,7 +1885,7 @@
     {
       "title": "Full Volume",
       "season": "2023-2024",
-      "prog": ["VIQRC"],
+      "programs": ["VIQRC"],
       "ruleGroups": [
         {
           "name": "Scoring Rules",

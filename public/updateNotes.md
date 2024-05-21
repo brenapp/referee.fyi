@@ -1,3 +1,8 @@
+### 21 May 2024
+
+- Added support for 2024/25 game rules (V5RC, VURC, and VIQRC)
+- Reduced likelihood of event summary not displaying all incidents correctly
+
 ### 24 March 2024
 
 - Introduced new authorization system for the sharing server that significantly improves upon

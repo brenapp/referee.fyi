@@ -49,7 +49,8 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     4
   );
   const { mutateAsync: addRecentRules } = useAddRecentRules(
-    event?.program.code ?? "V5RC"
+    event?.program.code ?? "V5RC",
+    event?.season.id ?? 0
   );
 
   // Find all teams and matches at the event

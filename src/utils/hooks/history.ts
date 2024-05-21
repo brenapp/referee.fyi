@@ -24,8 +24,8 @@ export async function getRecentEvents() {
   return (await get<EventData[]>("event_history")) ?? [];
 }
 
-export async function getRecentRules(program: ProgramAbbr) {
-  const key = `rule_history_${program}`;
+export async function getRecentRules(program: ProgramAbbr, season: number) {
+  const key = `rule_history_${program}_${season}`;
   return (await get<Rule[]>(key)) ?? [];
 }
 
@@ -41,11 +41,15 @@ export function useRecentEvents(limit?: number) {
   });
 }
 
-export function useRecentRules(program: ProgramAbbr, limit?: number) {
+export function useRecentRules(
+  program: ProgramAbbr,
+  season: number,
+  limit?: number
+) {
   return useQuery({
     queryKey: ["recent_rules"],
     queryFn: async () => {
-      const rules = await getRecentRules(program);
+      const rules = await getRecentRules(program, season);
       return rules.slice(0, limit);
     },
     staleTime: 0,
@@ -64,15 +68,15 @@ export function useAddEventVisited() {
   });
 }
 
-export function useAddRecentRules(program: ProgramAbbr) {
-  const key = `rule_history_${program}`;
+export function useAddRecentRules(program: ProgramAbbr, season: number) {
+  const key = `rule_history_${program}_${season}`;
   return useMutation({
     mutationFn: async (rules: Rule[]) => {
       if (rules.length < 1) {
         return;
       }
 
-      const recent = (await getRecentRules(program)).filter((a) =>
+      const recent = (await getRecentRules(program, season)).filter((a) =>
         rules.every((b) => b.rule !== a.rule)
       );
       await set(key, [...rules, ...recent]);

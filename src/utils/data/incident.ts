@@ -290,7 +290,7 @@ export async function getAllIncidents(): Promise<IncidentWithID[]> {
   if (!ids) return [];
   const incidents = await getManyIncidents(ids);
 
-  return incidents.filter((i) => !!i);
+  return incidents.filter((i) => !!i) as IncidentWithID[];
 }
 
 export async function getIncidentsByEvent(
@@ -300,7 +300,7 @@ export async function getIncidentsByEvent(
   if (!ids) return [];
   const incidents = await getManyIncidents(ids);
 
-  return incidents.filter((i) => !!i);
+  return incidents.filter((i) => !!i) as IncidentWithID[];
 }
 
 export async function getIncidentsByTeam(
@@ -310,7 +310,7 @@ export async function getIncidentsByTeam(
   if (!ids) return [];
   const incidents = await getManyIncidents(ids);
 
-  return incidents.filter((i) => !!i);
+  return incidents.filter((i) => !!i) as IncidentWithID[];
 }
 
 export function matchToString(match: IncidentMatch) {

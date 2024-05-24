@@ -1132,14 +1132,14 @@
           "programs": ["V5RC", "VURC", "VAIRC"],
           "rules": [
             {
-              "rule": "<SC1>",
-              "description": " All Scoring statuses are evaluated after the Match ends.",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/SC1.html"
+              "rule": "<SG1>",
+              "description": "Starting a Match",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/SG1.html"
             },
             {
-              "rule": "<SC2>",
-              "description": " Scoring of the Autonomous Bonus is immediately after the Autonomous Period ends",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/SC2.html"
+              "rule": "<SG2>",
+              "description": "Horizontal expansion is limited",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/SG2.html"
             },
             {
               "rule": "<SG3>",
@@ -1147,24 +1147,24 @@
               "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/SG3.html"
             },
             {
-              "rule": "<SC4>",
-              "description": " Top Ring criteria",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/SC4.html"
+              "rule": "<SG4>",
+              "description": "Each Robot gets one Alliance Triball as a Preload",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/SG4.html"
             },
             {
-              "rule": "<SC5>",
-              "description": " Placed in a Corner criteria",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/SC5.html"
+              "rule": "<SG5>",
+              "description": "Stay away from nets on the Goals",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/SG5.html"
             },
             {
-              "rule": "<SC6>",
-              "description": " Corner modifiers to Scored Rings",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/SC6.html"
+              "rule": "<SG6>",
+              "description": "Match Load Triballs may be safely introduced during the Match under certain conditions",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/SG6.html"
             },
             {
-              "rule": "<SC7>",
-              "description": " Climbed to a Level criteria",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/SC7.html"
+              "rule": "<SG7>",
+              "description": "Possession is limited to one (1) Triball",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/SG7.html"
             },
             {
               "rule": "<SG8>",
@@ -1256,8 +1256,8 @@
           "rules": [
             {
               "rule": "<G1>",
-              "description": " Treat everyone with respect",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/G1.html"
+              "description": "Treat everyone with respect",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/G1.html"
             },
             {
               "rule": "<G2>",
@@ -1266,23 +1266,23 @@
             },
             {
               "rule": "<G3>",
-              "description": " Use common sense",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/G3.html"
+              "description": "Use common sense",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/G3.html"
             },
             {
               "rule": "<G4>",
-              "description": " The Robot must represent the skill level of the Team",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/G4.html"
+              "description": "The Robot must represent the skill level of the Team",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/G4.html"
             },
             {
               "rule": "<G5>",
-              "description": " Robots begin the Match in the starting volume",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/G5.html"
+              "description": "Robots begin the Match in the starting volume",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/G5.html"
             },
             {
               "rule": "<G6>",
-              "description": " Keep your Robots together",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/G6.html"
+              "description": "Keep your Robots together",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/G6.html"
             },
             {
               "rule": "<G7>",
@@ -1311,8 +1311,8 @@
             },
             {
               "rule": "<G12>",
-              "description": " All rules still apply in the Autonomous Period",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/G12.html"
+              "description": "All rules still apply in the Autonomous Period",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/G12.html"
             },
             {
               "rule": "<G13>",
@@ -1331,8 +1331,8 @@
             },
             {
               "rule": "<G16>",
-              "description": " No Holding for more than a 5-count",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/G16.html"
+              "description": "No Holding for more than a 5-count",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/G16.html"
             },
             {
               "rule": "<G17>",
@@ -1346,9 +1346,9 @@
           "programs": ["V5RC", "VURC", "VAIRC"],
           "rules": [
             {
-              "rule": "<SG1>",
-              "description": " Starting a Match",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/SG1.html"
+              "rule": "<S1>",
+              "description": "Be safe out there",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/S1.html"
             },
             {
               "rule": "<S2>",
@@ -1470,8 +1470,8 @@
           "rules": [
             {
               "rule": "<R1>",
-              "description": " One Robot per Team",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R1.html"
+              "description": "One Robot per Team",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R1.html"
             },
             {
               "rule": "<R2>",
@@ -1480,8 +1480,8 @@
             },
             {
               "rule": "<R3>",
-              "description": " Robots must pass inspection",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R3.html"
+              "description": "Robots must pass inspection",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R3.html"
             },
             {
               "rule": "<R4>",
@@ -1490,48 +1490,48 @@
             },
             {
               "rule": "<R5>",
-              "description": " Robots may only expand horizontally in one direction",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R5.html"
+              "description": "Robots must be safe",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R5.html"
             },
             {
               "rule": "<R6>",
-              "description": " Robots must be safe",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R6.html"
+              "description": "Robots are built from the VEX V5 system",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R6.html"
             },
             {
               "rule": "<R7>",
-              "description": " Robots are built from the VEX V5 system",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R7.html"
+              "description": "Certain non-VEX components are allowed",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R7.html"
             },
             {
               "rule": "<R8>",
-              "description": " Certain non-VEX components are allowed",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R8.html"
+              "description": "Decorations are allowed",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R8.html"
             },
             {
               "rule": "<R9>",
-              "description": " Decorations are allowed",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R9.html"
+              "description": "Officially registered Team numbers must be displayed on Robot License Plates",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R9.html"
             },
             {
               "rule": "<R10>",
-              "description": " Officially registered Team numbers must be displayed on Robot license plates",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R10.html"
+              "description": "Let go of Triballs after the Match",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R10.html"
             },
             {
               "rule": "<R11>",
-              "description": " Let go of Scoring Objects after the Match",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R11.html"
+              "description": "Robots have one microcontroller",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R11.html"
             },
             {
               "rule": "<R12>",
-              "description": " Robots have one Brain",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R12.html"
+              "description": "Motors are limited",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R12.html"
             },
             {
               "rule": "<R13>",
-              "description": " Motors are limited",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R13.html"
+              "description": "Electrical power comes from VEX batteries only",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R13.html"
             },
             {
               "rule": "<R14>",
@@ -1540,58 +1540,58 @@
             },
             {
               "rule": "<R15>",
-              "description": " No modifications to electronic or pneumatic components are allowed",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R15.html"
+              "description": "Most modifications to non-electrical components are allowed",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R15.html"
             },
             {
               "rule": "<R16>",
-              "description": " Most modifications to non-electrical components are allowed",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R16.html"
+              "description": "Robots use VEXnet",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R16.html"
             },
             {
               "rule": "<R17>",
-              "description": " Robots use VEXnet",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R17.html"
+              "description": "Give the radio some space",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R17.html"
             },
             {
               "rule": "<R18>",
-              "description": " Give the radio some space",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R18.html"
+              "description": "A limited amount of custom plastic is allowed",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R18.html"
             },
             {
               "rule": "<R19>",
-              "description": " A limited amount of custom plastic is allowed",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R19.html"
+              "description": "A limited amount of tape is allowed",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R19.html"
             },
             {
               "rule": "<R20>",
-              "description": " A limited amount of tape is allowed",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R20.html"
+              "description": "Certain non-VEX fasteners are allowed",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R20.html"
             },
             {
               "rule": "<R21>",
-              "description": " Certain non-VEX fasteners are allowed",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R21.html"
+              "description": "New VEX parts are legal",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R21.html"
             },
             {
               "rule": "<R22>",
-              "description": " New VEX parts are legal",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R22.html"
+              "description": "Pneumatics are limited",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R22.html"
             },
             {
               "rule": "<R23>",
-              "description": " Pneumatics are limited",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R23.html"
+              "description": "One or two Controllers per Robot",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R23.html"
             },
             {
               "rule": "<R24>",
-              "description": " One or two Controllers per Robot",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R24.html"
+              "description": "Custom V5 Smart Cables are allowed",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R24.html"
             },
             {
               "rule": "<R25>",
-              "description": " Custom V5 Smart Cables are allowed",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R25.html"
+              "description": "Keep the power button accessible",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R25.html"
             },
             {
               "rule": "<R26>",
@@ -1600,13 +1600,8 @@
             },
             {
               "rule": "<R27>",
-              "description": " Use a “Competition Template” for programming",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R27.html"
-            },
-            {
-              "rule": "<R28>",
-              "description": " There is a difference between accidentally and willfully violating a Robot rule",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/R28.html"
+              "description": "There is a difference between accidentally and willfully violating a Robot rule",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/R27.html"
             }
           ]
         },
@@ -1785,9 +1780,9 @@
               "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T1.html"
             },
             {
-              "rule": "<VUG2>",
-              "description": " Different Climbing",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/VUG2.html"
+              "rule": "<T2>",
+              "description": "Head Referees must be qualified",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T2.html"
             },
             {
               "rule": "<T3>",
@@ -1805,19 +1800,19 @@
               "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T5.html"
             },
             {
-              "rule": "<VUR6>",
-              "description": " Fabricated Parts may not be made from Raw Stock which poses a safety or damage risk",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/VUR6.html"
+              "rule": "<T6>",
+              "description": "Robots at the field must be ready to play",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T6.html"
             },
             {
-              "rule": "<VUR7>",
-              "description": " Fabricated Parts must be made by Team members",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/VUR7.html"
+              "rule": "<T7>",
+              "description": "Match replays are allowed, but rare",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T7.html"
             },
             {
-              "rule": "<VUR8>",
-              "description": " Springs",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/VUR8.html"
+              "rule": "<T8>",
+              "description": "Disqualifications",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T8.html"
             },
             {
               "rule": "<T9>",
@@ -1835,9 +1830,9 @@
               "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T11.html"
             },
             {
-              "rule": "<VUR12>",
-              "description": " No sensor and other Additional Electronics restrictions",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/VUR12.html"
+              "rule": "<T12>",
+              "description": "The red Alliance places last",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T12.html"
             },
             {
               "rule": "<T13>",
@@ -1855,14 +1850,14 @@
               "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T15.html"
             },
             {
-              "rule": "<VUT2>",
-              "description": " Qualification Matches will be conducted in the 1v1 format",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/VUT2.html"
+              "rule": "<T16>",
+              "description": "Qualification Match tiebreakers",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T16.html"
             },
             {
-              "rule": "<VUT3>",
-              "description": " Elimination Matches will be conducted without an Alliance Selection",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/VUT3.html"
+              "rule": "<T17>",
+              "description": "Send a Student representative to Alliance Selection",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T17.html"
             },
             {
               "rule": "<T18>",
@@ -1870,9 +1865,9 @@
               "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T18.html"
             },
             {
-              "rule": "<VUT5>",
-              "description": " The Driver Controlled Period is shortened to 90 seconds",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/VUT5.html"
+              "rule": "<T19>",
+              "description": "Elimination Matches follow the Elimination Bracket",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T19.html"
             },
             {
               "rule": "<T20>",
@@ -1885,9 +1880,9 @@
               "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T21.html"
             },
             {
-              "rule": "<VURS2>",
-              "description": " Both Robots must start in legal starting positions for the red Alliance",
-              "link": "https://www.robotevents.com/storage/game_manual/VRC_2024-2025_High_Stakes/rules/VURS2.html"
+              "rule": "<T22>",
+              "description": "Fields at an event must be consistent with each other",
+              "link": "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/T22.html"
             },
             {
               "rule": "<T23>",
@@ -1906,7 +1901,7 @@
     {
       "title": "Full Volume",
       "season": "2023-2024",
-      "prog": ["VIQRC"],
+      "programs": ["VIQRC"],
       "ruleGroups": [
         {
           "name": "Specific Game Rules",

@@ -6,7 +6,7 @@ import {
 import { del, get, set } from "idb-keyval";
 
 // Cache buster key, used to forcibly invalidate queries
-export const CACHE_BUSTER = "v5";
+export const CACHE_BUSTER = "v6";
 
 export const queryClient = new QueryClient({
   defaultOptions: {

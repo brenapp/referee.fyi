@@ -1,16 +1,16 @@
 import { Button, LinkButton } from "~components/Button";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogHeader, DialogBody } from "~components/Dialog";
 import Markdown from "react-markdown";
 import { version } from "../../package.json";
 import "./markdown.css";
-import DocumentDuplicateIcon from "@heroicons/react/24/outline/DocumentDuplicateIcon";
 import { Cog8ToothIcon, UserGroupIcon } from "@heroicons/react/20/solid";
 import { useEventSearch } from "~utils/hooks/robotevents";
 import { useRecentEvents } from "~utils/hooks/history";
 import { isWorldsBuild } from "~utils/data/state";
 import { useQuery } from "@tanstack/react-query";
 import { getEventInvitation } from "~utils/data/share";
+import { ClickToCopy } from "~components/ClickToCopy";
 
 function useHomeEvents() {
   const { data: worldsEvents } = useEventSearch(
@@ -65,10 +65,6 @@ export const HomePage: React.FC = () => {
     });
   }, []);
 
-  const onClickCopyBuild = useCallback(() => {
-    navigator.clipboard.writeText(__REFEREE_FYI_VERSION__);
-  }, []);
-
   return (
     <>
       <div>
@@ -117,14 +113,7 @@ export const HomePage: React.FC = () => {
         <DialogBody className="markdown">
           <section className="m-4 mt-0 ">
             <p>Build Version</p>
-            <Button
-              mode="normal"
-              className="font-mono text-left mt-2 flex items-center gap-2 active:bg-zinc-500"
-              onClick={onClickCopyBuild}
-            >
-              <DocumentDuplicateIcon height={20} />
-              <span>{__REFEREE_FYI_VERSION__}</span>
-            </Button>
+            <ClickToCopy message={__REFEREE_FYI_VERSION__} />
           </section>
           <Markdown className="p-4 pt-0">{markdownContent}</Markdown>
         </DialogBody>

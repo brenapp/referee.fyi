@@ -1,10 +1,10 @@
 import { useCallback } from "react";
-import { IconButton } from "./Button";
+import { Button, ButtonProps } from "./Button";
 import { DocumentDuplicateIcon } from "@heroicons/react/24/outline";
-import { twMerge } from "tailwind-merge";
 import { toast } from "./Toast";
+import { twMerge } from "tailwind-merge";
 
-export type ClickToCopyProps = React.HTMLProps<HTMLDivElement> & {
+export type ClickToCopyProps = ButtonProps & {
   message: string;
 };
 
@@ -20,21 +20,17 @@ export const ClickToCopy: React.FC<ClickToCopyProps> = ({
   }, [message]);
 
   return (
-    <div className="mt-2 flex gap-2 w-full">
-      <IconButton
-        className="p-3"
-        onClick={onClick}
-        icon={<DocumentDuplicateIcon height={20} />}
-      />
-      <div
-        {...props}
-        className={twMerge(
-          "p-3 px-4 text-ellipsis overflow-hidden bg-zinc-700 rounded-md flex-1",
-          props.className
-        )}
-      >
-        {message}
-      </div>
-    </div>
+    <Button
+      {...props}
+      mode="normal"
+      className={twMerge(
+        "font-mono text-left flex gap-2 items-center mt-2 py-2 px-3 active:bg-zinc-500",
+        props.className
+      )}
+      onClick={onClick}
+    >
+      <DocumentDuplicateIcon height={20} className="w-5 h-5 flex-shrink-0" />
+      <span className="text-ellipsis overflow-hidden">{message}</span>
+    </Button>
   );
 };

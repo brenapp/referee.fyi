@@ -27,7 +27,9 @@ import { runMigrations } from "../migrations";
 import { toast } from "~components/Toast";
 
 function isValidSKU(sku: string) {
-  return !!sku.match(/RE-(VRC|V5RC|VEXU|VURC|VIQRC|VIQC)-[0-9]{2}-[0-9]{4}/g);
+  return !!sku.match(
+    /RE-(VRC|V5RC|VEXU|VURC|VIQRC|VIQC|VAIRC)-[0-9]{2}-[0-9]{4}/g
+  );
 }
 
 const EventPicker: React.FC = () => {

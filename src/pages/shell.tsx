@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useEvent, useEventsToday } from "~utils/hooks/robotevents";
+import {
+  useCurrentSeason,
+  useEvent,
+  useEventsToday,
+  useSeason,
+} from "~utils/hooks/robotevents";
 import { Button, IconButton, LinkButton } from "~components/Button";
 import {
   BookOpenIcon,
@@ -18,7 +23,7 @@ import {
 } from "~components/Dialog";
 import { ProgramAbbr } from "robotevents/out/endpoints/programs";
 import { Input, RulesSelect, Select } from "~components/Input";
-import { Rule, useRulesForEvent } from "~utils/hooks/rules";
+import { Rule, useRulesForSeason } from "~utils/hooks/rules";
 import { Toaster } from "react-hot-toast";
 import { useEventInvitation } from "~utils/hooks/share";
 import { useShareConnection } from "~models/ShareConnection";
@@ -181,7 +186,10 @@ const Rules: React.FC = () => {
   const programs: ProgramAbbr[] = ["V5RC", "VIQRC", "VURC", "VAIRC"];
   const [program, setProgram] = useState<ProgramAbbr>("V5RC");
 
-  const rules = useRulesForEvent(event);
+  const { data: currentSeasonForProgram } = useCurrentSeason(program);
+  const { data: season } = useSeason(event?.season.id);
+  const rules = useRulesForSeason(season ?? currentSeasonForProgram);
+
   const [rule, setRule] = useState<Rule | null>(null);
 
   useEffect(() => {

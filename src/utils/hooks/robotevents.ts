@@ -349,3 +349,8 @@ export function useSeason(
     ...queryOptions,
   });
 }
+
+export function useCurrentSeason(program?: ProgramAbbr | null) {
+  const id = program ? robotevents.seasons.current(program) : undefined;
+  return useSeason(id);
+}

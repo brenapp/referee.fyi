@@ -1,5 +1,6 @@
 import showToast from "react-hot-toast";
-import { Error, Info, Warning } from "./Warning";
+import { Info, Warning } from "./Warning";
+import { ErrorToast } from "./ErrorToast";
 
 export type ToastType = "info" | "warn" | "error";
 export type ToastArguments = {
@@ -22,7 +23,7 @@ export function toast({ type, ...options }: ToastArguments) {
       break;
     }
     case "error": {
-      showToast.custom(() => <Error message={options.message} />, {
+      showToast.custom(() => <ErrorToast {...options} />, {
         position: "bottom-right",
       });
       break;

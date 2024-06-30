@@ -63,7 +63,7 @@ export const Warning: React.FC<WarningProps> = ({ message, ...props }) => {
 };
 
 export type ErrorProps = {
-  message: string;
+  message: ReactNode;
 } & React.HTMLProps<HTMLDivElement>;
 
 export const Error: React.FC<ErrorProps> = ({ message, ...props }) => {

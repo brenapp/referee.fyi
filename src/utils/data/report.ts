@@ -1,7 +1,7 @@
 import { getMany, keys } from "idb-keyval";
 import { PRIVATE_KEY } from "./crypto";
 
-const TOKEN = "94LhCJGnZbb0H2ZeacwFTKqyWYl8mLKpzb9LXRniZmxQGuHK";
+const TOKEN = import.meta.env.VITE_LOGSERVER_TOKEN;
 
 export type IssueReportMetadata = {
   email: string;
@@ -23,7 +23,8 @@ export async function reportIssue(
       `Comment: ${metadata.comment}`,
       `Version: ${__REFEREE_FYI_VERSION__}`,
       `Date: ${new Date().toISOString()}`,
-    ].join("\n") + "\n\n";
+      `User-Agent: ${navigator.userAgent}`,
+    ].join("\n") + "\n\n--\n\n";
 
   const allKeys = (await keys()).filter(
     (k) => !EXCLUDE_KEYS.includes(k.toString())

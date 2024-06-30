@@ -1,7 +1,8 @@
 import { GlobeAmericasIcon } from "@heroicons/react/20/solid";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "~components/Button";
 import { ClickToCopy } from "~components/ClickToCopy";
+import { ReportIssueDialog } from "~components/dialogs/report";
 import { Input } from "~components/Input";
 import { toast } from "~components/Toast";
 import { queryClient } from "~utils/data/query";
@@ -25,6 +26,8 @@ export const SettingsPage: React.FC = () => {
   const { name, setName, persist } = useShareProfile();
   const { data: publicKey } = useShareID();
 
+  const [reportIssueDialogOpen, setReportIssueDialogOpen] = useState(false);
+
   const onClickRemoveRobotEvents = useCallback(async () => {
     await clearCache();
     toast({ type: "info", message: "Deleted cache." });
@@ -46,7 +49,7 @@ export const SettingsPage: React.FC = () => {
       <section className="mt-4">
         <h2 className="font-bold">Name</h2>
         <Input
-          className="w-full"
+          className="w-full mt-2"
           value={name}
           onChange={(e) => setName(e.currentTarget.value)}
           onBlur={() => persist()}
@@ -55,6 +58,19 @@ export const SettingsPage: React.FC = () => {
       <section className="mt-4">
         <h2 className="font-bold">Public Key</h2>
         <ClickToCopy message={publicKey ?? ""} />
+      </section>
+      <section className="mt-4">
+        <h2 className="font-bold">Report Issues with Referee FYI</h2>
+        <p>
+          Information about your current session will be included in your report
+        </p>
+        <ReportIssueDialog
+          open={reportIssueDialogOpen}
+          setOpen={setReportIssueDialogOpen}
+        />
+        <Button className="mt-2" onClick={() => setReportIssueDialogOpen(true)}>
+          Report Issue
+        </Button>
       </section>
       <section className="mt-4">
         <h2 className="font-bold">Delete Cache</h2>

@@ -1,5 +1,8 @@
 import { get, set } from "idb-keyval";
 
+export const PUBLIC_KEY = "public_key";
+export const PRIVATE_KEY = "private_key";
+
 export async function exportPublicKey(
   publicKey: CryptoKey,
   includePrefix = true
@@ -27,15 +30,15 @@ export async function generateKeys(): Promise<CryptoKeyPair> {
   const publicKeyJWK = await crypto.subtle.exportKey("jwk", publicKey);
   const privateKeyJWK = await crypto.subtle.exportKey("jwk", privateKey);
 
-  await set("public_key", publicKeyJWK);
-  await set("private_key", privateKeyJWK);
+  await set(PUBLIC_KEY, publicKeyJWK);
+  await set(PRIVATE_KEY, privateKeyJWK);
 
   return { privateKey, publicKey };
 }
 
 export async function getKeyPair(): Promise<CryptoKeyPair> {
-  const publicJWK = await get<JsonWebKey>("public_key");
-  const privateJWK = await get<JsonWebKey>("private_key");
+  const publicJWK = await get<JsonWebKey>(PUBLIC_KEY);
+  const privateJWK = await get<JsonWebKey>(PRIVATE_KEY);
 
   if (!publicJWK || !privateJWK) {
     return generateKeys();

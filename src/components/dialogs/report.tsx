@@ -2,22 +2,31 @@ import { useEffect, useState } from "react";
 import { Button } from "~components/Button";
 import { ClickToCopy } from "~components/ClickToCopy";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
-import { Input, TextArea } from "~components/Input";
+import { Input, Select, TextArea } from "~components/Input";
 import { Spinner } from "~components/Spinner";
 import { Error } from "~components/Warning";
+import { useRecentEvents } from "~utils/hooks/history";
 import { useReportIssue } from "~utils/hooks/report";
+import { useCurrentEvent } from "~utils/hooks/state";
 
 export type ReportIssueDialogProps = {
   open: boolean;
   setOpen: (value: boolean) => void;
+  comment?: string;
 };
 
 export const ReportIssueDialog: React.FC<ReportIssueDialogProps> = ({
   open,
   setOpen,
+  comment: initComment,
 }) => {
   const [email, setEmail] = useState("");
-  const [comment, setComment] = useState("");
+  const [comment, setComment] = useState(initComment ?? "");
+
+  const { data: currentEvent } = useCurrentEvent();
+  const { data: recentEvents } = useRecentEvents();
+
+  const [sku, setSKU] = useState<string | null>(currentEvent?.sku ?? null);
 
   const {
     mutate: reportIssue,
@@ -27,14 +36,14 @@ export const ReportIssueDialog: React.FC<ReportIssueDialogProps> = ({
     isSuccess,
     isError,
     reset,
-  } = useReportIssue({ email, comment });
+  } = useReportIssue(sku, { email, comment });
 
   useEffect(() => {
     if (!open) {
       reset();
-      setComment("");
+      setComment(initComment ?? "");
     }
-  }, [reset, open]);
+  }, [reset, open, initComment]);
 
   return (
     <Dialog mode="modal" open={open} onClose={() => setOpen(false)}>
@@ -49,6 +58,25 @@ export const ReportIssueDialog: React.FC<ReportIssueDialogProps> = ({
           Information about your device and your session will be included with
           your report.
         </p>
+        <label>
+          <h2 className="font-bold mt-4">Event</h2>
+          <Select
+            value={sku ?? ""}
+            className="w-full"
+            onChange={(e) => setSKU(e.currentTarget.value)}
+          >
+            <option value="">Pick An Event</option>
+            {currentEvent &&
+            recentEvents?.every((e) => e.sku !== currentEvent.sku) ? (
+              <option value={currentEvent.sku}>{}</option>
+            ) : null}
+            {recentEvents?.map((event) => (
+              <option value={event.sku} key={event.id}>
+                {event.name} [{event.sku}]
+              </option>
+            ))}
+          </Select>
+        </label>
         <label>
           <h2 className="font-bold mt-4">Email</h2>
           <Input

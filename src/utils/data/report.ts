@@ -1,5 +1,6 @@
 import { getMany, keys } from "idb-keyval";
 import { PRIVATE_KEY } from "./crypto";
+import { CACHE_PREFIX } from "./query";
 
 const TOKEN = import.meta.env.VITE_LOGSERVER_TOKEN;
 
@@ -12,22 +13,29 @@ export type IssueReportResponse = {
   correlation: string;
 };
 
-const EXCLUDE_KEYS = [PRIVATE_KEY];
+const EXCLUDE_KEYS = [
+  (k) => k === PRIVATE_KEY,
+  (k) => k.toString().startsWith(CACHE_PREFIX),
+] satisfies ((k: IDBValidKey) => boolean)[];
 
 export async function reportIssue(
+  sku: string | null,
   metadata: IssueReportMetadata
 ): Promise<IssueReportResponse> {
-  let body =
-    [
-      `Email: ${metadata.email}`,
-      `Comment: ${metadata.comment}`,
-      `Version: ${__REFEREE_FYI_VERSION__}`,
-      `Date: ${new Date().toISOString()}`,
-      `User-Agent: ${navigator.userAgent}`,
-    ].join("\n") + "\n\n--\n\n";
+  const frontmatter = [
+    [`Email`, metadata.email],
+    [`Comment`, metadata.comment],
+    [`Version`, __REFEREE_FYI_VERSION__],
+    [`Date`, new Date().toISOString()],
+    [`User-Agent`, navigator.userAgent],
+    [`SKU`, sku],
+    [`URL`, window.location.toString()],
+  ];
+
+  let body = frontmatter.map((v) => v.join(":")).join("\n") + "\n\n--\n\n";
 
   const allKeys = (await keys()).filter(
-    (k) => !EXCLUDE_KEYS.includes(k.toString())
+    (k) => !EXCLUDE_KEYS.some((fn) => fn(k))
   );
   const allValues = await getMany(allKeys);
 
@@ -35,11 +43,17 @@ export async function reportIssue(
     .map((key, i) => `${key}\n${JSON.stringify(allValues[i], null, 2)}`)
     .join("\n\n");
 
+  const headers = new Headers();
+
+  headers.set("Authorization", `Bearer ${TOKEN}`);
+  headers.set(
+    "X-Log-Server-Frontmatter",
+    JSON.stringify(Object.fromEntries(frontmatter))
+  );
+
   const response = await fetch("https://logs.bren.app/dump", {
     method: "PUT",
-    headers: {
-      Authorization: `Bearer ${TOKEN}`,
-    },
+    headers,
     body,
   });
 

@@ -23,6 +23,19 @@ import { exportPublicKey, getKeyPair, getSignRequestHeaders } from "./crypto";
 export const URL_BASE =
   import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER ?? "https://referee.fyi/api";
 
+export async function getShareSessionID(): Promise<string> {
+  let id = sessionStorage.getItem("share_session_id");
+
+  if (id) {
+    return id;
+  }
+
+  id = crypto.randomUUID();
+  sessionStorage.setItem("share_session_id", id);
+
+  return id;
+}
+
 export type JoinRequest = {
   client_version: string;
   user: {
@@ -82,6 +95,9 @@ export async function signedFetch(
   }
 
   signatureHeaders.forEach((value, key) => headers.set(key, value));
+
+  const id = await getShareSessionID();
+  headers.set("X-Referee-FYI-Session", id);
 
   return fetch(request, {
     headers,

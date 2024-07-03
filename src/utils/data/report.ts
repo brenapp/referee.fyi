@@ -1,6 +1,7 @@
 import { getMany, keys } from "idb-keyval";
 import { PRIVATE_KEY } from "./crypto";
 import { CACHE_PREFIX } from "./query";
+import { getShareSessionID } from "./share";
 
 const TOKEN = import.meta.env.VITE_LOGSERVER_TOKEN;
 
@@ -26,6 +27,7 @@ export async function reportIssue(
     [`Email`, metadata.email],
     [`Comment`, metadata.comment],
     [`Version`, __REFEREE_FYI_VERSION__],
+    [`Session`, await getShareSessionID()],
     [`Date`, new Date().toISOString()],
     [`User-Agent`, navigator.userAgent],
     [`SKU`, sku],

@@ -1,5 +1,5 @@
 import { Router } from "itty-router";
-import { corsHeaders, response } from "./utils";
+import { response } from "./utils";
 import type {
   ShareUser,
   Incident,
@@ -313,7 +313,7 @@ export class EventIncidents implements DurableObject {
       })
       .join("\n");
 
-    const response = new Response(output, { headers: corsHeaders });
+    const response = new Response(output);
     return response;
   }
 
@@ -499,7 +499,6 @@ export class EventIncidents implements DurableObject {
       return new Response(null, {
         status: 101,
         webSocket: pair[0],
-        headers: corsHeaders,
       });
     }
   }

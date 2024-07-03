@@ -1,7 +1,8 @@
 import {
+  AutoRouter,
   IRequest,
   Router,
-  createCors,
+  cors,
   error,
   json,
   withParams,
@@ -40,10 +41,7 @@ import {
 import { importKey, KEY_PREFIX, verifyKeySignature } from "./crypto";
 import { integrationRouter } from "./integration";
 
-export const { preflight, corsify } = createCors({
-  origins: ["*"],
-  methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
-});
+export const { preflight, corsify } = cors();
 
 const verifySignature = async (request: IRequest & Request) => {
   const now = new Date();
@@ -182,7 +180,10 @@ const verifyInvitation = async (request: AuthenticatedRequest, env: Env) => {
   request.instance = instance;
 };
 
-const router = Router<IRequest, [Env]>();
+const router = AutoRouter<IRequest, [Env]>({
+  before: [preflight],
+  finally: [corsify],
+});
 
 router
   .all("*", preflight)
@@ -598,10 +599,6 @@ router
     })
   );
 
-export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    return router.handle(request, env).then(json).catch(error).then(corsify);
-  },
-};
+export default { ...router };
 
 export { EventIncidents } from "./incidents";

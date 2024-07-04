@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { type ReactNode, useCallback } from "react";
 import { Button, ButtonProps } from "./Button";
 import { DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 import { toast } from "./Toast";
@@ -6,10 +6,12 @@ import { twMerge } from "tailwind-merge";
 
 export type ClickToCopyProps = ButtonProps & {
   message: string;
+  prefix?: ReactNode;
 };
 
 export const ClickToCopy: React.FC<ClickToCopyProps> = ({
   message,
+  prefix,
   ...props
 }) => {
   const onClick = useCallback(() => {
@@ -30,7 +32,10 @@ export const ClickToCopy: React.FC<ClickToCopyProps> = ({
       onClick={onClick}
     >
       <DocumentDuplicateIcon height={20} className="w-5 h-5 flex-shrink-0" />
-      <span className="text-ellipsis overflow-hidden">{message}</span>
+      {prefix ? <span className="text-zinc-400 text-sm">{prefix}</span> : null}
+      <span className="text-ellipsis overflow-hidden text-nowrap whitespace-nowrap">
+        {message}
+      </span>
     </Button>
   );
 };

@@ -264,6 +264,27 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
   const { data: bearerToken, isSuccess: isSuccessBearerToken } =
     useIntegrationBearer(event.sku);
 
+  const { jsonEndpoint, csvEndpoint } = useMemo(() => {
+    if (!bearerToken) {
+      return { jsonEndpoint: "", csvEndpoint: "" };
+    }
+
+    const json = new URL(
+      `/api/integration/v1/${event.sku}/incidents.json`,
+      import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER
+    );
+
+    const csv = new URL(
+      `/api/integration/v1/${event.sku}/incidents.csv`,
+      import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER
+    );
+
+    json.searchParams.set("token", bearerToken);
+    csv.searchParams.set("token", bearerToken);
+
+    return { jsonEndpoint: json.toString(), csvEndpoint: csv.toString() };
+  }, [bearerToken, event.sku]);
+
   const {
     mutateAsync: onClickBeginSharing,
     isPending: isCreateInstancePending,
@@ -521,6 +542,8 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
             from this instance.
           </p>
           <ClickToCopy message={bearerToken ?? ""} />
+          <ClickToCopy prefix="JSON" message={jsonEndpoint} />
+          <ClickToCopy prefix="CSV" message={csvEndpoint} className="flex-1" />
         </section>
       ) : null}
     </section>

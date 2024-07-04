@@ -3,7 +3,10 @@ import type { ShareResponse } from "../../types/api";
 
 export const { preflight, corsify } = cors();
 
-export function response<T>(data: ShareResponse<T>, init?: ResponseInit) {
+export function response<T>(
+  data: ShareResponse<T>,
+  init?: ResponseInit
+): Response {
   let status = 200;
   if (data.success) {
     status = 200;

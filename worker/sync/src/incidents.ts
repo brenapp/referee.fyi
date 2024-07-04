@@ -15,7 +15,8 @@ import type {
 } from "../../types/api";
 import { ShareInstance, User } from "../../types/server";
 import { getUser } from "./data";
-import { Env } from "./types";
+import { Env, RequestHasInvitation } from "./types";
+import { DurableObject } from "cloudflare:workers";
 
 export type SessionClient = {
   user: ShareUser;
@@ -39,7 +40,7 @@ export function matchToString(match: IncidentMatch) {
   }
 }
 
-export class EventIncidents implements DurableObject {
+export class EventIncidents extends DurableObject {
   router = AutoRouter();
   clients: SessionClient[] = [];
   state: DurableObjectState;
@@ -47,11 +48,11 @@ export class EventIncidents implements DurableObject {
   env: Env;
 
   constructor(state: DurableObjectState, env: Env) {
+    super(state, env);
     this.state = state;
     this.env = env;
 
     this.router
-      .post("/init", (r) => this.handleInit(r))
       .get("/join", (r) => this.handleWebsocket(r))
       .get("/get", () => this.handleGet())
       .get("/csv", () => this.handleCSV())
@@ -265,17 +266,17 @@ export class EventIncidents implements DurableObject {
       .map((client) => client.user);
   }
 
-  async fetch(request: Request) {
-    return this.router.handle(request);
+  async handle(request: RequestHasInvitation) {
+    return this.router.fetch(request);
   }
 
-  async handleInit(request: Request) {
-    const data = await request.json<EventIncidentsInitData>();
+  async fetch(request: Request) {
+    return this.router.fetch(request);
+  }
 
+  async init(data: EventIncidentsInitData) {
     await this.setInstanceSecret(data.instance);
     await this.setSKU(data.sku);
-
-    return response({ success: true, data: null });
   }
 
   async handleGet() {

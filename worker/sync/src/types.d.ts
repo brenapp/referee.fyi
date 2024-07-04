@@ -1,5 +1,6 @@
 import { IRequest } from "itty-router";
 import { ShareInstance, Invitation, User } from "~types/server";
+import { EventIncidents } from "./incidents";
 
 export type SignedRequest = IRequest & {
   key: CryptoKey;
@@ -20,5 +21,5 @@ export interface Env {
   INVITATIONS: KVNamespace;
   USERS: KVNamespace;
   REQUEST_CODES: KVNamespace;
-  INCIDENTS: DurableObjectNamespace;
+  INCIDENTS: DurableObjectNamespace<EventIncidents>;
 }

@@ -1,4 +1,4 @@
-import { Router, IRequest } from "itty-router";
+import { IRequest, AutoRouter } from "itty-router";
 import { Env } from "./types";
 import { response } from "./utils";
 import { getInstance, getInvitation, getUser } from "./data";
@@ -13,7 +13,7 @@ const verifyBearerToken = async (request: IRequest, env: Env) => {
     return response({
       success: false,
       reason: "bad_request",
-      details: "Must specify bearer token and sku.",
+      details: `Must specify bearer token and sku`,
     });
   }
 
@@ -80,7 +80,8 @@ const verifyBearerToken = async (request: IRequest, env: Env) => {
   request.instance = instance;
 };
 
-const integrationRouter = Router<IRequest, [Env]>({
+const integrationRouter = AutoRouter<IRequest, [Env]>({
+  base: "/api/integration/v1/:sku",
   before: [verifyBearerToken],
 });
 
@@ -92,42 +93,18 @@ type VerifiedRequest = IRequest & {
 
 // Integration API (just requires bearer token)
 integrationRouter
-  .get("/api/integration/v1/:sku/verify", async () => {
+  .get("/verify", async () => {
     return response({ success: true, data: "Valid Bearer Token" });
   })
-  .get(
-    "/api/integration/v1/:sku/incidents.json",
-    async (request: VerifiedRequest, env: Env) => {
-      const id = env.INCIDENTS.idFromString(request.instance.secret);
-      const stub = env.INCIDENTS.get(id);
-
-      const headers = new Headers(request.headers);
-
-      headers.set("X-Referee-Content", request.payload);
-      headers.set("X-Referee-User-Name", request.user.name);
-      headers.set("X-Referee-User-Key", request.user.key);
-
-      return stub.fetch(`https://share/json`, {
-        headers,
-      });
-    }
-  )
-  .get(
-    "/api/integration/v1/:sku/incidents.csv",
-    async (request: VerifiedRequest, env: Env) => {
-      const id = env.INCIDENTS.idFromString(request.instance.secret);
-      const stub = env.INCIDENTS.get(id);
-
-      const headers = new Headers(request.headers);
-
-      headers.set("X-Referee-Content", request.payload);
-      headers.set("X-Referee-User-Name", request.user.name);
-      headers.set("X-Referee-User-Key", request.user.key);
-
-      return stub.fetch(`https://share/csv`, {
-        headers,
-      });
-    }
-  );
+  .get("/incidents.json", async (request: VerifiedRequest, env: Env) => {
+    const id = env.INCIDENTS.idFromString(request.instance.secret);
+    const stub = env.INCIDENTS.get(id);
+    return stub.handleJSON();
+  })
+  .get("/incidents.csv", async (request: VerifiedRequest, env: Env) => {
+    const id = env.INCIDENTS.idFromString(request.instance.secret);
+    const stub = env.INCIDENTS.get(id);
+    return stub.handleCSV();
+  });
 
 export { integrationRouter };

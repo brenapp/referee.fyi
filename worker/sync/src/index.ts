@@ -1,4 +1,4 @@
-import { AutoRouter, IRequest } from "itty-router";
+import { AutoRouter, IRequest, withParams } from "itty-router";
 import { corsify, preflight, response } from "./utils";
 
 import type { Invitation, ShareInstance, User } from "~types/server";
@@ -172,13 +172,14 @@ const verifyInvitation = async (request: AuthenticatedRequest, env: Env) => {
 };
 
 const router = AutoRouter<IRequest, [Env]>({
-  before: [preflight],
+  before: [preflight, withParams],
   finally: [corsify],
 });
 
 router
+
   // Integration API
-  .all("/api/integration/v1/*", integrationRouter.fetch)
+  .all("/api/integration/v1/:sku/*", integrationRouter.fetch)
 
   // Read Write API
   .all("*", verifySignature)
@@ -313,10 +314,7 @@ router
     const stub = env.INCIDENTS.get(instanceId);
 
     const body: EventIncidentsInitData = { sku, instance: secret };
-    await stub.fetch(`https://share/init`, {
-      body: JSON.stringify(body),
-      method: "POST",
-    });
+    await stub.init(body);
 
     return response<APIPostCreateResponseBody>({
       success: true,

@@ -15,7 +15,6 @@ import {
 } from "~types/api";
 import {
   deleteInvitation,
-  getInstance,
   getInvitation,
   getRequestCodeUserKey,
   getUser,
@@ -30,8 +29,8 @@ import {
   RequestHasInvitation,
   SignedRequest,
 } from "./types";
-import { importKey, KEY_PREFIX, verifyKeySignature } from "./crypto";
 import { integrationRouter } from "./integration";
+import { verifySignature, verifyUser, verifyInvitation } from "./verify";
 
 const verifySignature = async (request: IRequest & Request) => {
   const now = new Date();
@@ -577,14 +576,7 @@ router
       method: request.method,
       headers,
     });
-  })
-  .all("*", () =>
-    response({
-      success: false,
-      reason: "bad_request",
-      details: "unknown endpoint",
-    })
-  );
+  });
 
 export default { ...router };
 

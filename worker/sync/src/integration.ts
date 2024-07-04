@@ -1,11 +1,9 @@
-import { IRequest, Router } from "itty-router";
+import { Router, IRequest } from "itty-router";
 import { Env } from "./types";
 import { response } from "./utils";
 import { getInstance, getInvitation, getUser } from "./data";
 import { importKey, KEY_PREFIX, verifyKeySignature } from "./crypto";
 import { Invitation, ShareInstance, User } from "~types/server";
-
-const integrationRouter = Router<IRequest, [Env]>();
 
 const verifyBearerToken = async (request: IRequest, env: Env) => {
   const sku = request.params.sku;
@@ -82,6 +80,10 @@ const verifyBearerToken = async (request: IRequest, env: Env) => {
   request.instance = instance;
 };
 
+const integrationRouter = Router<IRequest, [Env]>({
+  before: [verifyBearerToken],
+});
+
 type VerifiedRequest = IRequest & {
   user: User;
   invitation: Invitation;
@@ -90,7 +92,6 @@ type VerifiedRequest = IRequest & {
 
 // Integration API (just requires bearer token)
 integrationRouter
-  .all("/api/integration/v1/:sku/*", verifyBearerToken)
   .get("/api/integration/v1/:sku/verify", async () => {
     return response({ success: true, data: "Valid Bearer Token" });
   })

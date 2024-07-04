@@ -1,5 +1,5 @@
-import { Router } from "itty-router";
-import { corsHeaders, response } from "./utils";
+import { AutoRouter, createResponse } from "itty-router";
+import { response } from "./utils";
 import type {
   ShareUser,
   Incident,
@@ -40,7 +40,7 @@ export function matchToString(match: IncidentMatch) {
 }
 
 export class EventIncidents implements DurableObject {
-  router = Router();
+  router = AutoRouter();
   clients: SessionClient[] = [];
   state: DurableObjectState;
 
@@ -286,6 +286,8 @@ export class EventIncidents implements DurableObject {
     });
   }
 
+  csv = createResponse("text/csv");
+
   async handleCSV() {
     const incidents = await this.getAllIncidents();
 
@@ -313,8 +315,7 @@ export class EventIncidents implements DurableObject {
       })
       .join("\n");
 
-    const response = new Response(output, { headers: corsHeaders });
-    return response;
+    return this.csv(output);
   }
 
   async handleJSON() {
@@ -499,7 +500,6 @@ export class EventIncidents implements DurableObject {
       return new Response(null, {
         status: 101,
         webSocket: pair[0],
-        headers: corsHeaders,
       });
     }
   }
@@ -623,7 +623,7 @@ export class EventIncidents implements DurableObject {
       }
     });
 
-    const activeUsers = await this.getActiveUsers();
+    const activeUsers = this.getActiveUsers();
     const invitations = await this.getInvitationList();
 
     clientLefts.forEach((client) => {

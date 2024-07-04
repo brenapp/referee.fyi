@@ -1,13 +1,5 @@
-import {
-  AutoRouter,
-  IRequest,
-  Router,
-  cors,
-  error,
-  json,
-  withParams,
-} from "itty-router";
-import { response } from "./utils";
+import { AutoRouter, IRequest } from "itty-router";
+import { corsify, preflight, response } from "./utils";
 
 import type { Invitation, ShareInstance, User } from "~types/server";
 import {
@@ -40,8 +32,6 @@ import {
 } from "./types";
 import { importKey, KEY_PREFIX, verifyKeySignature } from "./crypto";
 import { integrationRouter } from "./integration";
-
-export const { preflight, corsify } = cors();
 
 const verifySignature = async (request: IRequest & Request) => {
   const now = new Date();
@@ -186,11 +176,8 @@ const router = AutoRouter<IRequest, [Env]>({
 });
 
 router
-  .all("*", preflight)
-  .all("*", withParams)
-
   // Integration API
-  .all("/api/integration/v1/*", integrationRouter.handle)
+  .all("/api/integration/v1/*", integrationRouter.fetch)
 
   // Read Write API
   .all("*", verifySignature)

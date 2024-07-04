@@ -15,6 +15,7 @@ import {
 } from "~types/api";
 import {
   deleteInvitation,
+  getInstance,
   getInvitation,
   getRequestCodeUserKey,
   getUser,
@@ -23,6 +24,7 @@ import {
   setRequestCode,
   setUser,
 } from "./data";
+``;
 import {
   AuthenticatedRequest,
   Env,
@@ -30,7 +32,7 @@ import {
   SignedRequest,
 } from "./types";
 import { integrationRouter } from "./integration";
-import { verifySignature, verifyUser, verifyInvitation } from "./verify";
+import { importKey, KEY_PREFIX, verifyKeySignature } from "./crypto";
 
 const verifySignature = async (request: IRequest & Request) => {
   const now = new Date();

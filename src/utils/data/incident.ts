@@ -92,19 +92,19 @@ export async function getManyIncidents(
 }
 
 export type IncidentIndices = {
-  event: string[];
-  team: string[];
+  event: Set<string>;
+  team: Set<string>;
 };
 
 export async function getIncidentIndices(
   incident: Incident
 ): Promise<IncidentIndices> {
-  const [event, team] = await getMany<string[] | undefined>([
+  const [event, team] = await getMany<Set<string> | undefined>([
     `event_${incident.event}_idx`,
     `team_${incident.team}_idx`,
   ]);
 
-  return { event: event ?? [], team: team ?? [] };
+  return { event: event ?? new Set(), team: team ?? new Set() };
 }
 
 export async function setIncidentIndices(
@@ -120,12 +120,12 @@ export async function setIncidentIndices(
 export async function getDeletedIncidentIndices(
   incident: Incident
 ): Promise<IncidentIndices> {
-  const [event, team] = await getMany<string[] | undefined>([
+  const [event, team] = await getMany<Set<string> | undefined>([
     `deleted_event_${incident.event}_idx`,
     `deleted_team_${incident.team}_idx`,
   ]);
 
-  return { event: event ?? [], team: team ?? [] };
+  return { event: event ?? new Set(), team: team ?? new Set() };
 }
 
 export async function setDeletedIncidentIndices(
@@ -143,13 +143,13 @@ export async function repairIndices(id: string, incident: Incident) {
 
   let dirty = false;
 
-  if (!event.includes(id)) {
-    event.push(id);
+  if (!event.has(id)) {
+    event.add(id);
     dirty = true;
   }
 
-  if (!team.includes(id)) {
-    team.push(id);
+  if (!team.has(id)) {
+    team.add(id);
     dirty = true;
   }
 
@@ -185,8 +185,8 @@ export async function newIncident(
   // Index Properly
   const { event, team } = await getIncidentIndices(incident);
 
-  event.push(id);
-  team.push(id);
+  event.add(id);
+  team.add(id);
 
   setIncidentIndices(incident, {
     event,
@@ -196,7 +196,8 @@ export async function newIncident(
   const all = (await get<string[]>("incidents")) ?? [];
   await set("incidents", [...all, id]);
 
-  if (updateRemote) {
+  const invitation = await getEventInvitation(incident.event);
+  if (updateRemote && invitation && invitation.accepted) {
     await addServerIncident({ ...incident, id });
   }
 
@@ -248,7 +249,8 @@ export async function editIncident(
   const updatedIncident = { ...current, ...incident, revision };
   await setIncident(id, updatedIncident);
 
-  if (updateRemote) {
+  const invitation = await getEventInvitation(current.event);
+  if (updateRemote && invitation && invitation.accepted) {
     await editServerIncident(updatedIncident);
   }
 }
@@ -265,16 +267,19 @@ export async function deleteIncident(
 
   const { team, event } = await getIncidentIndices(incident);
 
+  team.delete(id);
+  event.delete(id);
+
   await setIncidentIndices(incident, {
-    event: event.filter((i) => i !== id),
-    team: team.filter((i) => i !== id),
+    event,
+    team,
   });
 
   const { event: deletedEvent, team: deletedTeam } =
     await getDeletedIncidentIndices(incident);
 
-  deletedEvent.push(id);
-  deletedTeam.push(id);
+  deletedEvent.add(id);
+  deletedTeam.add(id);
 
   await setDeletedIncidentIndices(incident, {
     event: deletedEvent,

@@ -7,6 +7,7 @@ import {
   addServerIncident,
   deleteServerIncident,
   editServerIncident,
+  getEventInvitation,
   getSender,
 } from "./share";
 import {
@@ -280,7 +281,8 @@ export async function deleteIncident(
     team: deletedTeam,
   });
 
-  if (updateRemote) {
+  const invitation = await getEventInvitation(incident.event);
+  if (updateRemote && invitation && invitation.accepted) {
     await deleteServerIncident(id, incident.event);
   }
 }

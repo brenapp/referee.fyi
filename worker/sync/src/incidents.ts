@@ -124,14 +124,11 @@ export class EventIncidents extends DurableObject {
       const filtered = list.filter((value) => value !== id);
       await this.state.storage.put("incidents", filtered);
 
-      const deletedIncidents =
-        (await this.state.storage.get<string[]>("deleted_incidents")) ?? [];
+      const deletedIncidents = await this.getDeletedIncidents();
 
-      if (!deletedIncidents.includes(id)) {
-        await this.state.storage.put("deleted_incidents", [
-          ...deletedIncidents,
-          id,
-        ]);
+      if (!deletedIncidents.has(id)) {
+        deletedIncidents.add(id);
+        await this.state.storage.put("deleted_incidents", deletedIncidents);
       }
 
       return list.length !== filtered.length;
@@ -143,7 +140,10 @@ export class EventIncidents extends DurableObject {
   }
 
   async getDeletedIncidents() {
-    return (await this.state.storage.get<string[]>("deleted_incidents")) ?? [];
+    const value = await this.state.storage.get<Set<string> | string[]>(
+      "deleted_incidents"
+    );
+    return new Set(value);
   }
 
   async getIncidentList() {
@@ -181,7 +181,7 @@ export class EventIncidents extends DurableObject {
     const incidents = await this.getAllIncidents();
     const deleted = await this.getDeletedIncidents();
 
-    return { sku: sku ?? "", incidents, deleted };
+    return { sku: sku ?? "", incidents, deleted: [...deleted.keys()] };
   }
 
   async createServerShareMessage(): Promise<WebSocketServerShareInfoMessage> {
@@ -352,7 +352,7 @@ export class EventIncidents extends DurableObject {
 
     const deleted = await this.getDeletedIncidents();
 
-    if (deleted.includes(incident.id)) {
+    if (deleted.has(incident.id)) {
       return response({
         success: false,
         reason: "bad_request",
@@ -381,7 +381,7 @@ export class EventIncidents extends DurableObject {
     }
 
     const deletedIncidents = await this.getDeletedIncidents();
-    if (deletedIncidents.includes(incident.id)) {
+    if (deletedIncidents.has(incident.id)) {
       return response({
         success: false,
         reason: "bad_request",

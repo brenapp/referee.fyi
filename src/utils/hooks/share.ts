@@ -6,6 +6,7 @@ import {
   acceptEventInvitation,
   createInstance,
   getEventInvitation,
+  getSender,
   getShareId,
   getShareName,
   registerUser,
@@ -39,6 +40,13 @@ export function useShareID() {
   return useQuery({
     queryKey: ["share_id"],
     queryFn: () => getShareId(),
+  });
+}
+
+export function useSender() {
+  return useQuery({
+    queryKey: ["sender"],
+    queryFn: () => getSender(),
   });
 }
 

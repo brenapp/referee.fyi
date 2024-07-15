@@ -29,6 +29,7 @@ import { TeamData } from "robotevents/out/endpoints/teams";
 import { MatchTime } from "~components/Match";
 import { TeamIsolationDialog } from "./team";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
+import { MatchScratchpad } from "~components/scratchpad/Scratchpad";
 
 const OUTCOME_PRIORITY: IncidentOutcome[] = [
   "Major",
@@ -172,6 +173,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
       {incidents.length > 0 ? (
         <>
           <TeamIsolationDialog
+            key={team?.number}
             team={team?.number}
             open={isolationOpen}
             setOpen={setIsolationOpen}
@@ -315,11 +317,11 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
               )}
             />
           </nav>
-          {match ? (
+          {match && incidentsByTeam ? (
             <div className="mt-4 mx-2">
               <MatchContext match={match} allianceClassName="w-full" />
               <section className="mt-4">
-                {incidentsByTeam?.map(({ team: number, incidents }) => (
+                {incidentsByTeam.map(({ team: number, incidents }) => (
                   <TeamSummary
                     key={number}
                     incidents={incidents}
@@ -328,6 +330,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                   />
                 ))}
               </section>
+              <MatchScratchpad match={match} />
             </div>
           ) : null}
         </DialogBody>

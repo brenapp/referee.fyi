@@ -15,9 +15,10 @@ import {
   IncidentMatch,
   IncidentMatchSkills,
   IncidentOutcome,
-  Revision,
   Incident as ServerIncident,
+  UnchangeableProperties,
 } from "~share/api";
+import { Change } from "~share/revision";
 
 export type Incident = Omit<ServerIncident, "id">;
 export type IncidentWithID = ServerIncident;
@@ -216,7 +217,7 @@ export async function editIncident(
   }
 
   // Annoying type coercion to support the strongly typed revision array
-  const changes: Revision[] = [];
+  const changes: Change<Incident, UnchangeableProperties>[] = [];
   for (const [key, currentValue] of Object.entries(current)) {
     if (key === "revision" || key === "team" || key === "event") continue;
 
@@ -227,7 +228,7 @@ export async function editIncident(
         property: key,
         old: currentValue,
         new: newValue,
-      } as Revision);
+      } as Change<Incident, UnchangeableProperties>);
     }
   }
 
@@ -293,9 +294,9 @@ export async function deleteIncident(
 }
 
 export async function getAllIncidents(): Promise<IncidentWithID[]> {
-  const ids = await get<string[]>(`incidents`);
+  const ids = await get<Set<string>>(`incidents`);
   if (!ids) return [];
-  const incidents = await getManyIncidents(ids);
+  const incidents = await getManyIncidents([...ids]);
 
   return incidents.filter((i) => !!i) as IncidentWithID[];
 }
@@ -303,9 +304,9 @@ export async function getAllIncidents(): Promise<IncidentWithID[]> {
 export async function getIncidentsByEvent(
   event: string
 ): Promise<IncidentWithID[]> {
-  const ids = await get<string[]>(`event_${event}_idx`);
+  const ids = await get<Set<string>>(`event_${event}_idx`);
   if (!ids) return [];
-  const incidents = await getManyIncidents(ids);
+  const incidents = await getManyIncidents([...ids]);
 
   return incidents.filter((i) => !!i) as IncidentWithID[];
 }
@@ -313,9 +314,9 @@ export async function getIncidentsByEvent(
 export async function getIncidentsByTeam(
   team: string
 ): Promise<IncidentWithID[]> {
-  const ids = await get<string[]>(`team_${team}_idx`);
+  const ids = await get<Set<string>>(`team_${team}_idx`);
   if (!ids) return [];
-  const incidents = await getManyIncidents(ids);
+  const incidents = await getManyIncidents([...ids]);
 
   return incidents.filter((i) => !!i) as IncidentWithID[];
 }

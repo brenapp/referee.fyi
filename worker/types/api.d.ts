@@ -1,4 +1,5 @@
 import { EventIncidentsData, Incident, ShareUser } from "./EventIncidents";
+import { MatchScratchpad } from "./MatchScratchpad";
 import { Invitation, User } from "./server";
 
 export * from "./EventIncidents";
@@ -88,6 +89,12 @@ export type WebSocketRemoveIncidentMessage = {
   id: string;
 };
 
+export type WebSocketUpdateScratchpadMessage = {
+  type: "scratchpad_update";
+  id: string;
+  scratchpad: MatchScratchpad;
+};
+
 export type WebSocketBroadcastMessage = {
   type: "message";
   message: string;
@@ -97,6 +104,7 @@ export type WebSocketPeerMessage =
   | WebSocketAddIncidentMessage
   | WebSocketUpdateIncidentMessage
   | WebSocketRemoveIncidentMessage
+  | WebSocketUpdateScratchpadMessage
   | WebSocketBroadcastMessage;
 
 export type InvitationListItem = Pick<Invitation, "admin"> & {
@@ -108,6 +116,7 @@ export type WebSocketServerShareInfoMessage = {
   data: EventIncidentsData;
   activeUsers: ShareUser[];
   invitations: InvitationListItem[];
+  scratchpads: Record<string, MatchScratchpad>;
 };
 
 export type WebsocketServerUserAddMessage = {

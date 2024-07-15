@@ -1,22 +1,6 @@
-import { WebSocketSender } from "./api";
+import { WithRevision } from "./revision";
 
 export type UnchangeableProperties = "revision" | "event" | "team";
-
-type RevisionMap = {
-  [K in keyof Omit<Incident, UnchangeableProperties>]-?: {
-    property: K;
-    old: Incident[K];
-    new: Incident[K];
-  };
-};
-type Revision = RevisionMap[keyof RevisionMap];
-
-export type ChangeLog = {
-  user: WebSocketSender;
-  date: Date;
-  changes: Revision[];
-};
-
 export type IncidentOutcome = "Minor" | "Major" | "Disabled" | "General";
 
 export type IncidentMatchHeadToHead = {
@@ -34,26 +18,23 @@ export type IncidentMatchSkills = {
 
 export type IncidentMatch = IncidentMatchHeadToHead | IncidentMatchSkills;
 
-export type Incident = {
-  id: string;
+export type Incident = WithRevision<
+  {
+    id: string;
 
-  time: Date;
+    time: Date;
 
-  event: string; // SKU
+    event: string; // SKU
 
-  match?: IncidentMatch;
-  team: string; // team number
+    match?: IncidentMatch;
+    team: string; // team number
 
-  revision?: {
-    count: number;
-    user: WebSocketSender;
-    history: ChangeLog[];
-  };
-
-  outcome: IncidentOutcome;
-  rules: string[];
-  notes: string;
-};
+    outcome: IncidentOutcome;
+    rules: string[];
+    notes: string;
+  },
+  UnchangeableProperties
+>;
 
 type EditIncident = Omit<Incident, UnchangeableProperties>;
 

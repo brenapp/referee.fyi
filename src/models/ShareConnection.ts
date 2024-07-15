@@ -1,4 +1,5 @@
 import {
+  Incident,
   InvitationListItem,
   ShareUser,
   UserInvitation,
@@ -8,6 +9,8 @@ import {
 } from "~share/api";
 import { create } from "zustand";
 import {
+  addServerIncident,
+  deleteServerIncident,
   editServerIncident,
   getShareData,
   getShareId,
@@ -26,6 +29,7 @@ import {
 } from "~utils/data/incident";
 import { queryClient } from "~utils/data/query";
 import { toast } from "~components/Toast";
+import { MatchScratchpad } from "~share/MatchScratchpad";
 
 export enum ReadyState {
   Closed = WebSocket.CLOSED,
@@ -48,6 +52,10 @@ export type ShareConnectionActions = {
     data: WebSocketPayload<WebSocketMessage>
   ): Promise<void>;
   send(message: WebSocketPeerMessage): Promise<void>;
+  addIncident(incident: Incident): Promise<void>;
+  editIncident(incident: Incident): Promise<void>;
+  deleteIncident(id: string, sku: string): Promise<void>;
+  updateScratchpad(id: string, scratchpad: MatchScratchpad): Promise<void>;
   connect(invitation: UserInvitation): Promise<void>;
   disconnect(): Promise<void>;
   forceSync(): Promise<void>;
@@ -198,6 +206,37 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
       date: new Date().toISOString(),
     };
     get().websocket?.send(JSON.stringify(payload));
+  },
+
+  addIncident: async (incident: Incident) => {
+    const connected = get().readyState !== WebSocket.OPEN;
+    if (!connected) {
+      await addServerIncident(incident);
+    }
+
+    return get().send({ type: "add_incident", incident });
+  },
+
+  editIncident: async (incident: Incident) => {
+    const connected = get().readyState !== WebSocket.OPEN;
+    if (!connected) {
+      await editServerIncident(incident);
+    }
+
+    return get().send({ type: "update_incident", incident });
+  },
+
+  deleteIncident: async (id: string, sku: string) => {
+    const connected = get().readyState !== WebSocket.OPEN;
+    if (!connected) {
+      await deleteServerIncident(id, sku);
+    }
+
+    return get().send({ type: "remove_incident", id });
+  },
+
+  updateScratchpad: async (id: string, scratchpad: MatchScratchpad) => {
+    return get().send({ type: "scratchpad_update", id, scratchpad });
   },
 
   connect: async (invitation) => {

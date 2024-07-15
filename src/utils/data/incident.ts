@@ -3,13 +3,7 @@ import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { TeamData } from "robotevents/out/endpoints/teams";
-import {
-  addServerIncident,
-  deleteServerIncident,
-  editServerIncident,
-  getEventInvitation,
-  getSender,
-} from "./share";
+import { getEventInvitation, getSender } from "./share";
 import {
   EditIncident,
   IncidentMatch,
@@ -19,6 +13,7 @@ import {
   UnchangeableProperties,
 } from "~share/api";
 import { Change } from "~share/revision";
+import { useShareConnection } from "~models/ShareConnection";
 
 export type Incident = Omit<ServerIncident, "id">;
 export type IncidentWithID = ServerIncident;
@@ -199,7 +194,7 @@ export async function newIncident(
 
   const invitation = await getEventInvitation(incident.event);
   if (updateRemote && invitation && invitation.accepted) {
-    await addServerIncident({ ...incident, id });
+    useShareConnection.getState().addIncident({ id, ...incident });
   }
 
   return id;
@@ -252,7 +247,7 @@ export async function editIncident(
 
   const invitation = await getEventInvitation(current.event);
   if (updateRemote && invitation && invitation.accepted) {
-    await editServerIncident(updatedIncident);
+    useShareConnection.getState().editIncident(updatedIncident);
   }
 }
 
@@ -289,7 +284,7 @@ export async function deleteIncident(
 
   const invitation = await getEventInvitation(incident.event);
   if (updateRemote && invitation && invitation.accepted) {
-    await deleteServerIncident(id, incident.event);
+    useShareConnection.getState().deleteIncident(id, incident.event);
   }
 }
 

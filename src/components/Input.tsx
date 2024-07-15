@@ -4,15 +4,32 @@ import React, { useCallback, useMemo } from "react";
 import { IconButton } from "./Button";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
+export type CheckboxBinding = {
+  value: boolean;
+  onChange: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
 export type CheckboxProps = React.HTMLProps<HTMLInputElement> & {
   label: string;
   labelProps?: React.HTMLProps<HTMLLabelElement>;
+  bind?: CheckboxBinding;
 };
 export const Checkbox: React.FC<CheckboxProps> = ({
   label,
   labelProps,
+  bind,
   ...props
 }) => {
+  const bindProps: React.HTMLProps<HTMLInputElement> = bind
+    ? {
+        checked: bind.value,
+        onChange: (e) => {
+          bind.onChange(e.currentTarget.checked);
+          props.onChange?.(e);
+        },
+      }
+    : {};
+
   return (
     <label
       {...labelProps}
@@ -24,6 +41,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
     >
       <input
         {...props}
+        {...bindProps}
         type="checkbox"
         className={twMerge("accent-emerald-400", props.className)}
       />
@@ -32,16 +50,34 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   );
 };
 
-export type RadioProps = React.HTMLProps<HTMLInputElement> & {
-  label: string;
-  labelProps?: React.HTMLProps<HTMLLabelElement>;
+export type RadioBinding<T> = {
+  variant: T;
+  value: T;
+  onChange: React.Dispatch<React.SetStateAction<T>>;
 };
 
-export const Radio: React.FC<RadioProps> = ({
+export type RadioProps<T extends string | number | symbol> =
+  React.HTMLProps<HTMLInputElement> & {
+    label: string;
+    labelProps?: React.HTMLProps<HTMLLabelElement>;
+    bind?: RadioBinding<T>;
+  };
+
+export const Radio = <T extends string | number | symbol>({
   labelProps,
   label,
+  bind,
   ...props
-}) => {
+}: RadioProps<T>) => {
+  const bindProps: React.HTMLProps<HTMLInputElement> = bind
+    ? {
+        checked: bind.value === bind.variant,
+        onChange: (e) => {
+          bind.onChange(bind.variant);
+          props.onChange?.(e);
+        },
+      }
+    : {};
   return (
     <label
       {...labelProps}
@@ -53,6 +89,7 @@ export const Radio: React.FC<RadioProps> = ({
     >
       <input
         {...props}
+        {...bindProps}
         type="radio"
         className={twMerge("accent-emerald-400", props.className)}
       />
@@ -63,12 +100,27 @@ export const Radio: React.FC<RadioProps> = ({
 
 export type InputBaseProps = React.HTMLProps<HTMLInputElement>;
 
-export type InputProps = InputBaseProps;
+export type InputBiding = {
+  value: string;
+  onChange: React.Dispatch<React.SetStateAction<string>>;
+};
 
-export const Input: React.FC<InputProps> = (props) => {
+export type InputProps = InputBaseProps & { bind?: InputBiding };
+
+export const Input: React.FC<InputProps> = ({ bind, ...props }) => {
+  const bindProps: React.HTMLProps<HTMLInputElement> = bind
+    ? {
+        value: bind.value,
+        onChange: (e) => {
+          bind.onChange(bind.value);
+          props.onChange?.(e);
+        },
+      }
+    : {};
   return (
     <input
       {...props}
+      {...bindProps}
       className={twMerge(
         "rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2",
         "hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500",

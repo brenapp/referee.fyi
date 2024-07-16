@@ -1,4 +1,4 @@
-import { get, set } from "idb-keyval";
+import { get, set } from "~utils/data/keyval";
 
 export const PUBLIC_KEY = "public_key";
 export const PRIVATE_KEY = "private_key";

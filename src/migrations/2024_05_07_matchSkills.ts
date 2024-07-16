@@ -5,7 +5,7 @@ import {
   Incident,
   IncidentMatch,
 } from "~share/EventIncidents";
-import { setMany } from "idb-keyval";
+import { setMany } from "~utils/data/keyval";
 
 type OldIncident = {
   id: string;

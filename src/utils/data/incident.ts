@@ -1,4 +1,4 @@
-import { get, getMany, set, setMany } from "idb-keyval";
+import { get, getMany, set, setMany } from "~utils/data/keyval";
 import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
 import { MatchData } from "robotevents/out/endpoints/matches";

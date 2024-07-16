@@ -1,4 +1,4 @@
-import { getMany, keys } from "idb-keyval";
+import { getMany, keys } from "~utils/data/keyval";
 import { PRIVATE_KEY } from "./crypto";
 import { CACHE_PREFIX } from "./query";
 import { getShareSessionID } from "./share";

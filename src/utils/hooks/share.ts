@@ -1,4 +1,4 @@
-import { set } from "idb-keyval";
+import { set } from "~utils/data/keyval";
 import { useCallback, useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "~utils/data/query";

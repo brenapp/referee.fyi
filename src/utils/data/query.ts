@@ -3,7 +3,7 @@ import {
   PersistedQuery,
   experimental_createPersister,
 } from "@tanstack/react-query-persist-client";
-import { del, get, set } from "idb-keyval";
+import { del, get, set } from "~utils/data/keyval";
 
 // Cache buster key, used to forcibly invalidate queries
 export const CACHE_BUSTER = "v6";

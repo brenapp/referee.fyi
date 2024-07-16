@@ -1,6 +1,6 @@
 import { getAllIncidents } from "~utils/data/incident";
 import { queueMigration } from "./utils";
-import { getMany, setMany } from "idb-keyval";
+import { getMany, setMany } from "~utils/data/keyval";
 
 queueMigration({
   name: `2024_07_11_setIndices`,

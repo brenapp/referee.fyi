@@ -2,7 +2,7 @@
  * Stores recent events
  **/
 
-import { get, set } from "idb-keyval";
+import { get, set } from "~utils/data/keyval";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { EventData } from "robotevents/out/endpoints/events";
 import { Rule } from "./rules";

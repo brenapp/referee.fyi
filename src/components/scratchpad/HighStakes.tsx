@@ -1,7 +1,5 @@
-import { ClockIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { MatchData } from "robotevents/out/endpoints/matches";
-import { IconButton } from "~components/Button";
 import { Checkbox, Radio } from "~components/Input";
 import { HighStakesMatchScratchpad } from "~share/MatchScratchpad";
 import { setMatchScratchpad } from "~utils/data/scratchpad";

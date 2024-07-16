@@ -13,11 +13,18 @@ import { Change } from "~share/revision";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { WebSocketSender } from "~share/api";
 import { seasons } from "robotevents";
+import { useShareConnection } from "~models/ShareConnection";
+
+export function getScratchpadID(match: MatchData) {
+  return `scratchpad_${match.event.code}_${
+    match.division.id
+  }_${match.name.replace(/ /g, "")}`;
+}
 
 export async function getMatchScratchpad<T extends MatchScratchpad>(
   match: MatchData
 ): Promise<T | undefined> {
-  const id = `scratchpad_${match.event.code}_${match.division.id}_${match.name}`;
+  const id = getScratchpadID(match);
   const data = await get<T>(id);
   return data;
 }
@@ -26,7 +33,7 @@ export async function setMatchScratchpad(
   match: MatchData,
   scratchpad: MatchScratchpad
 ) {
-  const id = `scratchpad_${match.event.code}_${match.division.id}_${match.name}`;
+  const id = getScratchpadID(match);
   return set(id, scratchpad);
 }
 
@@ -74,11 +81,15 @@ export async function editScratchpad<T extends MatchScratchpad>(
     changes,
   });
 
-  await setMatchScratchpad(match, {
+  const value = {
     ...current,
     ...scratchpad,
     revision,
-  });
+  };
+
+  const id = getScratchpadID(match);
+  useShareConnection.getState().updateScratchpad(id, value);
+  await setMatchScratchpad(match, value);
 }
 
 export function getGameForSeason(seasonId: number): SupportedGame | null {

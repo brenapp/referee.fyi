@@ -172,7 +172,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
         );
 
         for (const incident of localOnly) {
-          await get().send({ type: "add_incident", incident });
+          await get().addIncident(incident);
         }
 
         break;
@@ -209,7 +209,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
   },
 
   addIncident: async (incident: Incident) => {
-    const connected = get().readyState !== WebSocket.OPEN;
+    const connected = get().readyState === WebSocket.OPEN;
     if (!connected) {
       await addServerIncident(incident);
     }
@@ -218,7 +218,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
   },
 
   editIncident: async (incident: Incident) => {
-    const connected = get().readyState !== WebSocket.OPEN;
+    const connected = get().readyState === WebSocket.OPEN;
     if (!connected) {
       await editServerIncident(incident);
     }
@@ -227,7 +227,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
   },
 
   deleteIncident: async (id: string, sku: string) => {
-    const connected = get().readyState !== WebSocket.OPEN;
+    const connected = get().readyState === WebSocket.OPEN;
     if (!connected) {
       await deleteServerIncident(id, sku);
     }

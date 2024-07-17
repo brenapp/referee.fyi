@@ -29,15 +29,15 @@ export function update<T>(
 
 export function updateMany<T>(
   keys: IDBValidKey[],
-  updater: (old: T | undefined, key: IDBValidKey) => T
+  updater: (entries: [IDBValidKey, T | undefined][]) => [IDBValidKey, T][]
 ) {
   return customStore("readwrite", async (store) => {
     const oldValues = await Promise.all(
       keys.map((key) => kv.promisifyRequest<T | undefined>(store.get(key)))
     );
-    oldValues.forEach((oldValue, i) =>
-      store.put(updater(oldValue, keys[i]), keys[i])
-    );
+
+    const values = updater(oldValues.map((value, i) => [keys[i], value]));
+    values.forEach((entry) => store.put(entry[1], entry[0]));
     return kv.promisifyRequest(store.transaction);
   });
 }

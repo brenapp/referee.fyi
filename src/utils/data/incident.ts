@@ -11,6 +11,7 @@ import {
   IncidentOutcome,
   Incident as ServerIncident,
   UnchangeableProperties,
+  WebSocketSender,
 } from "~share/api";
 import { Change } from "~share/revision";
 
@@ -48,6 +49,21 @@ export function packIncident(incident: RichIncident): Omit<Incident, "id"> {
     team: incident.team!.number,
     rules: incident.rules.map((rule) => rule.rule),
   };
+}
+
+export function userString(user?: WebSocketSender) {
+  if (!user) {
+    return null;
+  }
+
+  switch (user.type) {
+    case "server": {
+      return "Server";
+    }
+    case "client": {
+      return user.name;
+    }
+  }
 }
 
 export function generateIncidentId(): string {
@@ -125,14 +141,12 @@ export async function getIncidentsForTeam(team: string) {
  * @return Promise<void> that resolves after transaction completes
  */
 export async function bulkIndexInsert(indices: Record<string, Incident[]>) {
-  console.log("bulkIndexInsert", indices);
   await updateMany<Set<string>>(Object.keys(indices), (entries) =>
     entries.map(([key, current]) => {
       const add = new Set<string>(
         indices[key as keyof typeof indices].map((i) => i.id)
       );
       const value = current?.union(add) ?? add;
-      console.log("bulkIndexInsert", key, add, value);
       return [key, value];
     })
   );

@@ -10,32 +10,18 @@ import {
   TextArea,
 } from "~components/Input";
 import { toast } from "~components/Toast";
-import {
-  IncidentMatchSkills,
-  UnchangeableProperties,
-  WebSocketSender,
-} from "~share/api";
+import { IncidentMatchSkills, UnchangeableProperties } from "~share/api";
 import { Change } from "~share/revision";
-import { IncidentOutcome, Incident, matchToString } from "~utils/data/incident";
+import {
+  IncidentOutcome,
+  Incident,
+  matchToString,
+  userString,
+} from "~utils/data/incident";
 import { useDeleteIncident, useEditIncident } from "~utils/hooks/incident";
 import { useEventMatchesForTeam, useEventTeam } from "~utils/hooks/robotevents";
 import { Rule, useRulesForEvent } from "~utils/hooks/rules";
 import { useCurrentEvent } from "~utils/hooks/state";
-
-function userString(user?: WebSocketSender) {
-  if (!user) {
-    return null;
-  }
-
-  switch (user.type) {
-    case "server": {
-      return "Server";
-    }
-    case "client": {
-      return user.name;
-    }
-  }
-}
 
 function timeAgo(input: Date) {
   const date = new Date(input);

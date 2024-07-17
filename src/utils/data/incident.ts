@@ -115,6 +115,40 @@ export async function setIncidentIndices(
   ]);
 }
 
+/**
+ * Inserts values into many indices in a single operation
+ * @param indices Record<Index Name, IDs to insert into that index>
+ * @return Promise<void> that resolves after transaction completes
+ */
+export async function bulkIndexInsert(indices: Record<string, Incident[]>) {
+  await updateMany<Set<string>>(Object.keys(indices), (entries) =>
+    entries.map(([key, current]) => {
+      const add = new Set<string>(
+        indices[key as keyof typeof indices].map((i) => i.id)
+      );
+      const value = current?.union(add) ?? add;
+      return [key, value];
+    })
+  );
+}
+
+/**
+ * Removes values from many indices in a single operation
+ * @param indices Record<Index Name, IDs to remove from that Index>
+ * @return Promise<void> that resolves after transaction completes
+ */
+export async function bulkIndexRemove(indices: Record<string, Incident[]>) {
+  await updateMany<Set<string>>(Object.keys(indices), (entries) =>
+    entries.map(([key, current]) => {
+      const remove = new Set<string>(
+        indices[key as keyof typeof indices].map((i) => i.id)
+      );
+      const value = current?.difference(remove) ?? new Set();
+      return [key, value];
+    })
+  );
+}
+
 export type UpdateIncidentIndices = {
   [I in keyof IncidentIndices]: (
     old: IncidentIndices[I] | undefined
@@ -246,6 +280,11 @@ export async function newIncident(
 
 export async function newManyIncidents(incidents: Incident[]) {
   await setManyIncidents(incidents);
+
+  const eventIndices = Object.groupBy(incidents, (i) => `event_${i.event}_idx`);
+  const teamIndices = Object.groupBy(incidents, (i) => `team_${i.team}_idx`);
+
+  await bulkIndexInsert({ ...eventIndices, ...teamIndices, incidents });
 }
 
 export async function editIncident(
@@ -345,20 +384,7 @@ export async function deleteManyIncidents(ids: string[]) {
   const eventIndices = Object.groupBy(incidents, (i) => `event_${i.event}_idx`);
   const teamIndices = Object.groupBy(incidents, (i) => `team_${i.team}_idx`);
 
-  const indices: Record<string, Incident[]> = {
-    ...eventIndices,
-    ...teamIndices,
-  };
-
-  await updateMany<Set<string>>(Object.keys(indices), (entries) =>
-    entries.map(([key, current]) => {
-      const remove = new Set(
-        indices[key as keyof typeof indices].map((v) => v.id)
-      );
-      const value = current?.difference(remove) ?? new Set();
-      return [key, value];
-    })
-  );
+  await bulkIndexRemove({ ...eventIndices, ...teamIndices });
 
   const deletedEventIndices = Object.groupBy(
     incidents,
@@ -369,18 +395,7 @@ export async function deleteManyIncidents(ids: string[]) {
     (i) => `deleted_team_${i.team}_idx`
   );
 
-  const deletedIndices: Record<string, Incident[]> = {
-    ...deletedEventIndices,
-    ...deletedTeamIndices,
-  };
-  await updateMany<Set<string>>(Object.keys(deletedIndices), (entries) =>
-    entries.map(([key, value]) => {
-      const add = new Set<string>(
-        deletedIndices[key as keyof typeof deletedIndices].map((v) => v.id)
-      );
-      return [key, value?.union(add) ?? add];
-    })
-  );
+  await bulkIndexInsert({ ...deletedEventIndices, ...deletedTeamIndices });
 }
 
 export async function getAllIncidents(): Promise<Incident[]> {

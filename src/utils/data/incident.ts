@@ -1,11 +1,4 @@
-import {
-  get,
-  getMany,
-  set,
-  setMany,
-  update,
-  updateMany,
-} from "~utils/data/keyval";
+import { get, getMany, set, setMany, updateMany } from "~utils/data/keyval";
 import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
 import { MatchData } from "robotevents/out/endpoints/matches";
@@ -115,6 +108,18 @@ export async function setIncidentIndices(
   ]);
 }
 
+export async function getIncidentsForEvent(sku: string) {
+  return get<Set<string>>(`event_${sku}_idx`).then(
+    (idx) => idx ?? new Set<string>()
+  );
+}
+
+export async function getIncidentsForTeam(team: string) {
+  return get<Set<string>>(`team_${team}_idx`).then(
+    (idx) => idx ?? new Set<string>()
+  );
+}
+
 /**
  * Inserts values into many indices in a single operation
  * @param indices Record<Index Name, IDs to insert into that index>
@@ -149,25 +154,6 @@ export async function bulkIndexRemove(indices: Record<string, Incident[]>) {
   );
 }
 
-export type UpdateIncidentIndices = {
-  [I in keyof IncidentIndices]: (
-    old: IncidentIndices[I] | undefined
-  ) => IncidentIndices[I];
-};
-
-export async function updateIncidentIndices(
-  incident: Incident,
-  updater: UpdateIncidentIndices
-) {
-  return updateMany<IncidentIndices[keyof IncidentIndices]>(
-    [`event_${incident.event}_idx`, `team_${incident.team}_idx`],
-    ([event, team]) => [
-      [event[0], updater.event(event[1])],
-      [team[0], updater.team(team[1])],
-    ]
-  );
-}
-
 export async function getDeletedIncidentIndices(
   incident: Incident
 ): Promise<IncidentIndices> {
@@ -189,19 +175,15 @@ export async function setDeletedIncidentIndices(
   ]);
 }
 
-export async function updateDeletedIncidentIndices(
-  incident: Incident,
-  updater: UpdateIncidentIndices
-) {
-  return updateMany<IncidentIndices[keyof IncidentIndices]>(
-    [
-      `deleted_event_${incident.event}_idx`,
-      `deleted_team_${incident.team}_idx`,
-    ],
-    ([event, team]) => [
-      [event[0], updater.event(event[1])],
-      [team[0], updater.team(team[1])],
-    ]
+export async function getDeletedIncidentsForEvent(sku: string) {
+  return get<Set<string>>(`deleted_event_${sku}_idx`).then(
+    (idx) => idx ?? new Set<string>()
+  );
+}
+
+export async function getDeletedIncidentsForTeam(team: string) {
+  return get<Set<string>>(`deleted_team_${team}_idx`).then(
+    (idx) => idx ?? new Set<string>()
   );
 }
 
@@ -253,27 +235,17 @@ export async function setManyIncidents(incidents: Incident[]) {
 
 export async function newIncident(
   data: Omit<Incident, "id">,
-  updateRemote: boolean = true,
   id = generateIncidentId()
 ): Promise<string> {
   const incident = { ...data, id };
   await setIncident(id, incident);
 
   // Index Properly
-  await updateIncidentIndices(incident, {
-    event: (old) => old?.add(id) ?? new Set([id]),
-    team: (old) => old?.add(id) ?? new Set([id]),
+  await bulkIndexInsert({
+    [`event_${incident.event}_idx`]: [incident],
+    [`team_${incident.event}_idx`]: [incident],
+    ["incidents"]: [incident],
   });
-
-  await update<Set<string>>(
-    "incidents",
-    (old) => old?.add(id) ?? new Set([id])
-  );
-
-  const invitation = await getEventInvitation(incident.event);
-  if (updateRemote && invitation && invitation.accepted) {
-    useShareConnection.getState().addIncident(incident);
-  }
 
   return id;
 }
@@ -346,26 +318,21 @@ export async function deleteIncident(
   id: string,
   updateRemote: boolean = true
 ): Promise<void> {
+  console.log("deleteIncident", id);
   const incident = await getIncident(id);
 
   if (!incident) {
     return;
   }
 
-  await updateIncidentIndices(incident, {
-    event: (old) => {
-      old?.delete(id);
-      return old ?? new Set();
-    },
-    team: (old) => {
-      old?.delete(id);
-      return old ?? new Set();
-    },
+  await bulkIndexRemove({
+    [`event_${incident.event}_idx`]: [incident],
+    [`team_${incident.event}_idx`]: [incident],
   });
 
-  await updateDeletedIncidentIndices(incident, {
-    event: (old) => old?.add(id) ?? new Set([id]),
-    team: (old) => old?.add(id) ?? new Set([id]),
+  await bulkIndexInsert({
+    [`deleted_event_${incident.event}_idx`]: [incident],
+    [`deleted_team_${incident.event}_idx`]: [incident],
   });
 
   const invitation = await getEventInvitation(incident.event);

@@ -21,6 +21,7 @@ import { signWebSocketConnectionURL } from "~utils/data/crypto";
 import {
   deleteIncident,
   deleteManyIncidents,
+  getDeletedIncidentsForEvent,
   getIncidentsByEvent,
   getManyIncidents,
   hasIncident,
@@ -106,12 +107,12 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
   },
 
   handleWebsocketMessage: async (data: WebSocketPayload<WebSocketMessage>) => {
-    console.log("message", performance.now(), data);
+    const store = get();
     switch (data.type) {
       case "add_incident": {
         const has = await hasIncident(data.incident.id);
         if (!has) {
-          await newIncident(data.incident, false, data.incident.id);
+          await newIncident(data.incident, data.incident.id);
           queryClient.invalidateQueries({ queryKey: ["incidents"] });
         }
         break;
@@ -165,13 +166,22 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
         // Explicitly delete incidents marked as deleted
         await deleteManyIncidents(data.data.deleted);
 
+        const localDeletes = await getDeletedIncidentsForEvent(data.data.sku);
+        const localDeletedOnly = localDeletes.difference(
+          new Set(data.data.deleted)
+        );
+        await Promise.all(
+          [...localDeletedOnly].map((i) =>
+            store.deleteIncident(i, data.data.sku)
+          )
+        );
+
         // Send message to other clients for local-only incidents
         const eventIncidents = await getIncidentsByEvent(data.data.sku);
         const localOnly = eventIncidents.filter((local) =>
           data.data.incidents.every((remote) => local.id !== remote.id)
         );
 
-        const store = get();
         await Promise.all(
           localOnly.map((incident) => store.addIncident(incident))
         );

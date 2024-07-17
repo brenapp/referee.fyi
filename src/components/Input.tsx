@@ -34,7 +34,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
     <label
       {...labelProps}
       className={twMerge(
-        "flex mt-4 gap-2 bg-zinc-700 p-2 rounded-md",
+        "flex mt-4 gap-2 bg-zinc-700 p-2 rounded-md items-center",
         "has-[:checked]:bg-emerald-800",
         labelProps?.className
       )}
@@ -82,7 +82,7 @@ export const Radio = <T extends string | number | symbol>({
     <label
       {...labelProps}
       className={twMerge(
-        `bg-zinc-700 rounded-md p-2 flex gap-2 justify-center`,
+        `bg-zinc-700 rounded-md p-2 flex gap-2 items-center`,
         "has-[:checked]:bg-emerald-800",
         labelProps?.className
       )}

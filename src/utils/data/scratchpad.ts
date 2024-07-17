@@ -22,26 +22,24 @@ export function getScratchpadID(match: MatchData) {
 }
 
 export async function getMatchScratchpad<T extends MatchScratchpad>(
-  match: MatchData
+  id: string
 ): Promise<T | undefined> {
-  const id = getScratchpadID(match);
   const data = await get<T>(id);
   return data;
 }
 
 export async function setMatchScratchpad(
-  match: MatchData,
+  id: string,
   scratchpad: MatchScratchpad
 ) {
-  const id = getScratchpadID(match);
   return set(id, scratchpad);
 }
 
 export async function editScratchpad<T extends MatchScratchpad>(
-  match: MatchData,
+  id: string,
   scratchpad: EditScratchpad<T>
 ) {
-  const current = await getMatchScratchpad(match);
+  const current = await getMatchScratchpad(id);
 
   if (!current) {
     return;
@@ -87,9 +85,8 @@ export async function editScratchpad<T extends MatchScratchpad>(
     revision,
   };
 
-  const id = getScratchpadID(match);
   useShareConnection.getState().updateScratchpad(id, value);
-  await setMatchScratchpad(match, value);
+  await setMatchScratchpad(id, value);
 }
 
 export function getGameForSeason(seasonId: number): SupportedGame | null {

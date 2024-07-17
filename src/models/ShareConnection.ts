@@ -35,6 +35,7 @@ import {
 import { queryClient } from "~utils/data/query";
 import { toast } from "~components/Toast";
 import { MatchScratchpad } from "~share/MatchScratchpad";
+import { setMatchScratchpad } from "~utils/data/scratchpad";
 
 export enum ReadyState {
   Closed = WebSocket.CLOSED,
@@ -188,7 +189,11 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
         queryClient.invalidateQueries({ queryKey: ["incidents"] });
         break;
       }
-
+      case "scratchpad_update": {
+        await setMatchScratchpad(data.id, data.scratchpad);
+        queryClient.invalidateQueries({ queryKey: ["scratchpad"] });
+        break;
+      }
       case "server_user_add": {
         toast({ type: "info", message: `${data.user.name} joined.` });
         set({ activeUsers: data.activeUsers, invitations: data.invitations });

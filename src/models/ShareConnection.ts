@@ -20,12 +20,15 @@ import {
 import { signWebSocketConnectionURL } from "~utils/data/crypto";
 import {
   deleteIncident,
-  getIncident,
+  deleteManyIncidents,
   getIncidentsByEvent,
+  getManyIncidents,
   hasIncident,
+  hasManyIncidents,
   newIncident,
-  repairIndices,
+  newManyIncidents,
   setIncident,
+  setManyIncidents,
 } from "~utils/data/incident";
 import { queryClient } from "~utils/data/query";
 import { toast } from "~components/Toast";
@@ -103,6 +106,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
   },
 
   handleWebsocketMessage: async (data: WebSocketPayload<WebSocketMessage>) => {
+    console.log("message", performance.now(), data);
     switch (data.type) {
       case "add_incident": {
         const has = await hasIncident(data.incident.id);
@@ -129,52 +133,50 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
       case "server_share_info": {
         set({ activeUsers: data.activeUsers, invitations: data.invitations });
 
-        for (const incident of data.data.incidents) {
-          const has = await hasIncident(incident.id);
+        const hasIncidents = await hasManyIncidents(
+          data.data.incidents.map((i) => i.id)
+        );
 
-          // Handle newly created incidents
-          if (!has) {
-            await newIncident(incident, false, incident.id);
+        // Incidents that have been created newly created on other devices
+        const remoteOnly = data.data.incidents.filter(
+          (_, i) => !hasIncidents[i]
+        );
+        await newManyIncidents(remoteOnly);
 
-            // Handle any incidents with different revisions while offline
-          } else {
-            await repairIndices(incident.id, incident);
+        // Handle incidents that may have changed
+        const localAndRemote = data.data.incidents.filter(
+          (_, i) => hasIncidents[i]
+        );
+        const current = await getManyIncidents(localAndRemote.map((i) => i.id));
 
-            const current = (await getIncident(incident.id))!;
+        const localMoreRecent = localAndRemote.filter(
+          (remote, i) =>
+            (remote.revision?.count ?? 0) < (current[i]?.revision?.count ?? 0)
+        );
+        const remoteMoreRecent = localAndRemote.filter(
+          (remote, i) =>
+            (remote.revision?.count ?? 0) > (current[i]?.revision?.count ?? 0)
+        );
+        await setManyIncidents(remoteMoreRecent);
+        await Promise.all(
+          localMoreRecent.map((incident) => editServerIncident(incident))
+        );
 
-            const localRevision = current.revision?.count ?? 0;
-            const remoteRevision = incident.revision?.count ?? 0;
+        // Explicitly delete incidents marked as deleted
+        await deleteManyIncidents(data.data.deleted);
 
-            if (localRevision > remoteRevision) {
-              const response = await editServerIncident(current);
-              if (response?.success) {
-                current.revision = response.data;
-              }
-              await setIncident(incident.id, current);
-              queryClient.invalidateQueries({ queryKey: ["incidents"] });
-            }
-
-            if (remoteRevision > localRevision) {
-              await setIncident(incident.id, incident);
-              queryClient.invalidateQueries({ queryKey: ["incidents"] });
-            }
-          }
-        }
-
-        // Explicitly delete incidents marked as deleted first.
-        for (const id of data.data.deleted) {
-          await deleteIncident(id, false);
-        }
-
-        const eventIncidents = await getIncidentsByEvent(get().invitation!.sku);
+        // Send message to other clients for local-only incidents
+        const eventIncidents = await getIncidentsByEvent(data.data.sku);
         const localOnly = eventIncidents.filter((local) =>
           data.data.incidents.every((remote) => local.id !== remote.id)
         );
 
-        for (const incident of localOnly) {
-          await get().addIncident(incident);
-        }
+        const store = get();
+        await Promise.all(
+          localOnly.map((incident) => store.addIncident(incident))
+        );
 
+        queryClient.invalidateQueries({ queryKey: ["incidents"] });
         break;
       }
 

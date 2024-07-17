@@ -16,7 +16,7 @@ import type {
   APIPutInvitationRequestResponseBody,
   APIGetInvitationRequestResponseBody,
 } from "~share/api";
-import { IncidentWithID } from "./incident";
+import { Incident } from "./incident";
 import { queryClient } from "./query";
 import { exportPublicKey, getKeyPair, getSignRequestHeaders } from "./crypto";
 
@@ -277,7 +277,7 @@ export async function getShareData(
 }
 
 export async function addServerIncident(
-  incident: IncidentWithID
+  incident: Incident
 ): Promise<ShareResponse<APIPutIncidentResponseBody>> {
   const url = new URL(`/api/${incident.event}/incident`, URL_BASE);
 
@@ -289,7 +289,7 @@ export async function addServerIncident(
 }
 
 export async function editServerIncident(
-  incident: IncidentWithID
+  incident: Incident
 ): Promise<ShareResponse<APIPatchIncidentResponseBody>> {
   const url = new URL(`/api/${incident.event}/incident`, URL_BASE);
 

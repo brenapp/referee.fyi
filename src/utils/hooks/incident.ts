@@ -1,6 +1,5 @@
 import {
   Incident,
-  IncidentWithID,
   deleteIncident,
   editIncident,
   getIncident,
@@ -32,7 +31,7 @@ export function useIncident(id: string | undefined | null) {
 }
 
 export function useEventIncidents(sku: string | undefined | null) {
-  return useQuery<IncidentWithID[]>({
+  return useQuery<Incident[]>({
     queryKey: ["incidents", "event", sku],
     queryFn: async () => {
       if (!sku) {
@@ -47,7 +46,7 @@ export function useEventIncidents(sku: string | undefined | null) {
 export function useNewIncident() {
   return useMutation({
     mutationKey: ["newIncident"],
-    mutationFn: async (incident: Incident) => {
+    mutationFn: async (incident: Omit<Incident, "id">) => {
       try {
         const id = await newIncident(incident);
         return id;
@@ -64,7 +63,7 @@ export function useNewIncident() {
 export function useEditIncident(updateRemote?: boolean) {
   return useMutation({
     mutationKey: ["editIncident"],
-    mutationFn: async (incident: Omit<IncidentWithID, "event" | "team">) => {
+    mutationFn: async (incident: Omit<Incident, "event" | "team">) => {
       try {
         await editIncident(incident.id, incident, updateRemote);
         return incident;
@@ -102,7 +101,7 @@ export function usePendingIncidents(
       mutationKey: ["newIncident"],
       status: "pending",
     },
-    select: (mutation) => mutation.state.variables as IncidentWithID,
+    select: (mutation) => mutation.state.variables as Incident,
   });
 
   const editIncident = useMutationState({
@@ -110,7 +109,7 @@ export function usePendingIncidents(
       mutationKey: ["editIncident"],
       status: "pending",
     },
-    select: (mutation) => mutation.state.variables as IncidentWithID,
+    select: (mutation) => mutation.state.variables as Incident,
   });
 
   const deleteIncident = useMutationState({
@@ -129,7 +128,7 @@ export function usePendingIncidents(
 }
 
 export function useTeamIncidents(team: string | undefined | null) {
-  return useQuery<IncidentWithID[]>({
+  return useQuery<Incident[]>({
     queryKey: ["incidents", "team", team],
     queryFn: () => {
       if (!team) {
@@ -145,7 +144,7 @@ export function useTeamIncidentsByEvent(
   team: string | undefined | null,
   sku: string | undefined | null
 ) {
-  return useQuery<IncidentWithID[]>({
+  return useQuery<Incident[]>({
     queryKey: ["incidents", "team", team, "event", sku],
     queryFn: async () => {
       if (!team || !sku) {
@@ -166,7 +165,7 @@ export function useTeamIncidentsByEvent(
 
 export type TeamIncidentsByMatch = {
   team: string;
-  incidents: IncidentWithID[];
+  incidents: Incident[];
 }[];
 
 export function useTeamIncidentsByMatch(

@@ -16,11 +16,7 @@ import {
   WebSocketSender,
 } from "~share/api";
 import { Change } from "~share/revision";
-import {
-  IncidentOutcome,
-  IncidentWithID,
-  matchToString,
-} from "~utils/data/incident";
+import { IncidentOutcome, Incident, matchToString } from "~utils/data/incident";
 import { useDeleteIncident, useEditIncident } from "~utils/hooks/incident";
 import { useEventMatchesForTeam, useEventTeam } from "~utils/hooks/robotevents";
 import { Rule, useRulesForEvent } from "~utils/hooks/rules";
@@ -67,7 +63,7 @@ function timeAgo(input: Date) {
 }
 
 export const RevisionEntry: React.FC<{
-  revision: Change<IncidentWithID, UnchangeableProperties>;
+  revision: Change<Incident, UnchangeableProperties>;
 }> = ({ revision }) => {
   const values: [ReactNode, ReactNode] = useMemo(() => {
     switch (revision.property) {
@@ -99,7 +95,7 @@ export const RevisionEntry: React.FC<{
 };
 
 export type RevisionListProps = {
-  incident: IncidentWithID;
+  incident: Incident;
 };
 
 export const RevisionList: React.FC<RevisionListProps> = ({ incident }) => {
@@ -144,7 +140,7 @@ export const RevisionList: React.FC<RevisionListProps> = ({ incident }) => {
 export type EditIncidentDialogProps = {
   open: boolean;
   setOpen: (value: boolean) => void;
-  incident: IncidentWithID;
+  incident: Incident;
 };
 
 export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({

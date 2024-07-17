@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { EventData } from "robotevents/out/endpoints/events";
 import { Button, IconButton, LinkButton } from "~components/Button";
-import { deleteIncident, getIncidentsByEvent } from "~utils/data/incident";
+import {
+  deleteManyIncidents,
+  editIncident,
+  getIncidentsByEvent,
+} from "~utils/data/incident";
 import {
   acceptEventInvitation,
   fetchInvitation,
@@ -322,9 +326,22 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
   const onConfirmDeleteData = useCallback(async () => {
     const incidents = await getIncidentsByEvent(event.sku);
     await removeInvitation(event.sku);
-    for (const incident of incidents) {
-      await deleteIncident(incident.id);
-    }
+
+    const toDelete = incidents.filter((_, i) => i % 2 === 0);
+    const toEdit = incidents.filter((_, i) => i % 2 === 1);
+
+    console.log("toEdit", toEdit);
+    console.log("toDelete", toDelete);
+
+    await deleteManyIncidents(toDelete.map((i) => i.id));
+
+    const edited = toEdit.map((i) => ({
+      ...i,
+      notes: i.notes + `\nETA: ${new Date().toString()}`,
+    }));
+
+    await Promise.all(edited.map((i) => editIncident(i.id, i, false)));
+
     setDeleteDataDialogOpen(false);
   }, [event.sku]);
 

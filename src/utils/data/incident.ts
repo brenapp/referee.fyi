@@ -22,8 +22,7 @@ import {
 import { Change } from "~share/revision";
 import { useShareConnection } from "~models/ShareConnection";
 
-export type Incident = Omit<ServerIncident, "id">;
-export type IncidentWithID = ServerIncident;
+export type Incident = ServerIncident;
 export type { IncidentOutcome };
 
 export type RichIncidentElements = {
@@ -40,10 +39,10 @@ export type RichIncidentElements = {
   notes: string;
 };
 
-export type RichIncident = Omit<Incident, keyof RichIncidentElements> &
+export type RichIncident = Omit<Incident, keyof RichIncidentElements | "id"> &
   RichIncidentElements;
 
-export function packIncident(incident: RichIncident): Incident {
+export function packIncident(incident: RichIncident): Omit<Incident, "id"> {
   return {
     ...incident,
     match: incident.match
@@ -71,9 +70,7 @@ export async function initIncidentStore() {
   }
 }
 
-export async function getIncident(
-  id: string
-): Promise<IncidentWithID | undefined> {
+export async function getIncident(id: string): Promise<Incident | undefined> {
   const value = await get<Incident>(id);
 
   if (!value) {
@@ -88,10 +85,8 @@ export async function getIncident(
 
 export async function getManyIncidents(
   ids: string[]
-): Promise<(IncidentWithID | undefined)[]> {
-  return (await getMany<Incident>(ids)).map((v, i) =>
-    v ? { id: ids[i], ...v } : undefined
-  );
+): Promise<(Incident | undefined)[]> {
+  return getMany<Incident>(ids);
 }
 
 export type IncidentIndices = {
@@ -100,7 +95,7 @@ export type IncidentIndices = {
 };
 
 export async function getIncidentIndices(
-  incident: IncidentWithID
+  incident: Incident
 ): Promise<IncidentIndices> {
   const [event, team] = await getMany<Set<string> | undefined>([
     `event_${incident.event}_idx`,
@@ -176,7 +171,7 @@ export async function updateDeletedIncidentIndices(
   );
 }
 
-export async function repairIndices(id: string, incident: IncidentWithID) {
+export async function repairIndices(id: string, incident: Incident) {
   const { event, team } = await getIncidentIndices(incident);
 
   let dirty = false;
@@ -218,17 +213,16 @@ export async function setIncident(
   return set(id, incident);
 }
 
-export async function setManyIncidents(
-  entries: [id: string, incident: Incident][]
-) {
-  return setMany(entries);
+export async function setManyIncidents(incidents: Incident[]) {
+  return setMany(incidents.map((incident) => [incident.id, incident]));
 }
 
 export async function newIncident(
-  incident: Incident,
+  data: Omit<Incident, "id">,
   updateRemote: boolean = true,
   id = generateIncidentId()
 ): Promise<string> {
+  const incident = { ...data, id };
   await setIncident(id, incident);
 
   // Index Properly
@@ -244,10 +238,14 @@ export async function newIncident(
 
   const invitation = await getEventInvitation(incident.event);
   if (updateRemote && invitation && invitation.accepted) {
-    useShareConnection.getState().addIncident({ id, ...incident });
+    useShareConnection.getState().addIncident(incident);
   }
 
   return id;
+}
+
+export async function newManyIncidents(incidents: Incident[]) {
+  await setManyIncidents(incidents);
 }
 
 export async function editIncident(
@@ -347,7 +345,7 @@ export async function deleteManyIncidents(ids: string[]) {
   const eventIndices = Object.groupBy(incidents, (i) => `event_${i.event}_idx`);
   const teamIndices = Object.groupBy(incidents, (i) => `team_${i.team}_idx`);
 
-  const indices: Record<string, IncidentWithID[]> = {
+  const indices: Record<string, Incident[]> = {
     ...eventIndices,
     ...teamIndices,
   };
@@ -371,7 +369,7 @@ export async function deleteManyIncidents(ids: string[]) {
     (i) => `deleted_team_${i.team}_idx`
   );
 
-  const deletedIndices: Record<string, IncidentWithID[]> = {
+  const deletedIndices: Record<string, Incident[]> = {
     ...deletedEventIndices,
     ...deletedTeamIndices,
   };
@@ -385,32 +383,28 @@ export async function deleteManyIncidents(ids: string[]) {
   );
 }
 
-export async function getAllIncidents(): Promise<IncidentWithID[]> {
+export async function getAllIncidents(): Promise<Incident[]> {
   const ids = await get<Set<string>>(`incidents`);
   if (!ids) return [];
   const incidents = await getManyIncidents([...ids]);
 
-  return incidents.filter((i) => !!i) as IncidentWithID[];
+  return incidents.filter((i) => !!i) as Incident[];
 }
 
-export async function getIncidentsByEvent(
-  event: string
-): Promise<IncidentWithID[]> {
+export async function getIncidentsByEvent(event: string): Promise<Incident[]> {
   const ids = await get<Set<string>>(`event_${event}_idx`);
   if (!ids) return [];
   const incidents = await getManyIncidents([...ids]);
 
-  return incidents.filter((i) => !!i) as IncidentWithID[];
+  return incidents.filter((i) => !!i) as Incident[];
 }
 
-export async function getIncidentsByTeam(
-  team: string
-): Promise<IncidentWithID[]> {
+export async function getIncidentsByTeam(team: string): Promise<Incident[]> {
   const ids = await get<Set<string>>(`team_${team}_idx`);
   if (!ids) return [];
   const incidents = await getManyIncidents([...ids]);
 
-  return incidents.filter((i) => !!i) as IncidentWithID[];
+  return incidents.filter((i) => !!i) as Incident[];
 }
 
 export function matchToString(match: IncidentMatch) {

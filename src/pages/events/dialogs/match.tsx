@@ -21,7 +21,10 @@ import {
   useTeamIncidentsByMatch,
 } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
-import { IncidentOutcome, IncidentWithID } from "~utils/data/incident";
+import {
+  IncidentOutcome,
+  Incident as IncidentData,
+} from "~utils/data/incident";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { MatchContext } from "~components/Context";
 import { Incident } from "~components/Incident";
@@ -41,7 +44,7 @@ const OUTCOME_PRIORITY: IncidentOutcome[] = [
 type TeamSummaryProps = {
   number: string;
   match: MatchData;
-  incidents: IncidentWithID[];
+  incidents: IncidentData[];
 };
 
 const TeamSummary: React.FC<TeamSummaryProps> = ({
@@ -74,7 +77,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
   );
 
   const rulesSummary = useMemo(() => {
-    const rules: Record<string, IncidentWithID[]> = {};
+    const rules: Record<string, IncidentData[]> = {};
 
     for (const incident of incidents) {
       if (incident.outcome === "General") {

@@ -22,6 +22,7 @@ import {
   deleteIncident,
   deleteManyIncidents,
   getDeletedIncidentsForEvent,
+  getIncident,
   getIncidentsByEvent,
   getManyIncidents,
   hasIncident,
@@ -58,7 +59,7 @@ export type ShareConnectionActions = {
   send(message: WebSocketPeerMessage): Promise<void>;
   addIncident(incident: Incident): Promise<void>;
   editIncident(incident: Incident): Promise<void>;
-  deleteIncident(id: string, sku: string): Promise<void>;
+  deleteIncident(id: string): Promise<void>;
   updateScratchpad(id: string, scratchpad: MatchScratchpad): Promise<void>;
   connect(invitation: UserInvitation): Promise<void>;
   disconnect(): Promise<void>;
@@ -123,7 +124,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
         break;
       }
       case "remove_incident": {
-        await deleteIncident(data.id, false);
+        await deleteIncident(data.id);
         queryClient.invalidateQueries({ queryKey: ["incidents"] });
         break;
       }
@@ -171,9 +172,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
           new Set(data.data.deleted)
         );
         await Promise.all(
-          [...localDeletedOnly].map((i) =>
-            store.deleteIncident(i, data.data.sku)
-          )
+          [...localDeletedOnly].map((i) => store.deleteIncident(i))
         );
 
         // Send message to other clients for local-only incidents
@@ -224,6 +223,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
     const connected = get().readyState === WebSocket.OPEN;
     if (!connected) {
       await addServerIncident(incident);
+      return;
     }
 
     return get().send({ type: "add_incident", incident });
@@ -233,15 +233,20 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
     const connected = get().readyState === WebSocket.OPEN;
     if (!connected) {
       await editServerIncident(incident);
+      return;
     }
 
     return get().send({ type: "update_incident", incident });
   },
 
-  deleteIncident: async (id: string, sku: string) => {
+  deleteIncident: async (id: string) => {
     const connected = get().readyState === WebSocket.OPEN;
     if (!connected) {
-      await deleteServerIncident(id, sku);
+      const incident = await getIncident(id);
+      if (incident) {
+        await deleteServerIncident(id, incident.event);
+      }
+      return;
     }
 
     return get().send({ type: "remove_incident", id });

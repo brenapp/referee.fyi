@@ -15,6 +15,7 @@ import {
 } from "@tanstack/react-query";
 import { Alliance, Match, MatchData } from "robotevents/out/endpoints/matches";
 import { toast } from "~components/Toast";
+import { useShareConnection } from "~models/ShareConnection";
 import { queryClient } from "~utils/data/query";
 
 export function useIncident(id: string | undefined | null) {
@@ -44,11 +45,13 @@ export function useEventIncidents(sku: string | undefined | null) {
 }
 
 export function useNewIncident() {
+  const connection = useShareConnection();
   return useMutation({
     mutationKey: ["newIncident"],
     mutationFn: async (incident: Omit<Incident, "id">) => {
       try {
         const id = await newIncident(incident);
+        connection.addIncident({ id, ...incident });
         return id;
       } catch (e) {
         toast({ type: "error", message: `${e}` });
@@ -60,12 +63,14 @@ export function useNewIncident() {
   });
 }
 
-export function useEditIncident(updateRemote?: boolean) {
+export function useEditIncident() {
+  const connection = useShareConnection();
   return useMutation({
     mutationKey: ["editIncident"],
     mutationFn: async (incident: Omit<Incident, "event" | "team">) => {
       try {
-        await editIncident(incident.id, incident, updateRemote);
+        const updated = await editIncident(incident.id, incident);
+        connection.editIncident(updated!);
         return incident;
       } catch (e) {
         toast({ type: "error", message: `${e}` });
@@ -77,12 +82,14 @@ export function useEditIncident(updateRemote?: boolean) {
   });
 }
 
-export function useDeleteIncident(updateRemote?: boolean) {
+export function useDeleteIncident() {
+  const connection = useShareConnection();
   return useMutation({
     mutationKey: ["deleteIncident"],
     mutationFn: async (id: string) => {
       try {
-        await deleteIncident(id, updateRemote);
+        await deleteIncident(id);
+        connection.deleteIncident(id);
       } catch (e) {
         toast({ type: "error", message: `${e}` });
       }

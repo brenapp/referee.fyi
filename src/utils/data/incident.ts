@@ -3,7 +3,7 @@ import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { TeamData } from "robotevents/out/endpoints/teams";
-import { getEventInvitation, getSender } from "./share";
+import { getSender } from "./share";
 import {
   EditIncident,
   IncidentMatch,
@@ -13,7 +13,6 @@ import {
   UnchangeableProperties,
 } from "~share/api";
 import { Change } from "~share/revision";
-import { useShareConnection } from "~models/ShareConnection";
 
 export type Incident = ServerIncident;
 export type { IncidentOutcome };
@@ -126,12 +125,14 @@ export async function getIncidentsForTeam(team: string) {
  * @return Promise<void> that resolves after transaction completes
  */
 export async function bulkIndexInsert(indices: Record<string, Incident[]>) {
+  console.log("bulkIndexInsert", indices);
   await updateMany<Set<string>>(Object.keys(indices), (entries) =>
     entries.map(([key, current]) => {
       const add = new Set<string>(
         indices[key as keyof typeof indices].map((i) => i.id)
       );
       const value = current?.union(add) ?? add;
+      console.log("bulkIndexInsert", key, add, value);
       return [key, value];
     })
   );
@@ -243,7 +244,7 @@ export async function newIncident(
   // Index Properly
   await bulkIndexInsert({
     [`event_${incident.event}_idx`]: [incident],
-    [`team_${incident.event}_idx`]: [incident],
+    [`team_${incident.team}_idx`]: [incident],
     ["incidents"]: [incident],
   });
 
@@ -259,11 +260,7 @@ export async function newManyIncidents(incidents: Incident[]) {
   await bulkIndexInsert({ ...eventIndices, ...teamIndices, incidents });
 }
 
-export async function editIncident(
-  id: string,
-  incident: EditIncident,
-  updateRemote: boolean = true
-) {
+export async function editIncident(id: string, incident: EditIncident) {
   const current = await getIncident(id);
 
   if (!current) {
@@ -303,22 +300,10 @@ export async function editIncident(
 
   const updatedIncident = { ...current, ...incident, revision };
   await setIncident(id, updatedIncident);
-
-  if (!updateRemote) {
-    return;
-  }
-
-  const invitation = await getEventInvitation(current.event);
-  if (invitation && invitation.accepted) {
-    useShareConnection.getState().editIncident(updatedIncident);
-  }
+  return updatedIncident;
 }
 
-export async function deleteIncident(
-  id: string,
-  updateRemote: boolean = true
-): Promise<void> {
-  console.log("deleteIncident", id);
+export async function deleteIncident(id: string): Promise<void> {
   const incident = await getIncident(id);
 
   if (!incident) {
@@ -327,18 +312,13 @@ export async function deleteIncident(
 
   await bulkIndexRemove({
     [`event_${incident.event}_idx`]: [incident],
-    [`team_${incident.event}_idx`]: [incident],
+    [`team_${incident.team}_idx`]: [incident],
   });
 
   await bulkIndexInsert({
     [`deleted_event_${incident.event}_idx`]: [incident],
-    [`deleted_team_${incident.event}_idx`]: [incident],
+    [`deleted_team_${incident.team}_idx`]: [incident],
   });
-
-  const invitation = await getEventInvitation(incident.event);
-  if (updateRemote && invitation && invitation.accepted) {
-    useShareConnection.getState().deleteIncident(id, incident.event);
-  }
 }
 
 export async function deleteManyIncidents(ids: string[]) {

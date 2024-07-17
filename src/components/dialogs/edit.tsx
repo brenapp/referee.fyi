@@ -10,7 +10,12 @@ import {
   TextArea,
 } from "~components/Input";
 import { toast } from "~components/Toast";
-import { IncidentMatchSkills, Revision, WebSocketSender } from "~share/api";
+import {
+  IncidentMatchSkills,
+  UnchangeableProperties,
+  WebSocketSender,
+} from "~share/api";
+import { Change } from "~share/revision";
 import {
   IncidentOutcome,
   IncidentWithID,
@@ -61,9 +66,9 @@ function timeAgo(input: Date) {
   return formatter.format(-1, "seconds");
 }
 
-export const RevisionEntry: React.FC<{ revision: Revision }> = ({
-  revision,
-}) => {
+export const RevisionEntry: React.FC<{
+  revision: Change<IncidentWithID, UnchangeableProperties>;
+}> = ({ revision }) => {
   const values: [ReactNode, ReactNode] = useMemo(() => {
     switch (revision.property) {
       case "time": {

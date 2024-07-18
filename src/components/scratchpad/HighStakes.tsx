@@ -1,10 +1,18 @@
 import { CodeBracketSquareIcon, StarIcon } from "@heroicons/react/20/solid";
-import { useEffect, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+} from "react";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { Checkbox, Radio } from "~components/Input";
-import { HighStakesMatchScratchpad } from "~share/MatchScratchpad";
+import {
+  HighStakesMatchScratchpad,
+  MatchScratchpad,
+} from "~share/MatchScratchpad";
 import { userString } from "~utils/data/incident";
-import { getScratchpadID, setMatchScratchpad } from "~utils/data/scratchpad";
 import {
   useDefaultScratchpad,
   useMatchScratchpad,
@@ -13,6 +21,34 @@ import {
 } from "~utils/hooks/scratchpad";
 import { timeAgo } from "~utils/time";
 
+type ScratchpadState<T extends MatchScratchpad, K extends keyof T> = {
+  data: T | null | undefined;
+  key: K;
+  fallback: T[K];
+  mutateAsync: ReturnType<typeof useUpdateMatchScratchpad<T>>["mutateAsync"];
+};
+
+function useScratchpadState<T extends MatchScratchpad, K extends keyof T>({
+  data,
+  key,
+  fallback,
+  mutateAsync,
+}: ScratchpadState<T, K>): [T[K], Dispatch<SetStateAction<T[K]>>] {
+  const value = useMemo(() => data?.[key] ?? fallback, [data, fallback, key]);
+  const dispatch = useCallback(
+    (action: SetStateAction<T[K]>) => {
+      if (!data) return;
+      const newValue =
+        typeof action === "function"
+          ? (action as (prev: T[K]) => T[K])(value)
+          : action;
+      mutateAsync({ ...data, [key]: newValue });
+    },
+    [data, key, mutateAsync, value]
+  );
+  return [value, dispatch];
+}
+
 export type HighStakesScratchpadProps = {
   match: MatchData;
 };
@@ -20,52 +56,34 @@ export type HighStakesScratchpadProps = {
 export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
   match,
 }) => {
-  const { data: fallback } =
+  const { data, isSuccess } =
+    useMatchScratchpad<HighStakesMatchScratchpad>(match);
+  const { data: defaultScratchpad } =
     useDefaultScratchpad<HighStakesMatchScratchpad>(match);
-  const { data } = useMatchScratchpad<HighStakesMatchScratchpad>(match);
-  const { mutateAsync: updateScratchpad } =
+  const { mutateAsync } =
     useUpdateMatchScratchpad<HighStakesMatchScratchpad>(match);
 
+  useEffect(() => {
+    if (isSuccess && !data && defaultScratchpad) {
+      mutateAsync(defaultScratchpad);
+    }
+  }, [data, defaultScratchpad, isSuccess, mutateAsync]);
+
+  const [auto, setAuto] = useScratchpadState({
+    data,
+    key: "auto",
+    fallback: "none",
+    mutateAsync,
+  });
+
+  const [awp, setAWP] = useScratchpadState({
+    data,
+    key: "awp",
+    fallback: { red: false, blue: false },
+    mutateAsync,
+  });
+
   const changeLog = usePropertyLastChangeLogForScratchpad(data);
-
-  const [autoWinner, setAutoWinner] = useState(
-    data ? data.auto : fallback?.auto ?? "none"
-  );
-
-  const [redAWP, setRedAWP] = useState(
-    data ? data.awp.red : fallback?.awp.red ?? false
-  );
-  const [blueAWP, setBlueAWP] = useState(
-    data ? data.awp.blue : fallback?.awp.blue ?? false
-  );
-
-  // Initialize scratchpad
-  useEffect(() => {
-    if (!data && fallback) {
-      const id = getScratchpadID(match);
-      setMatchScratchpad(id, fallback);
-    }
-  }, [data, fallback, match]);
-
-  // Send out notifications when we change
-  useEffect(() => {
-    updateScratchpad({
-      auto: autoWinner,
-      awp: { red: redAWP, blue: blueAWP },
-      notes: "",
-    });
-  }, [redAWP, blueAWP, autoWinner, updateScratchpad]);
-
-  // Update local variables when we get an update
-  useEffect(() => {
-    if (!data) {
-      return;
-    }
-
-    setAutoWinner(data.auto);
-    setRedAWP(data.awp.red);
-    setBlueAWP(data.awp.blue);
-  }, [data]);
 
   return (
     <section>
@@ -87,8 +105,8 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
             name="autoWinner"
             label="Red"
             bind={{
-              value: autoWinner,
-              onChange: setAutoWinner,
+              value: auto,
+              onChange: setAuto,
               variant: "red",
             }}
             className="accent-red-400"
@@ -100,8 +118,8 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
             name="autoWinner"
             label="Blue"
             bind={{
-              value: autoWinner,
-              onChange: setAutoWinner,
+              value: auto,
+              onChange: setAuto,
               variant: "blue",
             }}
             className="accent-blue-400"
@@ -114,8 +132,8 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
             label="Tie"
             className="accent-purple-400"
             bind={{
-              value: autoWinner,
-              onChange: setAutoWinner,
+              value: auto,
+              onChange: setAuto,
               variant: "tie",
             }}
             labelProps={{
@@ -126,8 +144,8 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
             name="autoWinner"
             label="None"
             bind={{
-              value: autoWinner,
-              onChange: setAutoWinner,
+              value: auto,
+              onChange: setAuto,
               variant: "none",
             }}
             labelProps={{ className: "mt-0 flex-1 px-2" }}
@@ -148,7 +166,10 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
         <div className="mt-2 flex gap-2">
           <Checkbox
             label="Red"
-            bind={{ value: redAWP, onChange: setRedAWP }}
+            bind={{
+              value: awp.red,
+              onChange: (value) => setAWP((awp) => ({ ...awp, red: value })),
+            }}
             className="accent-red-400 mt-0"
             labelProps={{
               className: "has-[:checked]:bg-red-800 mt-0 flex-1 px-4",
@@ -156,7 +177,10 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
           />
           <Checkbox
             label="Blue"
-            bind={{ value: blueAWP, onChange: setBlueAWP }}
+            bind={{
+              value: awp.blue,
+              onChange: (value) => setAWP((awp) => ({ ...awp, blue: value })),
+            }}
             className="accent-blue-400 mt-0"
             labelProps={{
               className: "has-[:checked]:bg-blue-800 mt-0 flex-1 px-4",

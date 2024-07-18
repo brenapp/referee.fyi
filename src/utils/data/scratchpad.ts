@@ -21,27 +21,27 @@ export function getScratchpadID(match: MatchData) {
   }_${match.name.replace(/ /g, "")}`;
 }
 
-export async function getMatchScratchpad<T extends MatchScratchpad>(
+export async function getMatchScratchpad<T extends BaseMatchScratchpad>(
   id: string
 ): Promise<T | undefined> {
   const data = await get<T>(id);
   return data;
 }
 
-export async function getManyMatchScratchpads<T extends MatchScratchpad>(
+export async function getManyMatchScratchpads<T extends BaseMatchScratchpad>(
   ids: string[]
 ): Promise<Record<string, T>> {
   const values = await getMany<T>(ids);
   return Object.fromEntries(ids.map((id, i) => [id, values[i]!]));
 }
 
-export async function setMatchScratchpad(
+export async function setMatchScratchpad<T extends BaseMatchScratchpad>(
   id: string,
-  scratchpad: MatchScratchpad
+  scratchpad: T
 ) {
   await update<Set<string>>(
     `scratchpad_${scratchpad.event}_idx`,
-    (old) => old?.add(id) ?? new Set(id)
+    (old) => old?.add(id) ?? new Set([id])
   );
   return set(id, scratchpad);
 }
@@ -51,8 +51,8 @@ export async function getScratchpadIdsForEvent(sku: string) {
   return data ?? new Set();
 }
 
-export async function setManyMatchScratchpad(
-  entries: [id: string, scratchpad: MatchScratchpad][]
+export async function setManyMatchScratchpad<T extends BaseMatchScratchpad>(
+  entries: [id: string, scratchpad: T][]
 ) {
   return setMany(entries);
 }
@@ -61,7 +61,7 @@ export async function editScratchpad<T extends MatchScratchpad>(
   id: string,
   scratchpad: EditScratchpad<T>
 ) {
-  const current = await getMatchScratchpad(id);
+  const current = await getMatchScratchpad<T>(id);
 
   if (!current) {
     return;

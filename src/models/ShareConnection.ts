@@ -34,13 +34,14 @@ import {
 } from "~utils/data/incident";
 import { queryClient } from "~utils/data/query";
 import { toast } from "~components/Toast";
-import { MatchScratchpad } from "~share/MatchScratchpad";
+import { BaseMatchScratchpad, MatchScratchpad } from "~share/MatchScratchpad";
 import {
   getManyMatchScratchpads,
   getScratchpadIdsForEvent,
   setManyMatchScratchpad,
   setMatchScratchpad,
 } from "~utils/data/scratchpad";
+import { compareLocalAndRemote } from "~utils/data/revision";
 
 export enum ReadyState {
   Closed = WebSocket.CLOSED,
@@ -191,55 +192,37 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
           localOnly.map((incident) => store.addIncident(incident))
         );
 
-        // Scratchpad Updates
+        // Scratchpad Comparison
         const localScratchpadIds = await getScratchpadIdsForEvent(
           data.data.sku
         );
-        const localScratchpads = await getManyMatchScratchpads([
-          ...localScratchpadIds,
-        ]);
-        const remoteScratchpadIds = new Set(Object.keys(data.scratchpads));
-        const remoteScratchpads = data.scratchpads;
+        const localScratchpads =
+          await getManyMatchScratchpads<BaseMatchScratchpad>([
+            ...localScratchpadIds,
+          ]);
 
-        const localOnlyScratchpadSet =
-          localScratchpadIds.difference(remoteScratchpadIds);
-        const remoteOnlyScratchpadSet =
-          remoteScratchpadIds.difference(localScratchpadIds);
+        const scratchpadComparison = compareLocalAndRemote(
+          localScratchpads,
+          data.scratchpads as Record<string, BaseMatchScratchpad>
+        );
 
         await setManyMatchScratchpad(
-          [...remoteOnlyScratchpadSet].map((id) => [id, remoteScratchpads[id]])
-        );
-
-        const localOnlyScratchpadIds = [...localOnlyScratchpadSet];
-        await Promise.all(
-          localOnlyScratchpadIds.map((id, i) =>
-            store.updateScratchpad(id, localScratchpads[i])
-          )
-        );
-
-        // Compare to see if either see side has more recent revisions
-        const localAndRemoteScratchpadIds = [
-          ...remoteScratchpadIds.union(localScratchpadIds),
-        ];
-
-        const localScratchpadMoreRecent = localAndRemoteScratchpadIds.filter(
-          (id) =>
-            (remoteScratchpads[id].revision?.count ?? 0) <
-            (localScratchpads[id].revision?.count ?? 0)
-        );
-        await Promise.all(
-          localScratchpadMoreRecent.map((id) =>
-            store.updateScratchpad(id, localScratchpads[id])
-          )
-        );
-
-        const remoteScratchpadMoreRecent = localAndRemoteScratchpadIds.filter(
-          (id) =>
-            (remoteScratchpads[id].revision?.count ?? 0) >
-            (localScratchpads[id].revision?.count ?? 0)
+          Object.entries(scratchpadComparison.remoteOnly)
         );
         await setManyMatchScratchpad(
-          remoteScratchpadMoreRecent.map((id) => [id, remoteScratchpads[id]])
+          Object.entries(scratchpadComparison.remoteMoreRecent)
+        );
+        await Promise.all(
+          Object.entries(scratchpadComparison.localOnly).map(
+            ([id, scratchpad]) =>
+              store.updateScratchpad(id, scratchpad as MatchScratchpad)
+          )
+        );
+        await Promise.all(
+          Object.entries(scratchpadComparison.localMoreRecent).map(
+            ([id, scratchpad]) =>
+              store.updateScratchpad(id, scratchpad as MatchScratchpad)
+          )
         );
 
         queryClient.invalidateQueries({ queryKey: ["incidents"] });

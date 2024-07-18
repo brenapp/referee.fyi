@@ -93,7 +93,7 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
             }}
             className="accent-red-400"
             labelProps={{
-              className: "has-[:checked]:bg-red-800 mt-0 flex-1 px-4",
+              className: "has-[:checked]:bg-red-800 mt-0 flex-1 px-2",
             }}
           />
           <Radio
@@ -106,7 +106,7 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
             }}
             className="accent-blue-400"
             labelProps={{
-              className: "has-[:checked]:bg-blue-800 mt-0 flex-1 px-4",
+              className: "has-[:checked]:bg-blue-800 mt-0 flex-1 px-2",
             }}
           />
           <Radio
@@ -119,7 +119,7 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
               variant: "tie",
             }}
             labelProps={{
-              className: "has-[:checked]:bg-purple-800 mt-0 flex-1 px-4",
+              className: "has-[:checked]:bg-purple-800 mt-0 flex-1 px-2",
             }}
           />
           <Radio
@@ -130,7 +130,7 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
               onChange: setAutoWinner,
               variant: "none",
             }}
-            labelProps={{ className: "mt-0 flex-1 px-4" }}
+            labelProps={{ className: "mt-0 flex-1 px-2" }}
           />
         </fieldset>
       </section>

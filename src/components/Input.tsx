@@ -1,12 +1,12 @@
 import { twMerge } from "tailwind-merge";
 import { Game, Rule } from "~utils/hooks/rules";
-import React, { useCallback, useMemo } from "react";
+import React, { Dispatch, useCallback, useMemo } from "react";
 import { IconButton } from "./Button";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
 export type CheckboxBinding = {
   value: boolean;
-  onChange: React.Dispatch<React.SetStateAction<boolean>>;
+  onChange: Dispatch<boolean>;
 };
 
 export type CheckboxProps = React.HTMLProps<HTMLInputElement> & {
@@ -53,7 +53,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
 export type RadioBinding<T> = {
   variant: T;
   value: T;
-  onChange: React.Dispatch<React.SetStateAction<T>>;
+  onChange: Dispatch<T>;
 };
 
 export type RadioProps<T extends string | number | symbol> =
@@ -102,7 +102,7 @@ export type InputBaseProps = React.HTMLProps<HTMLInputElement>;
 
 export type InputBiding = {
   value: string;
-  onChange: React.Dispatch<React.SetStateAction<string>>;
+  onChange: Dispatch<string>;
 };
 
 export type InputProps = InputBaseProps & { bind?: InputBiding };

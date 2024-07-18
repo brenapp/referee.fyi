@@ -35,7 +35,12 @@ import {
 import { queryClient } from "~utils/data/query";
 import { toast } from "~components/Toast";
 import { MatchScratchpad } from "~share/MatchScratchpad";
-import { setMatchScratchpad } from "~utils/data/scratchpad";
+import {
+  getManyMatchScratchpads,
+  getScratchpadIdsForEvent,
+  setManyMatchScratchpad,
+  setMatchScratchpad,
+} from "~utils/data/scratchpad";
 
 export enum ReadyState {
   Closed = WebSocket.CLOSED,
@@ -186,7 +191,59 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
           localOnly.map((incident) => store.addIncident(incident))
         );
 
+        // Scratchpad Updates
+        const localScratchpadIds = await getScratchpadIdsForEvent(
+          data.data.sku
+        );
+        const localScratchpads = await getManyMatchScratchpads([
+          ...localScratchpadIds,
+        ]);
+        const remoteScratchpadIds = new Set(Object.keys(data.scratchpads));
+        const remoteScratchpads = data.scratchpads;
+
+        const localOnlyScratchpadSet =
+          localScratchpadIds.difference(remoteScratchpadIds);
+        const remoteOnlyScratchpadSet =
+          remoteScratchpadIds.difference(localScratchpadIds);
+
+        await setManyMatchScratchpad(
+          [...remoteOnlyScratchpadSet].map((id) => [id, remoteScratchpads[id]])
+        );
+
+        const localOnlyScratchpadIds = [...localOnlyScratchpadSet];
+        await Promise.all(
+          localOnlyScratchpadIds.map((id, i) =>
+            store.updateScratchpad(id, localScratchpads[i])
+          )
+        );
+
+        // Compare to see if either see side has more recent revisions
+        const localAndRemoteScratchpadIds = [
+          ...remoteScratchpadIds.union(localScratchpadIds),
+        ];
+
+        const localScratchpadMoreRecent = localAndRemoteScratchpadIds.filter(
+          (id) =>
+            (remoteScratchpads[id].revision?.count ?? 0) <
+            (localScratchpads[id].revision?.count ?? 0)
+        );
+        await Promise.all(
+          localScratchpadMoreRecent.map((id) =>
+            store.updateScratchpad(id, localScratchpads[id])
+          )
+        );
+
+        const remoteScratchpadMoreRecent = localAndRemoteScratchpadIds.filter(
+          (id) =>
+            (remoteScratchpads[id].revision?.count ?? 0) >
+            (localScratchpads[id].revision?.count ?? 0)
+        );
+        await setManyMatchScratchpad(
+          remoteScratchpadMoreRecent.map((id) => [id, remoteScratchpads[id]])
+        );
+
         queryClient.invalidateQueries({ queryKey: ["incidents"] });
+        queryClient.invalidateQueries({ queryKey: ["scratchpad"] });
         break;
       }
       case "scratchpad_update": {

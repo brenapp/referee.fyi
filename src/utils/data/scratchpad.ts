@@ -1,4 +1,4 @@
-import { get, set } from "~utils/data/keyval";
+import { get, getMany, set, setMany, update } from "~utils/data/keyval";
 import {
   BaseMatchScratchpad,
   EditScratchpad,
@@ -28,11 +28,33 @@ export async function getMatchScratchpad<T extends MatchScratchpad>(
   return data;
 }
 
+export async function getManyMatchScratchpads<T extends MatchScratchpad>(
+  ids: string[]
+): Promise<Record<string, T>> {
+  const values = await getMany<T>(ids);
+  return Object.fromEntries(ids.map((id, i) => [id, values[i]!]));
+}
+
 export async function setMatchScratchpad(
   id: string,
   scratchpad: MatchScratchpad
 ) {
+  await update<Set<string>>(
+    `scratchpad_${scratchpad.event}_idx`,
+    (old) => old?.add(id) ?? new Set(id)
+  );
   return set(id, scratchpad);
+}
+
+export async function getScratchpadIdsForEvent(sku: string) {
+  const data = await get<Set<string>>(`scratchpad_${sku}_idx`);
+  return data ?? new Set();
+}
+
+export async function setManyMatchScratchpad(
+  entries: [id: string, scratchpad: MatchScratchpad][]
+) {
+  return setMany(entries);
 }
 
 export async function editScratchpad<T extends MatchScratchpad>(

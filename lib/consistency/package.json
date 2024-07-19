@@ -1,0 +1,17 @@
+{
+  "name": "@referee-fyi/consistency",
+  "type": "module",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Strong eventual-consistency guarantees using CRDTs",
+  "exports": "./index.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vitest": "^2.0.3"
+  }
+}

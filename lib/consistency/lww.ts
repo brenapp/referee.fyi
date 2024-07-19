@@ -32,8 +32,8 @@ export type MergeOptions<
   T extends Record<string, unknown>,
   U extends KeyArray<T>,
 > = {
-  local: WithLWWConsistency<T, U>;
-  remote: WithLWWConsistency<T, U>;
+  local: WithLWWConsistency<T, U> | null | undefined;
+  remote: WithLWWConsistency<T, U> | null | undefined;
   ignore: KeyArray<T>;
 };
 
@@ -41,7 +41,7 @@ export type MergeResult<
   T extends Record<string, unknown>,
   U extends KeyArray<T>,
 > = {
-  resolved: WithLWWConsistency<T, U>;
+  resolved: WithLWWConsistency<T, U> | null | undefined;
   changed: KeysWithout<T, U>[];
 };
 
@@ -56,12 +56,30 @@ export type MergeResult<
 export function merge<
   T extends Record<string, unknown>,
   const U extends KeyArray<T>,
->({ local, remote, ignore }: MergeOptions<T, U>): MergeResult<T, U> {
+>(options: MergeOptions<T, U>): MergeResult<T, U> {
+  if (!options.local && options.remote) {
+    const changed = Object.keys(options.remote).filter(
+      (key) => key !== "consistency" && !options.ignore.includes(key)
+    ) as KeysWithout<T, U>[];
+    return { resolved: options.remote, changed };
+  }
+
+  if (!options.remote && options.local) {
+    return { resolved: options.local, changed: [] };
+  }
+
+  if (!options.remote && !options.local) {
+    return { resolved: options.local, changed: [] };
+  }
+
+  const local = options.local!;
+  const remote = options.remote!;
+
   const resolved = { ...local };
   const changed: KeysWithout<T, U>[] = [];
 
   for (const key of Object.keys(remote) as KeysWithout<T, U>[]) {
-    if (ignore.includes(key) || key === "consistency") {
+    if (options.ignore.includes(key) || key === "consistency") {
       continue;
     }
 

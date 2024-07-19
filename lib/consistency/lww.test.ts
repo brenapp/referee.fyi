@@ -123,3 +123,25 @@ test("lww is resolved on a key-by-key basis", () => {
   const opposite = lww.merge({ local: remote, remote: local, ignore });
   expect(opposite.resolved).toEqual(result.resolved);
 });
+
+test("handles null and undefined", () => {
+  const local = lww.init<BaseObject, typeof ignore>({
+    peer: "A",
+    value: { a: "Local Value", constant: "Constant" },
+    ignore,
+  });
+
+  const remote = null;
+
+  const result = lww.merge({ local, remote, ignore });
+  expect(result.resolved).toEqual(local);
+  expect(result.changed).toEqual([]);
+
+  const opposite = lww.merge({ local: null, remote: local, ignore });
+  expect(opposite.resolved).toEqual(local);
+  expect(opposite.changed).toEqual(["a"]);
+
+  const bothNull = lww.merge({ local: null, remote: null, ignore: [] });
+  expect(bothNull.resolved).toBeNull();
+  expect(bothNull.changed).toEqual([]);
+});

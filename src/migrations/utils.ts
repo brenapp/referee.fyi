@@ -1,4 +1,4 @@
-import { get, set } from "idb-keyval";
+import { get, set } from "~utils/data/keyval";
 
 export type Migration = {
   name: string;
@@ -36,18 +36,29 @@ export async function applyMigration(
   }
 
   const start = performance.now();
-  const output = await migration.apply(result);
-  const end = performance.now();
+  try {
+    const output = await migration.apply(result);
+    const end = performance.now();
 
-  const newResult: MigrationResult = {
-    ...output,
-    date: new Date(),
-    duration: end - start,
-  };
+    const newResult: MigrationResult = {
+      ...output,
+      date: new Date(),
+      duration: end - start,
+    };
 
-  await set(`migration_${migration.name}`, newResult);
+    await set(`migration_${migration.name}`, newResult);
 
-  return { ...newResult, preapplied: false };
+    return { ...newResult, preapplied: false };
+  } catch (e) {
+    const newResult: MigrationResult = {
+      date: new Date(),
+      duration: performance.now() - start,
+      success: false,
+      details: `${e}`,
+    };
+    await set(`migration_${migration.name}`, newResult);
+    return { ...newResult, preapplied: false };
+  }
 }
 
 export const MIGRATION_QUEUE: Migration[] = [];

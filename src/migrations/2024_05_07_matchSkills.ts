@@ -1,13 +1,11 @@
 import { getAllIncidents } from "~utils/data/incident";
 import { queueMigration } from "./utils";
 import {
-  ChangeLog,
   IncidentOutcome,
   Incident,
   IncidentMatch,
 } from "~share/EventIncidents";
-import { WebSocketSender } from "~share/api";
-import { setMany } from "idb-keyval";
+import { setMany } from "~utils/data/keyval";
 
 type OldIncident = {
   id: string;
@@ -23,11 +21,7 @@ type OldIncident = {
   };
   team?: string; // team number
 
-  revision?: {
-    count: number;
-    user: WebSocketSender;
-    history: ChangeLog[];
-  };
+  revision?: Incident["revision"];
 
   outcome: IncidentOutcome;
   rules: string[];

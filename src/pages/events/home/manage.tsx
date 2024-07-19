@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { EventData } from "robotevents/out/endpoints/events";
 import { Button, IconButton, LinkButton } from "~components/Button";
-import { deleteIncident, getIncidentsByEvent } from "~utils/data/incident";
+import { deleteManyIncidents, getIncidentsByEvent } from "~utils/data/incident";
 import {
   acceptEventInvitation,
   fetchInvitation,
@@ -322,14 +322,12 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
   const onConfirmDeleteData = useCallback(async () => {
     const incidents = await getIncidentsByEvent(event.sku);
     await removeInvitation(event.sku);
-    for (const incident of incidents) {
-      await deleteIncident(incident.id);
-    }
+    await deleteManyIncidents(incidents.map((i) => i.id));
     setDeleteDataDialogOpen(false);
   }, [event.sku]);
 
   return (
-    <section className="max-w-xl w-full mx-auto flex-1">
+    <section className="max-w-xl w-full mx-auto flex-1 mb-4">
       <JoinCodeDialog
         sku={event.sku}
         open={joinCodeDialogOpen}

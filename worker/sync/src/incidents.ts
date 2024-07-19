@@ -12,11 +12,12 @@ import type {
   EventIncidentsInitData,
   InvitationListItem,
   IncidentMatch,
-} from "../../types/api";
-import { ShareInstance, User } from "../../types/server";
+} from "~types/api";
+import { ShareInstance, User } from "~types/server";
 import { getUser } from "./data";
 import { Env, RequestHasInvitation } from "./types";
 import { DurableObject } from "cloudflare:workers";
+import { MatchScratchpad } from "~types/MatchScratchpad";
 
 export type SessionClient = {
   user: ShareUser;
@@ -89,6 +90,40 @@ export class EventIncidents extends DurableObject {
     return this.state.storage.get<string>("instance_secret");
   }
 
+  async getScratchpad(id: string) {
+    return this.state.storage.get<MatchScratchpad>(`scratchpad_${id}`);
+  }
+
+  async setScratchpad(id: string, scratchpad: MatchScratchpad) {
+    const list =
+      (await this.state.storage.get<Set<string>>(`scratchpads`)) ?? new Set();
+    list.add(id);
+    await this.state.storage.put(`scratchpads`, list);
+
+    return this.state.storage.put<MatchScratchpad>(
+      `scratchpad_${id}`,
+      scratchpad
+    );
+  }
+
+  async getAllScratchpads(): Promise<Record<string, MatchScratchpad>> {
+    const listSet =
+      (await this.state.storage.get<Set<string>>(`scratchpads`)) ?? new Set();
+
+    const list = [...listSet];
+
+    const bulkOps = this.groupIds(list, 128);
+    const result = await Promise.all(
+      bulkOps.map((ids) => this.state.storage.get<MatchScratchpad>(ids))
+    );
+
+    const scratchpads = Object.fromEntries(
+      result.flatMap((r) => [...r.entries()])
+    );
+
+    return scratchpads;
+  }
+
   async addIncident(incident: Incident) {
     await this.state.blockConcurrencyWhile(async () => {
       await this.state.storage.put(incident.id, incident);
@@ -124,14 +159,11 @@ export class EventIncidents extends DurableObject {
       const filtered = list.filter((value) => value !== id);
       await this.state.storage.put("incidents", filtered);
 
-      const deletedIncidents =
-        (await this.state.storage.get<string[]>("deleted_incidents")) ?? [];
+      const deletedIncidents = await this.getDeletedIncidents();
 
-      if (!deletedIncidents.includes(id)) {
-        await this.state.storage.put("deleted_incidents", [
-          ...deletedIncidents,
-          id,
-        ]);
+      if (!deletedIncidents.has(id)) {
+        deletedIncidents.add(id);
+        await this.state.storage.put("deleted_incidents", deletedIncidents);
       }
 
       return list.length !== filtered.length;
@@ -143,7 +175,10 @@ export class EventIncidents extends DurableObject {
   }
 
   async getDeletedIncidents() {
-    return (await this.state.storage.get<string[]>("deleted_incidents")) ?? [];
+    const value = await this.state.storage.get<Set<string> | string[]>(
+      "deleted_incidents"
+    );
+    return new Set(value);
   }
 
   async getIncidentList() {
@@ -181,18 +216,20 @@ export class EventIncidents extends DurableObject {
     const incidents = await this.getAllIncidents();
     const deleted = await this.getDeletedIncidents();
 
-    return { sku: sku ?? "", incidents, deleted };
+    return { sku: sku ?? "", incidents, deleted: [...deleted.keys()] };
   }
 
   async createServerShareMessage(): Promise<WebSocketServerShareInfoMessage> {
     const data = await this.getData();
-    const activeUsers = await this.getActiveUsers();
+    const activeUsers = this.getActiveUsers();
     const invitations = await this.getInvitationList();
+    const scratchpads = await this.getAllScratchpads();
     return {
       type: "server_share_info",
       activeUsers,
       invitations,
       data,
+      scratchpads,
     };
   }
 
@@ -352,7 +389,7 @@ export class EventIncidents extends DurableObject {
 
     const deleted = await this.getDeletedIncidents();
 
-    if (deleted.includes(incident.id)) {
+    if (deleted.has(incident.id)) {
       return response({
         success: false,
         reason: "bad_request",
@@ -381,7 +418,7 @@ export class EventIncidents extends DurableObject {
     }
 
     const deletedIncidents = await this.getDeletedIncidents();
-    if (deletedIncidents.includes(incident.id)) {
+    if (deletedIncidents.has(incident.id)) {
       return response({
         success: false,
         reason: "bad_request",
@@ -553,6 +590,18 @@ export class EventIncidents extends DurableObject {
             );
             break;
           }
+          case "scratchpad_update": {
+            await this.setScratchpad(data.id, data.scratchpad);
+            this.broadcast(
+              {
+                type: "scratchpad_update",
+                id: data.id,
+                scratchpad: data.scratchpad,
+              },
+              { type: "client", name: client.user.name, id: client.user.id }
+            );
+            break;
+          }
           case "message": {
             this.broadcast(
               { type: "message", message: data.message },
@@ -566,7 +615,7 @@ export class EventIncidents extends DurableObject {
       }
     });
 
-    const activeUsers = await this.getActiveUsers();
+    const activeUsers = this.getActiveUsers();
     const invitations = await this.getInvitationList();
 
     await this.broadcast(
@@ -578,6 +627,7 @@ export class EventIncidents extends DurableObject {
       type: "server_share_info",
       activeUsers: this.getActiveUsers(),
       data: await this.getData(),
+      scratchpads: await this.getAllScratchpads(),
       invitations,
     };
 

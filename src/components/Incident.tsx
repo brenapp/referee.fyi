@@ -1,7 +1,7 @@
 import { twMerge } from "tailwind-merge";
 import {
   IncidentOutcome,
-  IncidentWithID,
+  Incident as IncidentData,
   matchToString,
 } from "~utils/data/incident";
 import { IconButton } from "./Button";
@@ -17,7 +17,7 @@ const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
 };
 
 export type IncidentProps = {
-  incident: IncidentWithID;
+  incident: IncidentData;
   readonly?: boolean;
 } & React.HTMLProps<HTMLDivElement>;
 

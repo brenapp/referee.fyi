@@ -1,25 +1,21 @@
-import { get, getMany, set, setMany } from "idb-keyval";
+import { get, getMany, set, setMany, updateMany } from "~utils/data/keyval";
 import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { TeamData } from "robotevents/out/endpoints/teams";
-import {
-  addServerIncident,
-  deleteServerIncident,
-  editServerIncident,
-  getSender,
-} from "./share";
+import { getSender } from "./share";
 import {
   EditIncident,
   IncidentMatch,
   IncidentMatchSkills,
   IncidentOutcome,
-  Revision,
   Incident as ServerIncident,
+  UnchangeableProperties,
+  WebSocketSender,
 } from "~share/api";
+import { Change } from "~share/revision";
 
-export type Incident = Omit<ServerIncident, "id">;
-export type IncidentWithID = ServerIncident;
+export type Incident = ServerIncident;
 export type { IncidentOutcome };
 
 export type RichIncidentElements = {
@@ -36,10 +32,10 @@ export type RichIncidentElements = {
   notes: string;
 };
 
-export type RichIncident = Omit<Incident, keyof RichIncidentElements> &
+export type RichIncident = Omit<Incident, keyof RichIncidentElements | "id"> &
   RichIncidentElements;
 
-export function packIncident(incident: RichIncident): Incident {
+export function packIncident(incident: RichIncident): Omit<Incident, "id"> {
   return {
     ...incident,
     match: incident.match
@@ -55,21 +51,34 @@ export function packIncident(incident: RichIncident): Incident {
   };
 }
 
+export function userString(user?: WebSocketSender) {
+  if (!user) {
+    return null;
+  }
+
+  switch (user.type) {
+    case "server": {
+      return "Server";
+    }
+    case "client": {
+      return user.name;
+    }
+  }
+}
+
 export function generateIncidentId(): string {
   return `incident_${uuid()}`;
 }
 
 export async function initIncidentStore() {
   // All incidents
-  const incidents = await get<string[]>("incidents");
+  const incidents = await get<Set<string>>("incidents");
   if (!incidents) {
-    await set("incidents", []);
+    await set("incidents", new Set<string>());
   }
 }
 
-export async function getIncident(
-  id: string
-): Promise<IncidentWithID | undefined> {
+export async function getIncident(id: string): Promise<Incident | undefined> {
   const value = await get<Incident>(id);
 
   if (!value) {
@@ -84,26 +93,24 @@ export async function getIncident(
 
 export async function getManyIncidents(
   ids: string[]
-): Promise<(IncidentWithID | undefined)[]> {
-  return (await getMany<Incident>(ids)).map((v, i) =>
-    v ? { id: ids[i], ...v } : undefined
-  );
+): Promise<(Incident | undefined)[]> {
+  return getMany<Incident>(ids);
 }
 
 export type IncidentIndices = {
-  event: string[];
-  team: string[];
+  event: Set<string>;
+  team: Set<string>;
 };
 
 export async function getIncidentIndices(
   incident: Incident
 ): Promise<IncidentIndices> {
-  const [event, team] = await getMany<string[] | undefined>([
+  const [event, team] = await getMany<Set<string> | undefined>([
     `event_${incident.event}_idx`,
     `team_${incident.team}_idx`,
   ]);
 
-  return { event: event ?? [], team: team ?? [] };
+  return { event: event ?? new Set(), team: team ?? new Set() };
 }
 
 export async function setIncidentIndices(
@@ -116,15 +123,61 @@ export async function setIncidentIndices(
   ]);
 }
 
+export async function getIncidentsForEvent(sku: string) {
+  return get<Set<string>>(`event_${sku}_idx`).then(
+    (idx) => idx ?? new Set<string>()
+  );
+}
+
+export async function getIncidentsForTeam(team: string) {
+  return get<Set<string>>(`team_${team}_idx`).then(
+    (idx) => idx ?? new Set<string>()
+  );
+}
+
+/**
+ * Inserts values into many indices in a single operation
+ * @param indices Record<Index Name, IDs to insert into that index>
+ * @return Promise<void> that resolves after transaction completes
+ */
+export async function bulkIndexInsert(indices: Record<string, Incident[]>) {
+  await updateMany<Set<string>>(Object.keys(indices), (entries) =>
+    entries.map(([key, current]) => {
+      const add = new Set<string>(
+        indices[key as keyof typeof indices].map((i) => i.id)
+      );
+      const value = current?.union(add) ?? add;
+      return [key, value];
+    })
+  );
+}
+
+/**
+ * Removes values from many indices in a single operation
+ * @param indices Record<Index Name, IDs to remove from that Index>
+ * @return Promise<void> that resolves after transaction completes
+ */
+export async function bulkIndexRemove(indices: Record<string, Incident[]>) {
+  await updateMany<Set<string>>(Object.keys(indices), (entries) =>
+    entries.map(([key, current]) => {
+      const remove = new Set<string>(
+        indices[key as keyof typeof indices].map((i) => i.id)
+      );
+      const value = current?.difference(remove) ?? new Set();
+      return [key, value];
+    })
+  );
+}
+
 export async function getDeletedIncidentIndices(
   incident: Incident
 ): Promise<IncidentIndices> {
-  const [event, team] = await getMany<string[] | undefined>([
+  const [event, team] = await getMany<Set<string> | undefined>([
     `deleted_event_${incident.event}_idx`,
     `deleted_team_${incident.team}_idx`,
   ]);
 
-  return { event: event ?? [], team: team ?? [] };
+  return { event: event ?? new Set(), team: team ?? new Set() };
 }
 
 export async function setDeletedIncidentIndices(
@@ -137,18 +190,30 @@ export async function setDeletedIncidentIndices(
   ]);
 }
 
+export async function getDeletedIncidentsForEvent(sku: string) {
+  return get<Set<string>>(`deleted_event_${sku}_idx`).then(
+    (idx) => idx ?? new Set<string>()
+  );
+}
+
+export async function getDeletedIncidentsForTeam(team: string) {
+  return get<Set<string>>(`deleted_team_${team}_idx`).then(
+    (idx) => idx ?? new Set<string>()
+  );
+}
+
 export async function repairIndices(id: string, incident: Incident) {
   const { event, team } = await getIncidentIndices(incident);
 
   let dirty = false;
 
-  if (!event.includes(id)) {
-    event.push(id);
+  if (!event.has(id)) {
+    event.add(id);
     dirty = true;
   }
 
-  if (!team.includes(id)) {
-    team.push(id);
+  if (!team.has(id)) {
+    team.add(id);
     dirty = true;
   }
 
@@ -167,6 +232,11 @@ export async function hasIncident(id: string): Promise<boolean> {
   return true;
 }
 
+export async function hasManyIncidents(ids: string[]): Promise<boolean[]> {
+  const incidents = await getMany<Incident>(ids);
+  return incidents.map((i) => !!i);
+}
+
 export async function setIncident(
   id: string,
   incident: Incident
@@ -174,39 +244,37 @@ export async function setIncident(
   return set(id, incident);
 }
 
+export async function setManyIncidents(incidents: Incident[]) {
+  return setMany(incidents.map((incident) => [incident.id, incident]));
+}
+
 export async function newIncident(
-  incident: Incident,
-  updateRemote: boolean = true,
+  data: Omit<Incident, "id">,
   id = generateIncidentId()
 ): Promise<string> {
+  const incident = { ...data, id };
   await setIncident(id, incident);
 
   // Index Properly
-  const { event, team } = await getIncidentIndices(incident);
-
-  event.push(id);
-  team.push(id);
-
-  setIncidentIndices(incident, {
-    event,
-    team,
+  await bulkIndexInsert({
+    [`event_${incident.event}_idx`]: [incident],
+    [`team_${incident.team}_idx`]: [incident],
+    ["incidents"]: [incident],
   });
-
-  const all = (await get<string[]>("incidents")) ?? [];
-  await set("incidents", [...all, id]);
-
-  if (updateRemote) {
-    await addServerIncident({ ...incident, id });
-  }
 
   return id;
 }
 
-export async function editIncident(
-  id: string,
-  incident: EditIncident,
-  updateRemote: boolean = true
-) {
+export async function newManyIncidents(incidents: Incident[]) {
+  await setManyIncidents(incidents);
+
+  const eventIndices = Object.groupBy(incidents, (i) => `event_${i.event}_idx`);
+  const teamIndices = Object.groupBy(incidents, (i) => `team_${i.team}_idx`);
+
+  await bulkIndexInsert({ ...eventIndices, ...teamIndices, incidents });
+}
+
+export async function editIncident(id: string, incident: EditIncident) {
   const current = await getIncident(id);
 
   if (!current) {
@@ -214,7 +282,7 @@ export async function editIncident(
   }
 
   // Annoying type coercion to support the strongly typed revision array
-  const changes: Revision[] = [];
+  const changes: Change<Incident, UnchangeableProperties>[] = [];
   for (const [key, currentValue] of Object.entries(current)) {
     if (key === "revision" || key === "team" || key === "event") continue;
 
@@ -225,7 +293,7 @@ export async function editIncident(
         property: key,
         old: currentValue,
         new: newValue,
-      } as Revision);
+      } as Change<Incident, UnchangeableProperties>);
     }
   }
 
@@ -246,71 +314,73 @@ export async function editIncident(
 
   const updatedIncident = { ...current, ...incident, revision };
   await setIncident(id, updatedIncident);
-
-  if (updateRemote) {
-    await editServerIncident(updatedIncident);
-  }
+  return updatedIncident;
 }
 
-export async function deleteIncident(
-  id: string,
-  updateRemote: boolean = true
-): Promise<void> {
+export async function deleteIncident(id: string): Promise<void> {
   const incident = await getIncident(id);
 
   if (!incident) {
     return;
   }
 
-  const { team, event } = await getIncidentIndices(incident);
-
-  await setIncidentIndices(incident, {
-    event: event.filter((i) => i !== id),
-    team: team.filter((i) => i !== id),
+  await bulkIndexRemove({
+    [`event_${incident.event}_idx`]: [incident],
+    [`team_${incident.team}_idx`]: [incident],
   });
 
-  const { event: deletedEvent, team: deletedTeam } =
-    await getDeletedIncidentIndices(incident);
-
-  deletedEvent.push(id);
-  deletedTeam.push(id);
-
-  await setDeletedIncidentIndices(incident, {
-    event: deletedEvent,
-    team: deletedTeam,
+  await bulkIndexInsert({
+    [`deleted_event_${incident.event}_idx`]: [incident],
+    [`deleted_team_${incident.team}_idx`]: [incident],
   });
+}
 
-  if (updateRemote) {
-    await deleteServerIncident(id, incident.event);
+export async function deleteManyIncidents(ids: string[]) {
+  const incidents = (await getManyIncidents(ids)).filter((i) => !!i);
+
+  if (incidents.length < 1) {
+    return;
   }
+
+  const eventIndices = Object.groupBy(incidents, (i) => `event_${i.event}_idx`);
+  const teamIndices = Object.groupBy(incidents, (i) => `team_${i.team}_idx`);
+
+  await bulkIndexRemove({ ...eventIndices, ...teamIndices });
+
+  const deletedEventIndices = Object.groupBy(
+    incidents,
+    (i) => `deleted_event_${i.event}_idx`
+  );
+  const deletedTeamIndices = Object.groupBy(
+    incidents,
+    (i) => `deleted_team_${i.team}_idx`
+  );
+
+  await bulkIndexInsert({ ...deletedEventIndices, ...deletedTeamIndices });
 }
 
-export async function getAllIncidents(): Promise<IncidentWithID[]> {
-  const ids = await get<string[]>(`incidents`);
+export async function getAllIncidents(): Promise<Incident[]> {
+  const ids = await get<Set<string>>(`incidents`);
   if (!ids) return [];
-  const incidents = await getManyIncidents(ids);
+  const incidents = await getManyIncidents([...ids]);
 
-  return incidents.filter((i) => !!i) as IncidentWithID[];
+  return incidents.filter((i) => !!i) as Incident[];
 }
 
-export async function getIncidentsByEvent(
-  event: string
-): Promise<IncidentWithID[]> {
-  const ids = await get<string[]>(`event_${event}_idx`);
+export async function getIncidentsByEvent(event: string): Promise<Incident[]> {
+  const ids = await get<Set<string>>(`event_${event}_idx`);
   if (!ids) return [];
-  const incidents = await getManyIncidents(ids);
+  const incidents = await getManyIncidents([...ids]);
 
-  return incidents.filter((i) => !!i) as IncidentWithID[];
+  return incidents.filter((i) => !!i) as Incident[];
 }
 
-export async function getIncidentsByTeam(
-  team: string
-): Promise<IncidentWithID[]> {
-  const ids = await get<string[]>(`team_${team}_idx`);
+export async function getIncidentsByTeam(team: string): Promise<Incident[]> {
+  const ids = await get<Set<string>>(`team_${team}_idx`);
   if (!ids) return [];
-  const incidents = await getManyIncidents(ids);
+  const incidents = await getManyIncidents([...ids]);
 
-  return incidents.filter((i) => !!i) as IncidentWithID[];
+  return incidents.filter((i) => !!i) as Incident[];
 }
 
 export function matchToString(match: IncidentMatch) {

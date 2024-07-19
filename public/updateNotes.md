@@ -1,3 +1,7 @@
+## 15 July 2024
+- Improved sync performance and correctness when connecting to a share instance.
+- Added Scratchpad for High Stakes matches to record Auto Winner and AWP
+
 ### 21 May 2024
 
 - Added support for 2024/25 game rules (V5RC, VURC, and VIQRC).

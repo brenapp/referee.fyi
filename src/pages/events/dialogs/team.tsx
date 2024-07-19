@@ -30,7 +30,7 @@ export const TeamIsolationDialog: React.FC<TeamIsolationDialogProps> = ({
       <DialogHeader title={team} onClose={() => setOpen(false)} />
       <DialogBody>
         {incidents?.map((incident) => (
-          <Incident incident={incident} readonly />
+          <Incident key={incident.id} incident={incident} readonly />
         ))}
       </DialogBody>
     </Dialog>

@@ -10,60 +10,23 @@ import {
   TextArea,
 } from "~components/Input";
 import { toast } from "~components/Toast";
-import { IncidentMatchSkills, Revision, WebSocketSender } from "~share/api";
+import { IncidentMatchSkills, UnchangeableProperties } from "~share/api";
+import { Change } from "~share/revision";
 import {
   IncidentOutcome,
-  IncidentWithID,
+  Incident,
   matchToString,
+  userString,
 } from "~utils/data/incident";
 import { useDeleteIncident, useEditIncident } from "~utils/hooks/incident";
 import { useEventMatchesForTeam, useEventTeam } from "~utils/hooks/robotevents";
 import { Rule, useRulesForEvent } from "~utils/hooks/rules";
 import { useCurrentEvent } from "~utils/hooks/state";
+import { timeAgo } from "~utils/time";
 
-function userString(user?: WebSocketSender) {
-  if (!user) {
-    return null;
-  }
-
-  switch (user.type) {
-    case "server": {
-      return "Server";
-    }
-    case "client": {
-      return user.name;
-    }
-  }
-}
-
-function timeAgo(input: Date) {
-  const date = new Date(input);
-  const formatter = new Intl.RelativeTimeFormat("en");
-  const ranges = {
-    years: 3600 * 24 * 365,
-    months: 3600 * 24 * 30,
-    weeks: 3600 * 24 * 7,
-    days: 3600 * 24,
-    hours: 3600,
-    minutes: 60,
-    seconds: 1,
-  };
-  const secondsElapsed = (date.getTime() - Date.now()) / 1000;
-  for (const [key, value] of Object.entries(ranges)) {
-    if (value < Math.abs(secondsElapsed)) {
-      const delta = secondsElapsed / value;
-      return formatter.format(
-        Math.round(delta),
-        key as Intl.RelativeTimeFormatUnit
-      );
-    }
-  }
-  return formatter.format(-1, "seconds");
-}
-
-export const RevisionEntry: React.FC<{ revision: Revision }> = ({
-  revision,
-}) => {
+export const RevisionEntry: React.FC<{
+  revision: Change<Incident, UnchangeableProperties>;
+}> = ({ revision }) => {
   const values: [ReactNode, ReactNode] = useMemo(() => {
     switch (revision.property) {
       case "time": {
@@ -94,7 +57,7 @@ export const RevisionEntry: React.FC<{ revision: Revision }> = ({
 };
 
 export type RevisionListProps = {
-  incident: IncidentWithID;
+  incident: Incident;
 };
 
 export const RevisionList: React.FC<RevisionListProps> = ({ incident }) => {
@@ -139,7 +102,7 @@ export const RevisionList: React.FC<RevisionListProps> = ({ incident }) => {
 export type EditIncidentDialogProps = {
   open: boolean;
   setOpen: (value: boolean) => void;
-  incident: IncidentWithID;
+  incident: Incident;
 };
 
 export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({

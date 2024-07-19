@@ -1,4 +1,4 @@
-import { set } from "idb-keyval";
+import { set } from "~utils/data/keyval";
 import { useCallback, useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { queryClient } from "~utils/data/query";
@@ -6,6 +6,7 @@ import {
   acceptEventInvitation,
   createInstance,
   getEventInvitation,
+  getSender,
   getShareId,
   getShareName,
   registerUser,
@@ -39,6 +40,13 @@ export function useShareID() {
   return useQuery({
     queryKey: ["share_id"],
     queryFn: () => getShareId(),
+  });
+}
+
+export function useSender() {
+  return useQuery({
+    queryKey: ["sender"],
+    queryFn: () => getSender(),
   });
 }
 

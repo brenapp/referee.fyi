@@ -59,3 +59,55 @@ test("tie goes to higher peer value", () => {
   const result = lww.merge({ local, remote, ignore });
   expect(result).toEqual({ resolved: remote, changed: ["a"] });
 });
+
+type ComplexObject = {
+  a: { b: number };
+  c: string;
+  constant: string;
+};
+
+test("lww is resolved on a key-by-key basis", () => {
+  const local = lww.init<ComplexObject, typeof ignore>({
+    peer: "A",
+    value: { a: { b: 10 }, c: "local", constant: "Constant" },
+    ignore,
+  });
+  local.consistency.a = {
+    count: 1,
+    peer: "local-A",
+    history: [{ peer: "local-A", prev: { b: 1 } }],
+  };
+
+  const remote = lww.init<ComplexObject, typeof ignore>({
+    peer: "A",
+    value: { a: { b: 1000 }, c: "remote", constant: "Constant" },
+    ignore,
+  });
+  remote.consistency.c = {
+    count: 1,
+    peer: "remote-A",
+    history: [{ peer: "remote-A", prev: "remote prev" }],
+  };
+
+  const result = lww.merge({ local, remote, ignore });
+  expect(result).toEqual({
+    resolved: {
+      a: { b: 10 },
+      c: "remote",
+      constant: "Constant",
+      consistency: {
+        a: {
+          count: 1,
+          peer: "local-A",
+          history: [{ peer: "local-A", prev: { b: 1 } }],
+        },
+        c: {
+          count: 1,
+          peer: "remote-A",
+          history: [{ peer: "remote-A", prev: "remote prev" }],
+        },
+      },
+    },
+    changed: ["c"],
+  });
+});

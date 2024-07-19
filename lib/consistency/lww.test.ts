@@ -23,6 +23,9 @@ test("greater-count local value persists", () => {
 
   const result = lww.merge({ local, remote, ignore });
   expect(result).toEqual({ resolved: local, changed: [] });
+
+  const opposite = lww.merge({ local: remote, remote: local, ignore });
+  expect(opposite.resolved).toEqual(result.resolved);
 });
 
 test("greater-count remote value persists", () => {
@@ -41,6 +44,9 @@ test("greater-count remote value persists", () => {
 
   const result = lww.merge({ local, remote, ignore });
   expect(result).toEqual({ resolved: remote, changed: ["a"] });
+
+  const opposite = lww.merge({ local: remote, remote: local, ignore });
+  expect(opposite.resolved).toEqual(result.resolved);
 });
 
 test("tie goes to higher peer value", () => {
@@ -58,6 +64,9 @@ test("tie goes to higher peer value", () => {
 
   const result = lww.merge({ local, remote, ignore });
   expect(result).toEqual({ resolved: remote, changed: ["a"] });
+
+  const opposite = lww.merge({ local: remote, remote: local, ignore });
+  expect(opposite.resolved).toEqual(result.resolved);
 });
 
 type ComplexObject = {
@@ -110,4 +119,7 @@ test("lww is resolved on a key-by-key basis", () => {
     },
     changed: ["c"],
   });
+
+  const opposite = lww.merge({ local: remote, remote: local, ignore });
+  expect(opposite.resolved).toEqual(result.resolved);
 });

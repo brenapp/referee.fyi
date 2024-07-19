@@ -1,8 +1,7 @@
-import { EventIncidentsData, Incident, ShareUser } from "./EventIncidents";
-import { MatchScratchpad } from "./MatchScratchpad";
-import { Invitation, User } from "./server";
-
-export * from "./EventIncidents";
+import type { Incident } from "./incident.ts";
+import type { BaseMatchScratchpad, MatchScratchpad } from "./index.ts";
+import type { Invitation } from "./server.js";
+import { InstanceState } from "./instance.ts";
 
 export type User = {
   key: string;
@@ -72,7 +71,7 @@ export type APIGetShareDataResponseBody = WebSocketServerShareInfoMessage;
 export type APIPutIncidentResponseBody = Incident;
 
 // PATCH /api/:sku/incident
-export type APIPatchIncidentResponseBody = Incident["revision"];
+export type APIPatchIncidentResponseBody = Incident;
 
 // DELETE /api/:sku/incident
 export type APIDeleteIncidentResponseBody = Record<string, never>;
@@ -116,25 +115,29 @@ export type InvitationListItem = Pick<Invitation, "admin"> & {
   user: User;
 };
 
-export type WebSocketServerShareInfoMessage = {
+export type WebSocketServerShareInfoMessage<
+  S extends BaseMatchScratchpad = MatchScratchpad,
+> = InstanceState<S> & {
   type: "server_share_info";
-  data: EventIncidentsData;
-  activeUsers: ShareUser[];
-  invitations: InvitationListItem[];
-  scratchpads: Record<string, MatchScratchpad>;
+  sku: string;
+  users: {
+    keys: Record<string, string>;
+    active: User[];
+    invitations: InvitationListItem[];
+  };
 };
 
 export type WebsocketServerUserAddMessage = {
   type: "server_user_add";
-  user: ShareUser;
-  activeUsers: ShareUser[];
+  user: User;
+  activeUsers: User[];
   invitations: InvitationListItem[];
 };
 
 export type WebsocketServerUserRemoveMessage = {
   type: "server_user_remove";
-  user: ShareUser;
-  activeUsers: ShareUser[];
+  user: User;
+  activeUsers: User[];
   invitations: InvitationListItem[];
 };
 

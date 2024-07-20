@@ -75,7 +75,7 @@ export function mergeLWW<
   const local = options.local!;
   const remote = options.remote!;
 
-  const resolved = { ...local };
+  const resolved = { ...local, consistency: { ...local.consistency } };
   const changed: KeysWithout<T, U>[] = [];
 
   for (const key of Object.keys(remote) as KeysWithout<T, U>[]) {
@@ -95,7 +95,11 @@ export function mergeLWW<
 
     if (shouldOverride) {
       resolved[key] = remote[key];
-      resolved.consistency[key] = remote.consistency[key];
+      resolved.consistency[key] = {
+        count: remote.consistency[key].count,
+        peer: remote.consistency[key].peer,
+        history: remote.consistency[key].history,
+      };
       changed.push(key);
     }
   }

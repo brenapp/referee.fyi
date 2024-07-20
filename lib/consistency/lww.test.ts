@@ -145,3 +145,83 @@ test("handles null and undefined", () => {
   expect(bothNull.resolved).toBeNull();
   expect(bothNull.changed).toEqual([]);
 });
+
+test("merge is idempotent", async () => {
+  const local = initLWW<ComplexObject, typeof ignore>({
+    peer: "A",
+    value: { a: { b: 10 }, c: "local", constant: "Constant" },
+    ignore,
+  });
+  local.consistency.a = {
+    count: 1,
+    peer: "local-A",
+    history: [{ peer: "local-A", prev: { b: 1 } }],
+  };
+
+  const remote = initLWW<ComplexObject, typeof ignore>({
+    peer: "A",
+    value: { a: { b: 1000 }, c: "remote", constant: "Constant" },
+    ignore,
+  });
+  remote.consistency.c = {
+    count: 1,
+    peer: "remote-A",
+    history: [{ peer: "remote-A", prev: "remote prev" }],
+  };
+
+  const localSelf = mergeLWW({ local, remote: local, ignore });
+  expect(localSelf.resolved).toBe(localSelf.resolved);
+  const remoteSelf = mergeLWW({ local: remote, remote, ignore });
+  expect(remoteSelf.resolved).toBe(remoteSelf.resolved);
+});
+
+test("merge is associative", async () => {
+  const A = initLWW<ComplexObject, typeof ignore>({
+    peer: "A",
+    value: { a: { b: 10 }, c: "local", constant: "Constant" },
+    ignore,
+  });
+  A.consistency.a = {
+    count: 1,
+    peer: "local-A",
+    history: [{ peer: "local-A", prev: { b: 1 } }],
+  };
+
+  const B = initLWW<ComplexObject, typeof ignore>({
+    peer: "B",
+    value: { a: { b: 1000 }, c: "remote", constant: "Constant" },
+    ignore,
+  });
+  B.consistency.c = {
+    count: 1,
+    peer: "remote-A",
+    history: [{ peer: "remote-A", prev: "remote prev" }],
+  };
+
+  const C = initLWW<ComplexObject, typeof ignore>({
+    peer: "C",
+    value: { a: { b: 50 }, c: "remote", constant: "Constant" },
+    ignore,
+  });
+  C.consistency.a = {
+    count: 10,
+    peer: "remote-A",
+    history: [{ peer: "remote-A", prev: { b: -1 } }],
+  };
+  C.consistency.c = {
+    count: 10,
+    peer: "remote-C",
+    history: [{ peer: "remote-C", prev: "remote C prev" }],
+  };
+
+  const AB = mergeLWW({ local: A, remote: B, ignore });
+  const BC = mergeLWW({ local: B, remote: C, ignore });
+  const AC = mergeLWW({ local: A, remote: C, ignore });
+
+  const ABxC = mergeLWW({ local: AB.resolved, remote: C, ignore });
+  const AxBC = mergeLWW({ local: A, remote: BC.resolved, ignore });
+  const ACxB = mergeLWW({ local: AC.resolved, remote: B, ignore });
+
+  expect(ABxC.resolved).toEqual(ACxB.resolved);
+  expect(ABxC.resolved).toEqual(AxBC.resolved);
+});

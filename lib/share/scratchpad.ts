@@ -10,12 +10,19 @@ export type ScratchpadForGame = {
 };
 
 export type BaseMatchScratchpad = {
+  id: string;
   game: SupportedGame;
   event: string;
   match: IncidentMatchHeadToHead;
   notes: string;
 };
-export const SCRATCHPAD_IGNORE = ["game", "event", "match", "notes"] as const;
+export const SCRATCHPAD_IGNORE = [
+  "game",
+  "event",
+  "match",
+  "notes",
+  "id",
+] as const;
 export type ScratchpadUnchangeableProperties =
   (typeof SCRATCHPAD_IGNORE)[number];
 

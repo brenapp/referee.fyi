@@ -1,7 +1,6 @@
 import type { Incident } from "./incident.ts";
 import type { BaseMatchScratchpad, MatchScratchpad } from "./index.ts";
 import type { Invitation } from "./server.js";
-import { InstanceState } from "./instance.ts";
 
 export type User = {
   key: string;
@@ -117,9 +116,11 @@ export type InvitationListItem = Pick<Invitation, "admin"> & {
 
 export type WebSocketServerShareInfoMessage<
   S extends BaseMatchScratchpad = MatchScratchpad,
-> = InstanceState<S> & {
+> = {
   type: "server_share_info";
   sku: string;
+  incidents: Incident[];
+  scratchpad: S[];
   users: {
     keys: Record<string, string>;
     active: User[];

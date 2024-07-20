@@ -35,7 +35,12 @@ export type BaseIncident = {
 export const INCIDENT_IGNORE = ["id", "time", "event", "team"] as const;
 export type IncidentUnchangeableProperties = (typeof INCIDENT_IGNORE)[number];
 
+export type IncidentHistoryMeta = {
+  instant: Date;
+};
+
 export type Incident = WithLWWConsistency<
   BaseIncident,
-  IncidentUnchangeableProperties
+  IncidentUnchangeableProperties,
+  IncidentHistoryMeta
 >;

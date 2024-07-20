@@ -1,26 +1,24 @@
 import { AutoRouter, createResponse } from "itty-router";
 import { response } from "./utils";
 import type {
-  ShareUser,
   Incident,
-  EventIncidentsData as EventIncidentsData,
   WebSocketMessage,
   WebSocketPayload,
   WebSocketPeerMessage,
   WebSocketSender,
   WebSocketServerShareInfoMessage,
-  EventIncidentsInitData,
   InvitationListItem,
   IncidentMatch,
-} from "~types/api";
-import { ShareInstance, User } from "~types/server";
+  MatchScratchpad,
+  ShareInstance,
+  User,
+} from "@referee-fyi/share";
 import { getUser } from "./data";
 import { Env, RequestHasInvitation } from "./types";
 import { DurableObject } from "cloudflare:workers";
-import { MatchScratchpad } from "~types/MatchScratchpad";
 
 export type SessionClient = {
-  user: ShareUser;
+  user: User;
   socket: WebSocket;
   ip: string;
   active: boolean;
@@ -211,16 +209,15 @@ export class EventIncidents extends DurableObject {
     return incidents;
   }
 
-  async getData(): Promise<EventIncidentsData> {
-    const sku = await this.getSKU();
+  async getIncidentsData(): Promise<EventIncidentsData> {
     const incidents = await this.getAllIncidents();
     const deleted = await this.getDeletedIncidents();
 
-    return { sku: sku ?? "", incidents, deleted: [...deleted.keys()] };
+    return { incidents, deleted: [...deleted.keys()] };
   }
 
   async createServerShareMessage(): Promise<WebSocketServerShareInfoMessage> {
-    const data = await this.getData();
+    const incidents = await this.getIncidentsData();
     const activeUsers = this.getActiveUsers();
     const invitations = await this.getInvitationList();
     const scratchpads = await this.getAllScratchpads();
@@ -626,7 +623,7 @@ export class EventIncidents extends DurableObject {
     const state: WebSocketServerShareInfoMessage = {
       type: "server_share_info",
       activeUsers: this.getActiveUsers(),
-      data: await this.getData(),
+      data: await this.getIncidentsData(),
       scratchpads: await this.getAllScratchpads(),
       invitations,
     };

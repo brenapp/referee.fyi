@@ -1,4 +1,4 @@
-import { Invitation, ShareInstance, User } from "~types/server";
+import { Invitation, ShareInstance, User } from "@referee-fyi/share";
 import { Env } from "./types";
 
 export async function setUser(env: Env, user: User): Promise<void> {

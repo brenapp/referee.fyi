@@ -1,5 +1,5 @@
 import { IRequest } from "itty-router";
-import { ShareInstance, Invitation, User } from "~types/server";
+import { ShareInstance, Invitation, User } from "@referee-fyi/share";
 import { EventIncidents } from "./incidents";
 
 export type SignedRequest = IRequest & {

@@ -1,5 +1,5 @@
 {
-  "name": "referee-fyi-worker",
+  "name": "@referee-fyi/worker-sync",
   "version": "1.0.0",
   "description": "Sync Service for Referee FYI",
   "scripts": {

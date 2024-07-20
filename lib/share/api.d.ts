@@ -1,5 +1,14 @@
-import type { Incident } from "./incident.ts";
-import type { BaseMatchScratchpad, MatchScratchpad } from "./index.ts";
+import { ConsistentMap } from "@referee-fyi/consistency";
+import type {
+  BaseIncident,
+  Incident,
+  IncidentUnchangeableProperties,
+} from "./incident.ts";
+import type {
+  BaseMatchScratchpad,
+  MatchScratchpad,
+  ScratchpadUnchangeableProperties,
+} from "./index.ts";
 import type { Invitation } from "./server.js";
 
 export type User = {
@@ -119,8 +128,8 @@ export type WebSocketServerShareInfoMessage<
 > = {
   type: "server_share_info";
   sku: string;
-  incidents: Incident[];
-  scratchpad: S[];
+  incidents: ConsistentMap<BaseIncident, IncidentUnchangeableProperties>;
+  scratchpad: ConsistentMap<S, ScratchpadUnchangeableProperties>;
   users: {
     keys: Record<string, string>;
     active: User[];

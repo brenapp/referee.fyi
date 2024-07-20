@@ -53,7 +53,7 @@ export type MergeResult<
  *
  * @returns The merged value, and a list of values that changed from local
  */
-export function merge<
+export function mergeLWW<
   T extends Record<string, unknown>,
   const U extends KeyArray<T>,
 >(options: MergeOptions<T, U>): MergeResult<T, U> {
@@ -109,7 +109,7 @@ export type InitOptions<T, U extends KeyArray<T>> = {
   ignore: U;
 };
 
-export function init<
+export function initLWW<
   T extends Record<string, unknown>,
   const U extends KeyArray<T>,
 >({ value, peer, ignore }: InitOptions<T, U>): WithLWWConsistency<T, U> {

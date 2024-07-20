@@ -1,4 +1,4 @@
-import { lww } from "./index.js";
+import { initLWW, mergeLWW } from "./index.js";
 import { test, expect } from "vitest";
 
 type BaseObject = {
@@ -8,64 +8,64 @@ type BaseObject = {
 const ignore = ["constant"] as const;
 
 test("greater-count local value persists", () => {
-  const local = lww.init<BaseObject, typeof ignore>({
+  const local = initLWW<BaseObject, typeof ignore>({
     peer: "A",
     value: { a: "Local Value", constant: "Constant" },
     ignore,
   });
   local.consistency.a.count = 1;
 
-  const remote = lww.init<BaseObject, typeof ignore>({
+  const remote = initLWW<BaseObject, typeof ignore>({
     peer: "A",
     value: { a: "Remote Value", constant: "Constant" },
     ignore,
   });
 
-  const result = lww.merge({ local, remote, ignore });
+  const result = mergeLWW({ local, remote, ignore });
   expect(result).toEqual({ resolved: local, changed: [] });
 
-  const opposite = lww.merge({ local: remote, remote: local, ignore });
+  const opposite = mergeLWW({ local: remote, remote: local, ignore });
   expect(opposite.resolved).toEqual(result.resolved);
 });
 
 test("greater-count remote value persists", () => {
-  const local = lww.init<BaseObject, typeof ignore>({
+  const local = initLWW<BaseObject, typeof ignore>({
     peer: "A",
     value: { a: "Local Value", constant: "Constant" },
     ignore,
   });
 
-  const remote = lww.init<BaseObject, typeof ignore>({
+  const remote = initLWW<BaseObject, typeof ignore>({
     peer: "A",
     value: { a: "Remote Value", constant: "Constant" },
     ignore,
   });
   remote.consistency.a.count = 2;
 
-  const result = lww.merge({ local, remote, ignore });
+  const result = mergeLWW({ local, remote, ignore });
   expect(result).toEqual({ resolved: remote, changed: ["a"] });
 
-  const opposite = lww.merge({ local: remote, remote: local, ignore });
+  const opposite = mergeLWW({ local: remote, remote: local, ignore });
   expect(opposite.resolved).toEqual(result.resolved);
 });
 
 test("tie goes to higher peer value", () => {
-  const local = lww.init<BaseObject, typeof ignore>({
+  const local = initLWW<BaseObject, typeof ignore>({
     peer: "A",
     value: { a: "Local Value", constant: "Constant" },
     ignore,
   });
 
-  const remote = lww.init<BaseObject, typeof ignore>({
+  const remote = initLWW<BaseObject, typeof ignore>({
     peer: "Z",
     value: { a: "Remote Value", constant: "Constant" },
     ignore,
   });
 
-  const result = lww.merge({ local, remote, ignore });
+  const result = mergeLWW({ local, remote, ignore });
   expect(result).toEqual({ resolved: remote, changed: ["a"] });
 
-  const opposite = lww.merge({ local: remote, remote: local, ignore });
+  const opposite = mergeLWW({ local: remote, remote: local, ignore });
   expect(opposite.resolved).toEqual(result.resolved);
 });
 
@@ -76,7 +76,7 @@ type ComplexObject = {
 };
 
 test("lww is resolved on a key-by-key basis", () => {
-  const local = lww.init<ComplexObject, typeof ignore>({
+  const local = initLWW<ComplexObject, typeof ignore>({
     peer: "A",
     value: { a: { b: 10 }, c: "local", constant: "Constant" },
     ignore,
@@ -87,7 +87,7 @@ test("lww is resolved on a key-by-key basis", () => {
     history: [{ peer: "local-A", prev: { b: 1 } }],
   };
 
-  const remote = lww.init<ComplexObject, typeof ignore>({
+  const remote = initLWW<ComplexObject, typeof ignore>({
     peer: "A",
     value: { a: { b: 1000 }, c: "remote", constant: "Constant" },
     ignore,
@@ -98,7 +98,7 @@ test("lww is resolved on a key-by-key basis", () => {
     history: [{ peer: "remote-A", prev: "remote prev" }],
   };
 
-  const result = lww.merge({ local, remote, ignore });
+  const result = mergeLWW({ local, remote, ignore });
   expect(result).toEqual({
     resolved: {
       a: { b: 10 },
@@ -120,12 +120,12 @@ test("lww is resolved on a key-by-key basis", () => {
     changed: ["c"],
   });
 
-  const opposite = lww.merge({ local: remote, remote: local, ignore });
+  const opposite = mergeLWW({ local: remote, remote: local, ignore });
   expect(opposite.resolved).toEqual(result.resolved);
 });
 
 test("handles null and undefined", () => {
-  const local = lww.init<BaseObject, typeof ignore>({
+  const local = initLWW<BaseObject, typeof ignore>({
     peer: "A",
     value: { a: "Local Value", constant: "Constant" },
     ignore,
@@ -133,15 +133,15 @@ test("handles null and undefined", () => {
 
   const remote = null;
 
-  const result = lww.merge({ local, remote, ignore });
+  const result = mergeLWW({ local, remote, ignore });
   expect(result.resolved).toEqual(local);
   expect(result.changed).toEqual([]);
 
-  const opposite = lww.merge({ local: null, remote: local, ignore });
+  const opposite = mergeLWW({ local: null, remote: local, ignore });
   expect(opposite.resolved).toEqual(local);
   expect(opposite.changed).toEqual(["a"]);
 
-  const bothNull = lww.merge({ local: null, remote: null, ignore: [] });
+  const bothNull = mergeLWW({ local: null, remote: null, ignore: [] });
   expect(bothNull.resolved).toBeNull();
   expect(bothNull.changed).toEqual([]);
 });

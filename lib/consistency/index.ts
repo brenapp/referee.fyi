@@ -1,2 +1,2 @@
-export * as lww from "./lww.js";
-export type * from "./lww.js";
+export * from "./lww.js";
+export * from "./gset.js";

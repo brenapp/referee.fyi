@@ -1,6 +1,10 @@
 import type { KeyArray, KeysWithout } from "~types";
 
-export type History<T extends Record<string, unknown>, K extends keyof T> = {
+export type History<
+  T extends Record<string, unknown>,
+  K extends keyof T,
+  M extends Record<string, unknown> = Record<never, unknown>,
+> = M & {
   prev: T[K];
   peer: string;
 };
@@ -8,24 +12,27 @@ export type History<T extends Record<string, unknown>, K extends keyof T> = {
 export type KeyRegister<
   T extends Record<string, unknown>,
   K extends keyof T,
+  M extends Record<string, unknown> = Record<never, unknown>,
 > = {
   count: number;
   peer: string;
-  history: History<T, K>[];
+  history: History<T, K, M>[];
 };
 
 export type LastWriteWinsConsistency<
   T extends Record<string, unknown>,
   U extends KeyArray<T>,
+  M extends Record<string, unknown> = Record<never, unknown>,
 > = {
-  [K in keyof Omit<T, U[number]>]: KeyRegister<T, K>;
+  [K in keyof Omit<T, U[number]>]: KeyRegister<T, K, M>;
 };
 
 export type WithLWWConsistency<
   T extends Record<string, unknown>,
   U extends KeyArray<T>,
+  M extends Record<string, unknown> = Record<never, unknown>,
 > = T & {
-  consistency: LastWriteWinsConsistency<T, U>;
+  consistency: LastWriteWinsConsistency<T, U, M>;
 };
 
 export type MergeOptions<
@@ -43,6 +50,7 @@ export type MergeResult<
 > = {
   resolved: WithLWWConsistency<T, U> | null | undefined;
   changed: KeysWithout<T, U>[];
+  rejected: KeysWithout<T, U>[];
 };
 
 /**
@@ -61,15 +69,18 @@ export function mergeLWW<
     const changed = Object.keys(options.remote).filter(
       (key) => key !== "consistency" && !options.ignore.includes(key)
     ) as KeysWithout<T, U>[];
-    return { resolved: options.remote, changed };
+    return { resolved: options.remote, changed, rejected: [] };
   }
 
   if (!options.remote && options.local) {
-    return { resolved: options.local, changed: [] };
+    const rejected = Object.keys(options.local).filter(
+      (key) => key !== "consistency" && !options.ignore.includes(key)
+    ) as KeysWithout<T, U>[];
+    return { resolved: options.local, changed: [], rejected };
   }
 
   if (!options.remote && !options.local) {
-    return { resolved: options.local, changed: [] };
+    return { resolved: options.local, changed: [], rejected: [] };
   }
 
   const local = options.local!;
@@ -77,6 +88,7 @@ export function mergeLWW<
 
   const resolved = { ...local, consistency: { ...local.consistency } };
   const changed: KeysWithout<T, U>[] = [];
+  const rejected: KeysWithout<T, U>[] = [];
 
   for (const key of Object.keys(remote) as KeysWithout<T, U>[]) {
     if (options.ignore.includes(key) || key === "consistency") {
@@ -85,6 +97,13 @@ export function mergeLWW<
 
     const localHistory = local.consistency[key];
     const remoteHistory = remote.consistency[key];
+
+    // Local History is more advanced
+    const shouldReject = localHistory.count > remoteHistory.count;
+
+    if (shouldReject) {
+      rejected.push(key);
+    }
 
     const shouldOverride =
       // Remote Count > Local Count
@@ -104,7 +123,7 @@ export function mergeLWW<
     }
   }
 
-  return { resolved, changed };
+  return { resolved, changed, rejected };
 }
 
 export type InitOptions<T, U extends KeyArray<T>> = {
@@ -126,4 +145,75 @@ export function initLWW<
   ) as LastWriteWinsConsistency<T, U>;
 
   return { ...value, consistency };
+}
+
+export type EquivalentCheckOptions<
+  T extends Record<string, unknown>,
+  U extends KeyArray<T>,
+> = {
+  left: WithLWWConsistency<T, U> | null | undefined;
+  right: WithLWWConsistency<T, U> | null | undefined;
+  ignore: KeyArray<T>;
+};
+
+export function equivalentLWW<
+  T extends Record<string, unknown>,
+  const U extends KeyArray<T>,
+>({ left, right, ignore }: EquivalentCheckOptions<T, U>): boolean {
+  if (!left || !right) {
+    return !left && !right;
+  }
+
+  for (const key of Object.keys(left) as KeysWithout<T, U>[]) {
+    if (ignore.includes(key) || key === "consistency") {
+      continue;
+    }
+
+    const leftConsistency = left.consistency[key];
+    const rightConsistency = right.consistency[key];
+
+    if (
+      leftConsistency.count !== rightConsistency.count ||
+      leftConsistency.peer !== rightConsistency.peer
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export type UpdateOptions<
+  T extends Record<string, unknown>,
+  U extends KeyArray<T>,
+  K extends KeysWithout<T, U>,
+  M extends Record<string, unknown>,
+> = M & {
+  key: K;
+  value: T[K];
+  peer: string;
+};
+
+export function updateLWW<
+  T extends Record<string, unknown>,
+  const U extends KeyArray<T>,
+  K extends KeysWithout<T, U>,
+  M extends Record<string, unknown>,
+>(
+  object: WithLWWConsistency<T, U>,
+  { key, value, peer, ...meta }: UpdateOptions<T, U, K, M>
+): WithLWWConsistency<T, U> {
+  const register: KeyRegister<T, K> = {
+    count: object.consistency[key].count + 1,
+    peer,
+    history: [
+      ...object.consistency[key].history,
+      { peer: object.consistency[key].peer, prev: object[key], ...meta },
+    ],
+  };
+  return {
+    ...object,
+    [key]: value,
+    consistency: { ...object.consistency, [key]: register },
+  };
 }

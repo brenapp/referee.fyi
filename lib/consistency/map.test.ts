@@ -98,12 +98,11 @@ test("local update handled", () => {
       }),
     },
   };
-  local.values["incident1"].note += "BMM EDIT";
-  local.values["incident1"].consistency.note = {
-    count: 1,
+  local.values["incident1"] = updateLWW(local.values["incident1"], {
+    key: "note",
+    value: "Expansion BMM EDIT",
     peer: "LOCAL",
-    history: [{ prev: "Expansion", peer: "REMOTE" }],
-  };
+  });
 
   const remote: ConsistentMap<Incident> = {
     deleted: [],
@@ -155,7 +154,6 @@ test("remote update handled", () => {
     key: "note",
     value: "Expansion BMM EDIT",
     peer: "LOCAL",
-    meta: {},
   });
 
   const remote: ConsistentMap<Incident> = {
@@ -178,7 +176,6 @@ test("remote update handled", () => {
     key: "rule",
     value: "<SG8>",
     peer: "REMOTE",
-    meta: {},
   });
 
   const result = mergeMap({ local, remote, ignore });

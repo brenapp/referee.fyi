@@ -6,8 +6,7 @@ import "core-js/actual/set";
 
 type ConsistentMapElement = WithLWWConsistency<
   Record<string, unknown> & { id: string },
-  never,
-  Record<never, unknown>
+  never
 >;
 
 export type ConsistentMap<T extends ConsistentMapElement> = {

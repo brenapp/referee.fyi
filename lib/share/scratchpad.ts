@@ -48,8 +48,7 @@ export type BaseRapidRelayMatchScratchpad = BaseMatchScratchpad &
 
 export type RapidRelayMatchScratchpad = WithLWWConsistency<
   BaseRapidRelayMatchScratchpad,
-  ScratchpadUnchangeableProperties,
-  Record<string, never>
+  ScratchpadUnchangeableProperties
 >;
 
 export type MatchScratchpad =

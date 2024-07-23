@@ -1,42 +1,36 @@
-export type History<
-  T extends Record<string, unknown>,
-  K extends keyof T,
-  M extends Record<string, unknown> = Record<never, unknown>,
-> = M & {
+export type History<T extends Record<string, unknown>, K extends keyof T> = {
   prev: T[K];
   peer: string;
+  instant: string;
 };
 
 export type KeyRegister<
   T extends Record<string, unknown>,
   K extends keyof T,
-  M extends Record<string, unknown> = Record<never, unknown>,
 > = {
   count: number;
   peer: string;
-  history: History<T, K, M>[];
+  instant: string; // ISO Date
+  history: History<T, K>[];
 };
 
 export type LastWriteWinsConsistency<
   T extends Record<string, unknown>,
   U extends keyof T,
-  M extends Record<string, unknown> = Record<never, unknown>,
 > = {
-  [K in Exclude<keyof T, U>]: KeyRegister<T, K, M>;
+  [K in Exclude<keyof T, U>]: KeyRegister<T, K>;
 };
 
 export type WithLWWConsistency<
   T extends Record<string, unknown>,
   U extends keyof T,
-  M extends Record<string, unknown> = Record<never, unknown>,
 > = T & {
-  consistency: LastWriteWinsConsistency<T, U, M>;
+  consistency: LastWriteWinsConsistency<T, U>;
 };
 
 export type BaseWithLWWConsistency = WithLWWConsistency<
   Record<string, unknown>,
-  never,
-  Record<string, unknown>
+  never
 >;
 
 export type LWWKeys<T extends BaseWithLWWConsistency> = Exclude<
@@ -120,6 +114,7 @@ export function mergeLWW<T extends BaseWithLWWConsistency>(
         count: remote.consistency[key].count,
         peer: remote.consistency[key].peer,
         history: remote.consistency[key].history,
+        instant: remote.consistency[key].instant,
       };
       changed.push(key);
     }
@@ -184,39 +179,27 @@ export function equivalentLWW<T extends BaseWithLWWConsistency>({
   return true;
 }
 
-export type UpdateMeta<T extends BaseWithLWWConsistency> =
-  T extends WithLWWConsistency<Record<string, unknown>, never, infer M>
-    ? M
-    : never;
-
-export type UpdateOptions<K, V, M> = {
+export type UpdateOptions<K, V> = {
   peer: string;
   key: K;
   value: V;
-  meta: M;
 };
 
 export function updateLWW<
   T extends BaseWithLWWConsistency,
   const K extends LWWKeys<T>,
   V = T[K],
->(
-  object: T,
-  { key, value, peer, meta }: UpdateOptions<K, V, UpdateMeta<T>>
-): T {
-  const current = object.consistency[key].history as History<
-    T,
-    K,
-    UpdateMeta<T>
-  >[];
-  const register: KeyRegister<T, K, UpdateMeta<T>> = {
+>(object: T, { key, value, peer }: UpdateOptions<K, V>): T {
+  const current = object.consistency[key].history as History<T, K>[];
+  const register: KeyRegister<T, K> = {
     count: object.consistency[key].count + 1,
     peer,
-    history: current.concat({ prev: object[key], peer, ...meta } as History<
-      T,
-      K,
-      UpdateMeta<T>
-    >),
+    instant: new Date().toISOString(),
+    history: current.concat({
+      prev: object[key],
+      peer,
+      instant: object.consistency[key].instant,
+    } as History<T, K>),
   };
   return {
     ...object,

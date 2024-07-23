@@ -1,4 +1,4 @@
-import { initLWW, mergeLWW, WithLWWConsistency } from "./index.js";
+import { initLWW, mergeLWW, updateLWW, WithLWWConsistency } from "./index.js";
 import { test, expect } from "vitest";
 
 type BaseObject = {
@@ -78,27 +78,23 @@ type BaseComplexObject = {
 type ComplexObject = WithLWWConsistency<BaseComplexObject, "constant">;
 
 test("lww is resolved on a key-by-key basis", () => {
-  const local = initLWW<ComplexObject>({
+  let local = initLWW<ComplexObject>({
     peer: "A",
     value: { a: { b: 10 }, c: "local", constant: "Constant" },
     ignore,
   });
-  local.consistency.a = {
-    count: 1,
-    peer: "local-A",
-    history: [{ peer: "local-A", prev: { b: 1 } }],
-  };
+  local = updateLWW(local, { key: "a", value: { b: 1 }, peer: "peer-A" });
 
-  const remote = initLWW<ComplexObject>({
+  let remote = initLWW<ComplexObject>({
     peer: "A",
     value: { a: { b: 1000 }, c: "remote", constant: "Constant" },
     ignore,
   });
-  remote.consistency.c = {
-    count: 1,
+  remote = updateLWW(remote, {
+    key: "c",
+    value: "remote prev",
     peer: "remote-A",
-    history: [{ peer: "remote-A", prev: "remote prev" }],
-  };
+  });
 
   const result = mergeLWW({ local, remote, ignore });
   expect(result).toEqual({
@@ -149,27 +145,23 @@ test("handles null and undefined", () => {
 });
 
 test("merge is idempotent", async () => {
-  const local = initLWW<ComplexObject>({
+  let local = initLWW<ComplexObject>({
     peer: "A",
     value: { a: { b: 10 }, c: "local", constant: "Constant" },
     ignore,
   });
-  local.consistency.a = {
-    count: 1,
-    peer: "local-A",
-    history: [{ peer: "local-A", prev: { b: 1 } }],
-  };
+  local = updateLWW(local, { key: "a", value: { b: 1 }, peer: "peer-A" });
 
-  const remote = initLWW<ComplexObject>({
+  let remote = initLWW<ComplexObject>({
     peer: "A",
     value: { a: { b: 1000 }, c: "remote", constant: "Constant" },
     ignore,
   });
-  remote.consistency.c = {
-    count: 1,
+  remote = updateLWW(remote, {
+    key: "c",
+    value: "remote prev",
     peer: "remote-A",
-    history: [{ peer: "remote-A", prev: "remote prev" }],
-  };
+  });
 
   const localSelf = mergeLWW({ local, remote: local, ignore });
   expect(localSelf.resolved).toBe(localSelf.resolved);
@@ -178,43 +170,27 @@ test("merge is idempotent", async () => {
 });
 
 test("merge is associative", async () => {
-  const A = initLWW<ComplexObject>({
+  let A = initLWW<ComplexObject>({
     peer: "A",
     value: { a: { b: 10 }, c: "local", constant: "Constant" },
     ignore,
   });
-  A.consistency.a = {
-    count: 1,
-    peer: "local-A",
-    history: [{ peer: "local-A", prev: { b: 1 } }],
-  };
+  A = updateLWW(A, { key: "a", value: { b: 1 }, peer: "peer-A" });
 
-  const B = initLWW<ComplexObject>({
+  let B = initLWW<ComplexObject>({
     peer: "B",
     value: { a: { b: 1000 }, c: "remote", constant: "Constant" },
     ignore,
   });
-  B.consistency.c = {
-    count: 1,
-    peer: "remote-A",
-    history: [{ peer: "remote-A", prev: "remote prev" }],
-  };
+  B = updateLWW(B, { key: "c", value: "remote prev", peer: "remote-A" });
 
-  const C = initLWW<ComplexObject>({
+  let C = initLWW<ComplexObject>({
     peer: "C",
     value: { a: { b: 50 }, c: "remote", constant: "Constant" },
     ignore,
   });
-  C.consistency.a = {
-    count: 10,
-    peer: "remote-A",
-    history: [{ peer: "remote-A", prev: { b: -1 } }],
-  };
-  C.consistency.c = {
-    count: 10,
-    peer: "remote-C",
-    history: [{ peer: "remote-C", prev: "remote C prev" }],
-  };
+  C = updateLWW(C, { key: "c", value: "remote C prev", peer: "remote-C" });
+  C = updateLWW(C, { key: "a", value: { b: -1 }, peer: "remote-C" });
 
   const AB = mergeLWW({ local: A, remote: B, ignore });
   const BC = mergeLWW({ local: B, remote: C, ignore });

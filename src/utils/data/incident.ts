@@ -300,7 +300,6 @@ export async function editIncident(id: string, incident: EditIncident) {
         key: key as keyof EditIncident,
         value: newValue,
         peer,
-        meta: { instant: new Date() },
       });
     }
   }

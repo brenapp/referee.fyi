@@ -24,7 +24,6 @@ import {
   deleteIncident,
   deleteManyIncidents,
   getDeletedIncidentsForEvent,
-  getIncident,
   getIncidentsByEvent,
   hasIncident,
   newIncident,

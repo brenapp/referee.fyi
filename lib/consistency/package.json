@@ -6,6 +6,7 @@
   "description": "Strong eventual-consistency guarantees using CRDTs",
   "exports": "./index.js",
   "scripts": {
+    "build": "tsc",
     "test": "vitest"
   },
   "keywords": [],

@@ -24,8 +24,7 @@ import { toast } from "~components/Toast";
 import { Spinner } from "~components/Spinner";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { queryClient } from "~utils/data/query";
-import { getSender } from "~utils/data/share";
-import { IncidentMatchSkills } from "~share/EventIncidents";
+import { IncidentMatchSkills } from "@referee-fyi/share";
 
 export type EventNewIncidentDialogProps = {
   open: boolean;
@@ -288,14 +287,6 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const onSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement> | React.MouseEvent) => {
       e.preventDefault();
-
-      const user = await getSender();
-
-      incident.revision = {
-        count: 0,
-        user,
-        history: [],
-      };
 
       const packed = packIncident(incident);
       setOpen(false);

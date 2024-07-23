@@ -5,8 +5,8 @@ import { IncidentMatchHeadToHead } from "./incident.js";
 export type SupportedGame = "High Stakes" | "Rapid Relay";
 
 export type ScratchpadForGame = {
-  "High Stakes": HighStakesMatchScratchpad;
-  "Rapid Relay": RapidRelayMatchScratchpad;
+  "High Stakes": BaseHighStakesMatchScratchpad;
+  "Rapid Relay": BaseRapidRelayMatchScratchpad;
 };
 
 export type BaseMatchScratchpad = {
@@ -32,19 +32,29 @@ export type HighStakesMatchScratchpadProperties = {
   auto: Color | "tie" | "none";
 };
 
-export type HighStakesMatchScratchpad = BaseMatchScratchpad &
+export type BaseHighStakesMatchScratchpad = BaseMatchScratchpad &
   HighStakesMatchScratchpadProperties;
+
+export type HighStakesMatchScratchpad = WithLWWConsistency<
+  BaseHighStakesMatchScratchpad,
+  ScratchpadUnchangeableProperties
+>;
 
 export type RapidRelayMatchScratchpadProperties = {
   game: "Rapid Relay";
 };
-export type RapidRelayMatchScratchpad = BaseMatchScratchpad &
+export type BaseRapidRelayMatchScratchpad = BaseMatchScratchpad &
   RapidRelayMatchScratchpadProperties;
 
-export type MatchScratchpad = WithLWWConsistency<
-  HighStakesMatchScratchpad | RapidRelayMatchScratchpad,
-  ScratchpadUnchangeableProperties
+export type RapidRelayMatchScratchpad = WithLWWConsistency<
+  BaseRapidRelayMatchScratchpad,
+  ScratchpadUnchangeableProperties,
+  Record<string, never>
 >;
+
+export type MatchScratchpad =
+  | HighStakesMatchScratchpad
+  | RapidRelayMatchScratchpad;
 
 export type EditScratchpad<T extends MatchScratchpad> = Omit<
   T,

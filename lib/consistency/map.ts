@@ -1,33 +1,29 @@
-import { KeyArray } from "~types";
 import { mergeLWW, WithLWWConsistency } from "./lww.js";
 import { mergeGrowSet } from "./gset.js";
 
 // July 2024 - Samsung Internet does not support Set.prototype.intersection or Set.prototype.difference
 import "core-js/actual/set";
 
-export type HasId = { id: string };
-export type ConsistentMapElement<
-  T extends HasId,
-  U extends KeyArray<T>,
-> = WithLWWConsistency<T, U>;
+type ConsistentMapElement = WithLWWConsistency<
+  Record<string, unknown> & { id: string },
+  never,
+  Record<never, unknown>
+>;
 
-export type ConsistentMap<T extends HasId, U extends KeyArray<T>> = {
+export type ConsistentMap<T extends ConsistentMapElement> = {
   deleted: string[];
-  values: Record<string, ConsistentMapElement<T, U>>;
+  values: Record<string, T>;
 };
 
-export type ConsistentMapMergeOptions<
-  T extends HasId,
-  U extends KeyArray<T>,
-> = {
-  local: ConsistentMap<T, U>;
-  remote: ConsistentMap<T, U>;
-  ignore: U;
+export type ConsistentMapMergeOptions<T extends ConsistentMapElement> = {
+  local: ConsistentMap<T>;
+  remote: ConsistentMap<T>;
+  ignore: readonly string[];
 };
 
-export type ConsistentMapMergeResult<T extends HasId, U extends KeyArray<T>> = {
+export type ConsistentMapMergeResult<T extends ConsistentMapElement> = {
   // Resolved state of the map
-  resolved: ConsistentMap<T, U>;
+  resolved: ConsistentMap<T>;
 
   // Values to save
   local: {
@@ -48,11 +44,11 @@ export type ConsistentMapMergeResult<T extends HasId, U extends KeyArray<T>> = {
   };
 };
 
-export function mergeMap<T extends HasId, const U extends KeyArray<T>>({
+export function mergeMap<T extends ConsistentMapElement>({
   local,
   remote,
   ignore,
-}: ConsistentMapMergeOptions<T, U>): ConsistentMapMergeResult<T, U> {
+}: ConsistentMapMergeOptions<T>): ConsistentMapMergeResult<T> {
   const localIds = new Set(Object.keys(local.values));
   const remoteIds = new Set(Object.keys(remote.values));
 
@@ -61,7 +57,11 @@ export function mergeMap<T extends HasId, const U extends KeyArray<T>>({
 
   const sharedIds = [...localIds.intersection(remoteIds)];
   const mergeResults = sharedIds.map((id) =>
-    mergeLWW({ ignore, local: local.values[id], remote: remote.values[id] })
+    mergeLWW({
+      ignore: ignore,
+      local: local.values[id],
+      remote: remote.values[id],
+    })
   );
 
   // Notify remote about results where we reject remote for being outdated (not just ties)
@@ -88,7 +88,7 @@ export function mergeMap<T extends HasId, const U extends KeyArray<T>>({
     [...remoteOnlyIds].map((id) => [id, remote.values[id]])
   );
   const sharedValues = Object.fromEntries(
-    mergeResults.map((result) => [result.resolved!.id, result.resolved!])
+    mergeResults.map((result) => [result.resolved!.id, result.resolved! as T])
   );
 
   return {

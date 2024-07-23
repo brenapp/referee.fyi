@@ -11,13 +11,13 @@ type BaseIncident = {
 };
 const ignore = ["id", "event", "team"] as const;
 
-type Incident = WithLWWConsistency<BaseIncident, typeof ignore>;
+type Incident = WithLWWConsistency<BaseIncident, "id" | "event" | "team">;
 
 test("new local entries uploaded", () => {
-  const local: ConsistentMap<BaseIncident, typeof ignore> = {
+  const local: ConsistentMap<Incident> = {
     deleted: [],
     values: {
-      incident1: initLWW<BaseIncident, typeof ignore>({
+      incident1: initLWW<Incident>({
         ignore,
         peer: "LOCAL",
         value: {
@@ -31,7 +31,7 @@ test("new local entries uploaded", () => {
     },
   };
 
-  const remote: ConsistentMap<Incident, typeof ignore> = {
+  const remote: ConsistentMap<Incident> = {
     deleted: ["incident12"],
     values: {},
   };
@@ -48,15 +48,15 @@ test("new local entries uploaded", () => {
 });
 
 test("new remote entries saved", () => {
-  const local: ConsistentMap<Incident, typeof ignore> = {
+  const local: ConsistentMap<Incident> = {
     deleted: ["incident12"],
     values: {},
   };
 
-  const remote: ConsistentMap<BaseIncident, typeof ignore> = {
+  const remote: ConsistentMap<Incident> = {
     deleted: [],
     values: {
-      incident1: initLWW<BaseIncident, typeof ignore>({
+      incident1: initLWW({
         ignore,
         peer: "LOCAL",
         value: {
@@ -82,10 +82,10 @@ test("new remote entries saved", () => {
 });
 
 test("local update handled", () => {
-  const local: ConsistentMap<BaseIncident, typeof ignore> = {
+  const local: ConsistentMap<Incident> = {
     deleted: ["incident12"],
     values: {
-      incident1: initLWW<BaseIncident, typeof ignore>({
+      incident1: initLWW({
         ignore,
         peer: "REMOTE",
         value: {
@@ -105,10 +105,10 @@ test("local update handled", () => {
     history: [{ prev: "Expansion", peer: "REMOTE" }],
   };
 
-  const remote: ConsistentMap<BaseIncident, typeof ignore> = {
+  const remote: ConsistentMap<Incident> = {
     deleted: [],
     values: {
-      incident1: initLWW<BaseIncident, typeof ignore>({
+      incident1: initLWW({
         ignore,
         peer: "REMOTE",
         value: {
@@ -135,10 +135,10 @@ test("local update handled", () => {
 });
 
 test("remote update handled", () => {
-  const local: ConsistentMap<BaseIncident, typeof ignore> = {
+  const local: ConsistentMap<Incident> = {
     deleted: ["incident12"],
     values: {
-      incident1: initLWW<BaseIncident, typeof ignore>({
+      incident1: initLWW({
         ignore,
         peer: "REMOTE",
         value: {
@@ -152,15 +152,16 @@ test("remote update handled", () => {
     },
   };
   local.values["incident1"] = updateLWW(local.values["incident1"], {
-    peer: "LOCAL",
     key: "note",
-    value: local.values["incident1"].note + " BMM EDIT",
+    value: "Expansion BMM EDIT",
+    peer: "LOCAL",
+    meta: {},
   });
 
-  const remote: ConsistentMap<BaseIncident, typeof ignore> = {
+  const remote: ConsistentMap<Incident> = {
     deleted: [],
     values: {
-      incident1: initLWW<BaseIncident, typeof ignore>({
+      incident1: initLWW({
         ignore,
         peer: "REMOTE",
         value: {
@@ -174,9 +175,10 @@ test("remote update handled", () => {
     },
   };
   remote.values["incident1"] = updateLWW(remote.values["incident1"], {
-    peer: "REMOTE",
     key: "rule",
     value: "<SG8>",
+    peer: "REMOTE",
+    meta: {},
   });
 
   const result = mergeMap({ local, remote, ignore });
@@ -209,12 +211,12 @@ test("remote update handled", () => {
 });
 
 test("deleted values merged", () => {
-  const local: ConsistentMap<BaseIncident, typeof ignore> = {
+  const local: ConsistentMap<Incident> = {
     deleted: ["incident1", "incident2", "incident3"],
     values: {},
   };
 
-  const remote: ConsistentMap<Incident, typeof ignore> = {
+  const remote: ConsistentMap<Incident> = {
     deleted: ["incident3", "incident4", "incident5"],
     values: {},
   };

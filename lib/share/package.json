@@ -6,6 +6,7 @@
   "description": "Share Instance Objects",
   "exports": "./index.js",
   "scripts": {
+    "build": "tsc",
     "test": "vitest"
   },
   "keywords": [],

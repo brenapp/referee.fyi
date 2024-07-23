@@ -44,3 +44,5 @@ export type Incident = WithLWWConsistency<
   IncidentUnchangeableProperties,
   IncidentHistoryMeta
 >;
+
+export type EditIncident = Omit<BaseIncident, IncidentUnchangeableProperties>;

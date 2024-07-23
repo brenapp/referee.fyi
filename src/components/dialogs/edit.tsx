@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { Button } from "~components/Button";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
@@ -10,94 +10,13 @@ import {
   TextArea,
 } from "~components/Input";
 import { toast } from "~components/Toast";
-import { IncidentMatchSkills, UnchangeableProperties } from "~share/api";
-import { Change } from "~share/revision";
-import {
-  IncidentOutcome,
-  Incident,
-  matchToString,
-  userString,
-} from "~utils/data/incident";
+import { IncidentMatchSkills } from "@referee-fyi/share";
+import { IncidentOutcome, Incident } from "~utils/data/incident";
 import { useDeleteIncident, useEditIncident } from "~utils/hooks/incident";
 import { useEventMatchesForTeam, useEventTeam } from "~utils/hooks/robotevents";
 import { Rule, useRulesForEvent } from "~utils/hooks/rules";
 import { useCurrentEvent } from "~utils/hooks/state";
-import { timeAgo } from "~utils/time";
-
-export const RevisionEntry: React.FC<{
-  revision: Change<Incident, UnchangeableProperties>;
-}> = ({ revision }) => {
-  const values: [ReactNode, ReactNode] = useMemo(() => {
-    switch (revision.property) {
-      case "time": {
-        return [revision.old.toLocaleString(), revision.new.toLocaleString()];
-      }
-      case "match": {
-        return [
-          revision.old ? matchToString(revision.old) : "No Match",
-          revision.new ? matchToString(revision.new) : "No Match",
-        ];
-      }
-      case "rules": {
-        return [revision.old.join(" "), revision.new.join(" ")];
-      }
-      case "notes":
-      case "outcome":
-      case "id": {
-        return [revision.old, revision.new];
-      }
-    }
-  }, [revision]);
-
-  return (
-    <p>
-      {revision.property}: {values[0]} to {values[1]}
-    </p>
-  );
-};
-
-export type RevisionListProps = {
-  incident: Incident;
-};
-
-export const RevisionList: React.FC<RevisionListProps> = ({ incident }) => {
-  const creator = useMemo(
-    () => userString(incident.revision?.user),
-    [incident.revision?.user]
-  );
-
-  if (!incident.revision) {
-    return null;
-  }
-
-  return (
-    <section className="mt-2">
-      <h2 className="font-bold">Revision History</h2>
-      <p>Created By: {creator}</p>
-
-      {incident.revision.history.map((log) => (
-        <details className="p-2 bg-zinc-800 mt-2 rounded-md">
-          <summary>
-            <p className="inline-flex ml-2 items-center justify-between w-max">
-              <span className="flex-1">{userString(log.user)}</span>,&nbsp;
-              <span>{timeAgo(log.date)}</span>
-            </p>
-          </summary>
-          <ul className="list-disc">
-            {log.changes.map((revision) => (
-              <li key={revision.property} className="ml-4">
-                <RevisionEntry revision={revision} />
-              </li>
-            ))}
-            {log.changes.length < 1 ? (
-              <li className="ml-4">No Changes Made</li>
-            ) : null}
-          </ul>
-        </details>
-      ))}
-    </section>
-  );
-};
+import { EditHistory } from "~components/EditHistory";
 
 export type EditIncidentDialogProps = {
   open: boolean;
@@ -292,6 +211,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             })}
           </Select>
         </label>
+        <EditHistory value={incident} valueKey="match" />
         {incident.match?.type === "skills" ? (
           <div className="flex gap-2 mt-2">
             <Radio
@@ -380,7 +300,6 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             onChange={onChangeIncidentNotes}
           />
         </label>
-        <RevisionList incident={incident} />
       </DialogBody>
       <nav className="flex gap-4 p-2">
         <Button mode="dangerous" onClick={onClickDelete}>

@@ -1,14 +1,6 @@
 import { ConsistentMap } from "@referee-fyi/consistency";
-import type {
-  BaseIncident,
-  Incident,
-  IncidentUnchangeableProperties,
-} from "./incident.ts";
-import type {
-  BaseMatchScratchpad,
-  MatchScratchpad,
-  ScratchpadUnchangeableProperties,
-} from "./index.ts";
+import type { Incident } from "./incident.ts";
+import type { MatchScratchpad } from "./index.ts";
 import type { Invitation } from "./server.js";
 
 export type User = {
@@ -123,15 +115,15 @@ export type InvitationListItem = Pick<Invitation, "admin"> & {
   user: User;
 };
 
-export type WebSocketServerShareInfoMessage<
-  S extends BaseMatchScratchpad = MatchScratchpad,
-> = {
+export type InstanceIncidents = ConsistentMap<Incident>;
+export type InstanceScratchpads = ConsistentMap<MatchScratchpad>;
+
+export type WebSocketServerShareInfoMessage = {
   type: "server_share_info";
   sku: string;
-  incidents: ConsistentMap<BaseIncident, IncidentUnchangeableProperties>;
-  scratchpad: ConsistentMap<S, ScratchpadUnchangeableProperties>;
+  incidents: InstanceIncidents;
+  scratchpads: InstanceScratchpads;
   users: {
-    keys: Record<string, string>;
     active: User[];
     invitations: InvitationListItem[];
   };

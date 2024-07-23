@@ -1,21 +1,22 @@
-import { initLWW, mergeLWW } from "./index.js";
+import { initLWW, mergeLWW, WithLWWConsistency } from "./index.js";
 import { test, expect } from "vitest";
 
 type BaseObject = {
   a: string;
   constant: string;
 };
+type Obj = WithLWWConsistency<BaseObject, "constant">;
 const ignore = ["constant"] as const;
 
 test("greater-count local value persists", () => {
-  const local = initLWW<BaseObject, typeof ignore>({
+  const local = initLWW<Obj>({
     peer: "A",
     value: { a: "Local Value", constant: "Constant" },
     ignore,
   });
   local.consistency.a.count = 1;
 
-  const remote = initLWW<BaseObject, typeof ignore>({
+  const remote = initLWW<Obj>({
     peer: "A",
     value: { a: "Remote Value", constant: "Constant" },
     ignore,
@@ -29,13 +30,13 @@ test("greater-count local value persists", () => {
 });
 
 test("greater-count remote value persists", () => {
-  const local = initLWW<BaseObject, typeof ignore>({
+  const local = initLWW<Obj>({
     peer: "A",
     value: { a: "Local Value", constant: "Constant" },
     ignore,
   });
 
-  const remote = initLWW<BaseObject, typeof ignore>({
+  const remote = initLWW<Obj>({
     peer: "A",
     value: { a: "Remote Value", constant: "Constant" },
     ignore,
@@ -50,13 +51,13 @@ test("greater-count remote value persists", () => {
 });
 
 test("tie goes to higher peer value", () => {
-  const local = initLWW<BaseObject, typeof ignore>({
+  const local = initLWW<Obj>({
     peer: "A",
     value: { a: "Local Value", constant: "Constant" },
     ignore,
   });
 
-  const remote = initLWW<BaseObject, typeof ignore>({
+  const remote = initLWW<Obj>({
     peer: "Z",
     value: { a: "Remote Value", constant: "Constant" },
     ignore,
@@ -69,14 +70,15 @@ test("tie goes to higher peer value", () => {
   expect(opposite.resolved).toEqual(result.resolved);
 });
 
-type ComplexObject = {
+type BaseComplexObject = {
   a: { b: number };
   c: string;
   constant: string;
 };
+type ComplexObject = WithLWWConsistency<BaseComplexObject, "constant">;
 
 test("lww is resolved on a key-by-key basis", () => {
-  const local = initLWW<ComplexObject, typeof ignore>({
+  const local = initLWW<ComplexObject>({
     peer: "A",
     value: { a: { b: 10 }, c: "local", constant: "Constant" },
     ignore,
@@ -87,7 +89,7 @@ test("lww is resolved on a key-by-key basis", () => {
     history: [{ peer: "local-A", prev: { b: 1 } }],
   };
 
-  const remote = initLWW<ComplexObject, typeof ignore>({
+  const remote = initLWW<ComplexObject>({
     peer: "A",
     value: { a: { b: 1000 }, c: "remote", constant: "Constant" },
     ignore,
@@ -125,7 +127,7 @@ test("lww is resolved on a key-by-key basis", () => {
 });
 
 test("handles null and undefined", () => {
-  const local = initLWW<BaseObject, typeof ignore>({
+  const local = initLWW<Obj>({
     peer: "A",
     value: { a: "Local Value", constant: "Constant" },
     ignore,
@@ -147,7 +149,7 @@ test("handles null and undefined", () => {
 });
 
 test("merge is idempotent", async () => {
-  const local = initLWW<ComplexObject, typeof ignore>({
+  const local = initLWW<ComplexObject>({
     peer: "A",
     value: { a: { b: 10 }, c: "local", constant: "Constant" },
     ignore,
@@ -158,7 +160,7 @@ test("merge is idempotent", async () => {
     history: [{ peer: "local-A", prev: { b: 1 } }],
   };
 
-  const remote = initLWW<ComplexObject, typeof ignore>({
+  const remote = initLWW<ComplexObject>({
     peer: "A",
     value: { a: { b: 1000 }, c: "remote", constant: "Constant" },
     ignore,
@@ -176,7 +178,7 @@ test("merge is idempotent", async () => {
 });
 
 test("merge is associative", async () => {
-  const A = initLWW<ComplexObject, typeof ignore>({
+  const A = initLWW<ComplexObject>({
     peer: "A",
     value: { a: { b: 10 }, c: "local", constant: "Constant" },
     ignore,
@@ -187,7 +189,7 @@ test("merge is associative", async () => {
     history: [{ peer: "local-A", prev: { b: 1 } }],
   };
 
-  const B = initLWW<ComplexObject, typeof ignore>({
+  const B = initLWW<ComplexObject>({
     peer: "B",
     value: { a: { b: 1000 }, c: "remote", constant: "Constant" },
     ignore,
@@ -198,7 +200,7 @@ test("merge is associative", async () => {
     history: [{ peer: "remote-A", prev: "remote prev" }],
   };
 
-  const C = initLWW<ComplexObject, typeof ignore>({
+  const C = initLWW<ComplexObject>({
     peer: "C",
     value: { a: { b: 50 }, c: "remote", constant: "Constant" },
     ignore,

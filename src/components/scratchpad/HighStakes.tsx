@@ -8,18 +8,12 @@ import {
 } from "react";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { Checkbox, Radio } from "~components/Input";
-import {
-  HighStakesMatchScratchpad,
-  MatchScratchpad,
-} from "~share/MatchScratchpad";
-import { userString } from "~utils/data/incident";
+import { HighStakesMatchScratchpad, MatchScratchpad } from "@referee-fyi/share";
 import {
   useDefaultScratchpad,
   useMatchScratchpad,
-  usePropertyLastChangeLogForScratchpad,
   useUpdateMatchScratchpad,
 } from "~utils/hooks/scratchpad";
-import { timeAgo } from "~utils/time";
 
 type ScratchpadState<T extends MatchScratchpad, K extends keyof T> = {
   data: T | null | undefined;
@@ -83,22 +77,13 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
     mutateAsync,
   });
 
-  const changeLog = usePropertyLastChangeLogForScratchpad(data);
-
   return (
     <section>
       <section className="bg-zinc-800 p-4 mt-4 rounded-md">
         <div className="flex items-center gap-2">
           <CodeBracketSquareIcon height={20} />
           <p>Auto Winner</p>
-          <span>
-            {changeLog.auto ? (
-              <span className="text-sm ml-2 italic text-emerald-400">
-                {userString(changeLog.auto.user)},&nbsp;
-                {timeAgo(changeLog.auto.date)}
-              </span>
-            ) : null}
-          </span>
+          <span></span>
         </div>
         <fieldset className="mt-2 flex gap-2">
           <Radio
@@ -156,12 +141,6 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
         <div className="flex items-center gap-2">
           <StarIcon height={20} />
           <p>AWP</p>
-          {changeLog.awp ? (
-            <span className="text-sm ml-2 italic text-emerald-400">
-              {userString(changeLog.awp.user)},&nbsp;
-              {timeAgo(changeLog.awp.date)}
-            </span>
-          ) : null}
         </div>
         <div className="mt-2 flex gap-2">
           <Checkbox

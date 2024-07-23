@@ -27,7 +27,12 @@ export const Incident: React.FC<IncidentProps> = ({
   ...props
 }) => {
   const [editIncidentOpen, setEditIncidentOpen] = useState(false);
-  const key = incident.id + (incident.revision?.count ?? -1).toString();
+  const key =
+    incident.id +
+    Object.values(incident.consistency)
+      .map((v) => v.count)
+      .join("");
+
   return (
     <>
       <EditIncidentDialog

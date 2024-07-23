@@ -12,7 +12,6 @@ import { useEventIncidents } from "~utils/hooks/incident";
 import { FixedSizeList as List } from "react-window";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { Incident } from "~components/Incident";
-import { IncidentOutcome } from "~share/EventIncidents";
 import { Rule, useRulesForEvent } from "~utils/hooks/rules";
 import { Dialog, DialogBody } from "~components/Dialog";
 import { XMarkIcon } from "@heroicons/react/20/solid";
@@ -21,6 +20,7 @@ import { twMerge } from "tailwind-merge";
 import { useMutation } from "@tanstack/react-query";
 import { useShareConnection } from "~models/ShareConnection";
 import { useShareID, useShareProfile } from "~utils/hooks/share";
+import { IncidentOutcome } from "@referee-fyi/share";
 
 export type Filters = {
   outcomes: Record<IncidentOutcome, boolean>;

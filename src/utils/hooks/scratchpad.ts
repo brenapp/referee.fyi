@@ -3,8 +3,8 @@ import { MatchData } from "robotevents/out/endpoints/matches";
 import {
   EditScratchpad,
   MatchScratchpad,
-  UnchangeableProperties,
-} from "~share/MatchScratchpad";
+  ScratchpadUnchangeableProperties,
+} from "@referee-fyi/share";
 import {
   editScratchpad,
   getDefaultScratchpad,
@@ -14,11 +14,13 @@ import {
   setMatchScratchpad,
 } from "~utils/data/scratchpad";
 import { useEvent } from "./robotevents";
-import { getSender } from "~utils/data/share";
-import { useSender } from "./share";
+import { getPeer } from "~utils/data/share";
 import { queryClient } from "~utils/data/query";
-import { ChangeLog } from "~share/revision";
-import { useMemo } from "react";
+import {
+  LastWriteWinsConsistency,
+  WithLWWConsistency,
+} from "@referee-fyi/consistency";
+import { useShareConnection } from "~models/ShareConnection";
 
 export function useMatchScratchpad<T extends MatchScratchpad>(
   match?: MatchData | null
@@ -43,11 +45,10 @@ export function useDefaultScratchpad<T extends MatchScratchpad>(
   const { data: event, isSuccess: isSuccessEvent } = useEvent(
     match?.event.code ?? ""
   );
-  const { data: sender, isSuccess: isSuccessSender } = useSender();
   return useQuery({
-    queryKey: ["default_match_scratchpad", event?.season.id, sender],
-    queryFn: () => {
-      if (!event || !sender || !match) {
+    queryKey: ["default_match_scratchpad", event?.season.id],
+    queryFn: async () => {
+      if (!event || !match) {
         return null;
       }
 
@@ -56,9 +57,10 @@ export function useDefaultScratchpad<T extends MatchScratchpad>(
         return null;
       }
 
-      return getDefaultScratchpad(match, sender, game) as T;
+      const peer = await getPeer();
+      return getDefaultScratchpad(match, peer, game) as T;
     },
-    enabled: isSuccessEvent && isSuccessSender,
+    enabled: isSuccessEvent,
   });
 }
 
@@ -66,6 +68,7 @@ export function useUpdateMatchScratchpad<T extends MatchScratchpad>(
   match?: MatchData
 ) {
   const { data: event } = useEvent(match?.event.code ?? "");
+  const connection = useShareConnection();
 
   return useMutation({
     mutationKey: ["update_match_scratchpad", match],
@@ -82,12 +85,13 @@ export function useUpdateMatchScratchpad<T extends MatchScratchpad>(
       const id = getScratchpadID(match);
       const current = await getMatchScratchpad(id);
       if (!current) {
-        const sender = await getSender();
-        const def = getDefaultScratchpad(match, sender, game);
+        const peer = await getPeer();
+        const def = getDefaultScratchpad(match, peer, game);
         await setMatchScratchpad(id, def);
       }
 
-      await editScratchpad(id, scratchpad);
+      const value = await editScratchpad(id, scratchpad);
+      connection.updateScratchpad(id, value!);
       queryClient.invalidateQueries({
         exact: true,
         queryKey: [`scratchpad`, match],
@@ -96,46 +100,13 @@ export function useUpdateMatchScratchpad<T extends MatchScratchpad>(
   });
 }
 
-const UNCHANGEABLE_PROPERTIES = Object.keys({
-  event: "",
-  game: "",
-  match: "",
-  revision: "",
-} satisfies Record<UnchangeableProperties, unknown>);
-
 export function usePropertyLastChangeLogForScratchpad<
   T extends MatchScratchpad,
 >(
-  scratchpad: T | undefined | null
-): Record<
-  Exclude<keyof T, UnchangeableProperties>,
-  ChangeLog<T, UnchangeableProperties> | null
-> {
-  return useMemo(() => {
-    if (!scratchpad) {
-      return {} as Record<
-        Exclude<keyof T, UnchangeableProperties>,
-        ChangeLog<T, UnchangeableProperties> | null
-      >;
-    }
-
-    const properties = Object.keys(scratchpad).filter(
-      (p) => !UNCHANGEABLE_PROPERTIES.includes(p)
-    ) as Exclude<keyof T, UnchangeableProperties>[];
-
-    const entries = properties.map(
-      (key) =>
-        [
-          key,
-          scratchpad.revision?.history.findLast((changelog) =>
-            changelog.changes.some((change) => change.property === key)
-          ) ?? null,
-        ] as const
-    );
-
-    return Object.fromEntries(entries) as Record<
-      Exclude<keyof T, UnchangeableProperties>,
-      ChangeLog<T, UnchangeableProperties> | null
-    >;
-  }, [scratchpad]);
+  scratchpad:
+    | WithLWWConsistency<T, ScratchpadUnchangeableProperties>
+    | undefined
+    | null
+): LastWriteWinsConsistency<T, ScratchpadUnchangeableProperties> | undefined {
+  return scratchpad?.consistency;
 }

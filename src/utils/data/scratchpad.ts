@@ -2,18 +2,21 @@ import { get, getMany, set, setMany, update } from "~utils/data/keyval";
 import {
   BaseMatchScratchpad,
   EditScratchpad,
-  HighStakesMatchScratchpad,
   MatchScratchpad,
-  RapidRelayMatchScratchpad,
   SupportedGame,
-  UnchangeableProperties,
-} from "~share/MatchScratchpad";
-import { getSender } from "./share";
-import { Change } from "~share/revision";
+  SCRATCHPAD_IGNORE,
+  HighStakesMatchScratchpad,
+  RapidRelayMatchScratchpad,
+} from "@referee-fyi/share";
+import { getPeer } from "./share";
 import { MatchData } from "robotevents/out/endpoints/matches";
-import { WebSocketSender } from "~share/api";
 import { seasons } from "robotevents";
-import { useShareConnection } from "~models/ShareConnection";
+import {
+  initLWW,
+  isKeyLWW,
+  LWWKeys,
+  updateLWW,
+} from "@referee-fyi/consistency";
 
 export function getScratchpadID(match: MatchData) {
   return `scratchpad_${match.event.code}_${
@@ -21,21 +24,21 @@ export function getScratchpadID(match: MatchData) {
   }_${match.name.replace(/ /g, "")}`;
 }
 
-export async function getMatchScratchpad<T extends BaseMatchScratchpad>(
+export async function getMatchScratchpad<T extends MatchScratchpad>(
   id: string
 ): Promise<T | undefined> {
   const data = await get<T>(id);
   return data;
 }
 
-export async function getManyMatchScratchpads<T extends BaseMatchScratchpad>(
+export async function getManyMatchScratchpads<T extends MatchScratchpad>(
   ids: string[]
 ): Promise<Record<string, T>> {
   const values = await getMany<T>(ids);
   return Object.fromEntries(ids.map((id, i) => [id, values[i]!]));
 }
 
-export async function setMatchScratchpad<T extends BaseMatchScratchpad>(
+export async function setMatchScratchpad<T extends MatchScratchpad>(
   id: string,
   scratchpad: T
 ) {
@@ -51,7 +54,7 @@ export async function getScratchpadIdsForEvent(sku: string) {
   return data ?? new Set();
 }
 
-export async function setManyMatchScratchpad<T extends BaseMatchScratchpad>(
+export async function setManyMatchScratchpad<T extends MatchScratchpad>(
   entries: [id: string, scratchpad: T][]
 ) {
   return setMany(entries);
@@ -60,55 +63,35 @@ export async function setManyMatchScratchpad<T extends BaseMatchScratchpad>(
 export async function editScratchpad<T extends MatchScratchpad>(
   id: string,
   scratchpad: EditScratchpad<T>
-) {
+): Promise<T | undefined> {
   const current = await getMatchScratchpad<T>(id);
 
   if (!current) {
     return;
   }
 
-  const changes: Change<MatchScratchpad, UnchangeableProperties>[] = [];
-  for (const [key, currentValue] of Object.entries(scratchpad)) {
-    if (["event", "match", "revision", "game"].includes(key)) continue;
+  let updated: T = current;
+  const peer = await getPeer();
 
-    const newValue = current[key as keyof MatchScratchpad];
+  for (const [key, currentValue] of Object.entries(scratchpad) as [
+    LWWKeys<T>,
+    unknown,
+  ][]) {
+    if (!isKeyLWW(key, SCRATCHPAD_IGNORE)) continue;
+
+    const newValue = current[key as keyof T];
 
     if (JSON.stringify(currentValue) != JSON.stringify(newValue)) {
-      changes.push({
-        property: key,
-        old: currentValue,
-        new: newValue,
-      } as Change<MatchScratchpad, UnchangeableProperties>);
+      updated = updateLWW(updated, {
+        key,
+        value: currentValue,
+        peer,
+      });
     }
   }
 
-  if (changes.length < 1) {
-    return;
-  }
-
-  const user = await getSender();
-
-  const revision = current.revision ?? {
-    count: 0,
-    user,
-    history: [],
-  };
-
-  revision.count += 1;
-  revision.history.push({
-    user,
-    date: new Date(),
-    changes,
-  });
-
-  const value = {
-    ...current,
-    ...scratchpad,
-    revision,
-  };
-
-  useShareConnection.getState().updateScratchpad(id, value);
-  await setMatchScratchpad(id, value);
+  await setMatchScratchpad(id, updated);
+  return updated;
 }
 
 export function getGameForSeason(seasonId: number): SupportedGame | null {
@@ -136,10 +119,11 @@ export function getGameForSeason(seasonId: number): SupportedGame | null {
 
 export function getDefaultScratchpad(
   match: MatchData,
-  user: WebSocketSender,
+  peer: string,
   game: SupportedGame
 ): MatchScratchpad {
   const base: BaseMatchScratchpad = {
+    id: getScratchpadID(match),
     event: match.event.code,
     match: {
       type: "match",
@@ -151,26 +135,25 @@ export function getDefaultScratchpad(
     notes: "",
   };
 
-  const revision = { count: 0, user, history: [] };
-
   switch (game) {
     case "High Stakes": {
-      const data: HighStakesMatchScratchpad = {
-        ...base,
-        game,
-        revision,
-        awp: { red: false, blue: false },
-        auto: "none",
-      };
-      return data;
+      return initLWW<HighStakesMatchScratchpad>({
+        peer,
+        ignore: SCRATCHPAD_IGNORE,
+        value: {
+          ...base,
+          game: "High Stakes",
+          auto: "none",
+          awp: { blue: false, red: false },
+        },
+      });
     }
     case "Rapid Relay": {
-      const data: RapidRelayMatchScratchpad = {
-        ...base,
-        game,
-        revision,
-      };
-      return data;
+      return initLWW<RapidRelayMatchScratchpad>({
+        peer,
+        ignore: SCRATCHPAD_IGNORE,
+        value: { ...base, game: "Rapid Relay" },
+      });
     }
   }
 }

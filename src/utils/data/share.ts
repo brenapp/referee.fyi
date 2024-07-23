@@ -1,7 +1,7 @@
 import { del, get, set } from "~utils/data/keyval";
 import type {
   ShareResponse,
-  ShareUser,
+  User,
   APIRegisterUserResponseBody,
   APIPostCreateResponseBody,
   APIGetInvitationResponseBody,
@@ -15,7 +15,7 @@ import type {
   WebSocketSender,
   APIPutInvitationRequestResponseBody,
   APIGetInvitationRequestResponseBody,
-} from "~share/api";
+} from "@referee-fyi/share";
 import { Incident } from "./incident";
 import { queryClient } from "./query";
 import { exportPublicKey, getKeyPair, getSignRequestHeaders } from "./crypto";
@@ -59,8 +59,8 @@ export function isValidJoinRequest(
   return versionMatch && hasUser;
 }
 
-export function getJoinRequest({ id, name }: ShareUser): JoinRequest {
-  return { client_version: __REFEREE_FYI_VERSION__, user: { name, key: id } };
+export function getJoinRequest({ key, name }: User): JoinRequest {
+  return { client_version: __REFEREE_FYI_VERSION__, user: { name, key } };
 }
 
 export async function getShareName() {
@@ -70,6 +70,10 @@ export async function getShareName() {
 export async function getShareId() {
   const { publicKey } = await getKeyPair();
   return exportPublicKey(publicKey, false);
+}
+
+export async function getPeer() {
+  return getShareId();
 }
 
 export async function getSender(): Promise<WebSocketSender> {

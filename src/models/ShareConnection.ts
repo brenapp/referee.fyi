@@ -241,8 +241,10 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
   },
 
   addIncident: async (incident: Incident) => {
-    const connected = get().readyState === WebSocket.OPEN;
-    if (!connected) {
+    const store = get();
+    const connected = store.readyState === WebSocket.OPEN;
+    const invitation = store.invitation;
+    if (!connected && invitation) {
       await addServerIncident(incident);
       return;
     }
@@ -251,8 +253,10 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
   },
 
   editIncident: async (incident: Incident) => {
-    const connected = get().readyState === WebSocket.OPEN;
-    if (!connected) {
+    const store = get();
+    const connected = store.readyState === WebSocket.OPEN;
+    const invitation = store.invitation;
+    if (!connected && invitation) {
       await editServerIncident(incident);
       return;
     }
@@ -261,12 +265,11 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
   },
 
   deleteIncident: async (id: string) => {
-    const connected = get().readyState === WebSocket.OPEN;
-    if (!connected) {
-      const incident = await getIncident(id);
-      if (incident) {
-        await deleteServerIncident(id, incident.event);
-      }
+    const store = get();
+    const connected = store.readyState === WebSocket.OPEN;
+    const invitation = store.invitation;
+    if (!connected && invitation) {
+      await deleteServerIncident(id, invitation.sku);
       return;
     }
 

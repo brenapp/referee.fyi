@@ -1,5 +1,11 @@
 import {
+  BaseIncident,
+  INCIDENT_IGNORE,
+  SCRATCHPAD_IGNORE,
+} from "@referee-fyi/share";
+import {
   Incident,
+  NewIncident,
   deleteIncident,
   editIncident,
   getIncident,
@@ -17,6 +23,8 @@ import { Alliance, Match, MatchData } from "robotevents/out/endpoints/matches";
 import { toast } from "~components/Toast";
 import { useShareConnection } from "~models/ShareConnection";
 import { queryClient } from "~utils/data/query";
+import { getPeer } from "~utils/data/share";
+import { initLWW } from "@referee-fyi/consistency";
 
 export function useIncident(id: string | undefined | null) {
   return useQuery<Incident | undefined>({
@@ -48,11 +56,12 @@ export function useNewIncident() {
   const connection = useShareConnection();
   return useMutation({
     mutationKey: ["newIncident"],
-    mutationFn: async (incident: Omit<Incident, "id">) => {
+    mutationFn: async (incident: NewIncident) => {
       try {
-        const id = await newIncident(incident);
-        connection.addIncident({ id, ...incident });
-        return id;
+        const peer = await getPeer();
+        const result = await newIncident(incident, peer);
+        connection.addIncident(result);
+        return result;
       } catch (e) {
         toast({ type: "error", message: `${e}` });
       }
@@ -67,7 +76,7 @@ export function useEditIncident() {
   const connection = useShareConnection();
   return useMutation({
     mutationKey: ["editIncident"],
-    mutationFn: async (incident: Omit<Incident, "event" | "team">) => {
+    mutationFn: async (incident: Omit<BaseIncident, "event" | "team">) => {
       try {
         const updated = await editIncident(incident.id, incident);
         connection.editIncident(updated!);
@@ -108,7 +117,14 @@ export function usePendingIncidents(
       mutationKey: ["newIncident"],
       status: "pending",
     },
-    select: (mutation) => mutation.state.variables as Incident,
+    select: (mutation) => {
+      const newIncident = mutation.state.variables as NewIncident;
+      return initLWW<Incident>({
+        value: { ...newIncident, id: `temp_incident_${mutation.mutationId}` },
+        peer: "local",
+        ignore: INCIDENT_IGNORE,
+      });
+    },
   });
 
   const editIncident = useMutationState({

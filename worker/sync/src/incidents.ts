@@ -1,20 +1,24 @@
 import { AutoRouter, createResponse } from "itty-router";
 import { response } from "./utils";
-import type {
-  Incident,
-  WebSocketMessage,
-  WebSocketPayload,
-  WebSocketPeerMessage,
-  WebSocketSender,
-  WebSocketServerShareInfoMessage,
-  InvitationListItem,
-  IncidentMatch,
-  MatchScratchpad,
-  ShareInstance,
-  User,
+import {
+  type Incident,
+  type WebSocketMessage,
+  type WebSocketPayload,
+  type WebSocketPeerMessage,
+  type WebSocketSender,
+  type WebSocketServerShareInfoMessage,
+  type InvitationListItem,
+  type IncidentMatch,
+  type MatchScratchpad,
+  type ShareInstance,
+  type User,
+  type InstanceIncidents,
+  type InstanceScratchpads,
+  INCIDENT_IGNORE,
 } from "@referee-fyi/share";
 import { getUser } from "./data";
-import { Env, RequestHasInvitation } from "./types";
+import { Env, EventIncidentsInitData, RequestHasInvitation } from "./types";
+import { mergeLWW } from "@referee-fyi/consistency";
 import { DurableObject } from "cloudflare:workers";
 
 export type SessionClient = {
@@ -209,24 +213,36 @@ export class EventIncidents extends DurableObject {
     return incidents;
   }
 
-  async getIncidentsData(): Promise<EventIncidentsData> {
+  async getIncidentsData(): Promise<InstanceIncidents> {
     const incidents = await this.getAllIncidents();
     const deleted = await this.getDeletedIncidents();
 
-    return { incidents, deleted: [...deleted.keys()] };
+    return {
+      values: Object.fromEntries(incidents.map((i) => [i.id, i])),
+      deleted: [...deleted.keys()],
+    };
+  }
+
+  async getScratchpadData(): Promise<InstanceScratchpads> {
+    const values = await this.getAllScratchpads();
+    return { deleted: [], values };
   }
 
   async createServerShareMessage(): Promise<WebSocketServerShareInfoMessage> {
+    const sku = await this.getSKU();
     const incidents = await this.getIncidentsData();
+    const scratchpads = await this.getScratchpadData();
     const activeUsers = this.getActiveUsers();
     const invitations = await this.getInvitationList();
-    const scratchpads = await this.getAllScratchpads();
     return {
       type: "server_share_info",
-      activeUsers,
-      invitations,
-      data,
+      sku: sku ?? "",
+      incidents,
       scratchpads,
+      users: {
+        active: activeUsers,
+        invitations,
+      },
     };
   }
 
@@ -294,7 +310,7 @@ export class EventIncidents extends DurableObject {
     return invitations;
   }
 
-  getActiveUsers(): ShareUser[] {
+  getActiveUsers(): User[] {
     return this.clients
       .filter((client) => client.active)
       .map((client) => client.user);
@@ -364,13 +380,13 @@ export class EventIncidents extends DurableObject {
 
   async handleAddIncident(request: Request) {
     const user = this.getRequestUser(request);
-    const client = this.clients.find((v) => v.user.id === user.key);
+    const client = this.clients.find((v) => v.user.key === user.key);
 
     const sender: WebSocketSender = client
       ? {
           type: "client",
           name: client.user.name,
-          id: client.user.id,
+          id: client.user.key,
         }
       : { type: "server" };
 
@@ -424,35 +440,32 @@ export class EventIncidents extends DurableObject {
     }
 
     const user = this.getRequestUser(request);
-    const client = this.clients.find((v) => v.user.id === user.key);
+    const client = this.clients.find((v) => v.user.key === user.key);
     const currentIncident = await this.getIncident(incident.id);
+
+    const result = mergeLWW({
+      local: currentIncident,
+      remote: incident,
+      ignore: INCIDENT_IGNORE,
+    });
+
+    if (!result.resolved) {
+      return response({
+        success: false,
+        reason: "bad_request",
+        details: "Could not edit incident with that ID",
+      });
+    }
+
+    const success = await this.editIncident(result.resolved);
 
     const sender: WebSocketSender = client
       ? {
           type: "client",
           name: client.user.name,
-          id: client.user.id,
+          id: client.user.key,
         }
       : { type: "server" };
-
-    const currentRevision = currentIncident?.revision?.count ?? 0;
-    if (incident.revision && incident.revision.count < currentRevision) {
-      return response({
-        success: false,
-        reason: "bad_request",
-        details: "The incident has been edited more recently.",
-      });
-    }
-
-    if (!incident.revision) {
-      incident.revision = {
-        count: 1,
-        user: sender,
-        history: [],
-      };
-    }
-
-    const success = await this.editIncident(incident);
 
     if (!success) {
       return response({
@@ -462,24 +475,27 @@ export class EventIncidents extends DurableObject {
       });
     }
 
-    await this.broadcast({ type: "update_incident", incident }, sender);
+    await this.broadcast(
+      { type: "update_incident", incident: result.resolved },
+      sender
+    );
 
     return response({
       success: true,
-      data: incident.revision,
+      data: incident,
     });
   }
 
   async handleDeleteIncident(request: Request) {
     const params = new URL(request.url).searchParams;
     const user = this.getRequestUser(request);
-    const client = this.clients.find((v) => v.user.id === user.key);
+    const client = this.clients.find((v) => v.user.key === user.key);
 
     const sender: WebSocketSender = client
       ? {
           type: "client",
           name: client.user.name,
-          id: client.user.id,
+          id: client.user.key,
         }
       : { type: "server" };
 
@@ -520,9 +536,9 @@ export class EventIncidents extends DurableObject {
       const search = new URL(request.url).searchParams;
 
       const name = search.get("name");
-      const id = search.get("id");
+      const key = search.get("id");
 
-      if (!name || !id) {
+      if (!name || !key) {
         const socket = pair[1];
         socket.accept();
 
@@ -531,7 +547,7 @@ export class EventIncidents extends DurableObject {
         return new Response(null, { status: 101, webSocket: pair[0] });
       }
 
-      this.handleSession(pair[1], ip, { name, id });
+      this.handleSession(pair[1], ip, { name, key });
       return new Response(null, {
         status: 101,
         webSocket: pair[0],
@@ -539,13 +555,13 @@ export class EventIncidents extends DurableObject {
     }
   }
 
-  async handleSession(socket: WebSocket, ip: string, user: ShareUser) {
+  async handleSession(socket: WebSocket, ip: string, user: User) {
     socket.accept();
 
     const client: SessionClient = { socket, ip, active: true, user };
 
     // Ensure that clients aren't  listed twice
-    this.clients = this.clients.filter((c) => c.user.id !== user.id);
+    this.clients = this.clients.filter((c) => c.user.key !== user.key);
     this.clients.push(client);
 
     // Set event handlers to receive messages.
@@ -566,7 +582,7 @@ export class EventIncidents extends DurableObject {
             await this.addIncident(incident);
             this.broadcast(
               { type: "add_incident", incident },
-              { type: "client", name: client.user.name, id: client.user.id }
+              { type: "client", name: client.user.name, id: client.user.key }
             );
             break;
           }
@@ -575,7 +591,7 @@ export class EventIncidents extends DurableObject {
             await this.editIncident(incident);
             this.broadcast(
               { type: "update_incident", incident },
-              { type: "client", name: client.user.name, id: client.user.id }
+              { type: "client", name: client.user.name, id: client.user.key }
             );
             break;
           }
@@ -583,7 +599,7 @@ export class EventIncidents extends DurableObject {
             await this.deleteIncident(data.id);
             this.broadcast(
               { type: "remove_incident", id: data.id },
-              { type: "client", name: client.user.name, id: client.user.id }
+              { type: "client", name: client.user.name, id: client.user.key }
             );
             break;
           }
@@ -595,14 +611,14 @@ export class EventIncidents extends DurableObject {
                 id: data.id,
                 scratchpad: data.scratchpad,
               },
-              { type: "client", name: client.user.name, id: client.user.id }
+              { type: "client", name: client.user.name, id: client.user.key }
             );
             break;
           }
           case "message": {
             this.broadcast(
               { type: "message", message: data.message },
-              { type: "client", name: client.user.name, id: client.user.id }
+              { type: "client", name: client.user.name, id: client.user.key }
             );
             break;
           }
@@ -620,14 +636,7 @@ export class EventIncidents extends DurableObject {
       { type: "server" }
     );
 
-    const state: WebSocketServerShareInfoMessage = {
-      type: "server_share_info",
-      activeUsers: this.getActiveUsers(),
-      data: await this.getIncidentsData(),
-      scratchpads: await this.getAllScratchpads(),
-      invitations,
-    };
-
+    const state = await this.createServerShareMessage();
     const payload = this.createPayload(state, { type: "server" });
     socket.send(JSON.stringify(payload));
 

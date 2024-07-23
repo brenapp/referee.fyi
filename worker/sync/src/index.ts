@@ -26,6 +26,7 @@ import {
 import {
   AuthenticatedRequest,
   Env,
+  EventIncidentsInitData,
   RequestHasInvitation,
   SignedRequest,
 } from "./types";

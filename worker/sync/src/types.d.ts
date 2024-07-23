@@ -16,6 +16,11 @@ export type RequestHasInvitation = AuthenticatedRequest & {
   instance: ShareInstance;
 };
 
+export type EventIncidentsInitData = {
+  instance: string;
+  sku: string;
+};
+
 export interface Env {
   SHARES: KVNamespace;
   INVITATIONS: KVNamespace;

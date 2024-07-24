@@ -16,10 +16,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { Spinner } from "~components/Spinner";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
-import {
-  usePendingIncidents,
-  useTeamIncidentsByMatch,
-} from "~utils/hooks/incident";
+import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
 import {
   IncidentOutcome,
@@ -50,24 +47,10 @@ type TeamSummaryProps = {
 const TeamSummary: React.FC<TeamSummaryProps> = ({
   number,
   match,
-  incidents: rawIncidents,
+  incidents,
 }) => {
   const [open, setOpen] = useState(false);
   const [isolationOpen, setIsolationOpen] = useState(false);
-
-  // Optimistic Updates
-  const pending = usePendingIncidents((t) => t.team === number);
-  const incidents = useMemo(() => {
-    return rawIncidents
-      .filter((i) => !pending.deleteIncident.includes(i.id))
-      .map((current) => {
-        return (
-          pending.editIncident.find((incident) => incident.id === current.id) ??
-          current
-        );
-      })
-      .concat(pending.newIncident);
-  }, [rawIncidents, pending]);
 
   const { data: event } = useCurrentEvent();
   const { data: team } = useEventTeam(event, number);
@@ -213,6 +196,7 @@ const TeamFlagButton: React.FC<TeamFlagButtonProps> = ({
         open={open}
         setOpen={setOpen}
         initial={{ match, team }}
+        key={match.id + team.id}
       />
       <Button
         mode="primary"

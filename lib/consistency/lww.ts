@@ -138,8 +138,14 @@ export function initLWW<T extends BaseWithLWWConsistency>({
     (key) => !ignore.includes(key)
   ) as LWWKeys<T>[];
 
-  const consistency = Object.fromEntries(
-    keys.map((key) => [key, { count: 0, peer, history: [] }])
+  const consistency: Record<
+    string,
+    KeyRegister<T, keyof T>
+  > = Object.fromEntries(
+    keys.map((key) => [
+      key,
+      { count: 0, instant: new Date().toISOString(), peer, history: [] },
+    ])
   );
 
   return { ...value, consistency } as unknown as T;

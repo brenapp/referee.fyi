@@ -1,11 +1,23 @@
 import { getAllIncidents } from "~utils/data/incident";
 import { queueMigration } from "./utils";
-import {
-  IncidentOutcome,
-  Incident,
-  IncidentMatch,
-} from "~share/EventIncidents";
 import { setMany } from "~utils/data/keyval";
+
+type IncidentOutcome = "Minor" | "Major" | "Disabled" | "General";
+
+type IncidentMatchHeadToHead = {
+  type: "match";
+  division: number;
+  name: string;
+  id: number;
+};
+
+type IncidentMatchSkills = {
+  type: "skills";
+  skillsType: "driver" | "programming";
+  attempt: number;
+};
+
+type IncidentMatch = IncidentMatchHeadToHead | IncidentMatchSkills;
 
 type OldIncident = {
   id: string;
@@ -21,16 +33,33 @@ type OldIncident = {
   };
   team?: string; // team number
 
-  revision?: Incident["revision"];
+  revision?: unknown;
 
   outcome: IncidentOutcome;
   rules: string[];
   notes: string;
 };
 
+type NewIncident = {
+  id: string;
+
+  time: Date;
+
+  event: string; // SKU
+
+  match?: IncidentMatch;
+  team: string; // team number
+
+  outcome: IncidentOutcome;
+  rules: string[];
+  notes: string;
+
+  revision?: unknown;
+};
+
 function hasIncidentBeenMigrated(
-  incident: OldIncident | Incident
-): incident is Incident {
+  incident: OldIncident | NewIncident
+): incident is NewIncident {
   return !Object.hasOwn(incident, "division");
 }
 
@@ -39,15 +68,18 @@ queueMigration({
   run_order: 0,
   dependencies: [],
   apply: async () => {
-    const incidents = (await getAllIncidents()) as (Incident | OldIncident)[];
+    const incidents = (await getAllIncidents()) as (
+      | NewIncident
+      | OldIncident
+    )[];
 
-    const migrated: [string, Incident][] = incidents.map((incident) => {
+    const migrated: [string, NewIncident][] = incidents.map((incident) => {
       if (hasIncidentBeenMigrated(incident)) {
         return [incident.id, incident];
       }
 
       if (!incident.match) {
-        const output: Incident = {
+        const output: NewIncident = {
           id: incident.id,
           event: incident.event,
           notes: incident.notes,

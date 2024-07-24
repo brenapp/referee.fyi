@@ -1,8 +1,4 @@
-import {
-  BaseIncident,
-  INCIDENT_IGNORE,
-  SCRATCHPAD_IGNORE,
-} from "@referee-fyi/share";
+import { BaseIncident, INCIDENT_IGNORE } from "@referee-fyi/share";
 import {
   Incident,
   NewIncident,

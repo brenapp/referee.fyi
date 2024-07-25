@@ -1,6 +1,7 @@
 import { getAllIncidents } from "~utils/data/incident";
 import { queueMigration } from "./utils";
 import { setMany } from "~utils/data/keyval";
+import { WebSocketSender } from "@referee-fyi/share";
 
 type IncidentOutcome = "Minor" | "Major" | "Disabled" | "General";
 
@@ -33,14 +34,17 @@ type OldIncident = {
   };
   team?: string; // team number
 
-  revision?: unknown;
+  revision?: Revision<
+    NewIncident,
+    "event" | "id" | "team" | "revision" | "time"
+  >;
 
   outcome: IncidentOutcome;
   rules: string[];
   notes: string;
 };
 
-type NewIncident = {
+export type NewIncident = {
   id: string;
 
   time: Date;
@@ -54,7 +58,35 @@ type NewIncident = {
   rules: string[];
   notes: string;
 
-  revision?: unknown;
+  revision?: Revision<
+    NewIncident,
+    "event" | "id" | "team" | "revision" | "time"
+  >;
+};
+
+export type ChangeMap<T, U extends keyof T> = {
+  [K in keyof Omit<T, U>]-?: {
+    property: K;
+    old: T[K];
+    new: T[K];
+  };
+};
+
+export type Change<T, U extends keyof T> = ChangeMap<T, U>[keyof ChangeMap<
+  T,
+  U
+>];
+
+export type ChangeLog<T, U extends keyof T> = {
+  user: WebSocketSender;
+  date: Date;
+  changes: Change<T, U>[];
+};
+
+export type Revision<T, U extends keyof T> = {
+  user: WebSocketSender;
+  count: number;
+  history: ChangeLog<T, U>[];
 };
 
 function hasIncidentBeenMigrated(

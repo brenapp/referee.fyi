@@ -162,14 +162,13 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
             (id) => incidentsResult.resolved.values[id]
           )
         );
-
         // Update remote
         await Promise.all(
           incidentsResult.remote.deleted.map((id) => store.deleteIncident(id))
         );
         await Promise.all(
           incidentsResult.remote.values.map((id) =>
-            store.editIncident(incidentsResult.resolved.values[id])
+            store.addIncident(incidentsResult.resolved.values[id])
           )
         );
 
@@ -195,7 +194,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
 
         // Update Remote
         await Promise.all(
-          incidentsResult.remote.values.map((id) =>
+          scratchpadsResults.remote.values.map((id) =>
             store.updateScratchpad(id, scratchpadsResults.resolved.values[id])
           )
         );

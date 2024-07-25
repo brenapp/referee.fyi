@@ -9,8 +9,11 @@
     "lib:dev": "concurrently \"npm --prefix lib/share run dev\" \"npm --prefix lib/consistency run dev\"",
     "lib:build": "concurrently \"npm --prefix lib/share run build\" \"npm --prefix lib/consistency run build\"",
     "worker:dev": "npm --prefix worker/sync run dev",
-    "worker:deploy": "npm --prefix worker/sync run deploy",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix"
+    "worker:build": "npm run lib:build && npm --prefix worker/sync run build",
+    "worker:deploy": "npm run lib:build && npm --prefix worker/sync run deploy",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
+    "pages:build": "npm run lib:build && npm run frontend:build",
+    "dev": "concurrently \"npm run frontend:dev\" \"npm run lib:dev\" \"npm run worker:dev\""
   },
   "workspaces": [
     "lib/*",

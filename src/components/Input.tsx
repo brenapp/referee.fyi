@@ -1,6 +1,6 @@
 import { twMerge } from "tailwind-merge";
 import { Game, Rule } from "~utils/hooks/rules";
-import React, { Dispatch, useCallback, useMemo } from "react";
+import React, { Dispatch, forwardRef, useCallback, useMemo } from "react";
 import { IconButton } from "./Button";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
@@ -107,45 +107,51 @@ export type InputBiding = {
 
 export type InputProps = InputBaseProps & { bind?: InputBiding };
 
-export const Input: React.FC<InputProps> = ({ bind, ...props }) => {
-  const bindProps: React.HTMLProps<HTMLInputElement> = bind
-    ? {
-        value: bind.value,
-        onChange: (e) => {
-          bind.onChange(bind.value);
-          props.onChange?.(e);
-        },
-      }
-    : {};
-  return (
-    <input
-      {...props}
-      {...bindProps}
-      className={twMerge(
-        "rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2",
-        "hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500",
-        props.className
-      )}
-    />
-  );
-};
+export const Input = forwardRef<HTMLInputElement, InputProps>(
+  ({ bind, ...props }, ref) => {
+    const bindProps: React.HTMLProps<HTMLInputElement> = bind
+      ? {
+          value: bind.value,
+          onChange: (e) => {
+            bind.onChange(bind.value);
+            props.onChange?.(e);
+          },
+        }
+      : {};
+    return (
+      <input
+        {...props}
+        {...bindProps}
+        {...(ref ? { ref } : {})}
+        className={twMerge(
+          "rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2",
+          "hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500",
+          props.className
+        )}
+      />
+    );
+  }
+);
 
 export type TextAreaBaseProps = React.HTMLProps<HTMLTextAreaElement>;
 
 export type TextAreaProps = TextAreaBaseProps;
 
-export const TextArea: React.FC<TextAreaProps> = (props) => {
-  return (
-    <textarea
-      {...props}
-      className={twMerge(
-        "rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2",
-        "hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500",
-        props.className
-      )}
-    />
-  );
-};
+export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
+  (props, ref) => {
+    return (
+      <textarea
+        {...props}
+        {...(ref ? { ref } : {})}
+        className={twMerge(
+          "rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2",
+          "hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500",
+          props.className
+        )}
+      />
+    );
+  }
+);
 
 export type SelectBaseProps = React.DetailedHTMLProps<
   React.InputHTMLAttributes<HTMLSelectElement>,

@@ -189,18 +189,22 @@ export type UpdateOptions<K, V> = {
   peer: string;
   key: K;
   value: V;
+  instant?: string;
 };
 
 export function updateLWW<
   T extends BaseWithLWWConsistency,
   const K extends LWWKeys<T>,
   V = T[K],
->(object: T, { key, value, peer }: UpdateOptions<K, V>): T {
+>(
+  object: T,
+  { key, value, peer, instant = new Date().toISOString() }: UpdateOptions<K, V>
+): T {
   const current = object.consistency[key].history as History<T, K>[];
   const register: KeyRegister<T, K> = {
     count: object.consistency[key].count + 1,
     peer,
-    instant: new Date().toISOString(),
+    instant,
     history: current.concat({
       prev: object[key],
       peer,

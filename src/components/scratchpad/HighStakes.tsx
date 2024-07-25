@@ -14,6 +14,7 @@ import {
   useMatchScratchpad,
   useUpdateMatchScratchpad,
 } from "~utils/hooks/scratchpad";
+import { EditHistory } from "~components/EditHistory";
 
 type ScratchpadState<T extends MatchScratchpad, K extends keyof T> = {
   data: T | null | undefined;
@@ -83,7 +84,13 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
         <div className="flex items-center gap-2">
           <CodeBracketSquareIcon height={20} />
           <p>Auto Winner</p>
-          <span></span>
+          {data ? (
+            <EditHistory
+              value={data}
+              valueKey="auto"
+              className="ml-auto text-emerald-400"
+            />
+          ) : null}
         </div>
         <fieldset className="mt-2 flex gap-2">
           <Radio
@@ -141,6 +148,13 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
         <div className="flex items-center gap-2">
           <StarIcon height={20} />
           <p>AWP</p>
+          {data ? (
+            <EditHistory
+              value={data}
+              valueKey="awp"
+              className="ml-auto text-emerald-400"
+            />
+          ) : null}
         </div>
         <div className="mt-2 flex gap-2">
           <Checkbox

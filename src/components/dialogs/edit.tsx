@@ -17,6 +17,7 @@ import { useEventMatchesForTeam, useEventTeam } from "~utils/hooks/robotevents";
 import { Rule, useRulesForEvent } from "~utils/hooks/rules";
 import { useCurrentEvent } from "~utils/hooks/state";
 import { EditHistory } from "~components/EditHistory";
+import { LWWKeys } from "@referee-fyi/consistency";
 
 export type EditIncidentDialogProps = {
   open: boolean;
@@ -62,6 +63,13 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
 
   const game = useRulesForEvent(eventData);
 
+  const [dirty, setDirty] = useState<Record<LWWKeys<Incident>, boolean>>({
+    match: false,
+    outcome: false,
+    rules: false,
+    notes: false,
+  });
+
   const onChangeIncidentMatch = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       // If they set skills, default to driver1
@@ -74,7 +82,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             attempt: 1,
           },
         }));
-
+        setDirty((dirty) => ({ ...dirty, match: true }));
         return;
       }
 
@@ -95,6 +103,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             }
           : undefined,
       }));
+      setDirty((dirty) => ({ ...dirty, match: true }));
     },
     [teamMatches]
   );
@@ -108,6 +117,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             ? { ...incident.match, skillsType: type }
             : incident.match,
       }));
+      setDirty((dirty) => ({ ...dirty, match: true }));
     },
     []
   );
@@ -120,6 +130,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
           ? { ...incident.match, attempt }
           : incident.match,
     }));
+    setDirty((dirty) => ({ ...dirty, match: true }));
   }, []);
 
   const onChangeIncidentOutcome = useCallback(
@@ -128,6 +139,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
         ...incident,
         outcome: e.target.value as IncidentOutcome,
       }));
+      setDirty((dirty) => ({ ...dirty, match: true }));
     },
     []
   );
@@ -147,11 +159,13 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
       ...incident,
       rules: rules.map((r) => r.rule),
     }));
+    setDirty((dirty) => ({ ...dirty, rules: true }));
   }, []);
 
   const onChangeIncidentNotes = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setIncident((incident) => ({ ...incident, notes: e.target.value }));
+      setDirty((dirty) => ({ ...dirty, notes: true }));
     },
     []
   );
@@ -211,7 +225,6 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             })}
           </Select>
         </label>
-        <EditHistory value={incident} valueKey="match" />
         {incident.match?.type === "skills" ? (
           <div className="flex gap-2 mt-2">
             <Radio
@@ -269,6 +282,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             />
           </div>
         ) : null}
+        <EditHistory value={incident} valueKey="match" dirty={dirty.match} />
         <label>
           <p className="mt-4">Outcome</p>
           <Select
@@ -282,15 +296,27 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             <option value="Disabled">Disabled</option>
           </Select>
         </label>
+        <EditHistory
+          value={incident}
+          valueKey="outcome"
+          dirty={dirty.outcome}
+        />
         {game ? (
-          <label>
-            <p className="mt-4">Associated Rules</p>
-            <RulesMultiSelect
-              game={game}
-              value={incidentRules}
-              onChange={onChangeIncidentRules}
+          <>
+            <label>
+              <p className="mt-4">Associated Rules</p>
+              <RulesMultiSelect
+                game={game}
+                value={incidentRules}
+                onChange={onChangeIncidentRules}
+              />
+            </label>
+            <EditHistory
+              value={incident}
+              valueKey="rules"
+              dirty={dirty.rules}
             />
-          </label>
+          </>
         ) : null}
         <label>
           <p className="mt-4">Notes</p>
@@ -300,6 +326,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             onChange={onChangeIncidentNotes}
           />
         </label>
+        <EditHistory value={incident} valueKey="notes" dirty={dirty.notes} />
       </DialogBody>
       <nav className="flex gap-4 p-2">
         <Button mode="dangerous" onClick={onClickDelete}>

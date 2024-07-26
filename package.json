@@ -4,7 +4,7 @@
   "version": "0.5.0",
   "type": "module",
   "scripts": {
-    "frontend:dev": "vite --host",
+    "frontend:dev": "vite --host --port 3000",
     "frontend:build": "tsc && vite build",
     "lib:dev": "concurrently \"npm --prefix lib/share run dev\" \"npm --prefix lib/consistency run dev\"",
     "lib:build": "concurrently \"npm --prefix lib/share run build\" \"npm --prefix lib/consistency run build\"",

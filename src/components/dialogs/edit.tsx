@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { Button } from "~components/Button";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
@@ -69,6 +69,11 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
     rules: false,
     notes: false,
   });
+  useEffect(() => {
+    if (!open) {
+      setDirty({ match: false, outcome: false, rules: false, notes: false });
+    }
+  }, [open]);
 
   const onChangeIncidentMatch = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -139,7 +144,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
         ...incident,
         outcome: e.target.value as IncidentOutcome,
       }));
-      setDirty((dirty) => ({ ...dirty, match: true }));
+      setDirty((dirty) => ({ ...dirty, outcome: true }));
     },
     []
   );

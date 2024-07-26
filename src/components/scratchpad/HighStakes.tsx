@@ -84,13 +84,6 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
         <div className="flex items-center gap-2">
           <CodeBracketSquareIcon height={20} />
           <p>Auto Winner</p>
-          {data ? (
-            <EditHistory
-              value={data}
-              valueKey="auto"
-              className="ml-auto text-emerald-400"
-            />
-          ) : null}
         </div>
         <fieldset className="mt-2 flex gap-2">
           <Radio
@@ -143,18 +136,14 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
             labelProps={{ className: "mt-0 flex-1 px-2" }}
           />
         </fieldset>
+        {data ? (
+          <EditHistory value={data} valueKey="auto" className="mt-4" />
+        ) : null}
       </section>
       <section className="bg-zinc-800 p-4 mt-4 rounded-md">
         <div className="flex items-center gap-2">
           <StarIcon height={20} />
           <p>AWP</p>
-          {data ? (
-            <EditHistory
-              value={data}
-              valueKey="awp"
-              className="ml-auto text-emerald-400"
-            />
-          ) : null}
         </div>
         <div className="mt-2 flex gap-2">
           <Checkbox
@@ -180,6 +169,9 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
             }}
           />
         </div>
+        {data ? (
+          <EditHistory value={data} valueKey="awp" className="mt-4" />
+        ) : null}
       </section>
     </section>
   );

@@ -11,7 +11,7 @@ import {
 } from "~components/Input";
 import { toast } from "~components/Toast";
 import { IncidentMatchSkills } from "@referee-fyi/share";
-import { IncidentOutcome, Incident } from "~utils/data/incident";
+import { IncidentOutcome, Incident, matchToString } from "~utils/data/incident";
 import { useDeleteIncident, useEditIncident } from "~utils/hooks/incident";
 import { useEventMatchesForTeam, useEventTeam } from "~utils/hooks/robotevents";
 import { Rule, useRulesForEvent } from "~utils/hooks/rules";
@@ -287,7 +287,12 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             />
           </div>
         ) : null}
-        <EditHistory value={incident} valueKey="match" dirty={dirty.match} />
+        <EditHistory
+          value={incident}
+          valueKey="match"
+          dirty={dirty.match}
+          render={(value) => (value ? matchToString(value) : "Non-Match")}
+        />
         <label>
           <p className="mt-4">Outcome</p>
           <Select
@@ -305,6 +310,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
           value={incident}
           valueKey="outcome"
           dirty={dirty.outcome}
+          render={(value) => value}
         />
         {game ? (
           <>
@@ -320,6 +326,9 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
               value={incident}
               valueKey="rules"
               dirty={dirty.rules}
+              render={(value) => (
+                <span className="font-mono">{value.join(" ")}</span>
+              )}
             />
           </>
         ) : null}
@@ -331,7 +340,12 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             onChange={onChangeIncidentNotes}
           />
         </label>
-        <EditHistory value={incident} valueKey="notes" dirty={dirty.notes} />
+        <EditHistory
+          value={incident}
+          valueKey="notes"
+          dirty={dirty.notes}
+          render={(value) => value}
+        />
       </DialogBody>
       <nav className="flex gap-4 p-2">
         <Button mode="dangerous" onClick={onClickDelete}>

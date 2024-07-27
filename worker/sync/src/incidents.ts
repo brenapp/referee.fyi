@@ -1,4 +1,4 @@
-import { AutoRouter, createResponse } from "itty-router";
+import { AutoRouter, cors, createResponse } from "itty-router";
 import { response } from "./utils";
 import {
   type Incident,
@@ -43,8 +43,12 @@ export function matchToString(match: IncidentMatch) {
   }
 }
 
+const { preflight, corsify } = cors();
 export class EventIncidents extends DurableObject {
-  router = AutoRouter();
+  router = AutoRouter({
+    before: [preflight],
+    finally: [corsify],
+  });
   clients: SessionClient[] = [];
   state: DurableObjectState;
 

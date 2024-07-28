@@ -250,11 +250,17 @@ export async function setManyIncidents(incidents: Incident[]) {
 
 export type NewIncident = Omit<BaseIncident, "id">;
 
-export async function newIncident(
-  data: NewIncident,
-  peer: string,
-  id = generateIncidentId()
-): Promise<Incident> {
+export type NewIncidentOptions = {
+  data: NewIncident;
+  peer: string;
+  id: string;
+};
+
+export async function newIncident({
+  data,
+  peer,
+  id,
+}: NewIncidentOptions): Promise<Incident> {
   const incident: Incident = initLWW({
     value: { ...data, id },
     ignore: INCIDENT_IGNORE,
@@ -272,7 +278,18 @@ export async function newIncident(
   return incident;
 }
 
-export async function newManyIncidents(incidents: Incident[]) {
+export async function addIncident(incident: Incident) {
+  await setIncident(incident.id, incident);
+
+  // Index Properly
+  await bulkIndexInsert({
+    [`event_${incident.event}_idx`]: [incident],
+    [`team_${incident.team}_idx`]: [incident],
+    ["incidents"]: [incident],
+  });
+}
+
+export async function addManyIncidents(incidents: Incident[]) {
   await setManyIncidents(incidents);
 
   const eventIndices = Object.groupBy(incidents, (i) => `event_${i.event}_idx`);

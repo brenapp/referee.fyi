@@ -4,6 +4,7 @@ import {
   NewIncident,
   deleteIncident,
   editIncident,
+  generateIncidentId,
   getIncident,
   getIncidentsByEvent,
   getIncidentsByTeam,
@@ -55,7 +56,11 @@ export function useNewIncident() {
     mutationFn: async (incident: NewIncident) => {
       try {
         const peer = await getPeer();
-        const result = await newIncident(incident, peer);
+        const result = await newIncident({
+          data: incident,
+          peer,
+          id: generateIncidentId(),
+        });
         connection.addIncident(result);
         return result;
       } catch (e) {

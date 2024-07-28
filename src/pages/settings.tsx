@@ -5,7 +5,7 @@ import { ClickToCopy } from "~components/ClickToCopy";
 import { ReportIssueDialog } from "~components/dialogs/report";
 import { Input } from "~components/Input";
 import { toast } from "~components/Toast";
-import { newManyIncidents } from "~utils/data/incident";
+import { addManyIncidents } from "~utils/data/incident";
 import { queryClient } from "~utils/data/query";
 import { isWorldsBuild } from "~utils/data/state";
 import { useShareID, useShareProfile } from "~utils/hooks/share";
@@ -46,7 +46,7 @@ export const SettingsPage: React.FC = () => {
 
     try {
       const { incidents } = JSON.parse(text);
-      await newManyIncidents(incidents);
+      await addManyIncidents(incidents);
 
       toast({
         type: "info",

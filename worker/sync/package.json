@@ -4,6 +4,7 @@
   "description": "Sync Service for Referee FYI",
   "scripts": {
     "dev": "wrangler dev --ip 0.0.0.0 --env staging",
+    "dev:remote": "wrangler dev --remote --env staging",
     "build": "wrangler deploy --env staging --dry-run",
     "deploy": "wrangler deploy",
     "format": "prettier --write  '*.{json,js}' 'src/**/*.{js,ts}'",

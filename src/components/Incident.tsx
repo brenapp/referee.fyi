@@ -27,17 +27,11 @@ export const Incident: React.FC<IncidentProps> = ({
   ...props
 }) => {
   const [editIncidentOpen, setEditIncidentOpen] = useState(false);
-  const key =
-    incident.id +
-    Object.values(incident.consistency)
-      .map((v) => v.count)
-      .join("");
-
   return (
     <>
       <EditIncidentDialog
         incident={incident}
-        key={key}
+        key={incident.id}
         open={editIncidentOpen}
         setOpen={setEditIncidentOpen}
       />

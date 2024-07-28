@@ -69,6 +69,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
     rules: false,
     notes: false,
   });
+
   useEffect(() => {
     if (!open) {
       setDirty({ match: false, outcome: false, rules: false, notes: false });
@@ -149,12 +150,17 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
     []
   );
 
+  const enrichRules = useCallback(
+    (rules: string[]) => {
+      const gameRules = game?.ruleGroups.flatMap((group) => group.rules) ?? [];
+      return rules.map((rule) => gameRules.find((r) => r.rule === rule)!);
+    },
+    [game]
+  );
+
   const initialRichRules = useMemo(() => {
-    const gameRules = game?.ruleGroups.flatMap((group) => group.rules) ?? [];
-    return incident.rules.map(
-      (rule) => gameRules.find((r) => r.rule === rule)!
-    );
-  }, [game?.ruleGroups, incident.rules]);
+    return enrichRules(incident.rules);
+  }, [enrichRules, incident.rules]);
 
   const [incidentRules, setIncidentRules] = useState(initialRichRules);
 
@@ -174,6 +180,27 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
     },
     []
   );
+
+  // Handle external updates graceful
+  useEffect(() => {
+    const shouldRun =
+      open &&
+      JSON.stringify(incident.consistency) !==
+        JSON.stringify(initialIncident.consistency);
+    if (!shouldRun) return;
+    const dirtyValues = Object.entries(dirty).filter(([, value]) => value) as [
+      LWWKeys<Incident>,
+      boolean,
+    ][];
+    setIncident((current) => ({
+      ...initialIncident,
+      ...Object.fromEntries(dirtyValues.map(([key]) => [key, current[key]])),
+    }));
+    if (!dirty.rules) {
+      onChangeIncidentRules(enrichRules(initialIncident.rules));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialIncident]);
 
   const onClickDelete = useCallback(async () => {
     setOpen(false);

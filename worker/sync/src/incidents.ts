@@ -49,7 +49,7 @@ export class EventIncidents extends DurableObject {
     before: [preflight],
     finally: [corsify],
   });
-  clients: SessionClient[] = [];
+  clients: Record<string, SessionClient> = {};
   state: DurableObjectState;
 
   env: Env;
@@ -315,7 +315,7 @@ export class EventIncidents extends DurableObject {
   }
 
   getActiveUsers(): User[] {
-    return this.clients
+    return Object.values(this.clients)
       .filter((client) => client.active)
       .map((client) => client.user);
   }
@@ -384,7 +384,7 @@ export class EventIncidents extends DurableObject {
 
   async handleAddIncident(request: Request) {
     const user = this.getRequestUser(request);
-    const client = this.clients.find((v) => v.user.key === user.key);
+    const client = this.clients[user.key];
 
     const sender: WebSocketSender = client
       ? {
@@ -444,7 +444,7 @@ export class EventIncidents extends DurableObject {
     }
 
     const user = this.getRequestUser(request);
-    const client = this.clients.find((v) => v.user.key === user.key);
+    const client = this.clients[user.key];
     const currentIncident = await this.getIncident(incident.id);
 
     const result = mergeLWW({
@@ -493,7 +493,7 @@ export class EventIncidents extends DurableObject {
   async handleDeleteIncident(request: Request) {
     const params = new URL(request.url).searchParams;
     const user = this.getRequestUser(request);
-    const client = this.clients.find((v) => v.user.key === user.key);
+    const client = this.clients[user.key];
 
     const sender: WebSocketSender = client
       ? {
@@ -552,6 +552,7 @@ export class EventIncidents extends DurableObject {
       }
 
       this.handleSession(pair[1], ip, { name, key });
+
       return new Response(null, {
         status: 101,
         webSocket: pair[0],
@@ -564,9 +565,19 @@ export class EventIncidents extends DurableObject {
 
     const client: SessionClient = { socket, ip, active: true, user };
 
-    // Ensure that clients aren't  listed twice
-    this.clients = this.clients.filter((c) => c.user.key !== user.key);
-    this.clients.push(client);
+    // Ensure that clients aren't listed twice
+    const current = this.clients[user.key];
+    if (current) {
+      current.active = false;
+      const payload = this.createPayload(
+        { type: "message", message: "Replaced by new connection" },
+        { type: "server" }
+      );
+      current.socket.send(JSON.stringify(payload));
+      current.socket.close(1011, "Replaced by new connection.");
+    }
+
+    this.clients[user.key] = client;
 
     // Set event handlers to receive messages.
     socket.addEventListener("message", async (event: MessageEvent) => {
@@ -646,7 +657,7 @@ export class EventIncidents extends DurableObject {
 
     const quitHandler = async () => {
       client.active = false;
-      this.clients = this.clients.filter((member) => member !== client);
+      delete this.clients[user.key];
 
       const activeUsers = await this.getActiveUsers();
       const invitations = await this.getInvitationList();
@@ -671,18 +682,15 @@ export class EventIncidents extends DurableObject {
 
     const clientLefts: SessionClient[] = [];
 
-    this.clients = this.clients.filter((client) => {
+    for (const [key, client] of Object.entries(this.clients)) {
       try {
         client.socket.send(JSON.stringify(payload));
-
-        return true;
       } catch (err) {
         client.active = false;
         clientLefts.push(client);
-
-        return false;
+        delete this.clients[key];
       }
-    });
+    }
 
     const activeUsers = this.getActiveUsers();
     const invitations = await this.getInvitationList();

@@ -1,11 +1,10 @@
 import { GlobeAmericasIcon } from "@heroicons/react/20/solid";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "~components/Button";
 import { ClickToCopy } from "~components/ClickToCopy";
 import { ReportIssueDialog } from "~components/dialogs/report";
 import { Input } from "~components/Input";
 import { toast } from "~components/Toast";
-import { addManyIncidents } from "~utils/data/incident";
 import { queryClient } from "~utils/data/query";
 import { isWorldsBuild } from "~utils/data/state";
 import { useShareID, useShareProfile } from "~utils/hooks/share";
@@ -35,31 +34,6 @@ export const SettingsPage: React.FC = () => {
 
     window.location.reload();
   }, []);
-
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const importIncidents = useCallback(async () => {
-    const file = fileInputRef.current?.files?.[0];
-    if (!file) return;
-
-    const array = await file.arrayBuffer();
-    const text = new TextDecoder().decode(array);
-
-    try {
-      const { incidents } = JSON.parse(text);
-      await addManyIncidents(incidents);
-
-      toast({
-        type: "info",
-        message: `Imported ${incidents.length} incidents`,
-      });
-    } catch (e) {
-      toast({
-        type: "error",
-        message: "Failed to import incidents.",
-        context: JSON.stringify(e),
-      });
-    }
-  }, [fileInputRef]);
 
   return (
     <main className="mt-4">
@@ -98,24 +72,6 @@ export const SettingsPage: React.FC = () => {
           Report Issue
         </Button>
       </section>
-      {import.meta.env.DEV ? (
-        <section className="mt-4">
-          <h2 className="font-bold">Import Incidents</h2>
-          <p>
-            Developer Mode: Import incidents from JSON file. This will overwrite
-            local changes.
-          </p>
-          <Input
-            type="file"
-            className="mt-2 w-full"
-            accept=".json"
-            ref={fileInputRef}
-          />
-          <Button className="mt-2" mode="primary" onClick={importIncidents}>
-            Import
-          </Button>
-        </section>
-      ) : null}
       <section className="mt-4">
         <h2 className="font-bold">Delete Cache</h2>
         <p>

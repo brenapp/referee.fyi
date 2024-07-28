@@ -1,4 +1,4 @@
-import React, { ReactNode, useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { Button } from "~components/Button";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
@@ -10,94 +10,14 @@ import {
   TextArea,
 } from "~components/Input";
 import { toast } from "~components/Toast";
-import { IncidentMatchSkills, UnchangeableProperties } from "~share/api";
-import { Change } from "~share/revision";
-import {
-  IncidentOutcome,
-  Incident,
-  matchToString,
-  userString,
-} from "~utils/data/incident";
+import { IncidentMatchSkills } from "@referee-fyi/share";
+import { IncidentOutcome, Incident, matchToString } from "~utils/data/incident";
 import { useDeleteIncident, useEditIncident } from "~utils/hooks/incident";
 import { useEventMatchesForTeam, useEventTeam } from "~utils/hooks/robotevents";
 import { Rule, useRulesForEvent } from "~utils/hooks/rules";
 import { useCurrentEvent } from "~utils/hooks/state";
-import { timeAgo } from "~utils/time";
-
-export const RevisionEntry: React.FC<{
-  revision: Change<Incident, UnchangeableProperties>;
-}> = ({ revision }) => {
-  const values: [ReactNode, ReactNode] = useMemo(() => {
-    switch (revision.property) {
-      case "time": {
-        return [revision.old.toLocaleString(), revision.new.toLocaleString()];
-      }
-      case "match": {
-        return [
-          revision.old ? matchToString(revision.old) : "No Match",
-          revision.new ? matchToString(revision.new) : "No Match",
-        ];
-      }
-      case "rules": {
-        return [revision.old.join(" "), revision.new.join(" ")];
-      }
-      case "notes":
-      case "outcome":
-      case "id": {
-        return [revision.old, revision.new];
-      }
-    }
-  }, [revision]);
-
-  return (
-    <p>
-      {revision.property}: {values[0]} to {values[1]}
-    </p>
-  );
-};
-
-export type RevisionListProps = {
-  incident: Incident;
-};
-
-export const RevisionList: React.FC<RevisionListProps> = ({ incident }) => {
-  const creator = useMemo(
-    () => userString(incident.revision?.user),
-    [incident.revision?.user]
-  );
-
-  if (!incident.revision) {
-    return null;
-  }
-
-  return (
-    <section className="mt-2">
-      <h2 className="font-bold">Revision History</h2>
-      <p>Created By: {creator}</p>
-
-      {incident.revision.history.map((log) => (
-        <details className="p-2 bg-zinc-800 mt-2 rounded-md">
-          <summary>
-            <p className="inline-flex ml-2 items-center justify-between w-max">
-              <span className="flex-1">{userString(log.user)}</span>,&nbsp;
-              <span>{timeAgo(log.date)}</span>
-            </p>
-          </summary>
-          <ul className="list-disc">
-            {log.changes.map((revision) => (
-              <li key={revision.property} className="ml-4">
-                <RevisionEntry revision={revision} />
-              </li>
-            ))}
-            {log.changes.length < 1 ? (
-              <li className="ml-4">No Changes Made</li>
-            ) : null}
-          </ul>
-        </details>
-      ))}
-    </section>
-  );
-};
+import { EditHistory } from "~components/EditHistory";
+import { LWWKeys } from "@referee-fyi/consistency";
 
 export type EditIncidentDialogProps = {
   open: boolean;
@@ -143,6 +63,19 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
 
   const game = useRulesForEvent(eventData);
 
+  const [dirty, setDirty] = useState<Record<LWWKeys<Incident>, boolean>>({
+    match: false,
+    outcome: false,
+    rules: false,
+    notes: false,
+  });
+
+  useEffect(() => {
+    if (!open) {
+      setDirty({ match: false, outcome: false, rules: false, notes: false });
+    }
+  }, [open]);
+
   const onChangeIncidentMatch = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       // If they set skills, default to driver1
@@ -155,7 +88,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             attempt: 1,
           },
         }));
-
+        setDirty((dirty) => ({ ...dirty, match: true }));
         return;
       }
 
@@ -176,6 +109,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             }
           : undefined,
       }));
+      setDirty((dirty) => ({ ...dirty, match: true }));
     },
     [teamMatches]
   );
@@ -189,6 +123,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             ? { ...incident.match, skillsType: type }
             : incident.match,
       }));
+      setDirty((dirty) => ({ ...dirty, match: true }));
     },
     []
   );
@@ -201,6 +136,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
           ? { ...incident.match, attempt }
           : incident.match,
     }));
+    setDirty((dirty) => ({ ...dirty, match: true }));
   }, []);
 
   const onChangeIncidentOutcome = useCallback(
@@ -209,16 +145,22 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
         ...incident,
         outcome: e.target.value as IncidentOutcome,
       }));
+      setDirty((dirty) => ({ ...dirty, outcome: true }));
     },
     []
   );
 
+  const enrichRules = useCallback(
+    (rules: string[]) => {
+      const gameRules = game?.ruleGroups.flatMap((group) => group.rules) ?? [];
+      return rules.map((rule) => gameRules.find((r) => r.rule === rule)!);
+    },
+    [game]
+  );
+
   const initialRichRules = useMemo(() => {
-    const gameRules = game?.ruleGroups.flatMap((group) => group.rules) ?? [];
-    return incident.rules.map(
-      (rule) => gameRules.find((r) => r.rule === rule)!
-    );
-  }, [game?.ruleGroups, incident.rules]);
+    return enrichRules(incident.rules);
+  }, [enrichRules, incident.rules]);
 
   const [incidentRules, setIncidentRules] = useState(initialRichRules);
 
@@ -228,14 +170,37 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
       ...incident,
       rules: rules.map((r) => r.rule),
     }));
+    setDirty((dirty) => ({ ...dirty, rules: true }));
   }, []);
 
   const onChangeIncidentNotes = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setIncident((incident) => ({ ...incident, notes: e.target.value }));
+      setDirty((dirty) => ({ ...dirty, notes: true }));
     },
     []
   );
+
+  // Handle external updates graceful
+  useEffect(() => {
+    const shouldRun =
+      open &&
+      JSON.stringify(incident.consistency) !==
+        JSON.stringify(initialIncident.consistency);
+    if (!shouldRun) return;
+    const dirtyValues = Object.entries(dirty).filter(([, value]) => value) as [
+      LWWKeys<Incident>,
+      boolean,
+    ][];
+    setIncident((current) => ({
+      ...initialIncident,
+      ...Object.fromEntries(dirtyValues.map(([key]) => [key, current[key]])),
+    }));
+    if (!dirty.rules) {
+      onChangeIncidentRules(enrichRules(initialIncident.rules));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialIncident]);
 
   const onClickDelete = useCallback(async () => {
     setOpen(false);
@@ -249,7 +214,11 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
       await editIncident(incident);
       toast({ type: "info", message: "Saved Incident" });
     } catch (e) {
-      toast({ type: "error", message: `${e}` });
+      toast({
+        type: "error",
+        message: "Could not save incident!",
+        context: JSON.stringify(e),
+      });
     }
   }, [editIncident, incident, setOpen]);
 
@@ -349,6 +318,12 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             />
           </div>
         ) : null}
+        <EditHistory
+          value={incident}
+          valueKey="match"
+          dirty={dirty.match}
+          render={(value) => (value ? matchToString(value) : "Non-Match")}
+        />
         <label>
           <p className="mt-4">Outcome</p>
           <Select
@@ -362,15 +337,31 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             <option value="Disabled">Disabled</option>
           </Select>
         </label>
+        <EditHistory
+          value={incident}
+          valueKey="outcome"
+          dirty={dirty.outcome}
+          render={(value) => value}
+        />
         {game ? (
-          <label>
-            <p className="mt-4">Associated Rules</p>
-            <RulesMultiSelect
-              game={game}
-              value={incidentRules}
-              onChange={onChangeIncidentRules}
+          <>
+            <label>
+              <p className="mt-4">Associated Rules</p>
+              <RulesMultiSelect
+                game={game}
+                value={incidentRules}
+                onChange={onChangeIncidentRules}
+              />
+            </label>
+            <EditHistory
+              value={incident}
+              valueKey="rules"
+              dirty={dirty.rules}
+              render={(value) => (
+                <span className="font-mono">{value.join(" ")}</span>
+              )}
             />
-          </label>
+          </>
         ) : null}
         <label>
           <p className="mt-4">Notes</p>
@@ -380,7 +371,12 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             onChange={onChangeIncidentNotes}
           />
         </label>
-        <RevisionList incident={incident} />
+        <EditHistory
+          value={incident}
+          valueKey="notes"
+          dirty={dirty.notes}
+          render={(value) => value}
+        />
       </DialogBody>
       <nav className="flex gap-4 p-2">
         <Button mode="dangerous" onClick={onClickDelete}>

@@ -1,8 +1,12 @@
-import { EventIncidentsData, Incident, ShareUser } from "./EventIncidents";
-import { MatchScratchpad } from "./MatchScratchpad";
-import { Invitation, User } from "./server";
+import { ConsistentMap } from "@referee-fyi/consistency";
+import type { Incident } from "./incident.ts";
+import type { MatchScratchpad } from "./index.ts";
+import type { Invitation } from "./server.js";
 
-export * from "./EventIncidents";
+export type User = {
+  key: string;
+  name: string;
+};
 
 export type ShareResponseSuccess<T> = {
   success: true;
@@ -67,7 +71,7 @@ export type APIGetShareDataResponseBody = WebSocketServerShareInfoMessage;
 export type APIPutIncidentResponseBody = Incident;
 
 // PATCH /api/:sku/incident
-export type APIPatchIncidentResponseBody = Incident["revision"];
+export type APIPatchIncidentResponseBody = Incident;
 
 // DELETE /api/:sku/incident
 export type APIDeleteIncidentResponseBody = Record<string, never>;
@@ -111,25 +115,31 @@ export type InvitationListItem = Pick<Invitation, "admin"> & {
   user: User;
 };
 
+export type InstanceIncidents = ConsistentMap<Incident>;
+export type InstanceScratchpads = ConsistentMap<MatchScratchpad>;
+
 export type WebSocketServerShareInfoMessage = {
   type: "server_share_info";
-  data: EventIncidentsData;
-  activeUsers: ShareUser[];
-  invitations: InvitationListItem[];
-  scratchpads: Record<string, MatchScratchpad>;
+  sku: string;
+  incidents: InstanceIncidents;
+  scratchpads: InstanceScratchpads;
+  users: {
+    active: User[];
+    invitations: InvitationListItem[];
+  };
 };
 
 export type WebsocketServerUserAddMessage = {
   type: "server_user_add";
-  user: ShareUser;
-  activeUsers: ShareUser[];
+  user: User;
+  activeUsers: User[];
   invitations: InvitationListItem[];
 };
 
 export type WebsocketServerUserRemoveMessage = {
   type: "server_user_remove";
-  user: ShareUser;
-  activeUsers: ShareUser[];
+  user: User;
+  activeUsers: User[];
   invitations: InvitationListItem[];
 };
 
@@ -147,6 +157,7 @@ export type WebSocketMessageData = {
 export type WebSocketSender =
   | { type: "server" }
   | { type: "client"; name: string; id: string };
+
 export type WebSocketPayload<T extends WebSocketMessage> = T & {
   date: string; // ISO string
   sender: WebSocketSender;

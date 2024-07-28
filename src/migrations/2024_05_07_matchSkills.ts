@@ -1,11 +1,24 @@
 import { getAllIncidents } from "~utils/data/incident";
 import { queueMigration } from "./utils";
-import {
-  IncidentOutcome,
-  Incident,
-  IncidentMatch,
-} from "~share/EventIncidents";
 import { setMany } from "~utils/data/keyval";
+import { WebSocketSender } from "@referee-fyi/share";
+
+type IncidentOutcome = "Minor" | "Major" | "Disabled" | "General";
+
+type IncidentMatchHeadToHead = {
+  type: "match";
+  division: number;
+  name: string;
+  id: number;
+};
+
+type IncidentMatchSkills = {
+  type: "skills";
+  skillsType: "driver" | "programming";
+  attempt: number;
+};
+
+type IncidentMatch = IncidentMatchHeadToHead | IncidentMatchSkills;
 
 type OldIncident = {
   id: string;
@@ -21,16 +34,64 @@ type OldIncident = {
   };
   team?: string; // team number
 
-  revision?: Incident["revision"];
+  revision?: Revision<
+    NewIncident,
+    "event" | "id" | "team" | "revision" | "time"
+  >;
 
   outcome: IncidentOutcome;
   rules: string[];
   notes: string;
 };
 
+export type NewIncident = {
+  id: string;
+
+  time: Date;
+
+  event: string; // SKU
+
+  match?: IncidentMatch;
+  team: string; // team number
+
+  outcome: IncidentOutcome;
+  rules: string[];
+  notes: string;
+
+  revision?: Revision<
+    NewIncident,
+    "event" | "id" | "team" | "revision" | "time"
+  >;
+};
+
+export type ChangeMap<T, U extends keyof T> = {
+  [K in keyof Omit<T, U>]-?: {
+    property: K;
+    old: T[K];
+    new: T[K];
+  };
+};
+
+export type Change<T, U extends keyof T> = ChangeMap<T, U>[keyof ChangeMap<
+  T,
+  U
+>];
+
+export type ChangeLog<T, U extends keyof T> = {
+  user: WebSocketSender;
+  date: Date;
+  changes: Change<T, U>[];
+};
+
+export type Revision<T, U extends keyof T> = {
+  user: WebSocketSender;
+  count: number;
+  history: ChangeLog<T, U>[];
+};
+
 function hasIncidentBeenMigrated(
-  incident: OldIncident | Incident
-): incident is Incident {
+  incident: OldIncident | NewIncident
+): incident is NewIncident {
   return !Object.hasOwn(incident, "division");
 }
 
@@ -39,15 +100,18 @@ queueMigration({
   run_order: 0,
   dependencies: [],
   apply: async () => {
-    const incidents = (await getAllIncidents()) as (Incident | OldIncident)[];
+    const incidents = (await getAllIncidents()) as (
+      | NewIncident
+      | OldIncident
+    )[];
 
-    const migrated: [string, Incident][] = incidents.map((incident) => {
+    const migrated: [string, NewIncident][] = incidents.map((incident) => {
       if (hasIncidentBeenMigrated(incident)) {
         return [incident.id, incident];
       }
 
       if (!incident.match) {
-        const output: Incident = {
+        const output: NewIncident = {
           id: incident.id,
           event: incident.event,
           notes: incident.notes,

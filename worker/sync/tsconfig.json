@@ -8,12 +8,7 @@
     "jsx": "react",
     "module": "es2022",
     "moduleResolution": "node",
-    "types": [
-      "@cloudflare/workers-types",
-      "../types/api.d.ts",
-      "../types/server.d.ts",
-      "../types/EventIncidents.d.ts"
-    ],
+    "types": ["@cloudflare/workers-types"],
     "resolveJsonModule": true,
     "allowJs": true,
     "checkJs": false,
@@ -22,9 +17,7 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "paths": {
-      "~types/*": ["../types/*"]
-    },
+    "paths": {},
     "skipLibCheck": true
   }
 }

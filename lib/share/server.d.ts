@@ -14,8 +14,3 @@ export type Invitation = {
   admin: boolean;
   accepted: boolean;
 };
-
-export type User = {
-  key: string;
-  name: string;
-};

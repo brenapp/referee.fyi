@@ -1,18 +1,17 @@
 import { AutoRouter, IRequest, withParams } from "itty-router";
 import { corsify, preflight, response } from "./utils";
 
-import type { Invitation, ShareInstance, User } from "~types/server";
+import type { Invitation, ShareInstance, User } from "@referee-fyi/share";
 import {
   APIPostCreateResponseBody,
   APIGetInvitationResponseBody,
   APIPutInvitationAcceptResponseBody,
   APIPutInviteResponseBody,
   APIRegisterUserResponseBody,
-  EventIncidentsInitData,
   APIDeleteInviteResponseBody,
   APIGetInvitationRequestResponseBody,
   APIPutInvitationRequestResponseBody,
-} from "~types/api";
+} from "@referee-fyi/share";
 import {
   deleteInvitation,
   getInstance,
@@ -24,10 +23,10 @@ import {
   setRequestCode,
   setUser,
 } from "./data";
-``;
 import {
   AuthenticatedRequest,
   Env,
+  EventIncidentsInitData,
   RequestHasInvitation,
   SignedRequest,
 } from "./types";

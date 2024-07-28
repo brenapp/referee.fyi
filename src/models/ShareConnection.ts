@@ -1,12 +1,14 @@
 import {
   Incident,
+  INCIDENT_IGNORE,
   InvitationListItem,
-  ShareUser,
+  SCRATCHPAD_IGNORE,
+  User,
   UserInvitation,
   WebSocketMessage,
   WebSocketPayload,
   WebSocketPeerMessage,
-} from "~share/api";
+} from "@referee-fyi/share";
 import { create } from "zustand";
 import {
   addServerIncident,
@@ -19,29 +21,26 @@ import {
 } from "~utils/data/share";
 import { signWebSocketConnectionURL } from "~utils/data/crypto";
 import {
+  addIncident,
   deleteIncident,
   deleteManyIncidents,
   getDeletedIncidentsForEvent,
-  getIncident,
   getIncidentsByEvent,
-  getManyIncidents,
   hasIncident,
-  hasManyIncidents,
-  newIncident,
-  newManyIncidents,
+  addManyIncidents,
   setIncident,
   setManyIncidents,
 } from "~utils/data/incident";
 import { queryClient } from "~utils/data/query";
 import { toast } from "~components/Toast";
-import { BaseMatchScratchpad, MatchScratchpad } from "~share/MatchScratchpad";
+import { MatchScratchpad } from "@referee-fyi/share";
+import { mergeMap } from "@referee-fyi/consistency";
 import {
   getManyMatchScratchpads,
   getScratchpadIdsForEvent,
   setManyMatchScratchpad,
   setMatchScratchpad,
 } from "~utils/data/scratchpad";
-import { compareLocalAndRemote } from "~utils/data/revision";
 
 export enum ReadyState {
   Closed = WebSocket.CLOSED,
@@ -54,7 +53,7 @@ export type ShareConnectionData = {
   readyState: ReadyState;
   websocket: WebSocket | null;
   invitation: UserInvitation | null;
-  activeUsers: ShareUser[];
+  activeUsers: User[];
   invitations: InvitationListItem[];
   reconnectTimer: NodeJS.Timeout | null;
 };
@@ -86,6 +85,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
   reconnectTimer: null,
 
   forceSync: async () => {
+    const start = performance.now();
     const sku = get().invitation?.sku;
     if (!sku) {
       return;
@@ -97,21 +97,27 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
       toast({
         type: "error",
         message: `Error when communicating with sharing server. ${response.details}`,
+        context: JSON.stringify(response),
       });
       return;
     }
 
-    await get().handleWebsocketMessage({
-      type: "server_share_info",
-      activeUsers: get().activeUsers,
-      invitations: get().invitations,
+    const store = get();
+
+    await store.handleWebsocketMessage({
+      ...response.data,
       date: new Date().toISOString(),
-      data: response.data.data,
-      scratchpads: response.data.scratchpads,
       sender: { type: "server" },
     });
 
-    toast({ type: "info", message: "Synchronized with the server!" });
+    const end = performance.now();
+
+    toast({
+      type: "info",
+      message:
+        "Synchronized with the server!" +
+        (import.meta.env.DEV ? ` (Took ${end - start}ms)` : ""),
+    });
   },
 
   handleWebsocketMessage: async (data: WebSocketPayload<WebSocketMessage>) => {
@@ -120,7 +126,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
       case "add_incident": {
         const has = await hasIncident(data.incident.id);
         if (!has) {
-          await newIncident(data.incident, data.incident.id);
+          await addIncident(data.incident);
           queryClient.invalidateQueries({ queryKey: ["incidents"] });
         }
         break;
@@ -140,90 +146,92 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
       // *delete* incidents the user creates before joining the share, unless they are listed as
       // being deleted on the server.
       case "server_share_info": {
-        set({ activeUsers: data.activeUsers, invitations: data.invitations });
+        const start = performance.now();
+        set({
+          activeUsers: data.users.active,
+          invitations: data.users.invitations,
+        });
 
-        const hasIncidents = await hasManyIncidents(
-          data.data.incidents.map((i) => i.id)
+        // Merge Incident State
+        const localIncidents = await getIncidentsByEvent(data.sku);
+        const localDeletedIncidents = await getDeletedIncidentsForEvent(
+          data.sku
         );
+        const incidentsResult = mergeMap({
+          local: {
+            values: Object.fromEntries(localIncidents.map((i) => [i.id, i])),
+            deleted: [...localDeletedIncidents],
+          },
+          remote: data.incidents,
+          ignore: INCIDENT_IGNORE,
+        });
 
-        // Incidents that have been created newly created on other devices
-        const remoteOnly = data.data.incidents.filter(
-          (_, i) => !hasIncidents[i]
-        );
-        await newManyIncidents(remoteOnly);
-
-        // Handle incidents that may have changed
-        const localAndRemote = data.data.incidents.filter(
-          (_, i) => hasIncidents[i]
-        );
-        const current = await getManyIncidents(localAndRemote.map((i) => i.id));
-
-        const localMoreRecent = localAndRemote.filter(
-          (remote, i) =>
-            (remote.revision?.count ?? 0) < (current[i]?.revision?.count ?? 0)
-        );
-        const remoteMoreRecent = localAndRemote.filter(
-          (remote, i) =>
-            (remote.revision?.count ?? 0) > (current[i]?.revision?.count ?? 0)
-        );
-        await setManyIncidents(remoteMoreRecent);
+        // Update Remote
         await Promise.all(
-          localMoreRecent.map((incident) => editServerIncident(incident))
-        );
-
-        // Explicitly delete incidents marked as deleted
-        await deleteManyIncidents(data.data.deleted);
-
-        const localDeletes = await getDeletedIncidentsForEvent(data.data.sku);
-        const localDeletedOnly = localDeletes.difference(
-          new Set(data.data.deleted)
-        );
-        await Promise.all(
-          [...localDeletedOnly].map((i) => store.deleteIncident(i))
-        );
-
-        // Send message to other clients for local-only incidents
-        const eventIncidents = await getIncidentsByEvent(data.data.sku);
-        const localOnly = eventIncidents.filter((local) =>
-          data.data.incidents.every((remote) => local.id !== remote.id)
-        );
-
-        await Promise.all(
-          localOnly.map((incident) => store.addIncident(incident))
-        );
-
-        // Scratchpad Comparison
-        const localScratchpadIds = await getScratchpadIdsForEvent(
-          data.data.sku
-        );
-        const localScratchpads =
-          await getManyMatchScratchpads<BaseMatchScratchpad>([
-            ...localScratchpadIds,
-          ]);
-
-        const scratchpadComparison = compareLocalAndRemote(
-          localScratchpads,
-          data.scratchpads as Record<string, BaseMatchScratchpad>
-        );
-
-        await setManyMatchScratchpad(
-          Object.entries(scratchpadComparison.remoteOnly)
-        );
-        await setManyMatchScratchpad(
-          Object.entries(scratchpadComparison.remoteMoreRecent)
-        );
-        await Promise.all(
-          Object.entries(scratchpadComparison.localOnly).map(
-            ([id, scratchpad]) =>
-              store.updateScratchpad(id, scratchpad as MatchScratchpad)
+          incidentsResult.remote.create.map((id) =>
+            store.addIncident(incidentsResult.resolved.values[id])
           )
         );
         await Promise.all(
-          Object.entries(scratchpadComparison.localMoreRecent).map(
-            ([id, scratchpad]) =>
-              store.updateScratchpad(id, scratchpad as MatchScratchpad)
+          incidentsResult.remote.update.map((id) =>
+            store.editIncident(incidentsResult.resolved.values[id])
           )
         );
+        await Promise.all(
+          incidentsResult.remote.remove.map((id) => store.deleteIncident(id))
+        );
+
+        // Update Local
+        await addManyIncidents(
+          incidentsResult.local.create.map(
+            (id) => incidentsResult.resolved.values[id]
+          )
+        );
+        await setManyIncidents(
+          incidentsResult.local.update.map(
+            (id) => incidentsResult.resolved.values[id]
+          )
+        );
+        await deleteManyIncidents(incidentsResult.local.remove);
+
+        // Update Scratchpad State
+        const localScratchpadIds = await getScratchpadIdsForEvent(data.sku);
+        const localScratchpads = await getManyMatchScratchpads([
+          ...localScratchpadIds,
+        ]);
+
+        const scratchpadsResults = mergeMap<MatchScratchpad>({
+          local: { deleted: [], values: localScratchpads },
+          remote: data.scratchpads,
+          ignore: SCRATCHPAD_IGNORE,
+        });
+
+        // Notify Remote
+        const notify = scratchpadsResults.remote.create.concat(
+          scratchpadsResults.remote.update
+        );
+        await Promise.all(
+          notify.map((id) =>
+            store.updateScratchpad(id, scratchpadsResults.resolved.values[id])
+          )
+        );
+
+        // Update Local
+        const update = scratchpadsResults.local.create.concat(
+          scratchpadsResults.local.update
+        );
+        await setManyMatchScratchpad(
+          update.map((id) => [id, scratchpadsResults.resolved.values[id]])
+        );
+
+        const end = performance.now();
+
+        toast({
+          type: "info",
+          message:
+            "Synchronized with the server!" +
+            (import.meta.env.DEV ? ` (Took ${end - start}ms)` : ""),
+        });
 
         queryClient.invalidateQueries({ queryKey: ["incidents"] });
         queryClient.invalidateQueries({ queryKey: ["scratchpad"] });
@@ -265,8 +273,10 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
   },
 
   addIncident: async (incident: Incident) => {
-    const connected = get().readyState === WebSocket.OPEN;
-    if (!connected) {
+    const store = get();
+    const connected = store.readyState === WebSocket.OPEN;
+    const invitation = store.invitation;
+    if (!connected && invitation) {
       await addServerIncident(incident);
       return;
     }
@@ -275,8 +285,10 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
   },
 
   editIncident: async (incident: Incident) => {
-    const connected = get().readyState === WebSocket.OPEN;
-    if (!connected) {
+    const store = get();
+    const connected = store.readyState === WebSocket.OPEN;
+    const invitation = store.invitation;
+    if (!connected && invitation) {
       await editServerIncident(incident);
       return;
     }
@@ -285,12 +297,11 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
   },
 
   deleteIncident: async (id: string) => {
-    const connected = get().readyState === WebSocket.OPEN;
-    if (!connected) {
-      const incident = await getIncident(id);
-      if (incident) {
-        await deleteServerIncident(id, incident.event);
-      }
+    const store = get();
+    const connected = store.readyState === WebSocket.OPEN;
+    const invitation = store.invitation;
+    if (!connected && invitation) {
+      await deleteServerIncident(id, invitation.sku);
       return;
     }
 
@@ -336,7 +347,11 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
         ) as WebSocketPayload<WebSocketMessage>;
         get().handleWebsocketMessage(data);
       } catch (e) {
-        toast({ type: "error", message: `${e}` });
+        toast({
+          type: "error",
+          message: "Error when communicating with sharing server",
+          context: JSON.stringify(e),
+        });
       }
     };
     websocket.onclose = async () => {
@@ -345,8 +360,12 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
         reconnectTimer: setTimeout(() => get().connect(invitation), 5000),
       });
     };
-    websocket.onerror = () => {
-      toast({ type: "error", message: "Could not connect to sharing server." });
+    websocket.onerror = (e) => {
+      toast({
+        type: "error",
+        message: "Could not connect to sharing server.",
+        context: JSON.stringify(e),
+      });
     };
 
     set({
@@ -374,3 +393,19 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
     });
   },
 }));
+
+// HMR Special Handling
+/// <reference types="vite/client" />
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    import.meta.hot!.data.websocket = useShareConnection.getState().websocket;
+  });
+  import.meta.hot.accept((mod) => {
+    if (!mod) {
+      import.meta.hot!.data.websocket.close();
+      import.meta.hot!.data.websocket = null;
+    }
+    useShareConnection.setState({ websocket: import.meta.hot!.data.websocket });
+  });
+}

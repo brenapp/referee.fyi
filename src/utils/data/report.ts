@@ -1,13 +1,14 @@
 import { getMany, keys } from "~utils/data/keyval";
 import { PRIVATE_KEY } from "./crypto";
 import { CACHE_PREFIX } from "./query";
-import { getShareSessionID } from "./share";
+import { getPeer, getShareName, getShareSessionID } from "./share";
 
 const TOKEN = import.meta.env.VITE_LOGSERVER_TOKEN;
 
 export type IssueReportMetadata = {
   email: string;
   comment: string;
+  context: string;
 };
 
 export type IssueReportResponse = {
@@ -28,22 +29,32 @@ export async function reportIssue(
     [`Comment`, metadata.comment],
     [`Version`, __REFEREE_FYI_VERSION__],
     [`Session`, await getShareSessionID()],
+    [`Peer`, await getPeer()],
+    [`Share Name`, await getShareName()],
     [`Date`, new Date().toISOString()],
     [`User-Agent`, navigator.userAgent],
     [`SKU`, sku],
     [`URL`, window.location.toString()],
   ];
 
-  let body = frontmatter.map((v) => v.join(":")).join("\n") + "\n\n--\n\n";
+  const body: string[] = [];
+
+  body.push(frontmatter.map((v) => v.join(": ")).join("\n"));
+
+  if (metadata.context) {
+    body.push(metadata.context);
+  }
 
   const allKeys = (await keys()).filter(
     (k) => !EXCLUDE_KEYS.some((fn) => fn(k))
   );
   const allValues = await getMany(allKeys);
 
-  body += allKeys
-    .map((key, i) => `${key}\n${JSON.stringify(allValues[i], null, 2)}`)
-    .join("\n\n");
+  body.push(
+    allKeys
+      .map((key, i) => `${key}\n${JSON.stringify(allValues[i], null, 2)}`)
+      .join("\n\n")
+  );
 
   const headers = new Headers();
 
@@ -56,7 +67,7 @@ export async function reportIssue(
   const response = await fetch("https://logs.bren.app/dump", {
     method: "PUT",
     headers,
-    body,
+    body: body.join("\n\n--\n\n"),
   });
 
   const resp: IssueReportResponse = await response.json();

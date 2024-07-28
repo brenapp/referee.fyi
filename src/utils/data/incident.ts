@@ -3,20 +3,20 @@ import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
 import { MatchData } from "robotevents/out/endpoints/matches";
 import { TeamData } from "robotevents/out/endpoints/teams";
-import { getSender } from "./share";
+import { getPeer } from "./share";
 import {
-  EditIncident,
   IncidentMatch,
   IncidentMatchSkills,
   IncidentOutcome,
-  Incident as ServerIncident,
-  UnchangeableProperties,
+  Incident,
   WebSocketSender,
-} from "~share/api";
-import { Change } from "~share/revision";
+  EditIncident,
+  INCIDENT_IGNORE,
+  BaseIncident,
+} from "@referee-fyi/share";
+import { initLWW, isKeyLWW, updateLWW } from "@referee-fyi/consistency";
 
-export type Incident = ServerIncident;
-export type { IncidentOutcome };
+export type { IncidentOutcome, Incident };
 
 export type RichIncidentElements = {
   time: Date;
@@ -32,10 +32,10 @@ export type RichIncidentElements = {
   notes: string;
 };
 
-export type RichIncident = Omit<Incident, keyof RichIncidentElements | "id"> &
+export type RichIncident = Omit<NewIncident, keyof RichIncidentElements> &
   RichIncidentElements;
 
-export function packIncident(incident: RichIncident): Omit<Incident, "id"> {
+export function packIncident(incident: RichIncident): NewIncident {
   return {
     ...incident,
     match: incident.match
@@ -248,11 +248,24 @@ export async function setManyIncidents(incidents: Incident[]) {
   return setMany(incidents.map((incident) => [incident.id, incident]));
 }
 
-export async function newIncident(
-  data: Omit<Incident, "id">,
-  id = generateIncidentId()
-): Promise<string> {
-  const incident = { ...data, id };
+export type NewIncident = Omit<BaseIncident, "id">;
+
+export type NewIncidentOptions = {
+  data: NewIncident;
+  peer: string;
+  id: string;
+};
+
+export async function newIncident({
+  data,
+  peer,
+  id,
+}: NewIncidentOptions): Promise<Incident> {
+  const incident: Incident = initLWW({
+    value: { ...data, id },
+    ignore: INCIDENT_IGNORE,
+    peer,
+  });
   await setIncident(id, incident);
 
   // Index Properly
@@ -262,10 +275,21 @@ export async function newIncident(
     ["incidents"]: [incident],
   });
 
-  return id;
+  return incident;
 }
 
-export async function newManyIncidents(incidents: Incident[]) {
+export async function addIncident(incident: Incident) {
+  await setIncident(incident.id, incident);
+
+  // Index Properly
+  await bulkIndexInsert({
+    [`event_${incident.event}_idx`]: [incident],
+    [`team_${incident.team}_idx`]: [incident],
+    ["incidents"]: [incident],
+  });
+}
+
+export async function addManyIncidents(incidents: Incident[]) {
   await setManyIncidents(incidents);
 
   const eventIndices = Object.groupBy(incidents, (i) => `event_${i.event}_idx`);
@@ -281,40 +305,24 @@ export async function editIncident(id: string, incident: EditIncident) {
     return;
   }
 
-  // Annoying type coercion to support the strongly typed revision array
-  const changes: Change<Incident, UnchangeableProperties>[] = [];
+  const peer = await getPeer();
+  let updated: Incident = current;
   for (const [key, currentValue] of Object.entries(current)) {
-    if (key === "revision" || key === "team" || key === "event") continue;
+    if (!isKeyLWW(key, INCIDENT_IGNORE)) continue;
 
     const newValue = incident[key as keyof EditIncident];
 
     if (JSON.stringify(currentValue) != JSON.stringify(newValue)) {
-      changes.push({
-        property: key,
-        old: currentValue,
-        new: newValue,
-      } as Change<Incident, UnchangeableProperties>);
+      updated = updateLWW(updated, {
+        key: key as keyof EditIncident,
+        value: newValue,
+        peer,
+      });
     }
   }
 
-  const user = await getSender();
-
-  const revision = current.revision ?? {
-    count: 0,
-    user,
-    history: [],
-  };
-
-  revision.count += 1;
-  revision.history.push({
-    user,
-    date: new Date(),
-    changes,
-  });
-
-  const updatedIncident = { ...current, ...incident, revision };
-  await setIncident(id, updatedIncident);
-  return updatedIncident;
+  await setIncident(id, updated);
+  return updated;
 }
 
 export async function deleteIncident(id: string): Promise<void> {

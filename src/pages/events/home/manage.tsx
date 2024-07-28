@@ -296,7 +296,11 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
       if (response.success) {
         toast({ type: "info", message: "Sharing!" });
       } else {
-        toast({ type: "error", message: response.details });
+        toast({
+          type: "error",
+          message: response.details,
+          context: JSON.stringify(response),
+        });
       }
     },
   });
@@ -430,7 +434,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
                       Admin
                     </span>
                   ) : null}
-                  {activeUsers.find((u) => u.id === user.user.key) ? (
+                  {activeUsers.find((u) => u.key === user.user.key) ? (
                     <span className="text-xs  bg-emerald-600 px-2 py-0.5 rounded-md">
                       Connected
                     </span>

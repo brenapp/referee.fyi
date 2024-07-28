@@ -20,27 +20,16 @@ export type ConsistentMapMergeOptions<T extends ConsistentMapElement> = {
   ignore: readonly string[];
 };
 
+export type ConsistentMapPeerOutcome = {
+  remove: string[];
+  update: string[];
+  create: string[];
+};
+
 export type ConsistentMapMergeResult<T extends ConsistentMapElement> = {
-  // Resolved state of the map
   resolved: ConsistentMap<T>;
-
-  // Values to save
-  local: {
-    // Should delete all of these locally
-    deleted: string[];
-
-    // Should set all of these locally to the resolved value
-    values: string[];
-  };
-
-  // Values to notify opposing client
-  remote: {
-    // Should notify remote that all of these should be deleted
-    deleted: string[];
-
-    // Should notify remote of the resolved value for each of these
-    values: string[];
-  };
+  local: ConsistentMapPeerOutcome;
+  remote: ConsistentMapPeerOutcome;
 };
 
 export function mergeMap<T extends ConsistentMapElement>({
@@ -63,23 +52,28 @@ export function mergeMap<T extends ConsistentMapElement>({
     })
   );
 
-  // Notify remote about results where we reject remote for being outdated (not just ties)
-  const notifyRemote = mergeResults.filter(
-    (result) => result.rejected.length > 0
-  );
-
-  // Values we need to update locally
-  const updateLocal = mergeResults.filter(
-    (result) => result.changed.length > 0
-  );
-
   // Deleted Set
   const deleted = mergeGrowSet({
     local: local.deleted,
     remote: remote.deleted,
   });
 
-  // Build resolved values
+  const localOutcome: ConsistentMapPeerOutcome = {
+    create: [...remoteOnlyIds],
+    remove: deleted.remoteOnly,
+    update: mergeResults
+      .filter((result) => result.changed.length > 0)
+      .map((result) => result.resolved!.id),
+  };
+
+  const remoteOutcome: ConsistentMapPeerOutcome = {
+    create: [...localOnlyIds],
+    remove: deleted.localOnly,
+    update: mergeResults
+      .filter((result) => result.rejected.length > 0)
+      .map((result) => result.resolved!.id),
+  };
+
   const localOnlyValues = Object.fromEntries(
     [...localOnlyIds].map((id) => [id, local.values[id]])
   );
@@ -90,24 +84,13 @@ export function mergeMap<T extends ConsistentMapElement>({
     mergeResults.map((result) => [result.resolved!.id, result.resolved! as T])
   );
 
+  const resolved: ConsistentMap<T> = {
+    deleted: deleted.resolved,
+    values: { ...localOnlyValues, ...remoteOnlyValues, ...sharedValues },
+  };
   return {
-    resolved: {
-      deleted: deleted.resolved,
-      values: { ...localOnlyValues, ...remoteOnlyValues, ...sharedValues },
-    },
-    local: {
-      values: [
-        ...remoteOnlyIds,
-        ...updateLocal.map((result) => result.resolved!.id),
-      ],
-      deleted: deleted.remoteOnly,
-    },
-    remote: {
-      values: [
-        ...localOnlyIds,
-        ...notifyRemote.map((result) => result.resolved!.id),
-      ],
-      deleted: deleted.localOnly,
-    },
+    resolved,
+    local: localOutcome,
+    remote: remoteOutcome,
   };
 }

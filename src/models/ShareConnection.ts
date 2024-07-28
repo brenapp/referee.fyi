@@ -21,14 +21,15 @@ import {
 } from "~utils/data/share";
 import { signWebSocketConnectionURL } from "~utils/data/crypto";
 import {
+  addIncident,
   deleteIncident,
   deleteManyIncidents,
   getDeletedIncidentsForEvent,
   getIncidentsByEvent,
   hasIncident,
-  newIncident,
-  newManyIncidents,
+  addManyIncidents,
   setIncident,
+  setManyIncidents,
 } from "~utils/data/incident";
 import { queryClient } from "~utils/data/query";
 import { toast } from "~components/Toast";
@@ -125,7 +126,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
       case "add_incident": {
         const has = await hasIncident(data.incident.id);
         if (!has) {
-          await newIncident(data.incident, data.incident.id);
+          await addIncident(data.incident);
           queryClient.invalidateQueries({ queryKey: ["incidents"] });
         }
         break;
@@ -164,26 +165,35 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
           ignore: INCIDENT_IGNORE,
         });
 
-        console.log(incidentsResult.resolved);
-
-        // Update local
-        await deleteManyIncidents(incidentsResult.local.deleted);
-        await newManyIncidents(
-          incidentsResult.local.values.map(
-            (id) => incidentsResult.resolved.values[id]
-          )
-        );
-        // Update remote
+        // Update Remote
         await Promise.all(
-          incidentsResult.remote.deleted.map((id) => store.deleteIncident(id))
-        );
-        await Promise.all(
-          incidentsResult.remote.values.map((id) =>
+          incidentsResult.remote.create.map((id) =>
             store.addIncident(incidentsResult.resolved.values[id])
           )
         );
+        await Promise.all(
+          incidentsResult.remote.update.map((id) =>
+            store.editIncident(incidentsResult.resolved.values[id])
+          )
+        );
+        await Promise.all(
+          incidentsResult.remote.remove.map((id) => store.deleteIncident(id))
+        );
 
-        // Merge Scratchpad State
+        // Update Local
+        await addManyIncidents(
+          incidentsResult.local.create.map(
+            (id) => incidentsResult.resolved.values[id]
+          )
+        );
+        await setManyIncidents(
+          incidentsResult.local.update.map(
+            (id) => incidentsResult.resolved.values[id]
+          )
+        );
+        await deleteManyIncidents(incidentsResult.local.remove);
+
+        // Update Scratchpad State
         const localScratchpadIds = await getScratchpadIdsForEvent(data.sku);
         const localScratchpads = await getManyMatchScratchpads([
           ...localScratchpadIds,
@@ -195,19 +205,22 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
           ignore: SCRATCHPAD_IGNORE,
         });
 
-        // Update Local
-        await setManyMatchScratchpad(
-          scratchpadsResults.local.values.map((id) => [
-            id,
-            scratchpadsResults.resolved.values[id],
-          ])
+        // Notify Remote
+        const notify = scratchpadsResults.remote.create.concat(
+          scratchpadsResults.remote.update
         );
-
-        // Update Remote
         await Promise.all(
-          scratchpadsResults.remote.values.map((id) =>
+          notify.map((id) =>
             store.updateScratchpad(id, scratchpadsResults.resolved.values[id])
           )
+        );
+
+        // Update Local
+        const update = scratchpadsResults.local.create.concat(
+          scratchpadsResults.local.update
+        );
+        await setManyMatchScratchpad(
+          update.map((id) => [id, scratchpadsResults.resolved.values[id]])
         );
 
         queryClient.invalidateQueries({ queryKey: ["incidents"] });

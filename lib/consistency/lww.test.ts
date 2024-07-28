@@ -14,7 +14,7 @@ test("greater-count local value persists", () => {
     value: { a: "Local Value", constant: "Constant" },
     ignore,
   });
-  local.consistency.a.count = 1;
+  local.consistency.a.count = 10;
 
   const remote = initLWW<Obj>({
     peer: "A",
@@ -23,10 +23,14 @@ test("greater-count local value persists", () => {
   });
 
   const result = mergeLWW({ local, remote, ignore });
-  expect(result).toEqual({ resolved: local, changed: [] });
+  expect(result).toEqual({ resolved: local, changed: [], rejected: ["a"] });
 
   const opposite = mergeLWW({ local: remote, remote: local, ignore });
-  expect(opposite.resolved).toEqual(result.resolved);
+  expect(opposite).toEqual({
+    resolved: result.resolved,
+    changed: ["a"],
+    rejected: [],
+  });
 });
 
 test("greater-count remote value persists", () => {
@@ -44,10 +48,10 @@ test("greater-count remote value persists", () => {
   remote.consistency.a.count = 2;
 
   const result = mergeLWW({ local, remote, ignore });
-  expect(result).toEqual({ resolved: remote, changed: ["a"] });
+  expect(result).toEqual({ resolved: remote, changed: ["a"], rejected: [] });
 
   const opposite = mergeLWW({ local: remote, remote: local, ignore });
-  expect(opposite.resolved).toEqual(result.resolved);
+  expect(opposite).toEqual({ resolved: remote, changed: [], rejected: ["a"] });
 });
 
 test("tie goes to higher peer value", () => {
@@ -64,10 +68,10 @@ test("tie goes to higher peer value", () => {
   });
 
   const result = mergeLWW({ local, remote, ignore });
-  expect(result).toEqual({ resolved: remote, changed: ["a"] });
+  expect(result).toEqual({ resolved: remote, changed: ["a"], rejected: [] });
 
   const opposite = mergeLWW({ local: remote, remote: local, ignore });
-  expect(opposite.resolved).toEqual(result.resolved);
+  expect(opposite).toEqual({ resolved: remote, changed: [], rejected: [] });
 });
 
 type BaseComplexObject = {
@@ -99,27 +103,24 @@ test("lww is resolved on a key-by-key basis", () => {
   const result = mergeLWW({ local, remote, ignore });
   expect(result).toEqual({
     resolved: {
-      a: { b: 10 },
-      c: "remote",
+      a: { b: 1 },
+      c: "remote prev",
       constant: "Constant",
       consistency: {
-        a: {
-          count: 1,
-          peer: "local-A",
-          history: [{ peer: "local-A", prev: { b: 1 } }],
-        },
-        c: {
-          count: 1,
-          peer: "remote-A",
-          history: [{ peer: "remote-A", prev: "remote prev" }],
-        },
+        a: local.consistency.a,
+        c: remote.consistency.c,
       },
     },
     changed: ["c"],
+    rejected: ["a"],
   });
 
   const opposite = mergeLWW({ local: remote, remote: local, ignore });
-  expect(opposite.resolved).toEqual(result.resolved);
+  expect(opposite).toEqual({
+    resolved: result.resolved,
+    changed: ["a"],
+    rejected: ["c"],
+  });
 });
 
 test("handles null and undefined", () => {

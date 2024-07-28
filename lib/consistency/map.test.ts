@@ -40,11 +40,13 @@ test("new local entries uploaded", () => {
   expect(result.resolved.deleted).toEqual(["incident12"]);
   expect(result.resolved.values).toEqual(local.values);
 
-  expect(result.local.deleted).toEqual(["incident12"]);
-  expect(result.local.values).toEqual([]);
+  expect(result.local.create).toEqual([]);
+  expect(result.local.update).toEqual([]);
+  expect(result.local.remove).toEqual(["incident12"]);
 
-  expect(result.remote.deleted).toEqual([]);
-  expect(result.remote.values).toEqual(["incident1"]);
+  expect(result.remote.create).toEqual(["incident1"]);
+  expect(result.remote.update).toEqual([]);
+  expect(result.remote.remove).toEqual([]);
 });
 
 test("new remote entries saved", () => {
@@ -74,11 +76,13 @@ test("new remote entries saved", () => {
   expect(result.resolved.deleted).toEqual(["incident12"]);
   expect(result.resolved.values).toEqual(remote.values);
 
-  expect(result.remote.deleted).toEqual(["incident12"]);
-  expect(result.remote.values).toEqual([]);
+  expect(result.local.create).toEqual(["incident1"]);
+  expect(result.local.update).toEqual([]);
+  expect(result.local.remove).toEqual([]);
 
-  expect(result.local.deleted).toEqual([]);
-  expect(result.local.values).toEqual(["incident1"]);
+  expect(result.remote.create).toEqual([]);
+  expect(result.remote.update).toEqual([]);
+  expect(result.remote.remove).toEqual(["incident12"]);
 });
 
 test("local update handled", () => {
@@ -126,11 +130,13 @@ test("local update handled", () => {
   expect(result.resolved.deleted).toEqual(["incident12"]);
   expect(result.resolved.values).toEqual(local.values);
 
-  expect(result.remote.deleted).toEqual(["incident12"]);
-  expect(result.remote.values).toEqual(["incident1"]);
+  expect(result.local.create).toEqual([]);
+  expect(result.local.update).toEqual([]);
+  expect(result.local.remove).toEqual([]);
 
-  expect(result.local.deleted).toEqual([]);
-  expect(result.local.values).toEqual([]);
+  expect(result.remote.create).toEqual([]);
+  expect(result.remote.update).toEqual(["incident1"]);
+  expect(result.remote.remove).toEqual(["incident12"]);
 });
 
 test("remote update handled", () => {
@@ -187,24 +193,18 @@ test("remote update handled", () => {
     rule: "<SG8>",
     note: "Expansion BMM EDIT",
     consistency: {
-      rule: {
-        count: 1,
-        peer: "REMOTE",
-        history: [{ prev: "<SG11>", peer: "REMOTE" }],
-      },
-      note: {
-        count: 1,
-        peer: "LOCAL",
-        history: [{ prev: "Expansion", peer: "REMOTE" }],
-      },
+      rule: remote.values["incident1"].consistency.rule,
+      note: local.values["incident1"].consistency.note,
     },
   });
 
-  expect(result.remote.deleted).toEqual(["incident12"]);
-  expect(result.remote.values).toEqual(["incident1"]);
+  expect(result.local.create).toEqual([]);
+  expect(result.local.update).toEqual(["incident1"]);
+  expect(result.local.remove).toEqual([]);
 
-  expect(result.local.deleted).toEqual([]);
-  expect(result.local.values).toEqual(["incident1"]);
+  expect(result.remote.create).toEqual([]);
+  expect(result.remote.update).toEqual(["incident1"]);
+  expect(result.remote.remove).toEqual(["incident12"]);
 });
 
 test("deleted values merged", () => {
@@ -228,9 +228,11 @@ test("deleted values merged", () => {
   ]);
   expect(result.resolved.values).toEqual({});
 
-  expect(result.local.deleted).toEqual(["incident4", "incident5"]);
-  expect(result.local.values).toEqual([]);
+  expect(result.local.create).toEqual([]);
+  expect(result.local.update).toEqual([]);
+  expect(result.local.remove).toEqual(["incident4", "incident5"]);
 
-  expect(result.remote.deleted).toEqual(["incident1", "incident2"]);
-  expect(result.remote.values).toEqual([]);
+  expect(result.remote.create).toEqual([]);
+  expect(result.remote.update).toEqual([]);
+  expect(result.remote.remove).toEqual(["incident1", "incident2"]);
 });

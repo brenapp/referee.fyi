@@ -57,7 +57,12 @@ export const Incident: React.FC<IncidentProps> = ({
               incident.outcome,
             ].join(" • ")}
           </p>
-          <p>{incident.notes}</p>
+          <p>
+            {incident.notes}
+            {import.meta.env.DEV ? (
+              <span className="font-mono text-sm">{incident.id}</span>
+            ) : null}
+          </p>
           <ul>
             {incident.rules.map((r) => (
               <li key={r} className="text-sm font-mono">

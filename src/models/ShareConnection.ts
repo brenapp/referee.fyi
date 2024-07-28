@@ -146,6 +146,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
       // *delete* incidents the user creates before joining the share, unless they are listed as
       // being deleted on the server.
       case "server_share_info": {
+        const start = performance.now();
         set({
           activeUsers: data.users.active,
           invitations: data.users.invitations,
@@ -222,6 +223,15 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
         await setManyMatchScratchpad(
           update.map((id) => [id, scratchpadsResults.resolved.values[id]])
         );
+
+        const end = performance.now();
+
+        toast({
+          type: "info",
+          message:
+            "Synchronized with the server!" +
+            (import.meta.env.DEV ? ` (Took ${end - start}ms)` : ""),
+        });
 
         queryClient.invalidateQueries({ queryKey: ["incidents"] });
         queryClient.invalidateQueries({ queryKey: ["scratchpad"] });

@@ -84,6 +84,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
   reconnectTimer: null,
 
   forceSync: async () => {
+    const start = performance.now();
     const sku = get().invitation?.sku;
     if (!sku) {
       return;
@@ -95,6 +96,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
       toast({
         type: "error",
         message: `Error when communicating with sharing server. ${response.details}`,
+        context: JSON.stringify(response),
       });
       return;
     }
@@ -107,7 +109,14 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
       sender: { type: "server" },
     });
 
-    toast({ type: "info", message: "Synchronized with the server!" });
+    const end = performance.now();
+
+    toast({
+      type: "info",
+      message:
+        "Synchronized with the server!" +
+        (import.meta.env.DEV ? ` (Took ${end - start}ms)` : ""),
+    });
   },
 
   handleWebsocketMessage: async (data: WebSocketPayload<WebSocketMessage>) => {
@@ -154,6 +163,8 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
           remote: data.incidents,
           ignore: INCIDENT_IGNORE,
         });
+
+        console.log(incidentsResult.resolved);
 
         // Update local
         await deleteManyIncidents(incidentsResult.local.deleted);
@@ -313,7 +324,11 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
         ) as WebSocketPayload<WebSocketMessage>;
         get().handleWebsocketMessage(data);
       } catch (e) {
-        toast({ type: "error", message: `${e}` });
+        toast({
+          type: "error",
+          message: "Error when communicating with sharing server",
+          context: JSON.stringify(e),
+        });
       }
     };
     websocket.onclose = async () => {
@@ -322,8 +337,12 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
         reconnectTimer: setTimeout(() => get().connect(invitation), 5000),
       });
     };
-    websocket.onerror = () => {
-      toast({ type: "error", message: "Could not connect to sharing server." });
+    websocket.onerror = (e) => {
+      toast({
+        type: "error",
+        message: "Could not connect to sharing server.",
+        context: JSON.stringify(e),
+      });
     };
 
     set({

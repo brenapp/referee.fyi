@@ -53,7 +53,11 @@ export const SettingsPage: React.FC = () => {
         message: `Imported ${incidents.length} incidents`,
       });
     } catch (e) {
-      toast({ type: "error", message: "Failed to import incidents." });
+      toast({
+        type: "error",
+        message: "Failed to import incidents.",
+        context: JSON.stringify(e),
+      });
     }
   }, [fileInputRef]);
 

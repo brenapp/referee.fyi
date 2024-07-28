@@ -187,7 +187,11 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
       await editIncident(incident);
       toast({ type: "info", message: "Saved Incident" });
     } catch (e) {
-      toast({ type: "error", message: `${e}` });
+      toast({
+        type: "error",
+        message: "Could not save incident!",
+        context: JSON.stringify(e),
+      });
     }
   }, [editIncident, incident, setOpen]);
 

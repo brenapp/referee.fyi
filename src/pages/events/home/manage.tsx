@@ -296,7 +296,11 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
       if (response.success) {
         toast({ type: "info", message: "Sharing!" });
       } else {
-        toast({ type: "error", message: response.details });
+        toast({
+          type: "error",
+          message: response.details,
+          context: JSON.stringify(response),
+        });
       }
     },
   });

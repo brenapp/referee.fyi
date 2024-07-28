@@ -59,7 +59,11 @@ export function useNewIncident() {
         connection.addIncident(result);
         return result;
       } catch (e) {
-        toast({ type: "error", message: `${e}` });
+        toast({
+          type: "error",
+          message: "Could not create new incident!",
+          context: JSON.stringify(e),
+        });
       }
     },
     onSettled: () => {
@@ -78,7 +82,11 @@ export function useEditIncident() {
         connection.editIncident(updated!);
         return incident;
       } catch (e) {
-        toast({ type: "error", message: `${e}` });
+        toast({
+          type: "error",
+          message: "Could not edit incident!",
+          context: JSON.stringify(e),
+        });
       }
     },
     onSettled: () => {
@@ -96,7 +104,11 @@ export function useDeleteIncident() {
         await deleteIncident(id);
         connection.deleteIncident(id);
       } catch (e) {
-        toast({ type: "error", message: `${e}` });
+        toast({
+          type: "error",
+          message: "Could not delete incident!",
+          context: JSON.stringify(e),
+        });
       }
     },
     onSettled: () => {

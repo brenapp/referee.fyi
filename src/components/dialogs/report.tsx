@@ -13,12 +13,14 @@ export type ReportIssueDialogProps = {
   open: boolean;
   setOpen: (value: boolean) => void;
   comment?: string;
+  context?: string;
 };
 
 export const ReportIssueDialog: React.FC<ReportIssueDialogProps> = ({
   open,
   setOpen,
   comment: initComment,
+  context,
 }) => {
   const [email, setEmail] = useState("");
   const [comment, setComment] = useState(initComment ?? "");
@@ -36,7 +38,7 @@ export const ReportIssueDialog: React.FC<ReportIssueDialogProps> = ({
     isSuccess,
     isError,
     reset,
-  } = useReportIssue(sku, { email, comment });
+  } = useReportIssue(sku, { email, comment, context: context ?? "" });
 
   useEffect(() => {
     if (!open) {
@@ -56,7 +58,7 @@ export const ReportIssueDialog: React.FC<ReportIssueDialogProps> = ({
           Please give a brief description of what went wrong. If you provide an
           email, we may reach out to clarify or to notify you of resolution.
           Information about your device and your session will be included with
-          your report.
+          your report, including the contents of incidents.
         </p>
         <label>
           <h2 className="font-bold mt-4">Event</h2>

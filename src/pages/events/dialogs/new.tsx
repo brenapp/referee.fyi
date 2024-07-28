@@ -302,7 +302,11 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 
         toast({ type: "info", message: "Created Entry" });
       } catch (e) {
-        toast({ type: "error", message: `${e}` });
+        toast({
+          type: "error",
+          message: "Could not create entry!",
+          context: JSON.stringify(e),
+        });
       }
 
       queryClient.invalidateQueries({ queryKey: ["incidents"] });

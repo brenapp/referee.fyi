@@ -6,6 +6,7 @@ export type ToastType = "info" | "warn" | "error";
 export type ToastArguments = {
   type: ToastType;
   message: string;
+  context?: string;
 };
 
 export function toast({ type, ...options }: ToastArguments) {

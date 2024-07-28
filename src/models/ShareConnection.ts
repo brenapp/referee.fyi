@@ -370,3 +370,19 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
     });
   },
 }));
+
+// HMR Special Handling
+/// <reference types="vite/client" />
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => {
+    import.meta.hot!.data.websocket = useShareConnection.getState().websocket;
+  });
+  import.meta.hot.accept((mod) => {
+    if (!mod) {
+      import.meta.hot!.data.websocket.close();
+      import.meta.hot!.data.websocket = null;
+    }
+    useShareConnection.setState({ websocket: import.meta.hot!.data.websocket });
+  });
+}

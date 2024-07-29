@@ -1,12 +1,9 @@
 import { get, set } from "~utils/data/keyval";
 
-export const PUBLIC_KEY = "public_key";
-export const PRIVATE_KEY = "private_key";
+export const KEY = "identity_key";
 
-export async function exportPublicKey(
-  publicKey: CryptoKey,
-  includePrefix = true
-) {
+export async function exportPublicKey(includePrefix = true) {
+  const { publicKey } = await getKeyPair();
   const buffer = await crypto.subtle.exportKey("raw", publicKey);
 
   const key = Array.from(new Uint8Array(buffer), (x) =>
@@ -21,52 +18,32 @@ export async function exportPublicKey(
 }
 
 export async function generateKeys(): Promise<CryptoKeyPair> {
-  const { privateKey, publicKey } = await crypto.subtle.generateKey(
+  const pair = await crypto.subtle.generateKey(
     { name: "ECDSA", namedCurve: "P-384" },
-    true,
+    false,
     ["sign", "verify"]
   );
 
-  const publicKeyJWK = await crypto.subtle.exportKey("jwk", publicKey);
-  const privateKeyJWK = await crypto.subtle.exportKey("jwk", privateKey);
-
-  await set(PUBLIC_KEY, publicKeyJWK);
-  await set(PRIVATE_KEY, privateKeyJWK);
-
-  return { privateKey, publicKey };
+  await set(KEY, pair);
+  return pair;
 }
 
 export async function getKeyPair(): Promise<CryptoKeyPair> {
-  const publicJWK = await get<JsonWebKey>(PUBLIC_KEY);
-  const privateJWK = await get<JsonWebKey>(PRIVATE_KEY);
+  const pair = await get<CryptoKeyPair>(KEY);
 
-  if (!publicJWK || !privateJWK) {
+  if (!pair) {
     return generateKeys();
   }
 
-  const publicKey = await crypto.subtle.importKey(
-    "jwk",
-    publicJWK,
-    { name: "ECDSA", namedCurve: "P-384" },
-    true,
-    ["verify"]
-  );
-  const privateKey = await crypto.subtle.importKey(
-    "jwk",
-    privateJWK,
-    { name: "ECDSA", namedCurve: "P-384" },
-    true,
-    ["sign"]
-  );
-
-  return { publicKey, privateKey };
+  return pair;
 }
 
-export async function signMessage(privateKey: CryptoKey, message: string) {
+export async function signMessage(message: string) {
+  const pair = await getKeyPair();
   const messageBuffer = new TextEncoder().encode(message);
   const signature = await crypto.subtle.sign(
     { name: "ECDSA", hash: "SHA-256" },
-    privateKey,
+    pair.privateKey,
     messageBuffer
   );
 
@@ -80,8 +57,6 @@ export async function signMessage(privateKey: CryptoKey, message: string) {
 export async function getSignRequestHeaders(
   request: Request
 ): Promise<Headers> {
-  const keys = await getKeyPair();
-
   const headers = new Headers();
   const date = new Date();
 
@@ -102,10 +77,10 @@ export async function getSignRequestHeaders(
     body,
   ].join("\n");
 
-  const hexSignature = await signMessage(keys.privateKey, message);
+  const hexSignature = await signMessage(message);
 
   headers.set("X-Referee-Date", date.toISOString());
-  headers.set("X-Referee-Public-Key", await exportPublicKey(keys.publicKey));
+  headers.set("X-Referee-Public-Key", await exportPublicKey());
   headers.set("X-Referee-Signature", hexSignature);
 
   return headers;

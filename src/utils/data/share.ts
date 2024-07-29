@@ -18,7 +18,7 @@ import type {
 } from "@referee-fyi/share";
 import { Incident } from "./incident";
 import { queryClient } from "./query";
-import { exportPublicKey, getKeyPair, getSignRequestHeaders } from "./crypto";
+import { exportPublicKey, getSignRequestHeaders } from "./crypto";
 
 export const URL_BASE =
   import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER ?? "https://referee.fyi/api";
@@ -68,8 +68,7 @@ export async function getShareName() {
 }
 
 export async function getShareId() {
-  const { publicKey } = await getKeyPair();
-  return exportPublicKey(publicKey, false);
+  return exportPublicKey(false);
 }
 
 export async function getPeer() {

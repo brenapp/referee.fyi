@@ -11,7 +11,7 @@ import {
   getShareName,
   registerUser,
 } from "~utils/data/share";
-import { exportPublicKey, getKeyPair, signMessage } from "~utils/data/crypto";
+import { exportPublicKey, signMessage } from "~utils/data/crypto";
 
 export function useShareProfile() {
   const [name, setName] = useState("");
@@ -94,13 +94,8 @@ export function useIntegrationBearer(sku: string) {
         return null;
       }
 
-      const { publicKey, privateKey } = await getKeyPair();
-      const message = await signMessage(
-        privateKey,
-        `${invitation.id}${invitation.sku}`
-      );
-
-      const keyHex = await exportPublicKey(publicKey, true);
+      const message = await signMessage(`${invitation.id}${invitation.sku}`);
+      const keyHex = await exportPublicKey(true);
 
       return [keyHex, message].join("|");
     },

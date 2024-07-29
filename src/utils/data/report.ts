@@ -1,5 +1,5 @@
 import { getMany, isStoragePersisted, keys } from "~utils/data/keyval";
-import { PRIVATE_KEY } from "./crypto";
+import { KEY } from "./crypto";
 import { CACHE_PREFIX } from "./query";
 import { getPeer, getShareName, getShareSessionID } from "./share";
 
@@ -16,7 +16,7 @@ export type IssueReportResponse = {
 };
 
 const EXCLUDE_KEYS = [
-  (k) => k === PRIVATE_KEY,
+  (k) => k === KEY,
   (k) => k.toString().startsWith(CACHE_PREFIX),
 ] satisfies ((k: IDBValidKey) => boolean)[];
 

@@ -1,4 +1,4 @@
-import { getMany, keys } from "~utils/data/keyval";
+import { getMany, isStoragePersisted, keys } from "~utils/data/keyval";
 import { PRIVATE_KEY } from "./crypto";
 import { CACHE_PREFIX } from "./query";
 import { getPeer, getShareName, getShareSessionID } from "./share";
@@ -30,11 +30,12 @@ export async function reportIssue(
     [`Version`, __REFEREE_FYI_VERSION__],
     [`Session`, await getShareSessionID()],
     [`Peer`, await getPeer()],
-    [`Share Name`, await getShareName()],
+    [`Name`, await getShareName()],
     [`Date`, new Date().toISOString()],
     [`User-Agent`, navigator.userAgent],
     [`SKU`, sku],
     [`URL`, window.location.toString()],
+    [`Storage Persisted`, (await isStoragePersisted()) ? "Yes" : "No"],
   ];
 
   const body: string[] = [];

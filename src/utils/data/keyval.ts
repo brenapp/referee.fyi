@@ -53,3 +53,15 @@ export function delMany(key: IDBValidKey[]) {
 export function keys<K extends IDBValidKey>() {
   return kv.keys<K>(customStore);
 }
+
+export async function tryPersistStorage(): Promise<boolean> {
+  const persisted = await navigator.storage.persisted();
+  if (persisted) {
+    return true;
+  }
+  return navigator.storage.persist();
+}
+
+export async function isStoragePersisted(): Promise<boolean> {
+  return navigator.storage.persisted();
+}

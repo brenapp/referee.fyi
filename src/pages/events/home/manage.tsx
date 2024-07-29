@@ -36,6 +36,7 @@ import { ReadyState, useShareConnection } from "~models/ShareConnection";
 import { isWorldsBuild } from "~utils/data/state";
 import { ClickToCopy } from "~components/ClickToCopy";
 import { twMerge } from "tailwind-merge";
+import { tryPersistStorage } from "~utils/data/keyval";
 
 export type ManageDialogProps = {
   open: boolean;
@@ -183,6 +184,7 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
     if (!invitation || !invitation.success) {
       return;
     }
+    await tryPersistStorage();
     await acceptEventInvitation(sku, invitation.data.id);
     onClose();
   }, [invitation, sku, onClose]);
@@ -290,6 +292,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
     isPending: isCreateInstancePending,
   } = useMutation({
     mutationFn: async () => {
+      await tryPersistStorage();
       await registerUser(name);
       const response = await createInstance();
 

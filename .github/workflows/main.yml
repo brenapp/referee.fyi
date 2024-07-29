@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deploy Staging
+    name: Deploy Main
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v4
@@ -20,4 +20,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: "worker/sync"
-          environment: "staging"
+          environment: "main"

@@ -58,6 +58,11 @@
               "rule": "<SG10>",
               "description": "Alliance Wall Stakes are protected",
               "link": "https://www.robotevents.com/storage/game_manual/V5RC_2024-2025_High_Stakes/rules/SG10.html"
+            },
+            {
+              "rule": "<SG11>",
+              "description": "Positive Corners are \"safe\" during the endgame.",
+              "link": "https://www.robotevents.com/storage/game_manual/V5RC_2024-2025_High_Stakes/rules/SG11.html"
             }
           ]
         },
@@ -464,6 +469,11 @@
               "rule": "<SC8>",
               "description": "An Autonomous Win Point is awarded to any Alliance that ends the Autonomous Period with the following tasks completed, and that has not broken any rules during the Autonomous Period: At least three (3) Scored Rings A minimum of two (2) Stakes with at least(1) Ring Scored Neither Robot contacting / breaking the plane of the Starting Line One (1) Robot contacting the Ladder",
               "link": "https://www.robotevents.com/storage/game_manual/V5RC_2024-2025_High_Stakes/rules/SC8.html"
+            },
+            {
+              "rule": "<SC9>",
+              "description": "A High Stake bonus is available to an Alliance that ends the Match with a Ring Scored on the High Stake.",
+              "link": "https://www.robotevents.com/storage/game_manual/V5RC_2024-2025_High_Stakes/rules/SC9.html"
             }
           ]
         },

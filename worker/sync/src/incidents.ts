@@ -106,10 +106,7 @@ export class EventIncidents extends DurableObject {
     list.add(id);
     await this.state.storage.put(`scratchpads`, list);
 
-    return this.state.storage.put<MatchScratchpad>(
-      `scratchpad_${id}`,
-      scratchpad
-    );
+    return this.state.storage.put<MatchScratchpad>(id, scratchpad);
   }
 
   async getAllScratchpads(): Promise<Record<string, MatchScratchpad>> {

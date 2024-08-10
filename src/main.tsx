@@ -8,6 +8,9 @@ import { registerSW } from "virtual:pwa-register";
 import { initHistoryStore } from "~utils/hooks/history";
 import { QueryClientProvider } from "@tanstack/react-query";
 
+// Register Sentry
+import "~utils/sentry";
+
 registerSW({ immediate: true });
 
 initIncidentStore();

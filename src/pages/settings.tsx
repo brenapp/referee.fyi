@@ -5,22 +5,9 @@ import { ClickToCopy } from "~components/ClickToCopy";
 import { ReportIssueDialog } from "~components/dialogs/report";
 import { Input } from "~components/Input";
 import { toast } from "~components/Toast";
-import { queryClient } from "~utils/data/query";
 import { isWorldsBuild } from "~utils/data/state";
 import { useShareID, useShareProfile } from "~utils/hooks/share";
-
-async function clearCache() {
-  // Invalidate All Queries
-  await queryClient.invalidateQueries({ type: "all" });
-
-  // Unregister Service Workers
-  if ("serviceWorker" in navigator) {
-    const registrations = await navigator.serviceWorker.getRegistrations();
-    for (const registration of registrations) {
-      await registration.unregister();
-    }
-  }
-}
+import { clearCache } from "~utils/sentry";
 
 export const SettingsPage: React.FC = () => {
   const { name, setName, persist } = useShareProfile();

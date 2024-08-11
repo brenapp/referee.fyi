@@ -24,7 +24,7 @@ import {
   useIntegrationBearer,
   useShareProfile,
 } from "~utils/hooks/share";
-import { Input } from "~components/Input";
+import { Checkbox, Input } from "~components/Input";
 import { toast } from "~components/Toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Error, Info, Success, Warning } from "~components/Warning";
@@ -50,6 +50,7 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
   sku,
 }) => {
   const [inviteCode, setInviteCode] = useState("");
+  const [admin, setAdmin] = useState(false);
 
   const {
     data: response,
@@ -73,7 +74,7 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
     error: inviteError,
     reset: resetInvite,
   } = useMutation({
-    mutationFn: (key: string) => inviteUser(sku, key),
+    mutationFn: (key: string) => inviteUser(sku, key, { admin }),
   });
 
   useEffect(() => {
@@ -108,6 +109,10 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
           <div className="mt-4">
             <Info message={user.name} className="bg-zinc-700" />
             <ClickToCopy message={user.key} />
+            <Checkbox
+              label="Invite as Admin"
+              bind={{ value: admin, onChange: setAdmin }}
+            />
             <Button
               mode="primary"
               className="mt-4"

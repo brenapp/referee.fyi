@@ -433,6 +433,7 @@ router
   .put("/api/:sku/invite", async (request: RequestHasInvitation, env: Env) => {
     const sku = request.params.sku;
     const user = request.query.user;
+    const isAdmin = request.query.admin === "true";
 
     if (typeof user !== "string") {
       return response({
@@ -454,7 +455,7 @@ router
 
     const newInvitation: Invitation = {
       id: crypto.randomUUID(),
-      admin: false,
+      admin: isAdmin,
       user,
       sku,
       instance_secret: invitation.instance_secret,

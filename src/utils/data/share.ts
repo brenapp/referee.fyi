@@ -240,12 +240,21 @@ export async function acceptEventInvitation(
   return body;
 }
 
+export type InviteUserOptions = {
+  admin: boolean;
+};
+
 export async function inviteUser(
   sku: string,
-  user: string
+  user: string,
+  options: InviteUserOptions
 ): Promise<ShareResponse<APIPutInviteResponseBody>> {
   const url = new URL(`/api/${sku}/invite`, URL_BASE);
   url.searchParams.set("user", user);
+
+  if (options.admin) {
+    url.searchParams.set("admin", "true");
+  }
 
   const response = await signedFetch(url, { method: "PUT" });
   return response.json();

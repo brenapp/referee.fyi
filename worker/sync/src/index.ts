@@ -481,6 +481,10 @@ router
       instance.invitations.push(newInvitation.user);
     }
 
+    if (newInvitation.admin && !instance.admins.includes(newInvitation.user)) {
+      instance.admins.push(newInvitation.user);
+    }
+
     await setInstance(env, instance);
     await setInvitation(env, newInvitation);
 

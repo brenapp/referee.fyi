@@ -15,7 +15,7 @@ import { ClickToCopy } from "~components/ClickToCopy";
 function useHomeEvents() {
   const { data: worldsEvents } = useEventSearch(
     {
-      sku: [
+      "sku[]": [
         "RE-VRC-23-3690",
         "RE-VRC-23-3691",
         "RE-VEXU-23-3692",

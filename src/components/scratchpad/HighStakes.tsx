@@ -6,7 +6,7 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { MatchData } from "robotevents/out/endpoints/matches";
+import { MatchData } from "robotevents";
 import { Checkbox, Radio } from "~components/Input";
 import { HighStakesMatchScratchpad, MatchScratchpad } from "@referee-fyi/share";
 import {

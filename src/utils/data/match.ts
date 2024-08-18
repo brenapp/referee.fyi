@@ -1,4 +1,4 @@
-import { type MatchData, Round } from "robotevents/out/endpoints/matches";
+import { type MatchData, Round } from "robotevents";
 
 export function shortMatchName(match: MatchData) {
   switch (match.round) {

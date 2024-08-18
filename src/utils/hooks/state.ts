@@ -1,6 +1,6 @@
 import { useMatch, useParams } from "react-router-dom";
 import { HookQueryOptions, useEvent } from "./robotevents";
-import { EventData } from "robotevents/out/endpoints/events";
+import { EventData } from "robotevents";
 
 export function useSKU() {
   const { sku } = useParams();

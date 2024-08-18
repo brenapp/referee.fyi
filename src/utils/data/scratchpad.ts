@@ -9,7 +9,7 @@ import {
   RapidRelayMatchScratchpad,
 } from "@referee-fyi/share";
 import { getPeer } from "./share";
-import { MatchData } from "robotevents/out/endpoints/matches";
+import { MatchData, programs } from "robotevents";
 import { seasons } from "robotevents";
 import {
   initLWW,
@@ -96,19 +96,19 @@ export async function editScratchpad<T extends MatchScratchpad>(
 
 export function getGameForSeason(seasonId: number): SupportedGame | null {
   switch (seasonId) {
-    case seasons.get("V5RC", "2024-2025")!: {
+    case seasons[programs.V5RC]["2024-2025"]: {
       return "High Stakes";
     }
-    case seasons.get("V5RC", "2023-2024")!: {
+    case seasons[programs.V5RC]["2023-2024"]: {
       return "High Stakes";
     }
-    case seasons.get("VURC", "2024-2025")!: {
+    case seasons[programs.VURC]["2024-2025"]: {
       return "High Stakes";
     }
-    case seasons.get("VAIRC", "2024-2025")!: {
+    case seasons[programs.VAIRC]["2024-2025"]: {
       return "High Stakes";
     }
-    case seasons.get("VIQRC", "2024-2025")!: {
+    case seasons[programs.VIQRC]["2024-2025"]: {
       return "Rapid Relay";
     }
     default: {
@@ -124,7 +124,7 @@ export function getDefaultScratchpad(
 ): MatchScratchpad {
   const base: BaseMatchScratchpad = {
     id: getScratchpadID(match),
-    event: match.event.code,
+    event: match.event.code ?? "",
     match: {
       type: "match",
       division: match.division.id,

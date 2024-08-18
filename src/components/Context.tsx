@@ -1,7 +1,7 @@
-import { Match, MatchData } from "robotevents/out/endpoints/matches";
+import { Match, MatchData } from "robotevents";
 import { useEvent } from "~utils/hooks/robotevents";
 import { twMerge } from "tailwind-merge";
-import { IdInfo } from "robotevents/out/endpoints";
+import { IdInfo } from "robotevents";
 import { useMemo } from "react";
 export type AllianceListProps = {
   teams: IdInfo<string>[];
@@ -60,7 +60,7 @@ export const MatchContext: React.FC<MatchContextProps> = ({
     const teams = match.alliances
       .map((a) => a.teams)
       .flat()
-      .map((t) => t.team);
+      .map((t) => t.team!);
 
     return (
       <div {...props}>
@@ -80,13 +80,13 @@ export const MatchContext: React.FC<MatchContextProps> = ({
   return (
     <div {...props} className={twMerge("flex gap-2", props.className)}>
       <AllianceList
-        teams={red.teams.map((t) => t.team)}
+        teams={red.teams.map((t) => t.team!)}
         color="red"
         className={allianceClassName}
         score={red.score}
       />
       <AllianceList
-        teams={blue.teams.map((t) => t.team)}
+        teams={blue.teams.map((t) => t.team!)}
         color="blue"
         reverse
         className={allianceClassName}

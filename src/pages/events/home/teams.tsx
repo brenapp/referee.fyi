@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { EventData } from "robotevents/out/endpoints/events";
+import { EventData } from "robotevents";
 import { Spinner } from "~components/Spinner";
 import { useEventIncidents } from "~utils/hooks/incident";
 import { useDivisionTeams } from "~utils/hooks/robotevents";

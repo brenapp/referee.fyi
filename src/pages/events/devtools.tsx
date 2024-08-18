@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
-import { seasons } from "robotevents";
+import { ProgramAbbr } from "robotevents";
 import { Button } from "~components/Button";
 import { Input, Select } from "~components/Input";
 import { Spinner } from "~components/Spinner";
@@ -51,7 +51,7 @@ export const EventDevTools: React.FC = () => {
 
   const [generateIssueNumber, setGenerateIssueNumber] = useState(1000);
   const [generateIssuesDivision, setGenerateIssuesDivision] = useState(
-    event?.divisions[0].id ?? 1
+    event?.divisions?.[0].id ?? 1
   );
 
   const { data: teamsInDivision } = useDivisionTeams(
@@ -64,8 +64,8 @@ export const EventDevTools: React.FC = () => {
   );
 
   const { data: rules } = useRecentRules(
-    event?.program.code ?? "V5RC",
-    event?.season.id ?? seasons.current("V5RC")!
+    (event?.program?.code ?? "V5RC") as ProgramAbbr,
+    event?.season.id ?? 0
   );
 
   const { mutate: generateIncidents, isPending: isGeneratePending } =
@@ -172,7 +172,7 @@ export const EventDevTools: React.FC = () => {
               value={generateIssuesDivision}
               onChange={(e) => setGenerateIssuesDivision(+e.target.value)}
             >
-              {event?.divisions.map((division) => (
+              {event?.divisions?.map((division) => (
                 <option key={division.id} value={division.id}>
                   {division.name}
                 </option>

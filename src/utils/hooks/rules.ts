@@ -1,7 +1,5 @@
 import { UseQueryResult, useQuery } from "@tanstack/react-query";
-import { EventData } from "robotevents/out/endpoints/events";
-import { ProgramAbbr } from "robotevents/out/endpoints/programs";
-import { Season, Year } from "robotevents/out/endpoints/seasons";
+import { EventData, ProgramAbbr, Season, Year } from "robotevents";
 import { useSeason } from "./robotevents";
 
 export type Rule = {
@@ -56,7 +54,9 @@ export function useRulesForSeason(season?: Season | null): Game | undefined {
 
   const year = (season.years_start + "-" + season.years_end) as Year;
   const currentGame = rules?.games.find(
-    (g) => g.season === year && g.programs.includes(season.program.code)
+    (g) =>
+      g.season === year &&
+      g.programs.includes(season.program.code as ProgramAbbr)
   ) as Game | undefined;
 
   if (!currentGame) {
@@ -66,7 +66,7 @@ export function useRulesForSeason(season?: Season | null): Game | undefined {
   const relevantRuleGroups: RuleGroup[] = [];
 
   currentGame?.ruleGroups.forEach((ruleGroup) => {
-    if (ruleGroup.programs.includes(season.program.code)) {
+    if (ruleGroup.programs.includes(season.program.code as ProgramAbbr)) {
       relevantRuleGroups.push(ruleGroup);
     }
   });

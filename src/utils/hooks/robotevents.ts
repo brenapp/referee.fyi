@@ -1,4 +1,3 @@
-import * as robotevents from "robotevents";
 import {
   DefaultError,
   QueryKey,
@@ -10,19 +9,24 @@ import {
   Round,
   type MatchData,
   Color,
-} from "robotevents/out/endpoints/matches";
-import { ProgramAbbr } from "robotevents/out/endpoints/programs";
-import {
-  Team,
+  Client,
   TeamData,
-  TeamOptionsFromEvent,
-} from "robotevents/out/endpoints/teams";
-import { EventData } from "robotevents/out/endpoints/events";
-import { Skill, SkillOptionsFromEvent } from "robotevents/out/endpoints/skills";
-import { EventSearchOptions } from "robotevents/out/endpoints/events/search";
-import { Season } from "robotevents/out/endpoints/seasons";
+  EventData,
+  EventsEndpoints,
+  ProgramCode,
+  Event,
+  Team,
+  Match,
+  programs,
+  Skill,
+  Season,
+} from "robotevents";
 
-robotevents.authentication.setBearer(import.meta.env.VITE_ROBOTEVENTS_TOKEN);
+const client = Client({
+  authorization: {
+    token: import.meta.env.VITE_ROBOTEVENTS_TOKEN,
+  },
+});
 
 export type HookQueryOptions<
   TQueryFnData = unknown,
@@ -35,7 +39,7 @@ export type HookQueryOptions<
 >;
 
 export function useEvent(
-  sku: string,
+  sku: string | null | undefined,
   options?: HookQueryOptions<EventData | null | undefined>
 ): UseQueryResult<EventData | null | undefined> {
   return useQuery({
@@ -45,7 +49,13 @@ export function useEvent(
         return null;
       }
 
-      const event = await robotevents.events.get(sku);
+      const response = await client.events.getBySKU(sku);
+
+      if (!response.success) {
+        return null;
+      }
+
+      const event = response.data;
       return event?.getData();
     },
     staleTime: Infinity,
@@ -54,13 +64,20 @@ export function useEvent(
 }
 
 export function useEventSearch(
-  query: EventSearchOptions,
+  query: EventsEndpoints.EventGetEvents.RequestQuery,
   options?: HookQueryOptions<EventData[] | null | undefined>
 ) {
   return useQuery({
     queryKey: ["events_by_level", query],
     queryFn: async () => {
-      const events = await robotevents.events.search(query);
+      const response = await client.events.search(query);
+
+      if (!response.success) {
+        return null;
+      }
+
+      const events = response.data;
+
       return events.map((e) => e.getData());
     },
     staleTime: Infinity,
@@ -69,18 +86,24 @@ export function useEventSearch(
 }
 
 export function useTeam(
-  numberOrID: string | number | null | undefined,
-  program?: ProgramAbbr,
+  number: string | null | undefined,
+  program: ProgramCode,
   options?: HookQueryOptions<TeamData | null | undefined>
 ): UseQueryResult<TeamData | null | undefined> {
   return useQuery({
-    queryKey: ["team", numberOrID],
+    queryKey: ["team", number, program],
     queryFn: async () => {
-      if (!numberOrID) {
+      if (!number) {
         return null;
       }
 
-      const team = await robotevents.teams.get(numberOrID, program);
+      const response = await client.teams.getByNumber(number, program);
+
+      if (!response.success) {
+        return null;
+      }
+
+      const team = response.data;
       return team?.getData();
     },
     staleTime: 1000 * 60 * 60 * 4,
@@ -90,7 +113,7 @@ export function useTeam(
 
 export function useEventTeams<Select = TeamData[]>(
   eventData: EventData | null | undefined,
-  options?: TeamOptionsFromEvent,
+  options?: EventsEndpoints.EventGetTeams.RequestQuery,
   queryOptions?: HookQueryOptions<TeamData[], DefaultError, Select>
 ): UseQueryResult<Select> {
   return useQuery({
@@ -100,7 +123,7 @@ export function useEventTeams<Select = TeamData[]>(
         return [];
       }
 
-      const event = new robotevents.events.Event(eventData);
+      const event = new Event(eventData, client.api);
       const teams = await event.teams({ registered: true, ...options });
       return teams.array().map((team) => team.getData());
     },
@@ -132,14 +155,14 @@ export function useDivisionTeams(
         return { teams: [], divisionOnly: false };
       }
 
-      const event = new robotevents.events.Event(eventData);
+      const event = new Event(eventData, client.api);
 
       // "Overall Finals" division IDs, which won't have rankings. Instead, get teams from the matches
       if (division > 10) {
         const ids =
           matches
             ?.map((m) =>
-              m.alliances.flatMap((a) => a.teams.map((t) => t.team.id))
+              m.alliances.flatMap((a) => a.teams.map((t) => t.team?.id))
             )
             .flat() ?? [];
         const divisionTeams = teams?.filter((t) => ids.includes(t.id)) ?? [];
@@ -204,12 +227,12 @@ export function useEventMatches(
         return [];
       }
 
-      const event = new robotevents.events.Event(eventData);
+      const event = new Event(eventData, client.api);
       const matches = await event.matches(division);
 
       return matches
         .array()
-        .map((match) => match.getData())
+        .map((match) => match)
         .sort(logicalMatchComparison);
     },
     staleTime: 1000 * 60,
@@ -229,12 +252,14 @@ export function useEventMatchesForTeam(
       if (!event || !teamData) {
         return [];
       }
-      const team = new Team(teamData);
-      let matches = (await team.matches({ event: [event.id] })).array();
+      const team = new Team(teamData, client.api);
+      let matches = (await team.matches({ "event[]": [event.id] }))
+        .array()
+        .map((data) => new Match(data));
 
       if (color) {
         matches = matches.filter((match) =>
-          match.alliance(color).teams.some((t) => t.team.id === team.id)
+          match.alliance(color).teams.some((t) => t.team?.id === team.id)
         );
       }
 
@@ -258,7 +283,7 @@ export function useMatchTeams(
   }
 
   const teamsInMatch =
-    match?.alliances.flatMap((a) => a.teams.map((a) => a.team.id)) ?? [];
+    match?.alliances.flatMap((a) => a.teams.map((a) => a.team?.id)) ?? [];
   return teamsInMatch.map((id) => teams.find((t) => t.id === id)!);
 }
 
@@ -286,9 +311,9 @@ export function useEventsToday(
   return useQuery({
     queryKey: ["events_today"],
     queryFn: async () => {
-      const currentSeasons = (["V5RC", "VURC", "VIQRC"] as const).map(
-        (program) => robotevents.seasons.current(program)
-      ) as number[];
+      const currentSeasons = (
+        [programs.V5RC, programs.VIQRC, programs.VURC] as const
+      ).map((program) => client.seasons.current(program)) as number[];
       const today = new Date();
 
       const yesterday = new Date(today);
@@ -296,12 +321,17 @@ export function useEventsToday(
       const tomorrow = new Date(today);
       tomorrow.setDate(today.getDate() + 3);
 
-      const events = await robotevents.events.search({
+      const response = await client.events.search({
         start: yesterday.toISOString(),
         end: tomorrow.toISOString(),
-        season: currentSeasons,
+        "season[]": currentSeasons,
       });
 
+      if (!response.success) {
+        return [];
+      }
+
+      const events = response.data;
       return events
         .map((event) => event.getData())
         .sort((a, b) => a.name.localeCompare(b.name));
@@ -312,7 +342,7 @@ export function useEventsToday(
 
 export function useEventSkills(
   data: EventData | null | undefined,
-  options?: SkillOptionsFromEvent,
+  options?: EventsEndpoints.EventGetSkills.RequestQuery,
   queryOptions?: HookQueryOptions<Skill[]>
 ) {
   return useQuery({
@@ -322,7 +352,7 @@ export function useEventSkills(
         return [];
       }
 
-      const event = new robotevents.events.Event(data);
+      const event = new Event(data, client.api);
       const runs = await event.skills();
       return runs.array();
     },
@@ -340,14 +370,19 @@ export function useSeason(
       if (!id) {
         return null;
       }
-      return robotevents.seasons.fetch(id);
+      const response = await client.seasons.get(id);
+      if (!response.success) {
+        return null;
+      }
+
+      return response.data;
     },
     staleTime: Infinity,
     ...queryOptions,
   });
 }
 
-export function useCurrentSeason(program?: ProgramAbbr | null) {
-  const id = program ? robotevents.seasons.current(program) : undefined;
+export function useCurrentSeason(program?: ProgramCode | null) {
+  const id = program ? client.seasons.current(program) : undefined;
   return useSeason(id);
 }

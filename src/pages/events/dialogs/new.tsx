@@ -22,7 +22,7 @@ import { useAddRecentRules, useRecentRules } from "~utils/hooks/history";
 import { twMerge } from "tailwind-merge";
 import { toast } from "~components/Toast";
 import { Spinner } from "~components/Spinner";
-import { MatchData } from "robotevents/out/endpoints/matches";
+import { MatchData } from "robotevents";
 import { queryClient } from "~utils/data/query";
 import { IncidentMatchSkills } from "@referee-fyi/share";
 

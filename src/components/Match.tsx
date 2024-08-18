@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useState } from "react";
-import { Match, MatchData } from "robotevents/out/endpoints/matches";
+import { Match, MatchData } from "robotevents";
 import { MatchContext } from "./Context";
 import { Button } from "./Button";
 import { twMerge } from "tailwind-merge";
@@ -74,7 +74,7 @@ function matchTime(match: MatchData) {
 
   return (
     <span className="italic">
-      {dateFormatter.format(new Date(match.scheduled))}
+      {dateFormatter.format(new Date(match.scheduled ?? ""))}
     </span>
   );
 }

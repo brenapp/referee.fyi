@@ -38,10 +38,6 @@ export function useLatestAppVersion() {
   return useQuery({
     queryKey: ["latest_app_version"],
     queryFn: async () => {
-      if (import.meta.env.DEV) {
-        return "DEV-MODE";
-      }
-
       const headers = new Headers();
       headers.append("pragma", "no-cache");
       headers.append("cache-control", "no-cache");

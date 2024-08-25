@@ -1,6 +1,7 @@
 import { useMatch, useParams } from "react-router-dom";
 import { HookQueryOptions, useEvent } from "./robotevents";
 import { EventData } from "robotevents";
+import { useQuery } from "@tanstack/react-query";
 
 export function useSKU() {
   const { sku } = useParams();
@@ -31,4 +32,28 @@ export function useCurrentDivision(def?: number) {
   }
 
   return division;
+}
+
+export function useLatestAppVersion() {
+  return useQuery({
+    queryKey: ["latest_app_version"],
+    queryFn: async () => {
+      const headers = new Headers();
+      headers.append("pragma", "no-cache");
+      headers.append("cache-control", "no-cache");
+      const response = await fetch("/version.json", { headers });
+
+      // If we can't fetch the latest version for whatever reason, just pretend our version is the latest
+      if (!response.ok) {
+        return __REFEREE_FYI_VERSION__;
+      }
+      const data = await response.json();
+      if (typeof data.version !== "string") {
+        return __REFEREE_FYI_VERSION__;
+      }
+
+      return data.version as string;
+    },
+    staleTime: 1000 * 60 * 10,
+  });
 }

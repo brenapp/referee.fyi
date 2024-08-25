@@ -39,7 +39,7 @@ queueMigration({
       "jwk",
       privateJWK,
       { name: "ECDSA", namedCurve: "P-384" },
-      false,
+      true,
       ["sign"]
     );
 

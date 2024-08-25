@@ -260,6 +260,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
 
   const invitations = useShareConnection((c) => c.invitations);
   const activeUsers = useShareConnection((c) => c.activeUsers);
+  const forceSync = useShareConnection((c) => c.forceSync);
 
   const connectionStatus = useShareConnection((c) => c.readyState);
 
@@ -322,6 +323,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
       await removeInvitation(event.sku);
       queryClient.invalidateQueries({ queryKey: ["event_invitation_all"] });
       setLeaveDialogOpen(false);
+      forceSync();
     },
   });
 
@@ -329,6 +331,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
     mutationFn: async (user: string) => {
       await removeInvitation(event.sku, user);
       queryClient.invalidateQueries({ queryKey: ["event_invitation_all"] });
+      forceSync();
     },
   });
 
@@ -369,7 +372,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
               </Button>
             ) : null}
             <Dialog
-              mode="nonmodal"
+              mode="modal"
               open={leaveDialogOpen}
               className="p-4"
               onClose={() => setLeaveDialogOpen(false)}
@@ -523,7 +526,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
           </Button>
           <Dialog
             open={deleteDataDialogOpen}
-            mode="nonmodal"
+            mode="modal"
             className="absolute w-full rounded-md mt-4"
             onClose={() => setDeleteDataDialogOpen(false)}
           >

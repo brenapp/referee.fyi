@@ -219,7 +219,7 @@ export function useTeamIncidentsByMatch(
         (r) => !!r
       ) as Alliance[];
       const teams =
-        alliances.map((a) => a.teams.map((t) => t.team.name)).flat() ?? [];
+        alliances.map((a) => a.teams.map((t) => t.team!.name)).flat() ?? [];
 
       const incidentsByTeam: TeamIncidentsByMatch = [];
 

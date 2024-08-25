@@ -93,8 +93,12 @@ export const EventTeamsPage: React.FC = () => {
 
   const teamLocation = useMemo(() => {
     if (!team) return null;
-    return [team?.location.city, team?.location.region, team?.location.country]
-      .filter(Boolean)
+    return [
+      team?.location?.city,
+      team?.location?.region,
+      team?.location?.country,
+    ]
+      .filter((v) => !!v)
       .join(", ");
   }, [team]);
 

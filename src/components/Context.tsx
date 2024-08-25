@@ -3,8 +3,9 @@ import { useEvent } from "~utils/hooks/robotevents";
 import { twMerge } from "tailwind-merge";
 import { IdInfo } from "robotevents";
 import { useMemo } from "react";
+
 export type AllianceListProps = {
-  teams: IdInfo<string>[];
+  teams: IdInfo[];
   color: "red" | "blue";
   reverse?: boolean;
   score?: number;

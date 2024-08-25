@@ -30,6 +30,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
     const teams: Record<string, Skill[]> = {};
 
     for (const skill of skills) {
+      if (!skill.team) continue;
       if (teams[skill.team.name]) {
         teams[skill.team.name].push(skill);
       } else {

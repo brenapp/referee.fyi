@@ -67,17 +67,17 @@ const EventPicker: React.FC = () => {
           return true;
         }
 
-        if (event.location.venue.toUpperCase().includes(query)) {
+        if (event.location.venue?.toUpperCase().includes(query)) {
           return true;
         }
       }) ?? []
     );
   }, [query, eventsToday]);
 
-  const selectedDiv = event?.divisions.find((d) => d.id === division);
+  const selectedDiv = event?.divisions?.find((d) => d.id === division);
   const showDiv =
     location.pathname !== `/${event?.sku}` &&
-    (event?.divisions.length ?? 0) > 1;
+    (event?.divisions?.length ?? 0) > 1;
 
   const onClick = () => {
     if (showDiv) {

@@ -56,7 +56,7 @@ export function useRulesForSeason(season?: Season | null): Game | undefined {
   const currentGame = rules?.games.find(
     (g) =>
       g.season === year &&
-      g.programs.includes(season.program.code as ProgramAbbr)
+      g.programs.includes(season.program?.code as ProgramAbbr)
   ) as Game | undefined;
 
   if (!currentGame) {
@@ -66,7 +66,7 @@ export function useRulesForSeason(season?: Season | null): Game | undefined {
   const relevantRuleGroups: RuleGroup[] = [];
 
   currentGame?.ruleGroups.forEach((ruleGroup) => {
-    if (ruleGroup.programs.includes(season.program.code as ProgramAbbr)) {
+    if (ruleGroup.programs.includes(season.program?.code as ProgramAbbr)) {
       relevantRuleGroups.push(ruleGroup);
     }
   });

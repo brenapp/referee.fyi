@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
-import { ProgramAbbr } from "robotevents";
+import { programs } from "robotevents";
 import { Button } from "~components/Button";
 import { Input, Select } from "~components/Input";
 import { Spinner } from "~components/Spinner";
@@ -64,7 +64,7 @@ export const EventDevTools: React.FC = () => {
   );
 
   const { data: rules } = useRecentRules(
-    (event?.program?.code ?? "V5RC") as ProgramAbbr,
+    event?.program?.id ?? programs.V5RC,
     event?.season.id ?? 0
   );
 

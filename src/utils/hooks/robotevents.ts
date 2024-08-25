@@ -6,20 +6,19 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import {
-  Round,
   type MatchData,
   Color,
   Client,
   TeamData,
   EventData,
-  EventsEndpoints,
   ProgramCode,
   Event,
   Team,
-  Match,
   programs,
   Skill,
   Season,
+  operations,
+  rounds,
 } from "robotevents";
 
 const client = Client({
@@ -27,6 +26,8 @@ const client = Client({
     token: import.meta.env.VITE_ROBOTEVENTS_TOKEN,
   },
 });
+
+const CURRENT_YEAR = "2024-2025" as const;
 
 export type HookQueryOptions<
   TQueryFnData = unknown,
@@ -44,19 +45,19 @@ export function useEvent(
 ): UseQueryResult<EventData | null | undefined> {
   return useQuery({
     queryKey: ["event", sku],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (!sku) {
         return null;
       }
 
-      const response = await client.events.getBySKU(sku);
+      const response = await client.events.getBySKU(sku, { signal });
 
-      if (!response.success) {
+      if (!response.data) {
         return null;
       }
 
       const event = response.data;
-      return event?.getData();
+      return event.getData();
     },
     staleTime: Infinity,
     ...options,
@@ -64,20 +65,19 @@ export function useEvent(
 }
 
 export function useEventSearch(
-  query: EventsEndpoints.EventGetEvents.RequestQuery,
+  query: operations["event_getEvents"]["parameters"]["query"],
   options?: HookQueryOptions<EventData[] | null | undefined>
 ) {
   return useQuery({
     queryKey: ["events_by_level", query],
-    queryFn: async () => {
-      const response = await client.events.search(query);
+    queryFn: async ({ signal }) => {
+      const response = await client.events.search(query, { signal });
 
-      if (!response.success) {
+      if (!response.data) {
         return null;
       }
 
       const events = response.data;
-
       return events.map((e) => e.getData());
     },
     staleTime: Infinity,
@@ -92,14 +92,16 @@ export function useTeam(
 ): UseQueryResult<TeamData | null | undefined> {
   return useQuery({
     queryKey: ["team", number, program],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (!number) {
         return null;
       }
 
-      const response = await client.teams.getByNumber(number, program);
+      const response = await client.teams.getByNumber(number, program, {
+        signal,
+      });
 
-      if (!response.success) {
+      if (!response.data) {
         return null;
       }
 
@@ -113,19 +115,27 @@ export function useTeam(
 
 export function useEventTeams<Select = TeamData[]>(
   eventData: EventData | null | undefined,
-  options?: EventsEndpoints.EventGetTeams.RequestQuery,
+  options?: operations["event_getTeams"]["parameters"]["query"],
   queryOptions?: HookQueryOptions<TeamData[], DefaultError, Select>
 ): UseQueryResult<Select> {
   return useQuery({
     queryKey: ["teams", eventData?.sku, options],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (!eventData) {
         return [];
       }
 
       const event = new Event(eventData, client.api);
-      const teams = await event.teams({ registered: true, ...options });
-      return teams.array().map((team) => team.getData());
+      const teams = await event.teams(
+        { registered: true, ...options },
+        { signal }
+      );
+
+      if (!teams.data) {
+        return [];
+      }
+
+      return teams.data.map((team) => team.getData());
     },
     staleTime: 1000 * 60 * 60,
     ...queryOptions,
@@ -175,12 +185,18 @@ export function useDivisionTeams(
 
       const rankings = await event.rankings(division);
 
-      if (rankings.size < 1) {
+      if (!rankings.data) {
+        return { divisionOnly: false, teams: teams! };
+      }
+
+      if (rankings.data.length < 1) {
         return { divisionOnly: false, teams: teams! };
       }
 
       const divisionTeams =
-        teams?.filter((t) => rankings.some((r) => r.team.id === t.id)) ?? [];
+        teams?.filter((t) => rankings.data.some((r) => r.team?.id === t.id)) ??
+        [];
+
       return {
         divisionOnly: true,
         teams: divisionTeams,
@@ -194,15 +210,15 @@ export function useDivisionTeams(
 
 export function logicalMatchComparison(a: MatchData, b: MatchData) {
   const roundOrder = [
-    Round.Practice,
-    Round.Qualification,
-    Round.RoundRobin,
-    Round.RoundOf16,
-    Round.Quarterfinals,
-    Round.Semifinals,
-    Round.Finals,
-    Round.TopN,
-  ];
+    rounds.Practice,
+    rounds.Qualification,
+    rounds.RoundRobin,
+    rounds.RoundOf16,
+    rounds.Quarterfinals,
+    rounds.Semifinals,
+    rounds.Finals,
+    rounds.TopN,
+  ] as number[];
 
   if (a.round !== b.round) {
     return roundOrder.indexOf(a.round) - roundOrder.indexOf(b.round);
@@ -230,10 +246,11 @@ export function useEventMatches(
       const event = new Event(eventData, client.api);
       const matches = await event.matches(division);
 
-      return matches
-        .array()
-        .map((match) => match)
-        .sort(logicalMatchComparison);
+      if (!matches.data) {
+        return [];
+      }
+
+      return matches.data.map((match) => match).sort(logicalMatchComparison);
     },
     staleTime: 1000 * 60,
     ...options,
@@ -253,9 +270,13 @@ export function useEventMatchesForTeam(
         return [];
       }
       const team = new Team(teamData, client.api);
-      let matches = (await team.matches({ "event[]": [event.id] }))
-        .array()
-        .map((data) => new Match(data));
+      const result = await team.matches({ "event[]": [event.id] });
+
+      if (!result.data) {
+        return [];
+      }
+
+      let matches = result.data;
 
       if (color) {
         matches = matches.filter((match) =>
@@ -313,7 +334,7 @@ export function useEventsToday(
     queryFn: async () => {
       const currentSeasons = (
         [programs.V5RC, programs.VIQRC, programs.VURC] as const
-      ).map((program) => client.seasons.current(program)) as number[];
+      ).map((program) => client.seasons[program][CURRENT_YEAR]) as number[];
       const today = new Date();
 
       const yesterday = new Date(today);
@@ -327,7 +348,7 @@ export function useEventsToday(
         "season[]": currentSeasons,
       });
 
-      if (!response.success) {
+      if (!response.data) {
         return [];
       }
 
@@ -342,7 +363,7 @@ export function useEventsToday(
 
 export function useEventSkills(
   data: EventData | null | undefined,
-  options?: EventsEndpoints.EventGetSkills.RequestQuery,
+  options?: operations["event_getSkills"]["parameters"]["query"],
   queryOptions?: HookQueryOptions<Skill[]>
 ) {
   return useQuery({
@@ -354,7 +375,12 @@ export function useEventSkills(
 
       const event = new Event(data, client.api);
       const runs = await event.skills();
-      return runs.array();
+
+      if (!runs.data) {
+        return [];
+      }
+
+      return runs.data;
     },
     ...queryOptions,
   });
@@ -371,7 +397,7 @@ export function useSeason(
         return null;
       }
       const response = await client.seasons.get(id);
-      if (!response.success) {
+      if (!response.data) {
         return null;
       }
 
@@ -383,6 +409,7 @@ export function useSeason(
 }
 
 export function useCurrentSeason(program?: ProgramCode | null) {
-  const id = program ? client.seasons.current(program) : undefined;
+  // @ts-expect-error fix for as const - if program doesn't have a year just return undefined
+  const id = program ? client.seasons?.[program]?.[CURRENT_YEAR] : undefined;
   return useSeason(id);
 }

@@ -56,7 +56,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
   const { data: team } = useEventTeam(event, number);
 
   const teamAlliance = match.alliances.find((alliance) =>
-    alliance.teams.some((t) => t.team.name === number)
+    alliance.teams.some((t) => t.team?.name === number)
   );
 
   const rulesSummary = useMemo(() => {

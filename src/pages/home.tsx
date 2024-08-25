@@ -11,6 +11,7 @@ import { isWorldsBuild } from "~utils/data/state";
 import { useQuery } from "@tanstack/react-query";
 import { getEventInvitation } from "~utils/data/share";
 import { ClickToCopy } from "~components/ClickToCopy";
+import { UpdatePrompt } from "~components/UpdatePrompt";
 
 function useHomeEvents() {
   const { data: worldsEvents } = useEventSearch(
@@ -83,6 +84,7 @@ export const HomePage: React.FC = () => {
             <p>Settings</p>
           </LinkButton>
         </nav>
+        <UpdatePrompt />
         <section className="max-w-full mb-4">
           {events?.map((event) => (
             <LinkButton

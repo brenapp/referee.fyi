@@ -37,6 +37,7 @@ import { isWorldsBuild } from "~utils/data/state";
 import { ClickToCopy } from "~components/ClickToCopy";
 import { twMerge } from "tailwind-merge";
 import { tryPersistStorage } from "~utils/data/keyval";
+import { UpdatePrompt } from "~components/UpdatePrompt";
 
 export type ManageDialogProps = {
   open: boolean;
@@ -350,9 +351,10 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
         open={inviteDialogOpen}
         onClose={() => setInviteDialogOpen(false)}
       />
+      <UpdatePrompt />
       <Spinner show={isCreateInstancePending || isLeavePending} />
       {isSharing ? (
-        <section>
+        <section className="mt-4">
           <h2 className="font-bold">Sharing</h2>
           <p>Share Name: {name} </p>
           <div className="mt-2">

@@ -72,9 +72,13 @@ function matchTime(match: MatchData) {
     return <span>{dateFormatter.format(new Date(match.started))}</span>;
   }
 
+  if (!match.scheduled) {
+    return <span className="italic">Not Scheduled</span>;
+  }
+
   return (
     <span className="italic">
-      {dateFormatter.format(new Date(match.scheduled ?? ""))}
+      {dateFormatter.format(new Date(match.scheduled))}
     </span>
   );
 }

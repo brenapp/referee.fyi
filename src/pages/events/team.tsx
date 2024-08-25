@@ -5,11 +5,11 @@ import { useCallback, useMemo, useState } from "react";
 import { useCurrentEvent } from "~hooks/state";
 import { useTeamIncidentsByEvent } from "~hooks/incident";
 import { Tabs } from "~components/Tabs";
-import { EventData } from "robotevents/out/endpoints/events";
-import { TeamData } from "robotevents/out/endpoints/teams";
+import { EventData } from "robotevents";
+import { TeamData } from "robotevents";
 import { ClickableMatch } from "~components/Match";
 import { EventMatchDialog } from "./dialogs/match";
-import { MatchData } from "robotevents/out/endpoints/matches";
+import { MatchData } from "robotevents";
 import { Incident } from "~components/Incident";
 import { EventNewIncidentDialog } from "./dialogs/new";
 import { Button } from "~components/Button";
@@ -93,8 +93,12 @@ export const EventTeamsPage: React.FC = () => {
 
   const teamLocation = useMemo(() => {
     if (!team) return null;
-    return [team?.location.city, team?.location.region, team?.location.country]
-      .filter(Boolean)
+    return [
+      team?.location?.city,
+      team?.location?.region,
+      team?.location?.country,
+    ]
+      .filter((v) => !!v)
       .join(", ");
   }, [team]);
 

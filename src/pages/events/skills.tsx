@@ -7,12 +7,12 @@ import { EventNewIncidentDialog } from "./dialogs/new";
 import { Tabs } from "~components/Tabs";
 import { EventManageTab } from "./home/manage";
 import { Spinner } from "~components/Spinner";
-import { EventData } from "robotevents/out/endpoints/events";
+import { EventData } from "robotevents";
 import { useEventSkills, useEventTeams } from "~utils/hooks/robotevents";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList as List } from "react-window";
 import { Link } from "react-router-dom";
-import { Skill } from "robotevents/out/endpoints/skills";
+import { Skill } from "robotevents";
 
 type TeamSkillsTabProps = {
   event: EventData;
@@ -30,6 +30,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
     const teams: Record<string, Skill[]> = {};
 
     for (const skill of skills) {
+      if (!skill.team) continue;
       if (teams[skill.team.name]) {
         teams[skill.team.name].push(skill);
       } else {

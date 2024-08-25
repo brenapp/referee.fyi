@@ -16,7 +16,7 @@ import {
   useMutationState,
   useQuery,
 } from "@tanstack/react-query";
-import { Alliance, Match, MatchData } from "robotevents/out/endpoints/matches";
+import { Alliance, Match, MatchData } from "robotevents";
 import { toast } from "~components/Toast";
 import { useShareConnection } from "~models/ShareConnection";
 import { queryClient } from "~utils/data/query";
@@ -219,7 +219,7 @@ export function useTeamIncidentsByMatch(
         (r) => !!r
       ) as Alliance[];
       const teams =
-        alliances.map((a) => a.teams.map((t) => t.team.name)).flat() ?? [];
+        alliances.map((a) => a.teams.map((t) => t.team!.name)).flat() ?? [];
 
       const incidentsByTeam: TeamIncidentsByMatch = [];
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { EventData } from "robotevents/out/endpoints/events";
+import { EventData } from "robotevents";
 import { Button, IconButton, LinkButton } from "~components/Button";
 import { deleteManyIncidents, getIncidentsByEvent } from "~utils/data/incident";
 import {

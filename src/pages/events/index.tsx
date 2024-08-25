@@ -1,12 +1,26 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { EventDivisionPickerPage } from "./division";
 import { EventHome } from "./home";
 import { EventSkillsPage } from "./skills";
 import { EventSummaryPage } from "./summary";
 import { EventTeamsPage } from "./team";
 import { EventDevTools } from "./devtools";
+import { useCurrentEvent } from "~utils/hooks/state";
 
 const EventPage: React.FC = () => {
+  const {
+    data: currentEvent,
+    isPending: isLoadingCurrentEvent,
+    isError: isErrorCurrentEvent,
+  } = useCurrentEvent();
+
+  const invalidSKU =
+    !isLoadingCurrentEvent && (isErrorCurrentEvent || !currentEvent);
+
+  if (invalidSKU) {
+    return <Navigate to="/" replace />;
+  }
+
   return (
     <Routes>
       <Route path="/">

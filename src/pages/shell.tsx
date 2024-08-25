@@ -21,7 +21,7 @@ import {
   DialogCustomHeader,
   DialogHeader,
 } from "~components/Dialog";
-import { ProgramAbbr } from "robotevents/out/endpoints/programs";
+import { ProgramCode, programs } from "robotevents";
 import { Input, RulesSelect, Select } from "~components/Input";
 import { Rule, useRulesForSeason } from "~utils/hooks/rules";
 import { Toaster } from "react-hot-toast";
@@ -67,17 +67,17 @@ const EventPicker: React.FC = () => {
           return true;
         }
 
-        if (event.location.venue.toUpperCase().includes(query)) {
+        if (event.location.venue?.toUpperCase().includes(query)) {
           return true;
         }
       }) ?? []
     );
   }, [query, eventsToday]);
 
-  const selectedDiv = event?.divisions.find((d) => d.id === division);
+  const selectedDiv = event?.divisions?.find((d) => d.id === division);
   const showDiv =
     location.pathname !== `/${event?.sku}` &&
-    (event?.divisions.length ?? 0) > 1;
+    (event?.divisions?.length ?? 0) > 1;
 
   const onClick = () => {
     if (showDiv) {
@@ -183,8 +183,13 @@ const Rules: React.FC = () => {
   const { data: event } = useCurrentEvent();
 
   const [open, setOpen] = useState(false);
-  const programs: ProgramAbbr[] = ["V5RC", "VIQRC", "VURC", "VAIRC"];
-  const [program, setProgram] = useState<ProgramAbbr>("V5RC");
+  const selectablePrograms: ProgramCode[] = [
+    programs.V5RC,
+    programs.VIQRC,
+    programs.VURC,
+    programs.VAIRC,
+  ];
+  const [program, setProgram] = useState<ProgramCode>(programs.V5RC);
 
   const { data: currentSeasonForProgram } = useCurrentSeason(program);
   const { data: season } = useSeason(event?.season.id);
@@ -200,7 +205,7 @@ const Rules: React.FC = () => {
 
   useEffect(() => {
     if (event) {
-      setProgram(event.program.code);
+      setProgram(event.program.id as ProgramCode);
     }
   }, [event]);
 
@@ -216,10 +221,12 @@ const Rules: React.FC = () => {
           />
           <Select
             value={program}
-            onChange={(e) => setProgram(e.target.value as ProgramAbbr)}
+            onChange={(e) =>
+              setProgram(Number.parseInt(e.target.value) as ProgramCode)
+            }
             className="flex-1"
           >
-            {programs.map((program) => (
+            {selectablePrograms.map((program) => (
               <option key={program} value={program}>
                 {program}
               </option>

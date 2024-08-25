@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { EventData } from "robotevents/out/endpoints/events";
+import { EventData } from "robotevents";
 import { useEventMatches } from "~utils/hooks/robotevents";
 import { useCurrentDivision } from "~utils/hooks/state";
 import { EventMatchDialog } from "../dialogs/match";

@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useState } from "react";
-import { Match, MatchData } from "robotevents/out/endpoints/matches";
+import { Match, MatchData } from "robotevents";
 import { MatchContext } from "./Context";
 import { Button } from "./Button";
 import { twMerge } from "tailwind-merge";
@@ -70,6 +70,10 @@ const dateFormatter = new Intl.DateTimeFormat(navigator.language, {
 function matchTime(match: MatchData) {
   if (match.started) {
     return <span>{dateFormatter.format(new Date(match.started))}</span>;
+  }
+
+  if (!match.scheduled) {
+    return <span className="italic">Not Scheduled</span>;
   }
 
   return (

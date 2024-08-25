@@ -22,10 +22,10 @@ import {
   IncidentOutcome,
   Incident as IncidentData,
 } from "~utils/data/incident";
-import { MatchData } from "robotevents/out/endpoints/matches";
+import { MatchData } from "robotevents";
 import { MatchContext } from "~components/Context";
 import { Incident } from "~components/Incident";
-import { TeamData } from "robotevents/out/endpoints/teams";
+import { TeamData } from "robotevents";
 import { MatchTime } from "~components/Match";
 import { TeamIsolationDialog } from "./team";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
@@ -56,7 +56,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
   const { data: team } = useEventTeam(event, number);
 
   const teamAlliance = match.alliances.find((alliance) =>
-    alliance.teams.some((t) => t.team.name === number)
+    alliance.teams.some((t) => t.team?.name === number)
   );
 
   const rulesSummary = useMemo(() => {

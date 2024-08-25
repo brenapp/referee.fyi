@@ -120,7 +120,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
             >
               <option value={undefined}>Pick Division</option>
               {divisions
-                .sort((a, b) => a.order - b.order)
+                .sort((a, b) => a.order! - b.order!)
                 .map((div) => (
                   <option value={div.id} key={div.id}>
                     {div.name}

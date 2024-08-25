@@ -22,7 +22,7 @@ import { useAddRecentRules, useRecentRules } from "~utils/hooks/history";
 import { twMerge } from "tailwind-merge";
 import { toast } from "~components/Toast";
 import { Spinner } from "~components/Spinner";
-import { MatchData } from "robotevents/out/endpoints/matches";
+import { MatchData, programs } from "robotevents";
 import { queryClient } from "~utils/data/query";
 import { IncidentMatchSkills } from "@referee-fyi/share";
 
@@ -45,11 +45,11 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 
   const rules = useRulesForEvent(event);
   const { data: recentRules } = useRecentRules(
-    event?.program.code ?? "V5RC",
+    event?.program.id ?? programs.V5RC,
     4
   );
   const { mutateAsync: addRecentRules } = useAddRecentRules(
-    event?.program.code ?? "V5RC",
+    event?.program.id ?? programs.V5RC,
     event?.season.id ?? 0
   );
 
@@ -89,7 +89,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     return (
       matches?.filter((match) => {
         const teams = match.alliances
-          .map((a) => a.teams.map((t) => t.team.name))
+          .map((a) => a.teams.map((t) => t.team?.name))
           .flat();
         return teams.includes(team);
       }) ?? []
@@ -424,8 +424,8 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
                 label={alliance.color.toUpperCase()}
               >
                 {alliance.teams.map(({ team }) => (
-                  <option value={team.name} key={team.id}>
-                    {team.name}
+                  <option value={team?.name} key={team?.id}>
+                    {team?.name}
                   </option>
                 ))}
               </optgroup>

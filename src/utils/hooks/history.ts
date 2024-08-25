@@ -4,9 +4,8 @@
 
 import { get, set } from "~utils/data/keyval";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { EventData } from "robotevents/out/endpoints/events";
+import { EventData } from "robotevents";
 import { Rule } from "./rules";
-import { ProgramAbbr } from "robotevents/out/endpoints/programs";
 
 export async function initHistoryStore() {
   const events = await get<EventData[]>("event_history");
@@ -24,8 +23,8 @@ export async function getRecentEvents() {
   return (await get<EventData[]>("event_history")) ?? [];
 }
 
-export async function getRecentRules(program: ProgramAbbr, season: number) {
-  const key = `rule_history_${program}_${season}`;
+export async function getRecentRules(programId: number, season: number) {
+  const key = `rule_history_${programId}_${season}`;
   return (await get<Rule[]>(key)) ?? [];
 }
 
@@ -42,14 +41,14 @@ export function useRecentEvents(limit?: number) {
 }
 
 export function useRecentRules(
-  program: ProgramAbbr,
+  programId: number,
   season: number,
   limit?: number
 ) {
   return useQuery({
     queryKey: ["recent_rules"],
     queryFn: async () => {
-      const rules = await getRecentRules(program, season);
+      const rules = await getRecentRules(programId, season);
       return rules.slice(0, limit);
     },
     staleTime: 0,
@@ -68,15 +67,15 @@ export function useAddEventVisited() {
   });
 }
 
-export function useAddRecentRules(program: ProgramAbbr, season: number) {
-  const key = `rule_history_${program}_${season}`;
+export function useAddRecentRules(programId: number, season: number) {
+  const key = `rule_history_${programId}_${season}`;
   return useMutation({
     mutationFn: async (rules: Rule[]) => {
       if (rules.length < 1) {
         return;
       }
 
-      const recent = (await getRecentRules(program, season)).filter((a) =>
+      const recent = (await getRecentRules(programId, season)).filter((a) =>
         rules.every((b) => b.rule !== a.rule)
       );
       await set(key, [...rules, ...recent]);

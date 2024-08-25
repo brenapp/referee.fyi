@@ -124,10 +124,30 @@ export const EventTeamsPage: React.FC = () => {
       </header>
       <section>
         <Tabs>
-          {{
-            Incidents: <EventTeamsIncidents event={event} team={team} />,
-            Schedule: <EventTeamsMatches event={event} team={team} />,
-          }}
+          {[
+            {
+              id: "incidents",
+              label: "Incidents",
+              icon: (active) =>
+                active ? (
+                  <FlagIcon height={24} className="inline" />
+                ) : (
+                  <FlagIcon height={24} className="inline" />
+                ),
+              content: <EventTeamsIncidents event={event} team={team} />,
+            },
+            {
+              id: "schedule",
+              label: "Schedule",
+              icon: (active) =>
+                active ? (
+                  <FlagIcon height={24} className="inline" />
+                ) : (
+                  <FlagIcon height={24} className="inline" />
+                ),
+              content: <EventTeamsMatches event={event} team={team} />,
+            },
+          ]}
         </Tabs>
       </section>
     </section>

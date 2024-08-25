@@ -9,6 +9,15 @@ import { EventMatchesTab } from "./matches";
 import { EventTeamsTab } from "./teams";
 import { EventManageTab } from "./manage";
 
+import { ClipboardDocumentListIcon as MatchesIconOutline } from "@heroicons/react/24/outline";
+import { ClipboardDocumentListIcon as MatchesIconSolid } from "@heroicons/react/24/solid";
+
+import { UserGroupIcon as TeamsIconOutline } from "@heroicons/react/24/outline";
+import { UserGroupIcon as TeamsIconSolid } from "@heroicons/react/24/solid";
+
+import { Cog8ToothIcon as ManageIconOutline } from "@heroicons/react/24/outline";
+import { Cog8ToothIcon as ManageIconSolid } from "@heroicons/react/24/solid";
+
 export const EventHome: React.FC = () => {
   const { data: event } = useCurrentEvent();
   const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
@@ -31,11 +40,41 @@ export const EventHome: React.FC = () => {
         setOpen={setIncidentDialogOpen}
       />
       <Tabs className="flex-1">
-        {{
-          Matches: <EventMatchesTab event={event} />,
-          Teams: <EventTeamsTab event={event} />,
-          Manage: <EventManageTab event={event} />,
-        }}
+        {[
+          {
+            id: "matches",
+            label: "Matches",
+            icon: (active) =>
+              active ? (
+                <MatchesIconSolid height={24} className="inline" />
+              ) : (
+                <MatchesIconOutline height={24} className="inline" />
+              ),
+            content: <EventMatchesTab event={event} />,
+          },
+          {
+            id: "team",
+            label: "Teams",
+            icon: (active) =>
+              active ? (
+                <TeamsIconSolid height={24} className="inline" />
+              ) : (
+                <TeamsIconOutline height={24} className="inline" />
+              ),
+            content: <EventTeamsTab event={event} />,
+          },
+          {
+            id: "manage",
+            label: "Manage",
+            icon: (active) =>
+              active ? (
+                <ManageIconSolid height={24} className="inline" />
+              ) : (
+                <ManageIconOutline height={24} className="inline" />
+              ),
+            content: <EventManageTab event={event} />,
+          },
+        ]}
       </Tabs>
     </section>
   ) : null;

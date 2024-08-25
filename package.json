@@ -20,7 +20,7 @@
     "worker/*"
   ],
   "dependencies": {
-    "@heroicons/react": "^2.0.18",
+    "@heroicons/react": "^2.1.5",
     "@referee-fyi/consistency": "^1.0.0",
     "@referee-fyi/share": "^1.0.0",
     "@sentry/react": "^8.22.0",

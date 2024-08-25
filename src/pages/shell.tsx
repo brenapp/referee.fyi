@@ -21,7 +21,7 @@ import {
   DialogCustomHeader,
   DialogHeader,
 } from "~components/Dialog";
-import { ProgramCode, programs } from "robotevents";
+import { ProgramAbbr, ProgramCode, programs } from "robotevents";
 import { Input, RulesSelect, Select } from "~components/Input";
 import { Rule, useRulesForSeason } from "~utils/hooks/rules";
 import { Toaster } from "react-hot-toast";
@@ -189,6 +189,13 @@ const Rules: React.FC = () => {
     programs.VURC,
     programs.VAIRC,
   ];
+  const selectableProgramAbbr: Partial<Record<ProgramCode, ProgramAbbr>> = {
+    [programs.V5RC]: "V5RC",
+    [programs.VIQRC]: "VIQRC",
+    [programs.VURC]: "VURC",
+    [programs.VAIRC]: "VAIRC",
+  };
+
   const [program, setProgram] = useState<ProgramCode>(programs.V5RC);
 
   const { data: currentSeasonForProgram } = useCurrentSeason(program);
@@ -228,7 +235,7 @@ const Rules: React.FC = () => {
           >
             {selectablePrograms.map((program) => (
               <option key={program} value={program}>
-                {program}
+                {selectableProgramAbbr[program]}
               </option>
             ))}
           </Select>
@@ -306,7 +313,7 @@ export const AppShell: React.FC = () => {
 
   return (
     <main
-      className="p-4 w-screen h-screen grid mb-4"
+      className="w-screen h-[100dvh] grid mb-4 p-4 overflow"
       style={{
         gridTemplateRows: "4rem 1fr",
         gridTemplateColumns: "calc(100vw - 32px)",

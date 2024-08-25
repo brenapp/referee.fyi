@@ -126,10 +126,7 @@ export function useEventTeams<Select = TeamData[]>(
       }
 
       const event = new Event(eventData, client.api);
-      const teams = await event.teams(
-        { registered: true, ...options },
-        { signal }
-      );
+      const teams = await event.teams(options, { signal });
 
       if (!teams.data) {
         return [];

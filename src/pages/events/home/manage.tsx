@@ -24,7 +24,7 @@ import {
   useIntegrationBearer,
   useShareProfile,
 } from "~utils/hooks/share";
-import { Input } from "~components/Input";
+import { Checkbox, Input } from "~components/Input";
 import { toast } from "~components/Toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Error, Info, Success, Warning } from "~components/Warning";
@@ -37,6 +37,7 @@ import { isWorldsBuild } from "~utils/data/state";
 import { ClickToCopy } from "~components/ClickToCopy";
 import { twMerge } from "tailwind-merge";
 import { tryPersistStorage } from "~utils/data/keyval";
+import { UpdatePrompt } from "~components/UpdatePrompt";
 
 export type ManageDialogProps = {
   open: boolean;
@@ -50,6 +51,7 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
   sku,
 }) => {
   const [inviteCode, setInviteCode] = useState("");
+  const [admin, setAdmin] = useState(false);
 
   const {
     data: response,
@@ -73,7 +75,7 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
     error: inviteError,
     reset: resetInvite,
   } = useMutation({
-    mutationFn: (key: string) => inviteUser(sku, key),
+    mutationFn: (key: string) => inviteUser(sku, key, { admin }),
   });
 
   useEffect(() => {
@@ -108,6 +110,10 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
           <div className="mt-4">
             <Info message={user.name} className="bg-zinc-700" />
             <ClickToCopy message={user.key} />
+            <Checkbox
+              label="Invite as Admin"
+              bind={{ value: admin, onChange: setAdmin }}
+            />
             <Button
               mode="primary"
               className="mt-4"
@@ -334,7 +340,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
   }, [event.sku]);
 
   return (
-    <section className="max-w-xl w-full mx-auto flex-1 mb-4">
+    <section className="max-w-xl max-h-full w-full mx-auto flex-1 mb-4 overflow-y-auto">
       <JoinCodeDialog
         sku={event.sku}
         open={joinCodeDialogOpen}
@@ -345,9 +351,10 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
         open={inviteDialogOpen}
         onClose={() => setInviteDialogOpen(false)}
       />
+      <UpdatePrompt />
       <Spinner show={isCreateInstancePending || isLeavePending} />
       {isSharing ? (
-        <section>
+        <section className="mt-4">
           <h2 className="font-bold">Sharing</h2>
           <p>Share Name: {name} </p>
           <div className="mt-2">

@@ -23,7 +23,7 @@ export const SettingsPage: React.FC = () => {
   }, []);
 
   return (
-    <main className="mt-4">
+    <main>
       {isWorldsBuild() ? (
         <p className="bg-purple-500 text-zinc-300 p-2 rounded-md flex items-center gap-2 mt-2">
           <GlobeAmericasIcon height={20} />

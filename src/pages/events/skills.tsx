@@ -14,6 +14,12 @@ import { FixedSizeList as List } from "react-window";
 import { Link } from "react-router-dom";
 import { Skill } from "robotevents";
 
+import { UserGroupIcon as TeamsIconOutline } from "@heroicons/react/24/outline";
+import { UserGroupIcon as TeamsIconSolid } from "@heroicons/react/24/solid";
+
+import { Cog8ToothIcon as ManageIconOutline } from "@heroicons/react/24/outline";
+import { Cog8ToothIcon as ManageIconSolid } from "@heroicons/react/24/solid";
+
 type TeamSkillsTabProps = {
   event: EventData;
 };
@@ -137,10 +143,30 @@ export const EventSkillsPage: React.FC = () => {
         setOpen={setIncidentDialogOpen}
       />
       <Tabs className="flex-1">
-        {{
-          Teams: <TeamSkillsTab event={event} />,
-          Manage: <EventManageTab event={event} />,
-        }}
+        {[
+          {
+            id: "team",
+            label: "Teams",
+            icon: (active) =>
+              active ? (
+                <TeamsIconSolid height={24} className="inline" />
+              ) : (
+                <TeamsIconOutline height={24} className="inline" />
+              ),
+            content: <TeamSkillsTab event={event} />,
+          },
+          {
+            id: "manage",
+            label: "Manage",
+            icon: (active) =>
+              active ? (
+                <ManageIconSolid height={24} className="inline" />
+              ) : (
+                <ManageIconOutline height={24} className="inline" />
+              ),
+            content: <EventManageTab event={event} />,
+          },
+        ]}
       </Tabs>
     </section>
   );

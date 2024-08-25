@@ -20,7 +20,7 @@ export async function exportPublicKey(includePrefix = true) {
 export async function generateKeys(): Promise<CryptoKeyPair> {
   const pair = await crypto.subtle.generateKey(
     { name: "ECDSA", namedCurve: "P-384" },
-    false,
+    true,
     ["sign", "verify"]
   );
 

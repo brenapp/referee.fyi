@@ -12,6 +12,9 @@ export async function clearCache() {
       await registration.unregister();
     }
   }
+
+  // Reload
+  window.location.reload();
 }
 
 Sentry.init({

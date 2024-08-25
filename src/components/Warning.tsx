@@ -7,76 +7,104 @@ import { twMerge } from "tailwind-merge";
 
 export type SuccessProps = {
   message: ReactNode;
+  children?: ReactNode;
 } & React.HTMLProps<HTMLDivElement>;
 
-export const Success: React.FC<SuccessProps> = ({ message, ...props }) => {
+export const Success: React.FC<SuccessProps> = ({
+  message,
+  children,
+  ...props
+}) => {
   return (
-    <p
+    <section
       {...props}
       className={twMerge(
-        "bg-emerald-300 text-emerald-950 p-2 rounded-md flex items-center gap-2",
+        "bg-emerald-300 text-emerald-950 p-2 rounded-md",
         props.className
       )}
     >
-      <CheckCircleIcon height={20} />
-      {message}
-    </p>
+      <header className="flex items-center gap-2">
+        <CheckCircleIcon height={20} />
+        {message}
+      </header>
+      {children}
+    </section>
   );
 };
 
 export type InfoProps = {
   message: ReactNode;
+  children?: ReactNode;
 } & React.HTMLProps<HTMLDivElement>;
 
-export const Info: React.FC<InfoProps> = ({ message, ...props }) => {
+export const Info: React.FC<InfoProps> = ({ message, children, ...props }) => {
   return (
-    <p
+    <section
       {...props}
       className={twMerge(
-        "bg-zinc-900 text-zinc-300 p-2 rounded-md flex items-center gap-2",
+        "bg-zinc-900 text-zinc-300 p-2 rounded-md",
         props.className
       )}
     >
-      <ExclamationCircleIcon height={20} />
-      {message}
-    </p>
+      <header className="flex items-center gap-2">
+        <CheckCircleIcon height={20} />
+        {message}
+      </header>
+      {children}
+    </section>
   );
 };
 
 export type WarningProps = {
   message: ReactNode;
+  children?: ReactNode;
 } & React.HTMLProps<HTMLDivElement>;
 
-export const Warning: React.FC<WarningProps> = ({ message, ...props }) => {
+export const Warning: React.FC<WarningProps> = ({
+  message,
+  children,
+  ...props
+}) => {
   return (
-    <p
+    <section
       {...props}
       className={twMerge(
-        "bg-yellow-300 text-yellow-950 p-2 rounded-md flex items-center gap-2",
+        "bg-yellow-300 text-yellow-950 p-2 rounded-md",
         props.className
       )}
     >
-      <ExclamationCircleIcon height={20} />
-      {message}
-    </p>
+      <header className="flex items-center gap-2">
+        <ExclamationCircleIcon height={20} />
+        {message}
+      </header>
+      {children}
+    </section>
   );
 };
 
 export type ErrorProps = {
   message: ReactNode;
+  children?: ReactNode;
 } & React.HTMLProps<HTMLDivElement>;
 
-export const Error: React.FC<ErrorProps> = ({ message, ...props }) => {
+export const Error: React.FC<ErrorProps> = ({
+  message,
+  children,
+  ...props
+}) => {
   return (
-    <p
+    <section
       {...props}
       className={twMerge(
-        "bg-red-300 text-red-950 p-2 rounded-md flex items-center gap-2",
+        "bg-red-300 text-red-950 p-2 rounded-md",
         props.className
       )}
     >
-      <ExclamationCircleIcon height={20} />
-      {message}
-    </p>
+      <header className="flex items-center gap-2">
+        <ExclamationCircleIcon height={20} />
+        {message}
+      </header>
+      {children}
+    </section>
   );
 };

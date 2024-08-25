@@ -51,12 +51,16 @@ export function useLatestAppVersion() {
       if (!response.ok) {
         return __REFEREE_FYI_VERSION__;
       }
-      const data = await response.json();
-      if (typeof data.version !== "string") {
+      try {
+        const data = await response.json();
+        if (typeof data.version !== "string") {
+          return __REFEREE_FYI_VERSION__;
+        }
+
+        return data.version as string;
+      } catch (error) {
         return __REFEREE_FYI_VERSION__;
       }
-
-      return data.version as string;
     },
     staleTime: 1000 * 60 * 10,
   });

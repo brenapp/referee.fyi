@@ -26,13 +26,8 @@ const generateVersionJson: Plugin = {
   name: "generate-version-json",
   apply: "build",
   async buildStart() {
-    let version = process.env.CF_PAGES_COMMIT_SHA;
-    if (!version) {
-      version = (await execCommand("git rev-parse --short HEAD"))
-        .toString()
-        .trim();
-    }
-
+    const output = await execCommand("git rev-parse --short HEAD");
+    const version = output.toString().trim();
     this.emitFile({
       type: "asset",
       fileName: "version.json",

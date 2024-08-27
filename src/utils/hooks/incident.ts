@@ -20,7 +20,7 @@ import { Alliance, Match, MatchData } from "robotevents";
 import { toast } from "~components/Toast";
 import { useShareConnection } from "~models/ShareConnection";
 import { queryClient } from "~utils/data/query";
-import { getPeer } from "~utils/data/share";
+import { getShareProfile } from "~utils/data/share";
 import { initLWW } from "@referee-fyi/consistency";
 
 export function useIncident(id: string | undefined | null) {
@@ -55,7 +55,7 @@ export function useNewIncident() {
     mutationKey: ["newIncident"],
     mutationFn: async (incident: NewIncident) => {
       try {
-        const peer = await getPeer();
+        const { key: peer } = await getShareProfile();
         const result = await newIncident({
           data: incident,
           peer,

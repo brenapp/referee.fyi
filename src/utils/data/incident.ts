@@ -3,7 +3,6 @@ import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
 import { MatchData } from "robotevents";
 import { TeamData } from "robotevents";
-import { getPeer } from "./share";
 import {
   IncidentMatch,
   IncidentMatchSkills,
@@ -15,6 +14,7 @@ import {
   BaseIncident,
 } from "@referee-fyi/share";
 import { initLWW, isKeyLWW, updateLWW } from "@referee-fyi/consistency";
+import { getShareProfile } from "./share";
 
 export type { IncidentOutcome, Incident };
 
@@ -305,7 +305,7 @@ export async function editIncident(id: string, incident: EditIncident) {
     return;
   }
 
-  const peer = await getPeer();
+  const profile = await getShareProfile();
   let updated: Incident = current;
   for (const [key, currentValue] of Object.entries(current)) {
     if (!isKeyLWW(key, INCIDENT_IGNORE)) continue;
@@ -316,7 +316,7 @@ export async function editIncident(id: string, incident: EditIncident) {
       updated = updateLWW(updated, {
         key: key as keyof EditIncident,
         value: newValue,
-        peer,
+        peer: profile.key,
       });
     }
   }

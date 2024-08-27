@@ -6,12 +6,12 @@ import { ReportIssueDialog } from "~components/dialogs/report";
 import { Input } from "~components/Input";
 import { toast } from "~components/Toast";
 import { isWorldsBuild } from "~utils/data/state";
-import { useShareID, useShareProfile } from "~utils/hooks/share";
+import { useShareProfile } from "~utils/hooks/share";
 import { clearCache } from "~utils/sentry";
 
 export const SettingsPage: React.FC = () => {
-  const { name, setName, persist } = useShareProfile();
-  const { data: publicKey } = useShareID();
+  const { name, key: publicKey, persist } = useShareProfile();
+  const [localName, setLocalName] = useState(name);
 
   const [reportIssueDialogOpen, setReportIssueDialogOpen] = useState(false);
 
@@ -37,9 +37,9 @@ export const SettingsPage: React.FC = () => {
         <h2 className="font-bold">Name</h2>
         <Input
           className="w-full mt-2"
-          value={name}
-          onChange={(e) => setName(e.currentTarget.value)}
-          onBlur={() => persist()}
+          value={localName}
+          onChange={(e) => setLocalName(e.currentTarget.value)}
+          onBlur={() => persist({ name: localName })}
         />
       </section>
       <section className="mt-4">

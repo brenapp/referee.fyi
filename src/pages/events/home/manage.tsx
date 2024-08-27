@@ -157,7 +157,7 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
   }, [requestCode]);
 
   // Register user when they open
-  const { name, setName, persist } = useShareProfile();
+  const { name, persist } = useShareProfile();
   const [localName, setLocalName] = useState(name);
   const { mutateAsync: register } = useMutation({ mutationFn: registerUser });
   useEffect(() => {
@@ -165,7 +165,7 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
       return;
     }
 
-    register(name);
+    register({ name });
   }, [name, open, register]);
 
   // Invitation
@@ -186,6 +186,15 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
       setHasInvitation(false);
     }
   }, [invitation]);
+
+  const { mutate: setNameContinue, isPending: isPendingSetNameContinue } =
+    useMutation({
+      mutationFn: async () => {
+        const profile = { name: localName };
+        await persist(profile);
+        await register(profile);
+      },
+    });
 
   const onAcceptInvitation = useCallback(async () => {
     if (!invitation || !invitation.success) {
@@ -222,13 +231,11 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
             <Button
               className={twMerge("mt-4", !localName ? "opacity-50" : "")}
               mode="primary"
-              onClick={() => {
-                setName(localName);
-                persist();
-              }}
+              onClick={() => setNameContinue()}
             >
               Continue
             </Button>
+            <Spinner show={isPendingSetNameContinue} />
           </>
         ) : null}
         {name ? (
@@ -286,7 +293,8 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [joinCodeDialogOpen, setJoinCodeDialogOpen] = useState(false);
 
-  const { name, setName, persist } = useShareProfile();
+  const { name, persist } = useShareProfile();
+  const [localName, setLocalName] = useState(name);
 
   const { mutateAsync: createInstance } = useCreateInstance(event.sku);
   const { data: invitation } = useEventInvitation(event.sku);
@@ -333,7 +341,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
   } = useMutation({
     mutationFn: async () => {
       await tryPersistStorage();
-      await registerUser(name);
+      await registerUser({ name });
       const response = await createInstance();
 
       if (response.success) {
@@ -512,9 +520,9 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
             <h2 className="font-bold">Name</h2>
             <Input
               className="w-full"
-              value={name}
-              onChange={(e) => setName(e.currentTarget.value)}
-              onBlur={() => persist()}
+              value={localName}
+              onChange={(e) => setLocalName(e.currentTarget.value)}
+              onBlur={() => persist({ name: localName })}
             />
           </section>
           <Button

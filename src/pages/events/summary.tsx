@@ -19,7 +19,7 @@ import { Checkbox, RulesMultiSelect, Select } from "~components/Input";
 import { twMerge } from "tailwind-merge";
 import { useMutation } from "@tanstack/react-query";
 import { useShareConnection } from "~models/ShareConnection";
-import { useShareID, useShareProfile } from "~utils/hooks/share";
+import { useShareProfile } from "~utils/hooks/share";
 import { IncidentOutcome } from "@referee-fyi/share";
 
 export type Filters = {
@@ -161,8 +161,7 @@ export const ForceSyncButton: React.FC = () => {
 };
 
 export const ExportButton: React.FC = () => {
-  const { name } = useShareProfile();
-  const { data: key } = useShareID();
+  const { name, key } = useShareProfile();
 
   const { data: event } = useCurrentEvent();
   const { data: incidents, isLoading } = useEventIncidents(event?.sku);

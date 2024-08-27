@@ -14,7 +14,7 @@ import {
   setMatchScratchpad,
 } from "~utils/data/scratchpad";
 import { useEvent } from "./robotevents";
-import { getPeer } from "~utils/data/share";
+import { getShareProfile } from "~utils/data/share";
 import { queryClient } from "~utils/data/query";
 import {
   LastWriteWinsConsistency,
@@ -57,7 +57,7 @@ export function useDefaultScratchpad<T extends MatchScratchpad>(
         return null;
       }
 
-      const peer = await getPeer();
+      const { key: peer } = await getShareProfile();
       return getDefaultScratchpad(match, peer, game) as T;
     },
     enabled: isSuccessEvent,
@@ -85,7 +85,7 @@ export function useUpdateMatchScratchpad<T extends MatchScratchpad>(
       const id = getScratchpadID(match);
       const current = await getMatchScratchpad(id);
       if (!current) {
-        const peer = await getPeer();
+        const { key: peer } = await getShareProfile();
         const def = getDefaultScratchpad(match, peer, game);
         await setMatchScratchpad(id, def);
       }

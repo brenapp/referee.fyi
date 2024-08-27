@@ -8,7 +8,7 @@ import {
   HighStakesMatchScratchpad,
   RapidRelayMatchScratchpad,
 } from "@referee-fyi/share";
-import { getPeer } from "./share";
+import { getShareProfile } from "./share";
 import { MatchData, programs } from "robotevents";
 import { seasons } from "robotevents";
 import {
@@ -71,7 +71,7 @@ export async function editScratchpad<T extends MatchScratchpad>(
   }
 
   let updated: T = current;
-  const peer = await getPeer();
+  const { key: peer } = await getShareProfile();
 
   for (const [key, currentValue] of Object.entries(scratchpad) as [
     LWWKeys<T>,

@@ -13,7 +13,7 @@ import {
   getIncidentsForEvent,
   newIncident,
 } from "~utils/data/incident";
-import { getPeer } from "~utils/data/share";
+import { getShareProfile } from "~utils/data/share";
 import { useRecentRules } from "~utils/hooks/history";
 import { useDivisionTeams, useEventMatches } from "~utils/hooks/robotevents";
 import { useCurrentEvent } from "~utils/hooks/state";
@@ -71,7 +71,7 @@ export const EventDevTools: React.FC = () => {
   const { mutate: generateIncidents, isPending: isGeneratePending } =
     useMutation({
       mutationFn: async () => {
-        const peer = await getPeer();
+        const { key: peer } = await getShareProfile();
         for (let i = 0; i < generateIssueNumber; i++) {
           const team =
             teamsInDivision!.teams[

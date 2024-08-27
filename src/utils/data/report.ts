@@ -1,7 +1,7 @@
 import { getMany, isStoragePersisted, keys } from "~utils/data/keyval";
 import { KEY } from "./crypto";
 import { CACHE_PREFIX } from "./query";
-import { getPeer, getShareName, getShareSessionID } from "./share";
+import { getShareProfile, getShareSessionID } from "./share";
 
 const TOKEN = import.meta.env.VITE_LOGSERVER_TOKEN;
 
@@ -24,13 +24,14 @@ export async function reportIssue(
   sku: string | null,
   metadata: IssueReportMetadata
 ): Promise<IssueReportResponse> {
+  const profile = await getShareProfile();
   const frontmatter = [
     [`Email`, metadata.email],
     [`Comment`, metadata.comment],
     [`Version`, __REFEREE_FYI_VERSION__],
     [`Session`, await getShareSessionID()],
-    [`Peer`, await getPeer()],
-    [`Name`, await getShareName()],
+    [`Key`, profile.key],
+    [`Name`, profile.name],
     [`Date`, new Date().toISOString()],
     [`User-Agent`, navigator.userAgent],
     [`SKU`, sku],

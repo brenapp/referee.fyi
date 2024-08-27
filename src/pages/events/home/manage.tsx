@@ -83,6 +83,7 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
       setTimeout(() => {
         if (isInviteSuccess) {
           setInviteCode("");
+          setAdmin(false);
           resetInvite();
         }
       }, 2000);

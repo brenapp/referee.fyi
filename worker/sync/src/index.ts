@@ -209,6 +209,17 @@ router
   // Request Codes (Key Exchange)
   .put("/api/:sku/request", async (request: AuthenticatedRequest, env: Env) => {
     const sku = request.params.sku;
+    const version = request.query.version;
+
+    console.log(version, request.query);
+
+    if (typeof sku !== "string" || typeof version !== "string") {
+      return response({
+        success: false,
+        reason: "bad_request",
+        details: "Must specify SKU and Version",
+      });
+    }
 
     const invitation: Invitation | null = await getInvitation(
       env,
@@ -233,9 +244,15 @@ router
       .join("")
       .toUpperCase();
 
-    await setRequestCode(env, code, sku, request.user.key, {
-      expirationTtl: 600,
-    });
+    await setRequestCode(
+      env,
+      code,
+      sku,
+      { key: request.user.key, version },
+      {
+        expirationTtl: 600,
+      }
+    );
 
     return response<APIPutInvitationRequestResponseBody>({
       success: true,
@@ -258,20 +275,22 @@ router
       });
     }
 
-    const key = await getRequestCodeUserKey(env, code, sku);
-    if (!key) {
+    const req = await getRequestCodeUserKey(env, code, sku);
+    if (!req) {
       return response({
         success: false,
         reason: "incorrect_code",
         details: "No such request code.",
       });
     }
+    console.log(req);
+    const { key, version } = req;
 
     const user = await getUser(env, key);
 
     return response<APIGetInvitationRequestResponseBody>({
       success: true,
-      data: { user: user ?? { key, name: "<Unknown User>" } },
+      data: { user: user ?? { key, name: "<Unknown User>" }, version },
     });
   })
 

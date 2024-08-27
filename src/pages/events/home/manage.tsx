@@ -63,9 +63,16 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
     enabled: inviteCode.length > 0,
   });
 
-  const user = useMemo(() => {
-    return response?.success ? response.data.user : null;
-  }, [response]);
+  const user = useMemo(
+    () => (response?.success ? response.data.user : null),
+    [response]
+  );
+  const userVersion = useMemo(
+    () => (response?.success ? response.data.version : null),
+    [response]
+  );
+
+  console.log(response);
 
   const {
     mutateAsync: invite,
@@ -109,12 +116,26 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
         <Spinner show={isLoadingRequestCode} />
         {user ? (
           <div className="mt-4">
-            <Info message={user.name} className="bg-zinc-700" />
+            <p>{user.name}</p>
             <ClickToCopy message={user.key} />
+            {userVersion !== __REFEREE_FYI_VERSION__ ? (
+              <Warning
+                message="User is on a different version"
+                className="mt-4"
+              >
+                <p>
+                  Your app version (<code>{__REFEREE_FYI_VERSION__}</code>) does
+                  not match this user's app version (
+                  <code>{userVersion ?? "Unknown"}</code>
+                  ). This can lead to instability.
+                </p>
+              </Warning>
+            ) : null}
             <Checkbox
               label="Invite as Admin"
               bind={{ value: admin, onChange: setAdmin }}
             />
+
             <Button
               mode="primary"
               className="mt-4"

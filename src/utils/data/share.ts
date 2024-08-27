@@ -331,6 +331,7 @@ export async function putRequestCode(
   sku: string
 ): Promise<ShareResponse<APIPutInvitationRequestResponseBody>> {
   const url = new URL(`/api/${sku}/request`, URL_BASE);
+  url.searchParams.set("version", __REFEREE_FYI_VERSION__);
 
   const response = await signedFetch(url, { method: "PUT" });
   return response.json();

@@ -31,6 +31,7 @@ import { useShareConnection } from "~models/ShareConnection";
 import { useMutation } from "@tanstack/react-query";
 import { runMigrations } from "../migrations";
 import { toast } from "~components/Toast";
+import { getShareProfile } from "~utils/data/share";
 
 function isValidSKU(sku: string) {
   return !!sku.match(
@@ -304,6 +305,7 @@ const ConnectionManager: React.FC = () => {
 
   const connect = useShareConnection((c) => c.connect);
   const disconnect = useShareConnection((c) => c.disconnect);
+  const updateProfile = useShareConnection((c) => c.updateProfile);
 
   useEffect(() => {
     if (invitation) {
@@ -316,6 +318,14 @@ const ConnectionManager: React.FC = () => {
       disconnect();
     };
   }, [connect, disconnect, invitation]);
+
+  useEffect(() => {
+    async function update() {
+      const profile = await getShareProfile();
+      updateProfile(profile);
+    }
+    update();
+  }, [updateProfile]);
 
   return null;
 };

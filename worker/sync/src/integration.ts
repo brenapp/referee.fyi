@@ -3,7 +3,7 @@ import { Env } from "./types";
 import { response } from "./utils";
 import { getInstance, getInvitation, getUser } from "./data";
 import { importKey, KEY_PREFIX, verifyKeySignature } from "./crypto";
-import { Invitation, ShareInstance, User } from "~types/server";
+import { Invitation, ShareInstance, User } from "@referee-fyi/share";
 
 const verifyBearerToken = async (request: IRequest, env: Env) => {
   const sku = request.params.sku;

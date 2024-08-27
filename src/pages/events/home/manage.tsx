@@ -157,7 +157,8 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
   }, [requestCode]);
 
   // Register user when they open
-  const { name } = useShareProfile();
+  const { name, setName, persist } = useShareProfile();
+  const [localName, setLocalName] = useState(name);
   const { mutateAsync: register } = useMutation({ mutationFn: registerUser });
   useEffect(() => {
     if (!name || !open) {
@@ -204,41 +205,73 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
     <Dialog open={open} onClose={onClose} mode="modal">
       <DialogHeader onClose={onClose} title="Join Request" />
       <DialogBody className="px-2">
-        <p className="mb-4">
-          To join an existing instance, you will need an admin to invite you.
-          Have them enter the code shown below on their device.
-        </p>
-        <Spinner show={isLoadingRequestCode} />
-        <ClickToCopy
-          message={code}
-          className="font-mono text-6xl text-center"
-        />
-        {hasInvitation ? (
-          <section className="mt-4">
-            <nav className="flex justify-between items-center">
-              <Info message={`Invitation From ${invitation?.data.from.name}`} />
-              {invitation?.data.admin ? (
-                <p className="text-sm text-emerald-400">Admin</p>
-              ) : null}
-            </nav>
+        {!name ? (
+          <>
+            <p>
+              Enter your name to continue. This name will be visible to other
+              participants.
+            </p>
+            <label>
+              <h1 className="font-bold mt-4">Name</h1>
+              <Input
+                className="w-full"
+                value={localName}
+                onChange={(e) => setLocalName(e.currentTarget.value)}
+              />
+            </label>
             <Button
+              className={twMerge("mt-4", !localName ? "opacity-50" : "")}
               mode="primary"
-              className="mt-2"
-              onClick={onAcceptInvitation}
+              onClick={() => {
+                setName(localName);
+                persist();
+              }}
             >
-              Accept & Join
+              Continue
             </Button>
-            <Button
-              mode="dangerous"
-              className="mt-2"
-              onClick={onClearInvitation}
-            >
-              Clear Invitation
-            </Button>
-          </section>
-        ) : (
-          <Spinner className="mt-4" show />
-        )}
+          </>
+        ) : null}
+        {name ? (
+          <>
+            <p className="mb-4">
+              To join an existing instance, you will need an admin to invite
+              you. Have them enter the code shown below on their device.
+            </p>
+            <Spinner show={isLoadingRequestCode} />
+            <ClickToCopy
+              message={code}
+              className="font-mono text-6xl text-center"
+            />
+            {hasInvitation ? (
+              <section className="mt-4">
+                <nav className="flex justify-between items-center">
+                  <Info
+                    message={`Invitation From ${invitation?.data.from.name}`}
+                  />
+                  {invitation?.data.admin ? (
+                    <p className="text-sm text-emerald-400">Admin</p>
+                  ) : null}
+                </nav>
+                <Button
+                  mode="primary"
+                  className="mt-2"
+                  onClick={onAcceptInvitation}
+                >
+                  Accept & Join
+                </Button>
+                <Button
+                  mode="dangerous"
+                  className="mt-2"
+                  onClick={onClearInvitation}
+                >
+                  Clear Invitation
+                </Button>
+              </section>
+            ) : (
+              <Spinner className="mt-4" show />
+            )}
+          </>
+        ) : null}
       </DialogBody>
     </Dialog>
   );
@@ -487,6 +520,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
           <Button
             mode="primary"
             className="mt-2"
+            disabled={!name}
             onClick={() => onClickBeginSharing()}
           >
             Begin Sharing

@@ -106,7 +106,7 @@ export const ClickableMatch: React.FC<ClickableMatch> = ({
         className="flex-1 active:bg-zinc-600"
         id={id}
       >
-        <p>{match.shortName()}</p>
+        <p className="text-emerald-400">{match.shortName()} </p>
         <p className="text-sm">{matchTime(match)}</p>
       </Button>
       <label htmlFor={id}>

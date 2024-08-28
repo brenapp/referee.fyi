@@ -5,6 +5,7 @@ import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { Input, Select, TextArea } from "~components/Input";
 import { Spinner } from "~components/Spinner";
 import { Error } from "~components/Warning";
+import { ErrorReport } from "~utils/data/report";
 import { useRecentEvents } from "~utils/hooks/history";
 import { useReportIssue } from "~utils/hooks/report";
 import { useCurrentEvent } from "~utils/hooks/state";
@@ -14,6 +15,7 @@ export type ReportIssueDialogProps = {
   setOpen: (value: boolean) => void;
   comment?: string;
   context?: string;
+  error?: ErrorReport;
 };
 
 export const ReportIssueDialog: React.FC<ReportIssueDialogProps> = ({
@@ -21,6 +23,7 @@ export const ReportIssueDialog: React.FC<ReportIssueDialogProps> = ({
   setOpen,
   comment: initComment,
   context,
+  error: causedError,
 }) => {
   const [email, setEmail] = useState("");
   const [comment, setComment] = useState(initComment ?? "");
@@ -38,7 +41,12 @@ export const ReportIssueDialog: React.FC<ReportIssueDialogProps> = ({
     isSuccess,
     isError,
     reset,
-  } = useReportIssue(sku, { email, comment, context: context ?? "" });
+  } = useReportIssue(sku, {
+    email,
+    comment,
+    context: context ?? "",
+    error: causedError,
+  });
 
   useEffect(() => {
     if (!open) {
@@ -54,6 +62,18 @@ export const ReportIssueDialog: React.FC<ReportIssueDialogProps> = ({
         title="Report Issues with Referee FYI"
       />
       <DialogBody className="px-2">
+        {causedError ? (
+          <section className="mb-4">
+            <Error message="Referee FYI encountered a fatal error!">
+              {import.meta.env.DEV ? (
+                <div className="mt-4">
+                  <p className="font-mono text-sm">{`${causedError.error}`}</p>
+                  <pre className="font-mono text-sm">{`${causedError.componentStack}`}</pre>
+                </div>
+              ) : null}
+            </Error>
+          </section>
+        ) : null}
         <p>
           Please give a brief description of what went wrong. If you provide an
           email, we may reach out to clarify or to notify you of resolution.
@@ -113,7 +133,7 @@ export const ReportIssueDialog: React.FC<ReportIssueDialogProps> = ({
           </section>
         ) : null}
         {isError ? (
-          <Error message={`Could Not Submit Report! ${error.message}`} />
+          <Error message={`Could Not Submit Report! ${error}`} />
         ) : null}
       </DialogBody>
     </Dialog>

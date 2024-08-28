@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { useCallback, useRef, useState } from "react";
+import { ReactNode, useCallback, useRef, useState } from "react";
 import { programs } from "robotevents";
 import { Button } from "~components/Button";
 import { Input, Select } from "~components/Input";
@@ -129,6 +129,11 @@ export const EventDevTools: React.FC = () => {
     },
   });
 
+  // Error
+  const [errorChild, setErrorChild] = useState<Record<string, unknown> | false>(
+    false
+  );
+
   return (
     <section className="mt-4">
       <section className="mt-4">
@@ -226,6 +231,20 @@ export const EventDevTools: React.FC = () => {
           Disconnect
         </Button>
       </nav>
+      <section className="mt-4">
+        <h2 className="font-bold">Throw an Error</h2>
+        <Button
+          mode="dangerous"
+          onClick={() =>
+            setErrorChild({
+              "REFEREE FYI DEVTOOLS ERROR": new Error("Test Error"),
+            })
+          }
+        >
+          Throw Error
+        </Button>
+        {errorChild as ReactNode}
+      </section>
     </section>
   );
 };

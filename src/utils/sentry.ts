@@ -23,6 +23,7 @@ Sentry.init({
     Sentry.browserTracingIntegration(),
     Sentry.replayIntegration(),
   ],
+  environment: import.meta.env.MODE,
   enabled:
     import.meta.env.MODE === "production" ||
     import.meta.env.VITE_REFEREE_FYI_ENABLE_SENTRY,

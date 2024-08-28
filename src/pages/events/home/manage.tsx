@@ -181,14 +181,13 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
   // Register user when they open
   const { name, persist } = useShareProfile();
   const [localName, setLocalName] = useState(name);
-  const { mutateAsync: register } = useMutation({ mutationFn: registerUser });
+
   useEffect(() => {
     if (!name || !open) {
       return;
     }
-
-    register({ name });
-  }, [name, open, register]);
+    registerUser({ name });
+  }, [name, open]);
 
   // Invitation
   const [hasInvitation, setHasInvitation] = useState(false);
@@ -214,7 +213,7 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
       mutationFn: async () => {
         const profile = { name: localName };
         await persist(profile);
-        await register(profile);
+        await registerUser(profile);
       },
     });
 
@@ -306,26 +305,117 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
   );
 };
 
-export type ManageTabProps = {
-  event: EventData;
+export const LeaveDialog: React.FC<ManageDialogProps> = ({
+  open,
+  onClose,
+  sku,
+}) => {
+  const { data: invitation } = useEventInvitation(sku);
+
+  const { forceSync, disconnect, invitations } = useShareConnection([
+    "forceSync",
+    "disconnect",
+    "invitations",
+  ]);
+
+  const { mutateAsync: onClickLeave } = useMutation({
+    mutationFn: async () => {
+      await disconnect();
+      await removeInvitation(sku);
+      queryClient.invalidateQueries({ queryKey: ["event_invitation_all"] });
+      onClose();
+      forceSync();
+    },
+  });
+
+  return (
+    <Dialog mode="modal" open={open} className="p-4" onClose={onClose}>
+      <DialogBody>
+        <p>
+          Are you sure? If you leave, you will need an admin to invite you
+          again.
+        </p>
+        {invitation?.admin && invitations.filter((i) => i.admin).length < 2 ? (
+          <Warning
+            className="mt-4"
+            message="Since you are the last admin, leaving will end this instance and remove all other users."
+          />
+        ) : null}
+        <Button
+          mode="dangerous"
+          className="mt-4"
+          onClick={() => onClickLeave()}
+        >
+          Leave
+        </Button>
+        <Button mode="normal" className="mt-4" onClick={onClose}>
+          Stay
+        </Button>
+      </DialogBody>
+    </Dialog>
+  );
 };
 
-export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
-  const [deleteDataDialogOpen, setDeleteDataDialogOpen] = useState(false);
-  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
-  const [joinCodeDialogOpen, setJoinCodeDialogOpen] = useState(false);
-
+export const ProfilePrompt: React.FC = () => {
   const { name, persist } = useShareProfile();
+
+  // Local
   const [localName, setLocalName] = useState(name);
 
-  const { mutateAsync: createInstance } = useCreateInstance(event.sku);
+  // Save
+  const { mutateAsync: register } = useMutation({ mutationFn: registerUser });
+  const { mutate: setNameContinue, isPending: isPendingSetNameContinue } =
+    useMutation({
+      mutationFn: async () => {
+        const profile = { name: localName };
+        await persist(profile);
+        await register(profile);
+      },
+    });
+
+  return (
+    <>
+      <p>
+        Enter your name to continue. This name will be visible to other
+        participants.
+      </p>
+      <label>
+        <h1 className="font-bold mt-4">Name</h1>
+        <Input
+          className="w-full"
+          value={localName}
+          onChange={(e) => setLocalName(e.currentTarget.value.trim())}
+        />
+      </label>
+      <Button
+        className={twMerge("mt-4", !localName ? "opacity-50" : "")}
+        mode="primary"
+        onClick={() => setNameContinue()}
+      >
+        Continue
+      </Button>
+      <Spinner show={isPendingSetNameContinue} />
+    </>
+  );
+};
+
+export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
+  const { name } = useShareProfile();
+
+  // Dialogs
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [joinCodeDialogOpen, setJoinCodeDialogOpen] = useState(false);
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+
+  // Instance State
   const { data: invitation } = useEventInvitation(event.sku);
-
-  const invitations = useShareConnection((c) => c.invitations);
-  const activeUsers = useShareConnection((c) => c.activeUsers);
-  const forceSync = useShareConnection((c) => c.forceSync);
-
-  const connectionStatus = useShareConnection((c) => c.readyState);
+  const connection = useShareConnection([
+    "invitations",
+    "activeUsers",
+    "readyState",
+    "forceSync",
+    "disconnect",
+  ]);
 
   const { data: entries } = useEventIncidents(event.sku);
   const isSharing = useMemo(
@@ -333,6 +423,239 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
     [invitation]
   );
 
+  // Remove User
+  const { mutateAsync: removeUser, isPending: isPendingRemoveUser } =
+    useMutation({
+      mutationFn: async (user: string) => {
+        await removeInvitation(event.sku, user);
+        queryClient.invalidateQueries({ queryKey: ["event_invitation_all"] });
+        return connection.forceSync();
+      },
+    });
+
+  // Begin Sharing
+  const { mutateAsync: createInstance } = useCreateInstance(event.sku);
+  const {
+    mutateAsync: onClickBeginSharing,
+    isPending: isCreateInstancePending,
+  } = useMutation({
+    mutationFn: async () => {
+      await tryPersistStorage();
+      await registerUser({ name });
+      const response = await createInstance();
+
+      if (response.success) {
+        toast({ type: "info", message: "Sharing!" });
+      } else {
+        toast({
+          type: "error",
+          message: response.details,
+          context: JSON.stringify(response),
+        });
+      }
+    },
+  });
+
+  if (!name) {
+    return (
+      <section>
+        <h2 className="font-bold">Sharing</h2>
+        <ProfilePrompt />
+      </section>
+    );
+  }
+
+  const showSpinner =
+    (connection.readyState !== ReadyState.Closed &&
+      connection.readyState !== ReadyState.Open) ||
+    isPendingRemoveUser ||
+    isCreateInstancePending;
+
+  return (
+    <section>
+      <JoinCodeDialog
+        sku={event.sku}
+        open={joinCodeDialogOpen}
+        onClose={() => setJoinCodeDialogOpen(false)}
+      />
+      <InviteDialog
+        sku={event.sku}
+        open={inviteDialogOpen}
+        onClose={() => setInviteDialogOpen(false)}
+      />
+      <LeaveDialog
+        sku={event.sku}
+        open={leaveDialogOpen}
+        onClose={() => setLeaveDialogOpen(false)}
+      />
+      <Spinner show={showSpinner} />
+      <h2 className="font-bold">Sharing</h2>
+      <p>Share Name: {name} </p>
+      {isSharing ? (
+        <div className="mt-2">
+          {invitation?.admin ? (
+            <Button
+              mode="normal"
+              className="flex gap-2 items-center justify-center"
+              onClick={() => setInviteDialogOpen(true)}
+            >
+              <UserPlusIcon height={20} />
+              <p>Invite</p>
+            </Button>
+          ) : null}
+          <Button
+            mode="dangerous"
+            className="mt-2"
+            onClick={() => setLeaveDialogOpen(true)}
+          >
+            Leave
+          </Button>
+          <nav className="flex gap-2 justify-evenly mt-4">
+            <p className="text-lg">
+              <FlagIcon height={20} className="inline mr-2" />
+              <span className="text-zinc-400">
+                {entries?.length ?? 0} entries
+              </span>
+            </p>
+            <p className="text-lg">
+              <UserCircleIcon height={20} className="inline mr-2" />
+              <span className="text-zinc-400">
+                {connection.activeUsers.length} active
+              </span>
+            </p>
+          </nav>
+          <section className="mt-4">
+            {connection.invitations.map((user) => (
+              <div
+                key={user.user.key}
+                className="py-2 px-4 rounded-md mt-2 flex"
+              >
+                <div className="flex gap-2 items-center flex-1">
+                  <UserCircleIcon height={24} />
+                  <p>{user.user.name}</p>
+                  {user.admin ? (
+                    <span className="text-xs  bg-purple-600 px-2 py-0.5 rounded-md">
+                      Admin
+                    </span>
+                  ) : null}
+                  {connection.activeUsers.find(
+                    (u) => u.key === user.user.key
+                  ) ? (
+                    <span className="text-xs  bg-emerald-600 px-2 py-0.5 rounded-md">
+                      Connected
+                    </span>
+                  ) : (
+                    <span className="text-xs  bg-zinc-700 px-2 py-0.5 rounded-md">
+                      Offline
+                    </span>
+                  )}
+                </div>
+                {invitation?.admin && !user.admin ? (
+                  <IconButton
+                    icon={<TrashIcon height={20} />}
+                    onClick={() => removeUser(user.user.key)}
+                    className="bg-transparent"
+                  />
+                ) : null}
+              </div>
+            ))}
+          </section>
+        </div>
+      ) : null}
+      {!isSharing ? (
+        <section>
+          <p>
+            Create or join a sharing instance to synchronize the anomaly log
+            between devices.
+          </p>
+          <Button
+            mode="primary"
+            className="mt-2"
+            disabled={!name}
+            onClick={() => onClickBeginSharing()}
+          >
+            Begin Sharing
+          </Button>
+          <Button
+            mode="normal"
+            className="mt-2"
+            onClick={() => setJoinCodeDialogOpen(true)}
+          >
+            Join Existing
+          </Button>
+        </section>
+      ) : null}
+    </section>
+  );
+};
+
+const EventSummaryLink: React.FC<ManageTabProps> = ({ event }) => {
+  return (
+    <section className="mt-4">
+      <h2 className="font-bold">Event Summary</h2>
+      <p>See a summary of all entries at the event.</p>
+      <LinkButton
+        to={`/${event.sku}/summary`}
+        className="w-full mt-2 flex items-center"
+      >
+        <span className="flex-1">Event Summary</span>
+        <ArrowRightIcon height={20} className="text-emerald-400" />
+      </LinkButton>
+    </section>
+  );
+};
+
+const DeleteData: React.FC<ManageTabProps> = ({ event }) => {
+  const [deleteDataDialogOpen, setDeleteDataDialogOpen] = useState(false);
+
+  const onConfirmDeleteData = useCallback(async () => {
+    const incidents = await getIncidentsByEvent(event.sku);
+    await removeInvitation(event.sku);
+    await deleteManyIncidents(incidents.map((i) => i.id));
+    setDeleteDataDialogOpen(false);
+  }, [event.sku]);
+
+  return (
+    <section className="mt-4 relative">
+      <h2 className="font-bold">Delete Event Data</h2>
+      <p>
+        This will delete all anomaly logs associated with this event. This
+        action cannot be undone.
+      </p>
+      <Button
+        className="w-full mt-4 bg-red-500 text-center"
+        onClick={() => setDeleteDataDialogOpen(true)}
+      >
+        Delete Event Data
+      </Button>
+      <Dialog
+        open={deleteDataDialogOpen}
+        mode="modal"
+        className="absolute w-full rounded-md mt-4"
+        onClose={() => setDeleteDataDialogOpen(false)}
+      >
+        <DialogBody>
+          <p>Really delete all event data? This action cannot be undone.</p>
+          <Button
+            className="w-full mt-4 bg-red-500 text-center"
+            onClick={onConfirmDeleteData}
+          >
+            Confirm Deletion
+          </Button>
+          <Button
+            className="w-full mt-4 text-center"
+            onClick={() => setDeleteDataDialogOpen(false)}
+            autoFocus
+          >
+            Cancel
+          </Button>
+        </DialogBody>
+      </Dialog>
+    </section>
+  );
+};
+
+const IntegrationInfo: React.FC<ManageTabProps> = ({ event }) => {
   const { data: bearerToken, isSuccess: isSuccessBearerToken } =
     useIntegrationBearer(event.sku);
 
@@ -357,274 +680,36 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
     return { jsonEndpoint: json.toString(), csvEndpoint: csv.toString() };
   }, [bearerToken, event.sku]);
 
-  const {
-    mutateAsync: onClickBeginSharing,
-    isPending: isCreateInstancePending,
-  } = useMutation({
-    mutationFn: async () => {
-      await tryPersistStorage();
-      await registerUser({ name });
-      const response = await createInstance();
-
-      if (response.success) {
-        toast({ type: "info", message: "Sharing!" });
-      } else {
-        toast({
-          type: "error",
-          message: response.details,
-          context: JSON.stringify(response),
-        });
-      }
-    },
-  });
-
-  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
-  const disconnect = useShareConnection((c) => c.disconnect);
-  const { mutateAsync: onClickLeave, isPending: isLeavePending } = useMutation({
-    mutationFn: async () => {
-      await disconnect();
-      await removeInvitation(event.sku);
-      queryClient.invalidateQueries({ queryKey: ["event_invitation_all"] });
-      setLeaveDialogOpen(false);
-      forceSync();
-    },
-  });
-
-  const { mutateAsync: removeUser } = useMutation({
-    mutationFn: async (user: string) => {
-      await removeInvitation(event.sku, user);
-      queryClient.invalidateQueries({ queryKey: ["event_invitation_all"] });
-      forceSync();
-    },
-  });
-
-  const onConfirmDeleteData = useCallback(async () => {
-    const incidents = await getIncidentsByEvent(event.sku);
-    await removeInvitation(event.sku);
-    await deleteManyIncidents(incidents.map((i) => i.id));
-    setDeleteDataDialogOpen(false);
-  }, [event.sku]);
+  if (!isSuccessBearerToken || !bearerToken) {
+    return null;
+  }
 
   return (
+    <section>
+      <h2 className="mt-4 font-bold">Integration Bearer</h2>
+      <p>
+        Use this bearer token to allow external integrations to read data from
+        this instance.
+      </p>
+      <ClickToCopy message={bearerToken ?? ""} />
+      <ClickToCopy prefix="JSON" message={jsonEndpoint} />
+      <ClickToCopy prefix="CSV" message={csvEndpoint} className="flex-1" />
+    </section>
+  );
+};
+
+export type ManageTabProps = {
+  event: EventData;
+};
+
+export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
+  return (
     <section className="max-w-xl max-h-full w-full mx-auto flex-1 mb-4 overflow-y-auto">
-      <JoinCodeDialog
-        sku={event.sku}
-        open={joinCodeDialogOpen}
-        onClose={() => setJoinCodeDialogOpen(false)}
-      />
-      <InviteDialog
-        sku={event.sku}
-        open={inviteDialogOpen}
-        onClose={() => setInviteDialogOpen(false)}
-      />
       <UpdatePrompt />
-      <Spinner show={isCreateInstancePending || isLeavePending} />
-      {isSharing ? (
-        <section className="mt-4">
-          <h2 className="font-bold">Sharing</h2>
-          <p>Share Name: {name} </p>
-          <div className="mt-2">
-            {invitation?.admin ? (
-              <Button
-                mode="normal"
-                className="flex gap-2 items-center justify-center"
-                onClick={() => setInviteDialogOpen(true)}
-              >
-                <UserPlusIcon height={20} />
-                <p>Invite</p>
-              </Button>
-            ) : null}
-            <Dialog
-              mode="modal"
-              open={leaveDialogOpen}
-              className="p-4"
-              onClose={() => setLeaveDialogOpen(false)}
-            >
-              <DialogBody>
-                <p>
-                  Are you sure? If you leave, you will need an admin to invite
-                  you again.
-                </p>
-                {invitation?.admin &&
-                invitations.filter((i) => i.admin).length < 2 ? (
-                  <Warning
-                    className="mt-4"
-                    message="Since you are the last admin, leaving will end this instance and remove all other users."
-                  />
-                ) : null}
-                <Button
-                  mode="dangerous"
-                  className="mt-4"
-                  onClick={() => onClickLeave()}
-                >
-                  Leave
-                </Button>
-                <Button
-                  mode="normal"
-                  className="mt-4"
-                  onClick={() => setLeaveDialogOpen(false)}
-                >
-                  Stay
-                </Button>
-              </DialogBody>
-            </Dialog>
-            <Button
-              mode="dangerous"
-              className="mt-2"
-              onClick={() => setLeaveDialogOpen(true)}
-            >
-              Leave
-            </Button>
-            <nav className="flex gap-2 justify-evenly mt-4">
-              <p className="text-lg">
-                <FlagIcon height={20} className="inline mr-2" />
-                <span className="text-zinc-400">
-                  {entries?.length ?? 0} entries
-                </span>
-              </p>
-              <p className="text-lg">
-                <UserCircleIcon height={20} className="inline mr-2" />
-                <span className="text-zinc-400">
-                  {activeUsers.length} active
-                </span>
-              </p>
-            </nav>
-          </div>
-          <Spinner
-            show={
-              connectionStatus === ReadyState.Connecting ||
-              connectionStatus === ReadyState.Closing
-            }
-          />
-          <section className="mt-4">
-            {invitations.map((user) => (
-              <div
-                key={user.user.key}
-                className="py-2 px-4 rounded-md mt-2 flex"
-              >
-                <div className="flex gap-2 items-center flex-1">
-                  <UserCircleIcon height={24} />
-                  <p>{user.user.name}</p>
-                  {user.admin ? (
-                    <span className="text-xs  bg-purple-600 px-2 py-0.5 rounded-md">
-                      Admin
-                    </span>
-                  ) : null}
-                  {activeUsers.find((u) => u.key === user.user.key) ? (
-                    <span className="text-xs  bg-emerald-600 px-2 py-0.5 rounded-md">
-                      Connected
-                    </span>
-                  ) : (
-                    <span className="text-xs  bg-zinc-700 px-2 py-0.5 rounded-md">
-                      Offline
-                    </span>
-                  )}
-                </div>
-                {invitation?.admin && !user.admin ? (
-                  <IconButton
-                    icon={<TrashIcon height={20} />}
-                    onClick={() => removeUser(user.user.key)}
-                    className="bg-transparent"
-                  />
-                ) : null}
-              </div>
-            ))}
-          </section>
-        </section>
-      ) : (
-        <section>
-          <h2 className="font-bold">Sharing</h2>
-          <p>
-            Create or join a sharing instance to synchronize the anomaly log
-            between devices.
-          </p>
-          <section className="mt-2">
-            <h2 className="font-bold">Name</h2>
-            <Input
-              className="w-full"
-              value={localName}
-              onChange={(e) => setLocalName(e.currentTarget.value)}
-              onBlur={() => persist({ name: localName })}
-            />
-          </section>
-          <Button
-            mode="primary"
-            className="mt-2"
-            disabled={!name}
-            onClick={() => onClickBeginSharing()}
-          >
-            Begin Sharing
-          </Button>
-          <Button
-            mode="normal"
-            className="mt-2"
-            onClick={() => setJoinCodeDialogOpen(true)}
-          >
-            Join Existing
-          </Button>
-        </section>
-      )}
-      <section className="mt-4">
-        <h2 className="font-bold">Event Summary</h2>
-        <p>See a summary of all entries at the event.</p>
-        <LinkButton
-          to={`/${event.sku}/summary`}
-          className="w-full mt-2 flex items-center"
-        >
-          <span className="flex-1">Event Summary</span>
-          <ArrowRightIcon height={20} className="text-emerald-400" />
-        </LinkButton>
-      </section>
-      {!isWorldsBuild() ? (
-        <section className="mt-4 relative">
-          <h2 className="font-bold">Delete Event Data</h2>
-          <p>
-            This will delete all anomaly logs associated with this event. This
-            action cannot be undone.
-          </p>
-          <Button
-            className="w-full mt-4 bg-red-500 text-center"
-            onClick={() => setDeleteDataDialogOpen(true)}
-          >
-            Delete Event Data
-          </Button>
-          <Dialog
-            open={deleteDataDialogOpen}
-            mode="modal"
-            className="absolute w-full rounded-md mt-4"
-            onClose={() => setDeleteDataDialogOpen(false)}
-          >
-            <DialogBody>
-              <p>Really delete all event data? This action cannot be undone.</p>
-              <Button
-                className="w-full mt-4 bg-red-500 text-center"
-                onClick={onConfirmDeleteData}
-              >
-                Confirm Deletion
-              </Button>
-              <Button
-                className="w-full mt-4 text-center"
-                onClick={() => setDeleteDataDialogOpen(false)}
-                autoFocus
-              >
-                Cancel
-              </Button>
-            </DialogBody>
-          </Dialog>
-        </section>
-      ) : null}
-      {isSuccessBearerToken && bearerToken ? (
-        <section>
-          <h2 className="mt-4 font-bold">Integration Bearer</h2>
-          <p>
-            Use this bearer token to allow external integrations to read data
-            from this instance.
-          </p>
-          <ClickToCopy message={bearerToken ?? ""} />
-          <ClickToCopy prefix="JSON" message={jsonEndpoint} />
-          <ClickToCopy prefix="CSV" message={csvEndpoint} className="flex-1" />
-        </section>
-      ) : null}
+      <ShareManager event={event} />
+      <EventSummaryLink event={event} />
+      {!isWorldsBuild() ? <DeleteData event={event} /> : null}
+      <IntegrationInfo event={event} />
     </section>
   );
 };

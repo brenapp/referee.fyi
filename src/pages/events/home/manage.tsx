@@ -72,8 +72,6 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
     [response]
   );
 
-  console.log(response);
-
   const {
     mutateAsync: invite,
     isPending: isInvitePending,

@@ -116,7 +116,7 @@ export const EventDevTools: React.FC = () => {
       },
     });
 
-  const connection = useShareConnection();
+  const connection = useShareConnection(["disconnect"]);
 
   const [incidentsToDelete, setIncidentsToDelete] = useState(10);
   const { mutate: deleteIncidents, isPending: isDeletePending } = useMutation({

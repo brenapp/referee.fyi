@@ -50,7 +50,7 @@ export function useEventIncidents(sku: string | undefined | null) {
 }
 
 export function useNewIncident() {
-  const connection = useShareConnection();
+  const connection = useShareConnection(["addIncident"]);
   return useMutation({
     mutationKey: ["newIncident"],
     mutationFn: async (incident: NewIncident) => {
@@ -78,7 +78,7 @@ export function useNewIncident() {
 }
 
 export function useEditIncident() {
-  const connection = useShareConnection();
+  const connection = useShareConnection(["editIncident"]);
   return useMutation({
     mutationKey: ["editIncident"],
     mutationFn: async (incident: Omit<BaseIncident, "event" | "team">) => {
@@ -101,7 +101,7 @@ export function useEditIncident() {
 }
 
 export function useDeleteIncident() {
-  const connection = useShareConnection();
+  const connection = useShareConnection(["deleteIncident"]);
   return useMutation({
     mutationKey: ["deleteIncident"],
     mutationFn: async (id: string) => {

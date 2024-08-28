@@ -303,9 +303,11 @@ const ConnectionManager: React.FC = () => {
   const { data: event } = useCurrentEvent();
   const { data: invitation } = useEventInvitation(event?.sku);
 
-  const connect = useShareConnection((c) => c.connect);
-  const disconnect = useShareConnection((c) => c.disconnect);
-  const updateProfile = useShareConnection((c) => c.updateProfile);
+  const { connect, disconnect, updateProfile } = useShareConnection([
+    "connect",
+    "disconnect",
+    "updateProfile",
+  ]);
 
   useEffect(() => {
     if (invitation) {

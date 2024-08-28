@@ -10,10 +10,12 @@ import {
   WebSocketPeerMessage,
 } from "@referee-fyi/share";
 import { create } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 import {
   addServerIncident,
   deleteServerIncident,
   editServerIncident,
+  fetchInvitation,
   getSender,
   getShareData,
   registerUser,
@@ -77,7 +79,7 @@ export type ShareConnectionActions = {
 
 type ShareConnection = ShareConnectionData & ShareConnectionActions;
 
-export const useShareConnection = create<ShareConnection>((set, get) => ({
+const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
   readyState: WebSocket.CLOSED,
   websocket: null,
   invitation: null,
@@ -365,8 +367,14 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
     };
     websocket.onclose = async () => {
       await get().disconnect();
+      const response = await fetchInvitation(invitation.sku);
+
+      if (!response || !response.success) {
+        return;
+      }
+
       set({
-        reconnectTimer: setTimeout(() => get().connect(invitation), 5000),
+        reconnectTimer: setTimeout(() => get().connect(response.data), 5000),
       });
     };
     websocket.onerror = (e) => {
@@ -403,18 +411,35 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
   },
 }));
 
+export function useShareConnection<const T extends (keyof ShareConnection)[]>(
+  keys: T
+): Pick<ShareConnection, T[number]> {
+  return useShareConnectionInternal(
+    useShallow(
+      (state) =>
+        Object.fromEntries(keys.map((key) => [key, state[key]])) as Pick<
+          ShareConnection,
+          T[number]
+        >
+    )
+  );
+}
+
 // HMR Special Handling
 /// <reference types="vite/client" />
 
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
-    import.meta.hot!.data.websocket = useShareConnection.getState().websocket;
+    import.meta.hot!.data.websocket =
+      useShareConnectionInternal.getState().websocket;
   });
   import.meta.hot.accept((mod) => {
     if (!mod) {
       import.meta.hot!.data.websocket.close();
       import.meta.hot!.data.websocket = null;
     }
-    useShareConnection.setState({ websocket: import.meta.hot!.data.websocket });
+    useShareConnectionInternal.setState({
+      websocket: import.meta.hot!.data.websocket,
+    });
   });
 }

@@ -8,8 +8,10 @@ import { exportPublicKey, signMessage } from "~utils/data/crypto";
 import { useShareConnection } from "~models/ShareConnection";
 
 export function useShareProfile() {
-  const profile = useShareConnection((c) => c.profile);
-  const persist = useShareConnection((c) => c.updateProfile);
+  const { profile, updateProfile: persist } = useShareConnection([
+    "profile",
+    "updateProfile",
+  ]);
   return { ...profile, persist };
 }
 

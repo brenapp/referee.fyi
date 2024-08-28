@@ -68,7 +68,7 @@ export function useUpdateMatchScratchpad<T extends MatchScratchpad>(
   match?: MatchData
 ) {
   const { data: event } = useEvent(match?.event.code ?? "");
-  const connection = useShareConnection();
+  const connection = useShareConnection(["updateScratchpad"]);
 
   return useMutation({
     mutationKey: ["update_match_scratchpad", match],

@@ -6,7 +6,7 @@ import {
 import { type NewIncident as OldIncident } from "./2024_05_07_matchSkills";
 import { queueMigration } from "./utils";
 import { getAllIncidents, setManyIncidents } from "~utils/data/incident";
-import { getPeer } from "~utils/data/share";
+import { getShareProfile } from "~utils/data/share";
 
 export type IncidentOutcome = "Minor" | "Major" | "Disabled" | "General";
 
@@ -61,7 +61,7 @@ queueMigration({
   apply: async () => {
     const incidents = (await getAllIncidents()) as (OldIncident | Incident)[];
 
-    const peer = await getPeer();
+    const { key: peer } = await getShareProfile();
     const output: Incident[] = [];
     for (const incident of incidents) {
       if (hasIncidentBeenMigrated(incident)) {

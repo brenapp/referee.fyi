@@ -63,21 +63,19 @@ export function getJoinRequest({ key, name }: User): JoinRequest {
   return { client_version: __REFEREE_FYI_VERSION__, user: { name, key } };
 }
 
-export async function getShareName() {
-  return (await get<string>("share_name")) ?? "";
+export async function getShareProfile(): Promise<User> {
+  const key = await exportPublicKey(false);
+  const name = (await get<string>("share_name")) ?? "";
+
+  return { key, name };
 }
 
-export async function getShareId() {
-  return exportPublicKey(false);
-}
-
-export async function getPeer() {
-  return getShareId();
+export async function saveShareProfile(profile: Omit<User, "key">) {
+  return set("share_name", profile.name);
 }
 
 export async function getSender(): Promise<WebSocketSender> {
-  const name = await getShareName();
-  const id = await getShareId();
+  const { name, key: id } = await getShareProfile();
   return { type: "client", id, name };
 }
 
@@ -108,10 +106,14 @@ export async function signedFetch(
 }
 
 export async function registerUser(
-  name: string
+  profile: Omit<User, "key">
 ): Promise<ShareResponse<APIRegisterUserResponseBody>> {
+  if (!profile.name) {
+    return { success: false, reason: "bad_request", details: "No name" };
+  }
+
   const url = new URL("/api/user", URL_BASE);
-  url.searchParams.set("name", name);
+  url.searchParams.set("name", profile.name);
 
   const response = await signedFetch(url, {
     method: "POST",
@@ -264,7 +266,7 @@ export async function removeInvitation(
   sku: string,
   user?: string
 ): Promise<ShareResponse<APIDeleteInviteResponseBody>> {
-  const id = await getShareId();
+  const { key: id } = await getShareProfile();
 
   const url = new URL(`/api/${sku}/invite`, URL_BASE);
   url.searchParams.set("user", user ?? id);
@@ -329,6 +331,7 @@ export async function putRequestCode(
   sku: string
 ): Promise<ShareResponse<APIPutInvitationRequestResponseBody>> {
   const url = new URL(`/api/${sku}/request`, URL_BASE);
+  url.searchParams.set("version", __REFEREE_FYI_VERSION__);
 
   const response = await signedFetch(url, { method: "PUT" });
   return response.json();

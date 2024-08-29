@@ -323,15 +323,16 @@ export function useEventTeam(
   });
 }
 
+export const currentSeasons = (
+  [programs.V5RC, programs.VIQRC, programs.VURC] as const
+).map((program) => client.seasons[program][CURRENT_YEAR]) as number[];
+
 export function useEventsToday(
   options?: HookQueryOptions<EventData[]>
 ): UseQueryResult<EventData[]> {
   return useQuery({
     queryKey: ["events_today"],
     queryFn: async () => {
-      const currentSeasons = (
-        [programs.V5RC, programs.VIQRC, programs.VURC] as const
-      ).map((program) => client.seasons[program][CURRENT_YEAR]) as number[];
       const today = new Date();
 
       const yesterday = new Date(today);

@@ -18,8 +18,8 @@ import { XMarkIcon } from "@heroicons/react/20/solid";
 import { Checkbox, RulesMultiSelect, Select } from "~components/Input";
 import { twMerge } from "tailwind-merge";
 import { useMutation } from "@tanstack/react-query";
-import { useShareConnection } from "~models/ShareConnection";
-import { useShareID, useShareProfile } from "~utils/hooks/share";
+import { ReadyState, useShareConnection } from "~models/ShareConnection";
+import { useShareProfile } from "~utils/hooks/share";
 import { IncidentOutcome } from "@referee-fyi/share";
 
 export type Filters = {
@@ -138,17 +138,20 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
 };
 
 export const ForceSyncButton: React.FC = () => {
-  const isConnected =
-    useShareConnection((c) => c.readyState) === WebSocket.OPEN;
+  const connection = useShareConnection(["readyState", "forceSync"]);
+  const isConnected = connection.readyState === ReadyState.Open;
 
-  const connectionForceSync = useShareConnection((c) => c.forceSync);
   const { mutateAsync: forceSync, isPending: isForceSyncPending } = useMutation(
     {
-      mutationFn: connectionForceSync,
+      mutationFn: connection.forceSync,
     }
   );
 
-  return isConnected ? (
+  if (!isConnected) {
+    return null;
+  }
+
+  return (
     <IconButton
       className={twMerge(
         "bg-transparent",
@@ -157,12 +160,11 @@ export const ForceSyncButton: React.FC = () => {
       onClick={() => forceSync()}
       icon={<ArrowPathIcon height={24} />}
     />
-  ) : null;
+  );
 };
 
 export const ExportButton: React.FC = () => {
-  const { name } = useShareProfile();
-  const { data: key } = useShareID();
+  const { name, key } = useShareProfile();
 
   const { data: event } = useCurrentEvent();
   const { data: incidents, isLoading } = useEventIncidents(event?.sku);

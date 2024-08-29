@@ -13,7 +13,7 @@ import { ClockIcon } from "@heroicons/react/24/outline";
 import { Dialog, DialogBody, DialogHeader } from "./Dialog";
 
 function usePeerUser(peer: string) {
-  const invitations = useShareConnection((state) => state.invitations);
+  const { invitations } = useShareConnection(["invitations"]);
   return useMemo(
     () => invitations.find((v) => v.user.key === peer),
     [invitations, peer]

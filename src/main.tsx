@@ -10,6 +10,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 
 // Register Sentry
 import "~utils/sentry";
+import { ErrorBoundary } from "~components/ErrorBoundary";
 
 registerSW({ immediate: true });
 
@@ -19,7 +20,9 @@ initHistoryStore();
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <App />
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
     </QueryClientProvider>
   </React.StrictMode>
 );

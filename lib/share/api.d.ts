@@ -47,6 +47,7 @@ export type APIPutInvitationRequestResponseBody = {
 // GET /api/:sku/request?code=<CODE>
 export type APIGetInvitationRequestResponseBody = {
   user: User;
+  version: string;
 };
 
 // POST /api/:sku/create

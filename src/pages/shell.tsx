@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
+  currentSeasons,
   useCurrentSeason,
   useEvent,
-  useEventsToday,
+  useEventSearch,
   useSeason,
 } from "~utils/hooks/robotevents";
 import { Button, IconButton, LinkButton } from "~components/Button";
@@ -30,6 +31,7 @@ import { useShareConnection } from "~models/ShareConnection";
 import { useMutation } from "@tanstack/react-query";
 import { runMigrations } from "../migrations";
 import { toast } from "~components/Toast";
+import { getShareProfile } from "~utils/data/share";
 
 function isValidSKU(sku: string) {
   return !!sku.match(
@@ -48,17 +50,32 @@ const EventPicker: React.FC = () => {
     { enabled: isValidSKU(query) }
   );
 
-  const { data: eventsToday, isLoading } = useEventsToday();
+  const start = useRef(
+    new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString()
+  );
+  const [end, setEnd] = useState(
+    new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)
+  );
+  const onClickMore = useCallback(() => {
+    setEnd((end) => new Date(end.getTime() + 1000 * 60 * 60 * 24 * 31));
+  }, [setEnd]);
+
+  const { data: events, isLoading: isLoadingEvents } = useEventSearch({
+    "season[]": currentSeasons,
+    "eventTypes[]": ["tournament"],
+    start: start.current,
+    end: end.toISOString(),
+  });
   const { data: event } = useCurrentEvent();
   const division = useCurrentDivision();
 
   const results = useMemo(() => {
     if (!query) {
-      return eventsToday ?? [];
+      return events ?? [];
     }
 
     return (
-      eventsToday?.filter((event) => {
+      events?.filter((event) => {
         if (event.name.toUpperCase().includes(query)) {
           return true;
         }
@@ -72,7 +89,21 @@ const EventPicker: React.FC = () => {
         }
       }) ?? []
     );
-  }, [query, eventsToday]);
+  }, [query, events]);
+
+  useEffect(() => {
+    const maxTime = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30 * 3);
+
+    const shouldLoadMore =
+      query.length > 3 &&
+      !isLoadingEvents &&
+      results.length < 1 &&
+      end < maxTime;
+
+    if (shouldLoadMore) {
+      onClickMore();
+    }
+  }, [query, results, isLoadingEvents, onClickMore, end]);
 
   const selectedDiv = event?.divisions?.find((d) => d.id === division);
   const showDiv =
@@ -92,7 +123,7 @@ const EventPicker: React.FC = () => {
       <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
         <DialogHeader title="Pick An Event" onClose={() => setOpen(false)} />
         <DialogBody>
-          <Spinner show={isLoading} />
+          <Spinner show={isLoadingEvents} />
           <section>
             <h2 className="text-lg font-bold text-white mx-2">Search</h2>
             <Input
@@ -132,7 +163,7 @@ const EventPicker: React.FC = () => {
             <h2 className="text-lg font-bold text-white mx-2">Events</h2>
             <ul>
               {results?.map((event) => (
-                <li key={event.id}>
+                <li key={event.sku}>
                   <LinkButton
                     to={`/${event.sku}`}
                     onClick={() => {
@@ -154,6 +185,10 @@ const EventPicker: React.FC = () => {
                 </li>
               ))}
             </ul>
+            <Button onClick={onClickMore} mode="normal" className="mt-2">
+              Load More
+            </Button>
+            <Spinner show={isLoadingEvents} />
           </section>
         </DialogBody>
       </Dialog>
@@ -268,8 +303,11 @@ const ConnectionManager: React.FC = () => {
   const { data: event } = useCurrentEvent();
   const { data: invitation } = useEventInvitation(event?.sku);
 
-  const connect = useShareConnection((c) => c.connect);
-  const disconnect = useShareConnection((c) => c.disconnect);
+  const { connect, disconnect, updateProfile } = useShareConnection([
+    "connect",
+    "disconnect",
+    "updateProfile",
+  ]);
 
   useEffect(() => {
     if (invitation) {
@@ -282,6 +320,14 @@ const ConnectionManager: React.FC = () => {
       disconnect();
     };
   }, [connect, disconnect, invitation]);
+
+  useEffect(() => {
+    async function update() {
+      const profile = await getShareProfile();
+      updateProfile(profile);
+    }
+    update();
+  }, [updateProfile]);
 
   return null;
 };

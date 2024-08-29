@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { useCallback, useRef, useState } from "react";
+import { ReactNode, useCallback, useRef, useState } from "react";
 import { programs } from "robotevents";
 import { Button } from "~components/Button";
 import { Input, Select } from "~components/Input";
@@ -13,7 +13,7 @@ import {
   getIncidentsForEvent,
   newIncident,
 } from "~utils/data/incident";
-import { getPeer } from "~utils/data/share";
+import { getShareProfile } from "~utils/data/share";
 import { useRecentRules } from "~utils/hooks/history";
 import { useDivisionTeams, useEventMatches } from "~utils/hooks/robotevents";
 import { useCurrentEvent } from "~utils/hooks/state";
@@ -71,7 +71,7 @@ export const EventDevTools: React.FC = () => {
   const { mutate: generateIncidents, isPending: isGeneratePending } =
     useMutation({
       mutationFn: async () => {
-        const peer = await getPeer();
+        const { key: peer } = await getShareProfile();
         for (let i = 0; i < generateIssueNumber; i++) {
           const team =
             teamsInDivision!.teams[
@@ -116,7 +116,7 @@ export const EventDevTools: React.FC = () => {
       },
     });
 
-  const connection = useShareConnection();
+  const connection = useShareConnection(["disconnect"]);
 
   const [incidentsToDelete, setIncidentsToDelete] = useState(10);
   const { mutate: deleteIncidents, isPending: isDeletePending } = useMutation({
@@ -128,6 +128,11 @@ export const EventDevTools: React.FC = () => {
       await deleteManyIncidents(toDelete);
     },
   });
+
+  // Error
+  const [errorChild, setErrorChild] = useState<Record<string, unknown> | false>(
+    false
+  );
 
   return (
     <section className="mt-4">
@@ -226,6 +231,20 @@ export const EventDevTools: React.FC = () => {
           Disconnect
         </Button>
       </nav>
+      <section className="mt-4">
+        <h2 className="font-bold">Throw an Error</h2>
+        <Button
+          mode="dangerous"
+          onClick={() =>
+            setErrorChild({
+              "REFEREE FYI DEVTOOLS ERROR": new Error("Test Error"),
+            })
+          }
+        >
+          Throw Error
+        </Button>
+        {errorChild as ReactNode}
+      </section>
     </section>
   );
 };

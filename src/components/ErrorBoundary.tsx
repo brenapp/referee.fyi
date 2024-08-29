@@ -8,7 +8,6 @@ import { useCallback } from "react";
 import { clearCache } from "~utils/sentry";
 
 const ErrorReportIssueDialog: FallbackRender = (props) => {
-  console.log(props);
   const setOpen = useCallback(
     (value: boolean) => {
       if (value) return;
@@ -28,6 +27,7 @@ const ErrorReportIssueDialog: FallbackRender = (props) => {
       open={true}
       setOpen={setOpen}
       context={JSON.stringify(props)}
+      error={props}
     />
   );
 };

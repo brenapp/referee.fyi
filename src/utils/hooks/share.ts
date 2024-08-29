@@ -1,53 +1,18 @@
-import { set } from "~utils/data/keyval";
-import { useCallback, useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { queryClient } from "~utils/data/query";
 import {
   acceptEventInvitation,
   createInstance,
   getEventInvitation,
-  getSender,
-  getShareId,
-  getShareName,
-  registerUser,
 } from "~utils/data/share";
 import { exportPublicKey, signMessage } from "~utils/data/crypto";
+import { useShareConnection } from "~models/ShareConnection";
 
 export function useShareProfile() {
-  const [name, setName] = useState("");
-
-  const query = useQuery({
-    queryKey: ["share_name"],
-    queryFn: getShareName,
-  });
-
-  useEffect(() => {
-    if (query.isSuccess && query.data) {
-      setName(query.data);
-    }
-  }, [query.data, query.isSuccess]);
-
-  const persist = useCallback(async () => {
-    await set("share_name", name);
-    await registerUser(name);
-    queryClient.invalidateQueries({ exact: true, queryKey: ["share_name"] });
-  }, [name]);
-
-  return { name, setName, persist };
-}
-
-export function useShareID() {
-  return useQuery({
-    queryKey: ["share_id"],
-    queryFn: () => getShareId(),
-  });
-}
-
-export function useSender() {
-  return useQuery({
-    queryKey: ["sender"],
-    queryFn: () => getSender(),
-  });
+  const { profile, updateProfile: persist } = useShareConnection([
+    "profile",
+    "updateProfile",
+  ]);
+  return { ...profile, persist };
 }
 
 export type UseCreateShareOptions = {

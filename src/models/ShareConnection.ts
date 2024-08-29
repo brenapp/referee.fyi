@@ -10,13 +10,16 @@ import {
   WebSocketPeerMessage,
 } from "@referee-fyi/share";
 import { create } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 import {
   addServerIncident,
   deleteServerIncident,
   editServerIncident,
+  fetchInvitation,
+  getSender,
   getShareData,
-  getShareId,
-  getShareName,
+  registerUser,
+  saveShareProfile,
   URL_BASE,
 } from "~utils/data/share";
 import { signWebSocketConnectionURL } from "~utils/data/crypto";
@@ -51,6 +54,7 @@ export enum ReadyState {
 
 export type ShareConnectionData = {
   readyState: ReadyState;
+  profile: User;
   websocket: WebSocket | null;
   invitation: UserInvitation | null;
   activeUsers: User[];
@@ -70,17 +74,26 @@ export type ShareConnectionActions = {
   connect(invitation: UserInvitation): Promise<void>;
   disconnect(): Promise<void>;
   forceSync(): Promise<void>;
+  updateProfile(profile: Partial<User>): Promise<void>;
 };
 
 type ShareConnection = ShareConnectionData & ShareConnectionActions;
 
-export const useShareConnection = create<ShareConnection>((set, get) => ({
+const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
   readyState: WebSocket.CLOSED,
   websocket: null,
   invitation: null,
 
   activeUsers: [],
   invitations: [],
+
+  profile: { name: "", key: "" },
+  updateProfile: async (updates) => {
+    const profile = { ...get().profile, ...updates };
+    set({ profile });
+    saveShareProfile(profile);
+    registerUser(profile);
+  },
 
   reconnectTimer: null,
 
@@ -262,11 +275,10 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
   },
 
   send: async (message: WebSocketPeerMessage) => {
-    const id = await getShareId();
-    const name = await getShareName();
+    const sender = await getSender();
     const payload: WebSocketPayload<WebSocketPeerMessage> = {
       ...message,
-      sender: { type: "client", id, name },
+      sender,
       date: new Date().toISOString(),
     };
     get().websocket?.send(JSON.stringify(payload));
@@ -329,8 +341,7 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
       url.protocol = "ws:";
     }
 
-    const id = await getShareId();
-    const name = await getShareName();
+    const { key: id, name } = get().profile;
 
     url.searchParams.set("id", id);
     url.searchParams.set("name", name);
@@ -356,8 +367,14 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
     };
     websocket.onclose = async () => {
       await get().disconnect();
+      const response = await fetchInvitation(invitation.sku);
+
+      if (!response || !response.success) {
+        return;
+      }
+
       set({
-        reconnectTimer: setTimeout(() => get().connect(invitation), 5000),
+        reconnectTimer: setTimeout(() => get().connect(response.data), 5000),
       });
     };
     websocket.onerror = (e) => {
@@ -394,18 +411,35 @@ export const useShareConnection = create<ShareConnection>((set, get) => ({
   },
 }));
 
+export function useShareConnection<const T extends (keyof ShareConnection)[]>(
+  keys: T
+): Pick<ShareConnection, T[number]> {
+  return useShareConnectionInternal(
+    useShallow(
+      (state) =>
+        Object.fromEntries(keys.map((key) => [key, state[key]])) as Pick<
+          ShareConnection,
+          T[number]
+        >
+    )
+  );
+}
+
 // HMR Special Handling
 /// <reference types="vite/client" />
 
 if (import.meta.hot) {
   import.meta.hot.dispose(() => {
-    import.meta.hot!.data.websocket = useShareConnection.getState().websocket;
+    import.meta.hot!.data.websocket =
+      useShareConnectionInternal.getState().websocket;
   });
   import.meta.hot.accept((mod) => {
     if (!mod) {
       import.meta.hot!.data.websocket.close();
       import.meta.hot!.data.websocket = null;
     }
-    useShareConnection.setState({ websocket: import.meta.hot!.data.websocket });
+    useShareConnectionInternal.setState({
+      websocket: import.meta.hot!.data.websocket,
+    });
   });
 }

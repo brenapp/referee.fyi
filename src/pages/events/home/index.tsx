@@ -15,8 +15,8 @@ import { ClipboardDocumentListIcon as MatchesIconSolid } from "@heroicons/react/
 import { UserGroupIcon as TeamsIconOutline } from "@heroicons/react/24/outline";
 import { UserGroupIcon as TeamsIconSolid } from "@heroicons/react/24/solid";
 
-import { Cog8ToothIcon as ManageIconOutline } from "@heroicons/react/24/outline";
-import { Cog8ToothIcon as ManageIconSolid } from "@heroicons/react/24/solid";
+import { CloudIcon as ManageIconOutline } from "@heroicons/react/24/outline";
+import { CloudIcon as ManageIconSolid } from "@heroicons/react/24/solid";
 
 export const EventHome: React.FC = () => {
   const { data: event } = useCurrentEvent();

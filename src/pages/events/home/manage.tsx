@@ -188,23 +188,13 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
   }, [name, open]);
 
   // Invitation
-  const [hasInvitation, setHasInvitation] = useState(false);
-
   const { data: invitation } = useQuery({
     queryKey: ["join_custom_get_invite"],
     queryFn: () => fetchInvitation(sku),
     refetchInterval: 2000,
     networkMode: "always",
-    enabled: open && !hasInvitation,
+    enabled: open,
   });
-
-  useEffect(() => {
-    if (invitation?.success && invitation.data) {
-      setHasInvitation(true);
-    } else {
-      setHasInvitation(false);
-    }
-  }, [invitation]);
 
   const { mutate: setNameContinue, isPending: isPendingSetNameContinue } =
     useMutation({
@@ -226,7 +216,6 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
 
   const onClearInvitation = useCallback(async () => {
     await removeInvitation(sku);
-    setHasInvitation(false);
   }, [sku]);
 
   return (
@@ -268,7 +257,7 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
               message={code}
               className="font-mono text-6xl text-center"
             />
-            {hasInvitation ? (
+            {invitation?.data ? (
               <section className="mt-4">
                 <nav className="flex justify-between items-center">
                   <Info

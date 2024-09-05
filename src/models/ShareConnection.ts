@@ -44,6 +44,7 @@ import {
   setManyMatchScratchpad,
   setMatchScratchpad,
 } from "~utils/data/scratchpad";
+import { setUser } from "@sentry/react";
 
 export enum ReadyState {
   Closed = WebSocket.CLOSED,
@@ -93,6 +94,7 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
     set({ profile });
     saveShareProfile(profile);
     registerUser(profile);
+    setUser({ id: profile.key, username: profile.name });
   },
 
   reconnectTimer: null,

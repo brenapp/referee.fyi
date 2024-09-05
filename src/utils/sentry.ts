@@ -1,5 +1,6 @@
-import { init, browserTracingIntegration } from "@sentry/react";
+import { init, browserTracingIntegration, setUser } from "@sentry/react";
 import { queryClient } from "./data/query";
+import { getShareProfile } from "./data/share";
 
 export async function clearCache() {
   // Invalidate All Queries
@@ -37,5 +38,14 @@ const client = init({
 if (import.meta.env.PROD) {
   import("@sentry-internal/replay").then(({ replayIntegration }) => {
     client?.addIntegration(replayIntegration);
+  });
+}
+
+// Initialize user
+const profile = await getShareProfile();
+if (profile) {
+  setUser({
+    id: profile.key,
+    username: profile.name,
   });
 }

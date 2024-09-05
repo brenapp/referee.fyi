@@ -56,6 +56,8 @@ export const EventMatchesTab: React.FC<MatchesTabProps> = ({ event }) => {
   const division = useCurrentDivision();
   const { data: matches, isLoading } = useEventMatches(event, division);
 
+  console.log(matches);
+
   const [open, setOpen] = useState(false);
   const [matchId, setMatchId] = useState<number>(0);
 

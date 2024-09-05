@@ -16,9 +16,9 @@ export const queryClient = new QueryClient({
       gcTime: 1000 * 30,
       persister: experimental_createPersister<PersistedQuery>({
         buster: CACHE_BUSTER,
+        prefix: CACHE_PREFIX,
         serialize: (query) => query,
         deserialize: (query) => query,
-        prefix: CACHE_PREFIX,
         storage: {
           getItem: get,
           setItem: set,
@@ -28,3 +28,35 @@ export const queryClient = new QueryClient({
     },
   },
 });
+
+export type CreatePersisterOptions<S, D> = {
+  serialize: (data: D) => S;
+  deserialize: (data: S) => D;
+};
+
+export function createPersister<S, D>({
+  serialize: serializeData,
+  deserialize: deserializeData,
+}: CreatePersisterOptions<S, D>) {
+  const serialize = (query: PersistedQuery) => {
+    const data = serializeData(query.state.data as D);
+    return { ...query, state: { ...query.state, data } };
+  };
+
+  const deserialize = (query: PersistedQuery) => {
+    const data = deserializeData(query.state.data as S);
+    return { ...query, state: { ...query.state, data } };
+  };
+
+  return experimental_createPersister<PersistedQuery>({
+    buster: CACHE_BUSTER,
+    prefix: CACHE_PREFIX,
+    serialize,
+    deserialize,
+    storage: {
+      getItem: get,
+      setItem: set,
+      removeItem: del,
+    },
+  });
+}

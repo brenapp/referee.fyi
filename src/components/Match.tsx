@@ -83,16 +83,15 @@ function matchTime(match: MatchData) {
   );
 }
 export type ClickableMatch = {
-  match: MatchData;
+  match: Match;
   onClick: React.EventHandler<React.MouseEvent<HTMLButtonElement>>;
 };
 
 export const ClickableMatch: React.FC<ClickableMatch> = ({
-  match: matchData,
+  match,
   onClick,
 }) => {
   const id = useId();
-  const match = useMemo(() => new Match(matchData), [matchData]);
 
   return (
     <div

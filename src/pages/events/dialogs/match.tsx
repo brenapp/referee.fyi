@@ -22,7 +22,7 @@ import {
   IncidentOutcome,
   Incident as IncidentData,
 } from "~utils/data/incident";
-import { Match, MatchData } from "robotevents";
+import { Match } from "robotevents";
 import { MatchContext } from "~components/Context";
 import { Incident } from "~components/Incident";
 import { TeamData } from "robotevents";
@@ -40,7 +40,7 @@ const OUTCOME_PRIORITY: IncidentOutcome[] = [
 
 type TeamSummaryProps = {
   number: string;
-  match: MatchData;
+  match: Match;
   incidents: IncidentData[];
 };
 
@@ -179,7 +179,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
 };
 
 type TeamFlagButtonProps = {
-  match: MatchData;
+  match: Match;
   team: TeamData;
 } & ButtonProps;
 

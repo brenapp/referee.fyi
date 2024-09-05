@@ -21,6 +21,7 @@ import {
   rounds,
   Match,
 } from "robotevents";
+import { createPersister } from "~utils/data/query";
 
 const client = Client({
   authorization: {
@@ -39,6 +40,16 @@ export type HookQueryOptions<
   UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>,
   "queryKey" | "queryFn"
 >;
+
+const matchPersister = createPersister<
+  MatchData | MatchData[],
+  Match | Match[]
+>({
+  serialize: (data) =>
+    Array.isArray(data) ? data.map((m) => m.getData()) : data.getData(),
+  deserialize: (data) =>
+    Array.isArray(data) ? data.map((m) => new Match(m)) : new Match(data),
+});
 
 export function useEvent(
   sku: string | null | undefined,
@@ -251,6 +262,7 @@ export function useEventMatches<T = Match[]>(
       return matches.data.sort(logicalMatchComparison);
     },
     staleTime: 1000 * 60,
+    persister: matchPersister,
     ...options,
   });
 }
@@ -285,6 +297,7 @@ export function useEventMatchesForTeam(
       return matches.sort(logicalMatchComparison);
     },
     staleTime: 1000 * 60,
+    persister: matchPersister,
     ...options,
   });
 }

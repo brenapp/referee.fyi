@@ -1,8 +1,7 @@
-import { Match, MatchData } from "robotevents";
+import { Match } from "robotevents";
 import { useEvent } from "~utils/hooks/robotevents";
 import { twMerge } from "tailwind-merge";
 import { IdInfo } from "robotevents";
-import { useMemo } from "react";
 
 export type AllianceListProps = {
   teams: IdInfo[];
@@ -43,25 +42,21 @@ export const AllianceList: React.FC<AllianceListProps> = ({
 };
 
 export type MatchContextProps = {
-  match: MatchData;
+  match: Match;
   allianceClassName?: string;
 } & React.HTMLProps<HTMLDivElement>;
 
 export const MatchContext: React.FC<MatchContextProps> = ({
-  match: matchData,
+  match,
   allianceClassName,
   ...props
 }) => {
-  const match = useMemo(() => new Match(matchData), [matchData]);
   const { data: event } = useEvent(match.event.code);
 
   if (!event) return null;
 
   if (event.program.code === "VIQRC") {
-    const teams = match.alliances
-      .map((a) => a.teams)
-      .flat()
-      .map((t) => t.team!);
+    const teams = match.teams();
 
     return (
       <div {...props}>

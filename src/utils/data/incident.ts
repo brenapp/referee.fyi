@@ -1,7 +1,7 @@
 import { get, getMany, set, setMany, updateMany } from "~utils/data/keyval";
 import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
-import { MatchData } from "robotevents";
+import { Match } from "robotevents";
 import { TeamData } from "robotevents";
 import {
   IncidentMatch,
@@ -23,7 +23,7 @@ export type RichIncidentElements = {
 
   event: string;
 
-  match?: MatchData | null;
+  match?: Match | null;
   skills?: IncidentMatchSkills;
   team?: TeamData | null;
 

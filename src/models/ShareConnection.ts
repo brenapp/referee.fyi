@@ -374,15 +374,16 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
       }
 
       set({
-        reconnectTimer: setTimeout(() => get().connect(response.data), 5000),
+        reconnectTimer: setTimeout(() => get().connect(response.data), 2000),
       });
     };
     websocket.onerror = (e) => {
       toast({
-        type: "error",
-        message: "Could not connect to sharing server.",
+        type: "info",
+        message: "Reconnecting...",
         context: JSON.stringify(e),
       });
+      websocket.close();
     };
 
     set({

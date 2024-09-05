@@ -136,25 +136,23 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
             labelProps={{ className: "mt-0 flex-1 px-2" }}
           />
         </fieldset>
-        {data ? (
-          <EditHistory
-            value={data}
-            valueKey="auto"
-            className="mt-4"
-            render={(value) => {
-              switch (value) {
-                case "red":
-                  return "Red Win";
-                case "blue":
-                  return "Blue Win";
-                case "tie":
-                  return "Tie";
-                case "none":
-                  return "None";
-              }
-            }}
-          />
-        ) : null}
+        <EditHistory
+          value={data}
+          valueKey="auto"
+          className="mt-4"
+          render={(value) => {
+            switch (value) {
+              case "red":
+                return "Red Win";
+              case "blue":
+                return "Blue Win";
+              case "tie":
+                return "Tie";
+              case "none":
+                return "None";
+            }
+          }}
+        />
       </section>
       <section className="bg-zinc-800 p-4 mt-4 rounded-md">
         <div className="flex items-center gap-2">
@@ -185,18 +183,16 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
             }}
           />
         </div>
-        {data ? (
-          <EditHistory
-            value={data}
-            valueKey="awp"
-            className="mt-4"
-            render={(value) =>
-              `${value.red ? "Red AWP" : ""} ${value.blue ? "Blue AWP" : ""}${
-                !value.blue && !value.red ? "No AWP" : ""
-              }`
-            }
-          />
-        ) : null}
+        <EditHistory
+          value={data}
+          valueKey="awp"
+          className="mt-4"
+          render={(value) =>
+            `${value.red ? "Red AWP" : ""} ${value.blue ? "Blue AWP" : ""}${
+              !value.blue && !value.red ? "No AWP" : ""
+            }`
+          }
+        />
       </section>
     </section>
   );

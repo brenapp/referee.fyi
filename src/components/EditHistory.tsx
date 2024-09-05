@@ -12,7 +12,7 @@ import { Button } from "./Button";
 import { ClockIcon } from "@heroicons/react/24/outline";
 import { Dialog, DialogBody, DialogHeader } from "./Dialog";
 
-function usePeerUser(peer: string) {
+function usePeerUser(peer?: string) {
   const { invitations } = useShareConnection(["invitations"]);
   return useMemo(
     () => invitations.find((v) => v.user.key === peer),
@@ -109,7 +109,7 @@ export type EditHistoryProps<
   T extends BaseWithLWWConsistency,
   K extends LWWKeys<T>,
 > = {
-  value: T;
+  value: T | null | undefined;
   valueKey: K;
   dirty?: boolean;
   className?: string;
@@ -126,10 +126,20 @@ export const EditHistory = <
   className,
   render,
 }: EditHistoryProps<T, K>) => {
-  const consistency = value.consistency[valueKey];
-  const user = usePeerUser(consistency.peer);
-
+  const consistency = value?.consistency[valueKey];
+  const user = usePeerUser(consistency?.peer);
   const [historyOpen, setHistoryOpen] = useState(false);
+
+  if (!consistency || !value) {
+    return (
+      <div
+        className={twMerge(
+          "flex items-center justify-between mt-2 h-8",
+          className
+        )}
+      ></div>
+    );
+  }
 
   return (
     <div

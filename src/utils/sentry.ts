@@ -21,6 +21,7 @@ export async function clearCache() {
 const client = init({
   dsn: "https://0aecdc6c41674e7cf3b4a39ec939ed9c@o4507708571910144.ingest.us.sentry.io/4507708573286400",
   integrations: [browserTracingIntegration()],
+  attachStacktrace: true,
   environment: import.meta.env.MODE,
   enabled:
     import.meta.env.MODE === "production" ||

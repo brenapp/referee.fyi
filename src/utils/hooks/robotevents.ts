@@ -19,6 +19,7 @@ import {
   Season,
   operations,
   rounds,
+  Match,
 } from "robotevents";
 
 const client = Client({
@@ -228,11 +229,11 @@ export function logicalMatchComparison(a: MatchData, b: MatchData) {
   return a.matchnum - b.matchnum;
 }
 
-export function useEventMatches(
+export function useEventMatches<T = Match[]>(
   eventData: EventData | null | undefined,
   division: number | null | undefined,
-  options?: HookQueryOptions<MatchData[]>
-): UseQueryResult<MatchData[]> {
+  options?: HookQueryOptions<Match[], Error, T>
+): UseQueryResult<T> {
   return useQuery({
     queryKey: ["matches", eventData?.sku, division],
     queryFn: async () => {
@@ -247,7 +248,7 @@ export function useEventMatches(
         return [];
       }
 
-      return matches.data.map((match) => match).sort(logicalMatchComparison);
+      return matches.data.sort(logicalMatchComparison);
     },
     staleTime: 1000 * 60,
     ...options,
@@ -258,7 +259,7 @@ export function useEventMatchesForTeam(
   event: EventData | null | undefined,
   teamData: TeamData | null | undefined,
   color?: Color,
-  options?: HookQueryOptions<MatchData[]>
+  options?: HookQueryOptions<Match[]>
 ) {
   return useQuery({
     queryKey: ["team_matches", event?.sku, teamData?.number],
@@ -281,9 +282,7 @@ export function useEventMatchesForTeam(
         );
       }
 
-      return matches
-        .map((match) => match.getData())
-        .sort(logicalMatchComparison);
+      return matches.sort(logicalMatchComparison);
     },
     staleTime: 1000 * 60,
     ...options,
@@ -309,9 +308,10 @@ export function useEventMatch(
   event: EventData | null | undefined,
   division: number | null | undefined,
   match: number | null | undefined
-): MatchData | null {
-  const { data: matches } = useEventMatches(event, division);
-  return matches?.find((m) => m.id === match) ?? null;
+): UseQueryResult<Match | undefined> {
+  return useEventMatches(event, division, {
+    select: (matches) => matches?.find((m) => m.id === match),
+  });
 }
 
 export function useEventTeam(

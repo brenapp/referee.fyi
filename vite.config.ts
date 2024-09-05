@@ -147,7 +147,7 @@ export default defineConfig({
     }),
     sentryVitePlugin({
       org: "referee-fyi",
-      project: "javascript-react",
+      project: "referee-fyi",
     }),
   ],
 

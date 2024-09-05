@@ -35,17 +35,18 @@ const client = init({
   replaysOnErrorSampleRate: 1.0, // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
 });
 
-// Load Replay Integration in a Separate Bundle
-if (import.meta.env.PROD) {
-  const { replayIntegration } = await import("@sentry-internal/replay");
-  client?.addIntegration(replayIntegration);
-}
+window.addEventListener("load", async () => {
+  if (import.meta.env.PROD) {
+    const { replayIntegration } = await import("@sentry-internal/replay");
+    client?.addIntegration(replayIntegration);
+  }
 
-// Initialize user
-const profile = await getShareProfile();
-if (profile) {
-  setUser({
-    id: profile.key,
-    username: profile.name,
-  });
-}
+  // Initialize user
+  const profile = await getShareProfile();
+  if (profile) {
+    setUser({
+      id: profile.key,
+      username: profile.name,
+    });
+  }
+});

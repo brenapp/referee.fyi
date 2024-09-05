@@ -22,7 +22,7 @@ import {
   IncidentOutcome,
   Incident as IncidentData,
 } from "~utils/data/incident";
-import { MatchData } from "robotevents";
+import { Match, MatchData } from "robotevents";
 import { MatchContext } from "~components/Context";
 import { Incident } from "~components/Incident";
 import { TeamData } from "robotevents";
@@ -214,13 +214,53 @@ const TeamFlagButton: React.FC<TeamFlagButtonProps> = ({
   );
 };
 
-type EventMatchDialogProps = {
+export type EventMatchDialogProps = {
   matchId: number;
   setMatchId: (matchId: number) => void;
 
   open: boolean;
   setOpen: (open: boolean) => void;
   division?: number;
+};
+
+type EventMatchViewProps = {
+  match?: Match | null;
+};
+const EventMatchView: React.FC<EventMatchViewProps> = ({ match }) => {
+  const { data: incidentsByTeam } = useTeamIncidentsByMatch(match);
+
+  console.log(match, incidentsByTeam);
+
+  if (!match) {
+    return null;
+  }
+
+  return (
+    <div className="mt-4 mx-2">
+      <MatchContext match={match} allianceClassName="w-full" />
+      <section className="mt-4">
+        {incidentsByTeam?.map(({ team: number, incidents }) => (
+          <TeamSummary
+            key={number}
+            incidents={incidents}
+            match={match}
+            number={number}
+          />
+        )) ??
+          match
+            .teams()
+            .map((team) => (
+              <TeamSummary
+                key={team.name}
+                incidents={[]}
+                match={match}
+                number={team.name}
+              />
+            ))}
+      </section>
+      <MatchScratchpad match={match} />
+    </div>
+  );
 };
 
 export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
@@ -237,7 +277,11 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
     event,
     division
   );
-  const match = useEventMatch(event, division, matchId);
+  const { data: match, isLoading: isLoadingMatch } = useEventMatch(
+    event,
+    division,
+    matchId
+  );
 
   // Edge-case: If the match dialog was open when the match was scored, the match ID no longer
   // exists (RobotEvents creates a new match ID with the same name), so just close the dialog and have
@@ -271,19 +315,14 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
     }
   }, [nextMatch, setMatchId]);
 
-  const { data: incidentsByTeam } = useTeamIncidentsByMatch(match);
+  console.log("match", match);
 
-  const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
   return (
     <>
-      <EventNewIncidentDialog
-        open={incidentDialogOpen}
-        setOpen={setIncidentDialogOpen}
-      />
       <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
         <DialogHeader title="Matches" onClose={() => setOpen(false)} />
         <DialogBody className="relative">
-          <Spinner show={!match} />
+          <Spinner show={!match || isLoadingMatch} />
           <nav className="flex items-center mx-2 gap-4">
             <IconButton
               icon={<ArrowLeftIcon height={24} />}
@@ -304,22 +343,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
               )}
             />
           </nav>
-          {match && incidentsByTeam ? (
-            <div className="mt-4 mx-2">
-              <MatchContext match={match} allianceClassName="w-full" />
-              <section className="mt-4">
-                {incidentsByTeam.map(({ team: number, incidents }) => (
-                  <TeamSummary
-                    key={number}
-                    incidents={incidents}
-                    match={match}
-                    number={number}
-                  />
-                ))}
-              </section>
-              <MatchScratchpad match={match} />
-            </div>
-          ) : null}
+          <EventMatchView match={match} key={match?.name} />
         </DialogBody>
       </Dialog>
     </>

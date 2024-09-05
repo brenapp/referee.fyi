@@ -36,9 +36,8 @@ const client = init({
 
 // Load Replay Integration in a Separate Bundle
 if (import.meta.env.PROD) {
-  import("@sentry-internal/replay").then(({ replayIntegration }) => {
-    client?.addIntegration(replayIntegration);
-  });
+  const { replayIntegration } = await import("@sentry-internal/replay");
+  client?.addIntegration(replayIntegration);
 }
 
 // Initialize user

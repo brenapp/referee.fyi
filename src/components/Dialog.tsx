@@ -19,6 +19,23 @@ export const DialogCustomHeader: React.FC<DialogCustomHeaderProps> = ({
   );
 };
 
+export type DialogCloseButtonProps = {
+  onClose: () => void;
+};
+
+export const DialogCloseButton: React.FC<DialogCloseButtonProps> = ({
+  onClose,
+}) => {
+  return (
+    <IconButton
+      icon={<XMarkIcon height={24} />}
+      onClick={onClose}
+      className="bg-transparent"
+      autoFocus
+    />
+  );
+};
+
 export type DialogHeaderProps = {
   title: string;
   onClose: () => void;
@@ -30,12 +47,7 @@ export const DialogHeader: React.FC<DialogHeaderProps> = ({
 }) => {
   return (
     <DialogCustomHeader>
-      <IconButton
-        icon={<XMarkIcon height={24} />}
-        onClick={onClose}
-        className="bg-transparent"
-        autoFocus
-      />
+      <DialogCloseButton onClose={onClose} />
       <h1 className="text-xl text-white">{title}</h1>
     </DialogCustomHeader>
   );

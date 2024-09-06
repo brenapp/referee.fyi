@@ -41,8 +41,7 @@ export const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({
   return (
     <>
       <EventMatchDialog
-        matchId={matchId}
-        setMatchId={setMatchId}
+        initialMatchId={matchId}
         open={matchDialogOpen}
         setOpen={setMatchDialogOpen}
         division={division}
@@ -107,7 +106,7 @@ export const EventTeamsPage: React.FC = () => {
       <EventNewIncidentDialog
         open={incidentDialogOpen}
         setOpen={setIncidentDialogOpen}
-        initial={{ team }}
+        initial={{ team: team?.number }}
         key={team?.id}
       />
       <header className="mt-4">

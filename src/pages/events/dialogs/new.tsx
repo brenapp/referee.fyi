@@ -61,7 +61,9 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   );
 
   // Initialise current team and match
-  const [team, setTeam] = useState<string | undefined>(initial?.team?.number);
+  const [team, setTeam] = useState<string | undefined>(
+    initial?.team ?? undefined
+  );
   const [match, setMatch] = useState<number | undefined>(initial?.match?.id);
 
   const { data: teamData } = useEventTeam(event, team);
@@ -119,7 +121,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const [incident, setIncident] = useState<RichIncident>({
     time: new Date(),
     event: sku ?? "",
-    team: teamData,
+    team: teamData?.number,
     match: matchData,
     skills: undefined,
     rules: [],
@@ -129,7 +131,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   });
 
   useEffect(() => {
-    setIncidentField("team", teamData);
+    setIncidentField("team", teamData?.number);
     setIncidentField("match", matchData);
   }, [teamData, matchData]);
 
@@ -171,7 +173,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         setTeam(undefined);
       }
 
-      setIncidentField("team", newTeam);
+      setIncidentField("team", newTeam?.number);
       setTeam(newTeam?.number);
     },
     [teams]
@@ -413,7 +415,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         <label>
           <p className="mt-4">Team</p>
           <Select
-            value={incident.team?.number ?? -1}
+            value={incident.team ?? -1}
             onChange={onChangeIncidentTeam}
             className="max-w-full w-full"
           >

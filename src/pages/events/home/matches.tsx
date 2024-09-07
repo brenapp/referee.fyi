@@ -4,11 +4,10 @@ import { useEventMatches } from "~utils/hooks/robotevents";
 import { useCurrentDivision } from "~utils/hooks/state";
 import { EventMatchDialog } from "../dialogs/match";
 import { Spinner } from "~components/Spinner";
-import { FixedSizeList as List } from "react-window";
-import AutoSizer from "react-virtualized-auto-sizer";
 import { ClickableMatch, MatchTime } from "~components/Match";
 import { Button } from "~components/Button";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import { VirtualizedList } from "~components/VirtualizedList";
 
 export type UpcomingMatchProps = {
   event: EventData;
@@ -56,8 +55,6 @@ export const EventMatchesTab: React.FC<MatchesTabProps> = ({ event }) => {
   const division = useCurrentDivision();
   const { data: matches, isLoading } = useEventMatches(event, division);
 
-  console.log(matches);
-
   const [open, setOpen] = useState(false);
   const [matchId, setMatchId] = useState<number>(0);
 
@@ -65,48 +62,29 @@ export const EventMatchesTab: React.FC<MatchesTabProps> = ({ event }) => {
     const matchId = parseInt(e.currentTarget.dataset.matchid ?? "NaN");
     if (isNaN(matchId)) return;
     setMatchId(matchId);
-    setOpen(true);
+    setTimeout(() => {
+      setOpen(true);
+    }, 0);
   }, []);
 
   return (
     <>
       <EventMatchDialog
-        matchId={matchId}
-        setMatchId={setMatchId}
+        key={matchId}
+        initialMatchId={matchId}
         open={open}
         setOpen={setOpen}
       />
       <UpcomingMatch event={event} onClickMatch={onClickMatch} />
-      <section className="flex-1">
+      <section className="contents">
         <Spinner show={isLoading} />
-        <AutoSizer>
-          {(size) => (
-            <List
-              width={size.width}
-              height={size.height}
-              itemCount={matches?.length ?? 0}
-              itemSize={64}
-            >
-              {({ index, style }) => {
-                const match = matches?.[index];
-
-                if (!match) {
-                  return <div style={style} key={index}></div>;
-                }
-
-                return (
-                  <div style={style}>
-                    <ClickableMatch
-                      match={match}
-                      onClick={onClickMatch}
-                      key={match.id}
-                    />
-                  </div>
-                );
-              }}
-            </List>
-          )}
-        </AutoSizer>
+        <VirtualizedList
+          data={matches}
+          options={{ estimateSize: () => 64 }}
+          className="flex-1"
+        >
+          {(match) => <ClickableMatch match={match} onClick={onClickMatch} />}
+        </VirtualizedList>
       </section>
     </>
   );

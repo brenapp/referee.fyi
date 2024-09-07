@@ -36,10 +36,7 @@ export const Tabs: React.FC<TabsProps> = ({ children: tabs, ...props }) => {
   const tabLayoutId = useId();
 
   return (
-    <div
-      {...props}
-      className={twMerge("flex flex-col flex-1", props.className)}
-    >
+    <div {...props} className={twMerge("contents", props.className)}>
       <nav role="tablist" className="flex max-w-full pt-2">
         {tabs.map((tab, index) => (
           <button

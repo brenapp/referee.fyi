@@ -359,10 +359,10 @@ export const AppShell: React.FC = () => {
 
   return (
     <main
-      className="w-screen h-[100dvh] grid mb-4 p-4 overflow"
+      className="w-screen h-[100dvh] grid mb-4 p-4 overflow-hidden"
       style={{
-        gridTemplateRows: "4rem 1fr",
-        gridTemplateColumns: "calc(100vw - 32px)",
+        gridTemplateRows: "4rem minmax(0, 1fr)",
+        gridTemplateColumns: "calc(100dvw - 32px)",
       }}
     >
       <Toaster />

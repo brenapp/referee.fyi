@@ -9,8 +9,6 @@ import { EventManageTab } from "./home/manage";
 import { Spinner } from "~components/Spinner";
 import { EventData } from "robotevents";
 import { useEventSkills, useEventTeams } from "~utils/hooks/robotevents";
-import AutoSizer from "react-virtualized-auto-sizer";
-import { FixedSizeList as List } from "react-window";
 import { Link } from "react-router-dom";
 import { Skill } from "robotevents";
 
@@ -19,6 +17,7 @@ import { UserGroupIcon as TeamsIconSolid } from "@heroicons/react/24/solid";
 
 import { Cog8ToothIcon as ManageIconOutline } from "@heroicons/react/24/outline";
 import { Cog8ToothIcon as ManageIconSolid } from "@heroicons/react/24/solid";
+import { VirtualizedList } from "~components/VirtualizedList";
 
 type TeamSkillsTabProps = {
   event: EventData;
@@ -51,66 +50,55 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
 
   return (
     <>
-      <section className="flex-1">
+      <section className="contents">
         <Spinner show={isLoading} />
-        <AutoSizer>
-          {(size) => (
-            <List
-              width={size.width}
-              height={size.height}
-              itemCount={teams?.length ?? 0}
-              itemSize={64}
-            >
-              {({ index, style }) => {
-                const team = teams?.[index];
+        <VirtualizedList
+          className="flex-1"
+          data={teams}
+          options={{ estimateSize: () => 64 }}
+        >
+          {(team) => {
+            if (!team) {
+              return null;
+            }
 
-                if (!team) {
-                  return <div style={style} key={index}></div>;
-                }
+            const programming = skillsByTeam[team.number]?.find(
+              (skill) => skill.type === "programming"
+            );
 
-                const programming = skillsByTeam[team.number]?.find(
-                  (skill) => skill.type === "programming"
-                );
+            const driver = skillsByTeam[team.number]?.find(
+              (skill) => skill.type === "driver"
+            );
 
-                const driver = skillsByTeam[team.number]?.find(
-                  (skill) => skill.type === "driver"
-                );
-
-                return (
-                  <div style={style} key={team.id}>
-                    <Link
-                      to={`/${event.sku}/team/${team.number}`}
-                      className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
-                    >
-                      <div className="flex-1">
-                        <p className="text-emerald-400 font-mono">
-                          {team.number}
-                        </p>
-                        <p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose">
-                          {team.team_name}
-                        </p>
-                      </div>
-                      <p className="h-full pl-2 flex items-center">
-                        <span className="mr-4">
-                          <PlayIcon height={20} className="inline" />
-                          <span className="font-mono ml-2">
-                            {driver?.attempts ?? 0}
-                          </span>
-                        </span>
-                        <span className="">
-                          <CodeBracketIcon height={20} className="inline" />
-                          <span className="font-mono ml-2">
-                            {programming?.attempts ?? 0}
-                          </span>
-                        </span>
-                      </p>
-                    </Link>
-                  </div>
-                );
-              }}
-            </List>
-          )}
-        </AutoSizer>
+            return (
+              <Link
+                to={`/${event.sku}/team/${team.number}`}
+                className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
+              >
+                <div className="flex-1">
+                  <p className="text-emerald-400 font-mono">{team.number}</p>
+                  <p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose">
+                    {team.team_name}
+                  </p>
+                </div>
+                <p className="h-full pl-2 flex items-center">
+                  <span className="mr-4">
+                    <PlayIcon height={20} className="inline" />
+                    <span className="font-mono ml-2">
+                      {driver?.attempts ?? 0}
+                    </span>
+                  </span>
+                  <span className="">
+                    <CodeBracketIcon height={20} className="inline" />
+                    <span className="font-mono ml-2">
+                      {programming?.attempts ?? 0}
+                    </span>
+                  </span>
+                </p>
+              </Link>
+            );
+          }}
+        </VirtualizedList>
       </section>
     </>
   );

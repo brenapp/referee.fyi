@@ -14,6 +14,7 @@ import { Incident } from "~components/Incident";
 import { EventNewIncidentDialog } from "./dialogs/new";
 import { Button } from "~components/Button";
 import { FlagIcon } from "@heroicons/react/20/solid";
+import { VirtualizedList } from "~components/VirtualizedList";
 
 type EventTeamsTabProps = {
   event: EventData | null | undefined;
@@ -47,7 +48,7 @@ export const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({
         division={division}
       />
       <Spinner show={isLoading} />
-      <ul>
+      <ul className="flex-1 overflow-auto">
         {matches?.map((match) => (
           <ClickableMatch
             match={match}
@@ -75,11 +76,13 @@ export const EventTeamsIncidents: React.FC<EventTeamsTabProps> = ({
   }
 
   return (
-    <ul>
+    <ul className="contents">
       <Spinner show={isIncidentsLoading} />
-      {incidents?.map((incident) => (
-        <Incident incident={incident} key={incident.id} />
-      ))}
+      <VirtualizedList data={incidents} options={{ estimateSize: () => 88 }}>
+        {(incident) => (
+          <Incident incident={incident} key={incident.id} className="h-20" />
+        )}
+      </VirtualizedList>
     </ul>
   );
 };
@@ -102,7 +105,7 @@ export const EventTeamsPage: React.FC = () => {
   }, [team]);
 
   return (
-    <section>
+    <section className="flex flex-col">
       <EventNewIncidentDialog
         open={incidentDialogOpen}
         setOpen={setIncidentDialogOpen}
@@ -121,34 +124,32 @@ export const EventTeamsPage: React.FC = () => {
         </h1>
         <p className="italic">{teamLocation}</p>
       </header>
-      <section>
-        <Tabs>
-          {[
-            {
-              id: "incidents",
-              label: "Incidents",
-              icon: (active) =>
-                active ? (
-                  <FlagIcon height={24} className="inline" />
-                ) : (
-                  <FlagIcon height={24} className="inline" />
-                ),
-              content: <EventTeamsIncidents event={event} team={team} />,
-            },
-            {
-              id: "schedule",
-              label: "Schedule",
-              icon: (active) =>
-                active ? (
-                  <FlagIcon height={24} className="inline" />
-                ) : (
-                  <FlagIcon height={24} className="inline" />
-                ),
-              content: <EventTeamsMatches event={event} team={team} />,
-            },
-          ]}
-        </Tabs>
-      </section>
+      <Tabs>
+        {[
+          {
+            id: "incidents",
+            label: "Incidents",
+            icon: (active) =>
+              active ? (
+                <FlagIcon height={24} className="inline" />
+              ) : (
+                <FlagIcon height={24} className="inline" />
+              ),
+            content: <EventTeamsIncidents event={event} team={team} />,
+          },
+          {
+            id: "schedule",
+            label: "Schedule",
+            icon: (active) =>
+              active ? (
+                <FlagIcon height={24} className="inline" />
+              ) : (
+                <FlagIcon height={24} className="inline" />
+              ),
+            content: <EventTeamsMatches event={event} team={team} />,
+          },
+        ]}
+      </Tabs>
     </section>
   );
 };

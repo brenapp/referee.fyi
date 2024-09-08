@@ -269,34 +269,37 @@ export type EventMatchDialogProps = {
 export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
   open,
   setOpen,
+  initialMatchId,
   division: defaultDivision,
 }) => {
   const { data: event } = useCurrentEvent();
   const division = useCurrentDivision(defaultDivision);
   const { data: matches } = useEventMatches(event, division);
 
-  const [matchIndex, setMatchIndex] = useState(0);
+  const [[matchIndex, animateMatchTransition], setMatchIndex] = useState<
+    [index: number, animate: boolean]
+  >([0, false]);
 
-  // useEffect(() => {
-  //   if (!matches) return;
-  //   const index = matches.findIndex((match) => match.id === initialMatchId);
-  //   if (index !== -1) {
-  //     setMatchIndex(index);
-  //   }
-  // }, [initialMatchId, setMatchIndex, matches]);
+  useEffect(() => {
+    if (!matches) return;
+    const index = matches.findIndex((match) => match.id === initialMatchId);
+    if (index !== -1) {
+      setMatchIndex([index, false]);
+    }
+  }, [initialMatchId, setMatchIndex, matches]);
 
   const match = useMemo(() => matches?.[matchIndex], [matchIndex, matches]);
 
   const onClickNextMatch = useCallback(() => {
     if (!matches) return;
     if (matchIndex + 1 >= matches.length) return;
-    setMatchIndex(matchIndex + 1);
+    setMatchIndex([matchIndex + 1, true]);
   }, [matchIndex, matches]);
 
   const onClickPrevMatch = useCallback(() => {
     if (!matches) return;
     if (matchIndex - 1 < 0) return;
-    setMatchIndex(matchIndex - 1);
+    setMatchIndex([matchIndex - 1, true]);
   }, [matchIndex, matches]);
 
   const viewsToRender = [-1, 0, 1];
@@ -331,9 +334,13 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
   );
 
   useEffect(() => {
+    if (!animateMatchTransition) {
+      x.set(calculateNewX());
+      return;
+    }
     const controls = animate(x, calculateNewX(), transition);
     return controls.stop;
-  }, [matchIndex, calculateNewX, x]);
+  }, [matchIndex, calculateNewX, x, animateMatchTransition]);
 
   return (
     <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>

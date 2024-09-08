@@ -1,9 +1,5 @@
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
-import {
-  useEventMatch,
-  useEventMatches,
-  useEventTeam,
-} from "~hooks/robotevents";
+import { useEventMatches } from "~hooks/robotevents";
 import { Button, ButtonProps, IconButton } from "~components/Button";
 import {
   ArrowLeftIcon,
@@ -12,10 +8,15 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
 } from "@heroicons/react/20/solid";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { Spinner } from "~components/Spinner";
-import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
+import {
+  Dialog,
+  DialogBody,
+  DialogCloseButton,
+  DialogCustomHeader,
+} from "~components/Dialog";
 import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
 import {
@@ -25,11 +26,11 @@ import {
 import { Match } from "robotevents";
 import { MatchContext } from "~components/Context";
 import { Incident } from "~components/Incident";
-import { TeamData } from "robotevents";
 import { MatchTime } from "~components/Match";
 import { TeamIsolationDialog } from "./team";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import { MatchScratchpad } from "~components/scratchpad/Scratchpad";
+import { animate, motion, PanInfo, useMotionValue } from "framer-motion";
 
 const OUTCOME_PRIORITY: IncidentOutcome[] = [
   "Major",
@@ -51,9 +52,6 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [isolationOpen, setIsolationOpen] = useState(false);
-
-  const { data: event } = useCurrentEvent();
-  const { data: team } = useEventTeam(event, number);
 
   const teamAlliance = match.alliances.find((alliance) =>
     alliance.teams.some((t) => t.team?.name === number)
@@ -98,11 +96,10 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
   return (
     <details
       open={open}
-      key={number}
       onToggle={(e) => setOpen(e.currentTarget.open)}
-      className="p-1 rounded-md mb-2 max-w-full"
+      className="contents"
     >
-      <summary className="flex gap-2 items-center active:bg-zinc-700 rounded-md max-w-full">
+      <summary className="flex gap-2 items-center active:bg-zinc-700 max-w-full mt-0 sticky top-0 bg-zinc-900 h-16 z-10">
         {open ? (
           <ChevronDownIcon height={16} width={16} className="flex-shrink-0" />
         ) : (
@@ -151,27 +148,32 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
             );
           })}
         </ul>
-        {team ? <TeamFlagButton match={match} team={team} /> : null}
+        <TeamFlagButton match={match} team={number} />
       </summary>
-      {incidents.map((incident) => (
-        <Incident incident={incident} key={incident.id} />
-      ))}
-      {incidents.length > 0 ? (
+      {/* For performance - don't render Incidents unless the dialog is open */}
+      {open ? (
         <>
-          <TeamIsolationDialog
-            key={team?.number}
-            team={team?.number}
-            open={isolationOpen}
-            setOpen={setIsolationOpen}
-          />
-          <Button
-            mode="normal"
-            className="flex gap-2 items-center mt-2 justify-center"
-            onClick={() => setIsolationOpen(true)}
-          >
-            <ArrowsPointingOutIcon height={20} />
-            <p>Isolate Team</p>
-          </Button>
+          {incidents.map((incident) => (
+            <Incident incident={incident} key={incident.id} />
+          ))}
+          {incidents.length > 0 ? (
+            <>
+              <TeamIsolationDialog
+                key={number}
+                team={number}
+                open={isolationOpen}
+                setOpen={setIsolationOpen}
+              />
+              <Button
+                mode="normal"
+                className="flex gap-2 items-center mt-2 justify-center h-12"
+                onClick={() => setIsolationOpen(true)}
+              >
+                <ArrowsPointingOutIcon height={20} />
+                <p>Isolate Team</p>
+              </Button>
+            </>
+          ) : null}
         </>
       ) : null}
     </details>
@@ -180,7 +182,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
 
 type TeamFlagButtonProps = {
   match: Match;
-  team: TeamData;
+  team: string;
 } & ButtonProps;
 
 const TeamFlagButton: React.FC<TeamFlagButtonProps> = ({
@@ -196,7 +198,7 @@ const TeamFlagButton: React.FC<TeamFlagButtonProps> = ({
         open={open}
         setOpen={setOpen}
         initial={{ match, team }}
-        key={match.id + team.id}
+        key={match.id + team}
       />
       <Button
         mode="primary"
@@ -214,138 +216,190 @@ const TeamFlagButton: React.FC<TeamFlagButtonProps> = ({
   );
 };
 
-export type EventMatchDialogProps = {
-  matchId: number;
-  setMatchId: (matchId: number) => void;
-
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  division?: number;
-};
-
 type EventMatchViewProps = {
   match?: Match | null;
 };
 const EventMatchView: React.FC<EventMatchViewProps> = ({ match }) => {
-  const { data: incidentsByTeam } = useTeamIncidentsByMatch(match);
+  const { data: incidentsByTeam } = useTeamIncidentsByMatch(match, {
+    initialData: () => {
+      if (!match) {
+        return [];
+      }
 
-  console.log(match, incidentsByTeam);
+      const alliances = [match.alliance("red"), match.alliance("blue")];
+      const teams =
+        alliances.map((a) => a.teams.map((t) => t.team!.name)).flat() ?? [];
+
+      return teams.map((team) => ({ team, incidents: [] }));
+    },
+  });
 
   if (!match) {
     return null;
   }
 
   return (
-    <div className="mt-4 mx-2">
-      <MatchContext match={match} allianceClassName="w-full" />
-      <section className="mt-4">
-        {incidentsByTeam?.map(({ team: number, incidents }) => (
-          <TeamSummary
-            key={number}
-            incidents={incidents}
-            match={match}
-            number={number}
-          />
-        )) ??
-          match
-            .teams()
-            .map((team) => (
-              <TeamSummary
-                key={team.name}
-                incidents={[]}
-                match={match}
-                number={team.name}
-              />
-            ))}
-      </section>
+    <div className="mt-4 mx-2 contents">
+      {incidentsByTeam?.map(({ team: number, incidents }) => (
+        <TeamSummary
+          key={number}
+          incidents={incidents}
+          match={match}
+          number={number}
+        />
+      ))}
       <MatchScratchpad match={match} />
     </div>
   );
 };
 
+const transition = {
+  type: "spring",
+  bounce: 0,
+} as const;
+
+export type EventMatchDialogProps = {
+  initialMatchId: number;
+  division?: number;
+
+  open: boolean;
+  setOpen: (open: boolean) => void;
+};
+
 export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
-  matchId,
-  setMatchId,
   open,
   setOpen,
   division: defaultDivision,
 }) => {
   const { data: event } = useCurrentEvent();
   const division = useCurrentDivision(defaultDivision);
+  const { data: matches } = useEventMatches(event, division);
 
-  const { data: matches, isSuccess: isLoadingMatchesSuccess } = useEventMatches(
-    event,
-    division
-  );
-  const { data: match, isLoading: isLoadingMatch } = useEventMatch(
-    event,
-    division,
-    matchId
-  );
+  const [matchIndex, setMatchIndex] = useState(0);
 
-  // Edge-case: If the match dialog was open when the match was scored, the match ID no longer
-  // exists (RobotEvents creates a new match ID with the same name), so just close the dialog and have
-  // the user reopen it to pick the right match. We could try and go find the updated match ID, but
-  // I think this is less likely to frustrate them if we (for example, pick the wrong match).
-  useEffect(() => {
-    if (isLoadingMatchesSuccess && !match) {
-      setTimeout(() => {
-        setOpen(false);
-      }, 100);
-    }
-  }, [isLoadingMatchesSuccess, match, setOpen]);
+  // useEffect(() => {
+  //   if (!matches) return;
+  //   const index = matches.findIndex((match) => match.id === initialMatchId);
+  //   if (index !== -1) {
+  //     setMatchIndex(index);
+  //   }
+  // }, [initialMatchId, setMatchIndex, matches]);
 
-  const prevMatch = useMemo(() => {
-    return matches?.find((_, i) => matches[i + 1]?.id === match?.id);
-  }, [matches, match]);
-
-  const nextMatch = useMemo(() => {
-    return matches?.find((_, i) => matches[i - 1]?.id === match?.id);
-  }, [matches, match]);
-
-  const onClickPrevMatch = useCallback(() => {
-    if (prevMatch) {
-      setMatchId(prevMatch.id);
-    }
-  }, [prevMatch, setMatchId]);
+  const match = useMemo(() => matches?.[matchIndex], [matchIndex, matches]);
 
   const onClickNextMatch = useCallback(() => {
-    if (nextMatch) {
-      setMatchId(nextMatch.id);
-    }
-  }, [nextMatch, setMatchId]);
+    if (!matches) return;
+    if (matchIndex + 1 >= matches.length) return;
+    setMatchIndex(matchIndex + 1);
+  }, [matchIndex, matches]);
 
-  console.log("match", match);
+  const onClickPrevMatch = useCallback(() => {
+    if (!matches) return;
+    if (matchIndex - 1 < 0) return;
+    setMatchIndex(matchIndex - 1);
+  }, [matchIndex, matches]);
+
+  const viewsToRender = [-1, 0, 1];
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+
+  const calculateNewX = useCallback(
+    () => -matchIndex * (containerRef.current?.clientWidth ?? 0),
+    [matchIndex, containerRef]
+  );
+
+  const onDragEnd = useCallback(
+    (_: Event, dragProps: PanInfo) => {
+      const clientWidth = containerRef.current?.clientWidth ?? 0;
+      const { offset, velocity } = dragProps;
+
+      if (Math.abs(velocity.y) > Math.abs(velocity.x)) {
+        animate(x, calculateNewX(), transition);
+        return;
+      }
+
+      if (offset.x > clientWidth / 6) {
+        onClickPrevMatch();
+      } else if (offset.x < -clientWidth / 6) {
+        onClickNextMatch();
+      } else {
+        animate(x, calculateNewX(), transition);
+      }
+    },
+    [calculateNewX, onClickNextMatch, onClickPrevMatch, x]
+  );
+
+  useEffect(() => {
+    const controls = animate(x, calculateNewX(), transition);
+    return controls.stop;
+  }, [matchIndex, calculateNewX, x]);
 
   return (
-    <>
-      <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
-        <DialogHeader title="Matches" onClose={() => setOpen(false)} />
-        <DialogBody className="relative">
-          <Spinner show={!match || isLoadingMatch} />
-          <nav className="flex items-center mx-2 gap-4">
-            <IconButton
-              icon={<ArrowLeftIcon height={24} />}
-              onClick={onClickPrevMatch}
-              className={twMerge(
-                "bg-transparent p-2",
-                prevMatch ? "visible" : "invisible"
-              )}
-            />
-            <h1 className="text-xl flex-1">{match?.name}</h1>
-            {match && <MatchTime match={match} />}
-            <IconButton
-              icon={<ArrowRightIcon height={24} />}
-              onClick={onClickNextMatch}
-              className={twMerge(
-                "bg-transparent p-2",
-                nextMatch ? "visible" : "invisible"
-              )}
-            />
-          </nav>
-          <EventMatchView match={match} key={match?.name} />
-        </DialogBody>
-      </Dialog>
-    </>
+    <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
+      <DialogCustomHeader>
+        <DialogCloseButton onClose={() => setOpen(false)} />
+        <IconButton
+          icon={<ArrowLeftIcon height={24} />}
+          onClick={onClickPrevMatch}
+          className={twMerge(
+            "bg-transparent p-2",
+            matchIndex > 0 ? "visible" : "invisible"
+          )}
+        />
+        <h1 className="text-xl flex-1">{match?.name}</h1>
+        {match && <MatchTime match={match} />}
+        <IconButton
+          icon={<ArrowRightIcon height={24} />}
+          onClick={onClickNextMatch}
+          className={twMerge(
+            "bg-transparent p-2",
+            matchIndex < (matches?.length ?? Infinity) ? "visible" : "invisible"
+          )}
+        />
+      </DialogCustomHeader>
+      <DialogBody className="relative flex flex-col">
+        <Spinner show={!match} />
+        {match ? (
+          <MatchContext
+            match={match}
+            className="mb-4"
+            allianceClassName="w-full"
+          />
+        ) : null}
+        <motion.div
+          ref={containerRef}
+          style={{
+            position: "relative",
+            flexGrow: 1,
+            overflow: "hidden",
+          }}
+        >
+          {viewsToRender.map((i) => {
+            const match = matches?.[matchIndex + i];
+            return (
+              <motion.div
+                key={matchIndex + i}
+                style={{
+                  position: "absolute",
+                  width: "100%",
+                  height: "100%",
+                  x,
+                  left: `${(matchIndex + i) * 100}%`,
+                  right: `${(matchIndex + i) * 100}%`,
+                  overflowY: "auto",
+                }}
+                draggable
+                drag="x"
+                dragElastic={1}
+                onDragEnd={onDragEnd}
+              >
+                <EventMatchView key={matchIndex + i} match={match} />
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </DialogBody>
+    </Dialog>
   );
 };

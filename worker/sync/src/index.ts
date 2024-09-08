@@ -1,7 +1,7 @@
 import { AutoRouter, IRequest, withParams } from "itty-router";
-import { corsify, preflight, response } from "./utils";
+import { corsify, preflight, response } from "./utils/request";
 
-import type { Invitation, ShareInstance, User } from "@referee-fyi/share";
+import type { Invitation, ShareInstanceMeta, User } from "@referee-fyi/share";
 import {
   APIPostCreateResponseBody,
   APIGetInvitationResponseBody,
@@ -22,7 +22,7 @@ import {
   setInvitation,
   setRequestCode,
   setUser,
-} from "./data";
+} from "./utils/data";
 import {
   AuthenticatedRequest,
   Env,
@@ -31,7 +31,7 @@ import {
   SignedRequest,
 } from "./types";
 import { integrationRouter } from "./integration";
-import { importKey, KEY_PREFIX, verifyKeySignature } from "./crypto";
+import { importKey, KEY_PREFIX, verifyKeySignature } from "./utils/crypto";
 
 const verifySignature = async (request: IRequest & Request) => {
   const now = new Date();
@@ -152,7 +152,7 @@ const verifyInvitation = async (request: AuthenticatedRequest, env: Env) => {
       details: "Cannot perform this action until this invitation is accepted.",
     });
   }
-  const instance: ShareInstance | null = await getInstance(
+  const instance: ShareInstanceMeta | null = await getInstance(
     env,
     invitation.instance_secret,
     sku
@@ -308,7 +308,7 @@ router
     const instanceId = env.INCIDENTS.newUniqueId();
     const secret = instanceId.toString();
 
-    const instance: ShareInstance = {
+    const instance: ShareInstanceMeta = {
       secret,
       admins: [request.keyHex],
       invitations: [],
@@ -603,4 +603,4 @@ router
 
 export default { ...router };
 
-export { EventIncidents } from "./incidents";
+export { ShareInstance } from "./instance";

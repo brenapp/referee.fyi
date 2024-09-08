@@ -1,9 +1,9 @@
 import { IRequest, AutoRouter } from "itty-router";
 import { Env } from "./types";
-import { response } from "./utils";
-import { getInstance, getInvitation, getUser } from "./data";
-import { importKey, KEY_PREFIX, verifyKeySignature } from "./crypto";
-import { Invitation, ShareInstance, User } from "@referee-fyi/share";
+import { response } from "./utils/request";
+import { getInstance, getInvitation, getUser } from "./utils/data";
+import { importKey, KEY_PREFIX, verifyKeySignature } from "./utils/crypto";
+import { Invitation, ShareInstanceMeta, User } from "@referee-fyi/share";
 
 const verifyBearerToken = async (request: IRequest, env: Env) => {
   const sku = request.params.sku;
@@ -88,7 +88,7 @@ const integrationRouter = AutoRouter<IRequest, [Env]>({
 type VerifiedRequest = IRequest & {
   user: User;
   invitation: Invitation;
-  instance: ShareInstance;
+  instance: ShareInstanceMeta;
 };
 
 // Integration API (just requires bearer token)

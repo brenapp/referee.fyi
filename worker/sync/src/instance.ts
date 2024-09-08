@@ -1,5 +1,5 @@
 import { AutoRouter, cors, createResponse } from "itty-router";
-import { response } from "./utils";
+import { response } from "./utils/request";
 import {
   type Incident,
   type WebSocketMessage,
@@ -10,13 +10,13 @@ import {
   type InvitationListItem,
   type IncidentMatch,
   type MatchScratchpad,
-  type ShareInstance,
+  type ShareInstanceMeta as ShareInstanceMeta,
   type User,
   type InstanceIncidents,
   type InstanceScratchpads,
   INCIDENT_IGNORE,
 } from "@referee-fyi/share";
-import { getUser } from "./data";
+import { getUser } from "./utils/data";
 import { Env, EventIncidentsInitData, RequestHasInvitation } from "./types";
 import { mergeLWW } from "@referee-fyi/consistency";
 import { DurableObject } from "cloudflare:workers";
@@ -44,7 +44,7 @@ export function matchToString(match: IncidentMatch) {
 }
 
 const { preflight, corsify } = cors();
-export class EventIncidents extends DurableObject {
+export class ShareInstance extends DurableObject {
   router = AutoRouter({
     before: [preflight],
     finally: [corsify],
@@ -275,11 +275,11 @@ export class EventIncidents extends DurableObject {
     return { name, key };
   }
 
-  async getInstance(): Promise<ShareInstance | null> {
+  async getInstance(): Promise<ShareInstanceMeta | null> {
     const sku = await this.getSKU();
     const secret = await this.getInstanceSecret();
 
-    const instance = await this.env.SHARES.get<ShareInstance>(
+    const instance = await this.env.SHARES.get<ShareInstanceMeta>(
       `${sku}#${secret}`,
       "json"
     );

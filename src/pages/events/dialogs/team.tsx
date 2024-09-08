@@ -4,6 +4,7 @@
 
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { Incident } from "~components/Incident";
+import { VirtualizedList } from "~components/VirtualizedList";
 import { useTeamIncidentsByEvent } from "~utils/hooks/incident";
 import { useCurrentEvent } from "~utils/hooks/state";
 
@@ -29,9 +30,11 @@ export const TeamIsolationDialog: React.FC<TeamIsolationDialogProps> = ({
     <Dialog open={open} onClose={() => setOpen(false)} mode="modal">
       <DialogHeader title={team} onClose={() => setOpen(false)} />
       <DialogBody>
-        {incidents?.map((incident) => (
-          <Incident key={incident.id} incident={incident} readonly />
-        ))}
+        <VirtualizedList data={incidents} options={{ estimateSize: () => 64 }}>
+          {(incident) => (
+            <Incident incident={incident} className="h-14 overflow-hidden" />
+          )}
+        </VirtualizedList>
       </DialogBody>
     </Dialog>
   );

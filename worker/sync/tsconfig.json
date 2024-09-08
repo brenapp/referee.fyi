@@ -4,7 +4,7 @@
   "compilerOptions": {
     "incremental": true,
     "target": "es2021",
-    "lib": ["es2021"],
+    "lib": ["ESNext"],
     "jsx": "react",
     "module": "es2022",
     "moduleResolution": "node",

@@ -1,5 +1,5 @@
 import { AutoRouter, cors, createResponse } from "itty-router";
-import { response } from "./utils/request";
+import { response } from "../utils/request";
 import {
   type Incident,
   type WebSocketMessage,
@@ -16,8 +16,8 @@ import {
   type InstanceScratchpads,
   INCIDENT_IGNORE,
 } from "@referee-fyi/share";
-import { getUser } from "./utils/data";
-import { Env, EventIncidentsInitData, RequestHasInvitation } from "./types";
+import { getUser } from "../utils/data";
+import { Env, EventIncidentsInitData, RequestHasInvitation } from "../types";
 import { mergeLWW } from "@referee-fyi/consistency";
 import { DurableObject } from "cloudflare:workers";
 
@@ -45,7 +45,7 @@ export function matchToString(match: IncidentMatch) {
 
 const { preflight, corsify } = cors();
 export class ShareInstance extends DurableObject {
-  router = AutoRouter({
+  router = AutoRouter<RequestHasInvitation, [Env]>({
     before: [preflight],
     finally: [corsify],
   });

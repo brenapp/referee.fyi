@@ -108,13 +108,13 @@ export class ShareInstance extends DurableObject {
     return this.state.storage.put(this.KEYS.scratchpad(id), scratchpad);
   }
 
-  async getAllScratchpads(): Promise<Map<string, MatchScratchpad>> {
+  async getAllScratchpads(): Promise<MatchScratchpad[]> {
     const prefix = this.KEYS.scratchpad("");
     const map = await this.state.storage.list<MatchScratchpad>({
       prefix,
     });
 
-    return map;
+    return [...map.values()];
   }
 
   async addIncident(incident: Incident): Promise<void> {
@@ -163,7 +163,10 @@ export class ShareInstance extends DurableObject {
 
   async getScratchpadData(): Promise<InstanceScratchpads> {
     const values = await this.getAllScratchpads();
-    return { deleted: [], values: Object.fromEntries(values) };
+    return {
+      deleted: [],
+      values: Object.fromEntries(values.map((s) => [s.id, s])),
+    };
   }
 
   async createServerShareMessage(): Promise<WebSocketServerShareInfoMessage> {

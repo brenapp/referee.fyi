@@ -34,8 +34,6 @@ export const VirtualizedList = <T,>({
   const items = virtualizer.getVirtualItems();
   const totalSize = virtualizer.getTotalSize();
 
-  console.log(items.length);
-
   return (
     <div
       {...props}

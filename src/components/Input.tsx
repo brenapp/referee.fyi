@@ -115,7 +115,7 @@ export const Radio = <T extends string | number | symbol>({
     <div
       {...props}
       className={twMerge(
-        "h-10 flex items-center flex-1 bg-zinc-700 rounded-md px-2 gap-2",
+        "h-10 flex items-center flex-1 bg-zinc-700 rounded-md px-2 gap-2 data-[selected=true]:bg-emerald-800",
         props.className
       )}
       role="radio"

@@ -1,6 +1,13 @@
 import { twMerge } from "tailwind-merge";
 import { Game, Rule } from "~utils/hooks/rules";
-import React, { Dispatch, forwardRef, useCallback, useMemo } from "react";
+import React, {
+  Dispatch,
+  forwardRef,
+  SetStateAction,
+  useCallback,
+  useId,
+  useMemo,
+} from "react";
 import { IconButton } from "./Button";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
@@ -50,6 +57,23 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   );
 };
 
+export const RadioButton: React.FC<{ checked: boolean; fill: string }> = ({
+  checked,
+  fill,
+}) => {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="7" cy="7" r="6.5" stroke={fill} />
+      {checked ? <circle cx="7" cy="7" r="4" fill={fill} /> : null}
+    </svg>
+  );
+};
 export type RadioBinding<T> = {
   variant: T;
   value: T;
@@ -57,10 +81,10 @@ export type RadioBinding<T> = {
 };
 
 export type RadioProps<T extends string | number | symbol> =
-  React.HTMLProps<HTMLInputElement> & {
+  React.HTMLProps<HTMLDivElement> & {
     label: string;
-    labelProps?: React.HTMLProps<HTMLLabelElement>;
-    bind?: RadioBinding<T>;
+    labelProps?: React.HTMLProps<HTMLSpanElement>;
+    bind: RadioBinding<T>;
   };
 
 export const Radio = <T extends string | number | symbol>({
@@ -69,32 +93,44 @@ export const Radio = <T extends string | number | symbol>({
   bind,
   ...props
 }: RadioProps<T>) => {
-  const bindProps: React.HTMLProps<HTMLInputElement> = bind
-    ? {
-        checked: bind.value === bind.variant,
-        onChange: (e) => {
-          bind.onChange(bind.variant);
-          props.onChange?.(e);
-        },
+  const id = useId();
+
+  const checked = bind.value === bind.variant;
+
+  const onPointerDown = useCallback(() => {
+    bind.onChange(bind.variant);
+  }, [bind]);
+
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      const selectKey = e.key === "Enter" || e.key === " ";
+      if (selectKey && !checked) {
+        bind.onChange(bind.variant);
       }
-    : {};
+    },
+    [bind, checked]
+  );
+
   return (
-    <label
-      {...labelProps}
+    <div
+      {...props}
       className={twMerge(
-        `bg-zinc-700 rounded-md p-2 flex gap-2 items-center`,
-        "has-[:checked]:bg-emerald-800",
-        labelProps?.className
+        "h-10 flex items-center flex-1 bg-zinc-700 rounded-md px-2 gap-2",
+        props.className
       )}
+      role="radio"
+      aria-checked={checked}
+      data-selected={checked}
+      aria-labelledby={id}
+      tabIndex={0}
+      onPointerDown={onPointerDown}
+      onKeyDown={onKeyDown}
     >
-      <input
-        {...props}
-        {...bindProps}
-        type="radio"
-        className={twMerge("accent-emerald-400", props.className)}
-      />
-      <span>{label}</span>
-    </label>
+      <RadioButton checked={checked} fill="currentColor" />
+      <span id={id} {...labelProps}>
+        {label}
+      </span>
+    </div>
   );
 };
 
@@ -135,13 +171,23 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
 export type TextAreaBaseProps = React.HTMLProps<HTMLTextAreaElement>;
 
-export type TextAreaProps = TextAreaBaseProps;
+export type TextAreaProps = TextAreaBaseProps & { bind?: InputBiding };
 
 export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
-  (props, ref) => {
+  ({ bind, ...props }, ref) => {
+    const bindProps: React.HTMLProps<HTMLTextAreaElement> = bind
+      ? {
+          value: bind.value,
+          onChange: (e) => {
+            bind.onChange(bind.value);
+            props.onChange?.(e);
+          },
+        }
+      : {};
     return (
       <textarea
         {...props}
+        {...bindProps}
         {...(ref ? { ref } : {})}
         className={twMerge(
           "rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2",
@@ -158,12 +204,33 @@ export type SelectBaseProps = React.DetailedHTMLProps<
   HTMLSelectElement
 >;
 
-export type SelectProps = SelectBaseProps;
+export type SelectBinding<T extends string> = {
+  value: T;
+  onChange: Dispatch<SetStateAction<T>>;
+};
 
-export const Select: React.FC<SelectBaseProps> = ({ children, ...props }) => {
+export type SelectProps<T extends string> = SelectBaseProps & {
+  bind?: SelectBinding<T>;
+};
+
+export const Select = <T extends string>({
+  children,
+  bind,
+  ...props
+}: SelectProps<T>) => {
+  const bindProps: SelectBaseProps = bind
+    ? {
+        value: bind.value,
+        onChange: (e) => {
+          bind.onChange(e.currentTarget.value as T);
+          props.onChange?.(e);
+        },
+      }
+    : {};
   return (
     <select
       {...props}
+      {...bindProps}
       className={twMerge(
         "rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2",
         "hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500",

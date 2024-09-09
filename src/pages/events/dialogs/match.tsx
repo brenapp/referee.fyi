@@ -384,8 +384,17 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
         >
           {viewsToRender.map((i) => {
             const match = matches?.[matchIndex + i];
+            const hiddenProps =
+              i !== 0
+                ? {
+                    "aria-hidden": true,
+                    tabIndex: -1,
+                    inert: "",
+                  }
+                : {};
             return (
               <motion.div
+                {...hiddenProps}
                 key={matchIndex + i}
                 style={{
                   position: "absolute",

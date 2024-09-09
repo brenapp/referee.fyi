@@ -89,7 +89,11 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
           <CodeBracketSquareIcon height={20} />
           <p>Auto Winner</p>
         </div>
-        <fieldset className="mt-2 flex gap-2">
+        <fieldset
+          className="mt-2 flex gap-2"
+          role="radiogroup"
+          aria-label="Auto Winner"
+        >
           <Radio
             name="autoWinner"
             label="Red"
@@ -141,7 +145,7 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
           <StarIcon height={20} />
           <p>AWP</p>
         </div>
-        <div className="mt-2 flex gap-2">
+        <fieldset className="mt-2 flex gap-2" aria-label="Autonomous Win Point">
           <Checkbox
             label="Red"
             bind={{
@@ -164,7 +168,7 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
               className: "has-[:checked]:bg-blue-800 mt-0 flex-1 px-4",
             }}
           />
-        </div>
+        </fieldset>
         <EditHistory
           value={data}
           valueKey="awp"

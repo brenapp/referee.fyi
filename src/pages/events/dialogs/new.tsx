@@ -349,59 +349,58 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
           </Select>
         </label>
         {incident.skills ? (
-          <div className="flex gap-2 mt-2">
+          <div
+            className="flex gap-2 mt-2"
+            role="radiogroup"
+            aria-label="Skills Match"
+          >
             <Radio
               name="skillsType"
               label="Driver"
-              checked={incident.skills.skillsType === "driver"}
-              onChange={(e) =>
-                e.currentTarget.checked
-                  ? onChangeIncidentSkillsType("driver")
-                  : null
-              }
+              bind={{
+                value: incident.skills.skillsType,
+                onChange: onChangeIncidentSkillsType,
+                variant: "driver",
+              }}
             />
             <Radio
               name="skillsType"
               label="Auto"
-              checked={incident.skills.skillsType === "programming"}
-              onChange={(e) =>
-                e.currentTarget.checked
-                  ? onChangeIncidentSkillsType("programming")
-                  : null
-              }
+              bind={{
+                value: incident.skills.skillsType,
+                onChange: onChangeIncidentSkillsType,
+                variant: "programming",
+              }}
             />
             <Radio
               name="skillsAttempt"
               label="1"
-              labelProps={{ className: "flex-1 ml-4" }}
-              checked={incident.skills.attempt === 1}
-              onChange={(e) =>
-                e.currentTarget.checked
-                  ? onChangeIncidentSkillsAttempt(1)
-                  : null
-              }
+              className="flex-1 ml-4"
+              bind={{
+                value: incident.skills.attempt,
+                onChange: onChangeIncidentSkillsAttempt,
+                variant: 1,
+              }}
             />
             <Radio
               name="skillsAttempt"
               label="2"
-              labelProps={{ className: "flex-1" }}
-              checked={incident.skills.attempt === 2}
-              onChange={(e) =>
-                e.currentTarget.checked
-                  ? onChangeIncidentSkillsAttempt(2)
-                  : null
-              }
+              className="flex-1"
+              bind={{
+                value: incident.skills.attempt,
+                onChange: onChangeIncidentSkillsAttempt,
+                variant: 2,
+              }}
             />
             <Radio
               name="skillsAttempt"
               label="3"
-              labelProps={{ className: "flex-1" }}
-              checked={incident.skills.attempt === 3}
-              onChange={(e) =>
-                e.currentTarget.checked
-                  ? onChangeIncidentSkillsAttempt(3)
-                  : null
-              }
+              className="flex-1"
+              bind={{
+                value: incident.skills.attempt,
+                onChange: onChangeIncidentSkillsAttempt,
+                variant: 3,
+              }}
             />
           </div>
         ) : null}

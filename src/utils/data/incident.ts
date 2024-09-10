@@ -2,7 +2,6 @@ import { get, getMany, set, setMany, updateMany } from "~utils/data/keyval";
 import { v1 as uuid } from "uuid";
 import { Rule } from "~hooks/rules";
 import { Match } from "robotevents";
-import { TeamData } from "robotevents";
 import {
   IncidentMatch,
   IncidentMatchSkills,
@@ -25,7 +24,7 @@ export type RichIncidentElements = {
 
   match?: Match | null;
   skills?: IncidentMatchSkills;
-  team?: TeamData | null;
+  team?: string | null;
 
   outcome: IncidentOutcome;
   rules: Rule[];
@@ -46,7 +45,7 @@ export function packIncident(incident: RichIncident): NewIncident {
           name: incident.match.name,
         }
       : incident.skills,
-    team: incident.team!.number,
+    team: incident.team!,
     rules: incident.rules.map((rule) => rule.rule),
   };
 }
@@ -276,6 +275,30 @@ export async function newIncident({
   });
 
   return incident;
+}
+
+export async function newManyIncidents(incidents: NewIncidentOptions[]) {
+  const newIncidents = incidents.map(({ data, peer, id }) =>
+    initLWW<Incident>({
+      value: { ...data, id },
+      peer,
+      ignore: INCIDENT_IGNORE,
+    })
+  );
+
+  await setManyIncidents(newIncidents);
+
+  const eventIndices = Object.groupBy(
+    newIncidents,
+    (i) => `event_${i.event}_idx`
+  );
+  const teamIndices = Object.groupBy(newIncidents, (i) => `team_${i.team}_idx`);
+
+  await bulkIndexInsert({
+    ...eventIndices,
+    ...teamIndices,
+    incidents: newIncidents,
+  });
 }
 
 export async function addIncident(incident: Incident) {

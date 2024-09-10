@@ -1,5 +1,5 @@
 import { AutoRouter, cors, createResponse } from "itty-router";
-import { response } from "./utils";
+import { response } from "../utils/request";
 import {
   type Incident,
   type WebSocketMessage,
@@ -10,14 +10,14 @@ import {
   type InvitationListItem,
   type IncidentMatch,
   type MatchScratchpad,
-  type ShareInstance,
+  type ShareInstanceMeta as ShareInstanceMeta,
   type User,
   type InstanceIncidents,
   type InstanceScratchpads,
   INCIDENT_IGNORE,
 } from "@referee-fyi/share";
-import { getUser } from "./data";
-import { Env, EventIncidentsInitData, RequestHasInvitation } from "./types";
+import { getUser } from "../utils/data";
+import { Env, EventIncidentsInitData, RequestHasInvitation } from "../types";
 import { mergeLWW } from "@referee-fyi/consistency";
 import { DurableObject } from "cloudflare:workers";
 
@@ -44,8 +44,8 @@ export function matchToString(match: IncidentMatch) {
 }
 
 const { preflight, corsify } = cors();
-export class EventIncidents extends DurableObject {
-  router = AutoRouter({
+export class ShareInstance extends DurableObject {
+  router = AutoRouter<RequestHasInvitation, [Env]>({
     before: [preflight],
     finally: [corsify],
   });
@@ -77,141 +77,78 @@ export class EventIncidents extends DurableObject {
   }
 
   // Storage
-  async setSKU(sku: string) {
-    await this.state.blockConcurrencyWhile(async () => {
-      await this.state.storage.put("sku", sku);
+  KEYS = {
+    incident: (id: string) => `incident#${id}`,
+    deletedIncident: (id: string) => `deleted_incidents#${id}`,
+    scratchpad: (id: string) => `scratchpad#${id}`,
+    sku: "meta#sku",
+    secret: "meta#instance_secret",
+  };
+
+  async setSKU(sku: string): Promise<void> {
+    return this.state.storage.put(this.KEYS.sku, sku);
+  }
+
+  async getSKU(): Promise<string | undefined> {
+    return this.state.storage.get<string>(this.KEYS.sku);
+  }
+
+  async setInstanceSecret(secret: string): Promise<void> {
+    return this.state.storage.put(this.KEYS.secret, secret);
+  }
+  async getInstanceSecret(): Promise<string | undefined> {
+    return this.state.storage.get<string>(this.KEYS.secret);
+  }
+
+  async getScratchpad(id: string): Promise<MatchScratchpad | undefined> {
+    return this.state.storage.get<MatchScratchpad>(this.KEYS.scratchpad(id));
+  }
+
+  async setScratchpad(id: string, scratchpad: MatchScratchpad): Promise<void> {
+    return this.state.storage.put(this.KEYS.scratchpad(id), scratchpad);
+  }
+
+  async getAllScratchpads(): Promise<MatchScratchpad[]> {
+    const prefix = this.KEYS.scratchpad("");
+    const map = await this.state.storage.list<MatchScratchpad>({
+      prefix,
     });
+
+    return [...map.values()];
   }
 
-  async getSKU() {
-    return this.state.storage.get<string>("sku");
+  async addIncident(incident: Incident): Promise<void> {
+    return this.state.storage.put(this.KEYS.incident(incident.id), incident);
   }
 
-  async setInstanceSecret(secret: string) {
-    await this.state.blockConcurrencyWhile(async () => {
-      await this.state.storage.put("instance_secret", secret);
+  async editIncident(incident: Incident): Promise<void> {
+    return this.state.storage.put(this.KEYS.incident(incident.id), incident);
+  }
+
+  async deleteIncident(id: string): Promise<void> {
+    return this.state.storage.put(this.KEYS.deletedIncident(id), true);
+  }
+
+  async getIncident(id: string): Promise<Incident | undefined> {
+    return this.state.storage.get<Incident>(this.KEYS.incident(id));
+  }
+
+  async getDeletedIncidents(): Promise<Set<string>> {
+    const prefix = this.KEYS.deletedIncident("");
+    const map = await this.state.storage.list<boolean>({
+      prefix,
     });
-  }
-  async getInstanceSecret() {
-    return this.state.storage.get<string>("instance_secret");
-  }
-
-  async getScratchpad(id: string) {
-    return this.state.storage.get<MatchScratchpad>(`scratchpad_${id}`);
-  }
-
-  async setScratchpad(id: string, scratchpad: MatchScratchpad) {
-    const list =
-      (await this.state.storage.get<Set<string>>(`scratchpads`)) ?? new Set();
-    list.add(id);
-    await this.state.storage.put(`scratchpads`, list);
-
-    return this.state.storage.put<MatchScratchpad>(id, scratchpad);
-  }
-
-  async getAllScratchpads(): Promise<Record<string, MatchScratchpad>> {
-    const listSet =
-      (await this.state.storage.get<Set<string>>(`scratchpads`)) ?? new Set();
-
-    const list = [...listSet];
-
-    const bulkOps = this.groupIds(list, 128);
-    const result = await Promise.all(
-      bulkOps.map((ids) => this.state.storage.get<MatchScratchpad>(ids))
-    );
-
-    const scratchpads = Object.fromEntries(
-      result.flatMap((r) => [...r.entries()])
-    );
-
-    return scratchpads;
-  }
-
-  async addIncident(incident: Incident) {
-    await this.state.blockConcurrencyWhile(async () => {
-      await this.state.storage.put(incident.id, incident);
-
-      const list = (await this.state.storage.get<string[]>("incidents")) ?? [];
-
-      if (!list.includes(incident.id)) {
-        list.push(incident.id);
-      }
-
-      await this.state.storage.put("incidents", list);
-    });
-  }
-
-  async editIncident(incident: Incident) {
-    return this.state.blockConcurrencyWhile(async () => {
-      const current = await this.state.storage.get<Incident | undefined>(
-        incident.id
-      );
-
-      if (!current) {
-        return false;
-      }
-
-      await this.state.storage.put(incident.id, incident);
-      return true;
-    });
-  }
-
-  async deleteIncident(id: string) {
-    return this.state.blockConcurrencyWhile(async () => {
-      const list = (await this.state.storage.get<string[]>("incidents")) ?? [];
-      const filtered = list.filter((value) => value !== id);
-      await this.state.storage.put("incidents", filtered);
-
-      const deletedIncidents = await this.getDeletedIncidents();
-
-      if (!deletedIncidents.has(id)) {
-        deletedIncidents.add(id);
-        await this.state.storage.put("deleted_incidents", deletedIncidents);
-      }
-
-      return list.length !== filtered.length;
-    });
-  }
-
-  async getIncident(id: string) {
-    return this.state.storage.get<Incident>(id);
-  }
-
-  async getDeletedIncidents() {
-    const value = await this.state.storage.get<Set<string> | string[]>(
-      "deleted_incidents"
-    );
-    return new Set(value);
-  }
-
-  async getIncidentList() {
-    return (await this.state.storage.get<string[]>("incidents")) ?? [];
-  }
-
-  private groupIds(ids: string[], size: number): string[][] {
-    const chunkCount = Math.ceil(ids.length / size);
-    const chunks: string[][] = new Array(chunkCount);
-
-    for (let i = 0, j = 0, k = size; i < chunkCount; ++i) {
-      chunks[i] = ids.slice(j, k);
-      j = k;
-      k += size;
-    }
-
-    return chunks;
+    return new Set(map.keys().map((k) => k.slice(prefix.length)));
   }
 
   async getAllIncidents(): Promise<Incident[]> {
-    const ids = await this.getIncidentList();
+    const prefix = this.KEYS.incident("");
+    const map = await this.state.storage.list<Incident>({
+      prefix,
+    });
 
-    // Bulk get only supports up to 128
-    const bulkOps = this.groupIds(ids, 128);
-    const result = await Promise.all(
-      bulkOps.map((ids) => this.state.storage.get<Incident>(ids))
-    );
-
-    const incidents = result.map((map) => [...map.values()]).flat();
-    return incidents;
+    const deleted = await this.getDeletedIncidents();
+    return [...map.values()].filter((i) => !deleted.has(i.id));
   }
 
   async getIncidentsData(): Promise<InstanceIncidents> {
@@ -226,7 +163,10 @@ export class EventIncidents extends DurableObject {
 
   async getScratchpadData(): Promise<InstanceScratchpads> {
     const values = await this.getAllScratchpads();
-    return { deleted: [], values };
+    return {
+      deleted: [],
+      values: Object.fromEntries(values.map((s) => [s.id, s])),
+    };
   }
 
   async createServerShareMessage(): Promise<WebSocketServerShareInfoMessage> {
@@ -275,11 +215,11 @@ export class EventIncidents extends DurableObject {
     return { name, key };
   }
 
-  async getInstance(): Promise<ShareInstance | null> {
+  async getInstance(): Promise<ShareInstanceMeta | null> {
     const sku = await this.getSKU();
     const secret = await this.getInstanceSecret();
 
-    const instance = await this.env.SHARES.get<ShareInstance>(
+    const instance = await this.env.SHARES.get<ShareInstanceMeta>(
       `${sku}#${secret}`,
       "json"
     );
@@ -458,7 +398,7 @@ export class EventIncidents extends DurableObject {
       });
     }
 
-    const success = await this.editIncident(result.resolved);
+    await this.editIncident(result.resolved);
 
     const sender: WebSocketSender = client
       ? {
@@ -467,14 +407,6 @@ export class EventIncidents extends DurableObject {
           id: client.user.key,
         }
       : { type: "server" };
-
-    if (!success) {
-      return response({
-        success: false,
-        reason: "bad_request",
-        details: "Could not edit incident with that ID",
-      });
-    }
 
     await this.broadcast(
       { type: "update_incident", incident: result.resolved },
@@ -510,16 +442,7 @@ export class EventIncidents extends DurableObject {
       });
     }
 
-    const success = await this.deleteIncident(id);
-
-    if (!success) {
-      return response({
-        success: false,
-        reason: "bad_request",
-        details: "Could not find incident with that ID",
-      });
-    }
-
+    await this.deleteIncident(id);
     this.broadcast({ type: "remove_incident", id }, sender);
 
     return response({

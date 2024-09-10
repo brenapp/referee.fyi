@@ -40,7 +40,7 @@ export function useMatchScratchpad<T extends MatchScratchpad>(
 }
 
 export function useDefaultScratchpad<T extends MatchScratchpad>(
-  match?: MatchData
+  match?: MatchData | null
 ) {
   const { data: event, isSuccess: isSuccessEvent } = useEvent(
     match?.event.code ?? ""

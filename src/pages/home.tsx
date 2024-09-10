@@ -107,6 +107,7 @@ export const HomePage: React.FC = () => {
         open={updateDialogOpen}
         mode="modal"
         onClose={() => setUpdateDialogOpen(false)}
+        aria-label="What's New with Referee FYI"
       >
         <DialogHeader
           title="What's New"

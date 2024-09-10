@@ -223,7 +223,14 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
   }, [editIncident, incident, setOpen]);
 
   return (
-    <Dialog mode="modal" onClose={() => setOpen(false)} open={open}>
+    <Dialog
+      mode="modal"
+      onClose={() => setOpen(false)}
+      open={open}
+      aria-label={`Edit incident for ${incident.team}${
+        incident.match ? `in ${matchToString(incident.match)}` : ""
+      }`}
+    >
       <DialogHeader onClose={() => setOpen(false)} title="Edit Incident" />
       <DialogBody>
         <label>
@@ -262,59 +269,58 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
           </Select>
         </label>
         {incident.match?.type === "skills" ? (
-          <div className="flex gap-2 mt-2">
+          <div
+            className="flex gap-2 mt-2"
+            role="radiogroup"
+            aria-label="Skills Match"
+          >
             <Radio
               name="skillsType"
               label="Driver"
-              checked={incident.match.skillsType === "driver"}
-              onChange={(e) =>
-                e.currentTarget.checked
-                  ? onChangeIncidentSkillsType("driver")
-                  : null
-              }
+              bind={{
+                value: incident.match.skillsType,
+                onChange: onChangeIncidentSkillsType,
+                variant: "driver",
+              }}
             />
             <Radio
               name="skillsType"
               label="Auto"
-              checked={incident.match.skillsType === "programming"}
-              onChange={(e) =>
-                e.currentTarget.checked
-                  ? onChangeIncidentSkillsType("programming")
-                  : null
-              }
+              bind={{
+                value: incident.match.skillsType,
+                onChange: onChangeIncidentSkillsType,
+                variant: "programming",
+              }}
             />
             <Radio
               name="skillsAttempt"
               label="1"
-              labelProps={{ className: "flex-1 ml-4" }}
-              checked={incident.match.attempt === 1}
-              onChange={(e) =>
-                e.currentTarget.checked
-                  ? onChangeIncidentSkillsAttempt(1)
-                  : null
-              }
+              className="flex-1 ml-4"
+              bind={{
+                value: incident.match.attempt,
+                onChange: onChangeIncidentSkillsAttempt,
+                variant: 1,
+              }}
             />
             <Radio
               name="skillsAttempt"
               label="2"
-              labelProps={{ className: "flex-1" }}
-              checked={incident.match.attempt === 2}
-              onChange={(e) =>
-                e.currentTarget.checked
-                  ? onChangeIncidentSkillsAttempt(2)
-                  : null
-              }
+              className="flex-1"
+              bind={{
+                value: incident.match.attempt,
+                onChange: onChangeIncidentSkillsAttempt,
+                variant: 2,
+              }}
             />
             <Radio
               name="skillsAttempt"
               label="3"
-              labelProps={{ className: "flex-1" }}
-              checked={incident.match.attempt === 3}
-              onChange={(e) =>
-                e.currentTarget.checked
-                  ? onChangeIncidentSkillsAttempt(3)
-                  : null
-              }
+              className="flex-1"
+              bind={{
+                value: incident.match.attempt,
+                onChange: onChangeIncidentSkillsAttempt,
+                variant: 3,
+              }}
             />
           </div>
         ) : null}

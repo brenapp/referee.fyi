@@ -76,7 +76,12 @@ const EditHistoryDialog = <
 }: EditHistoryDialogProps<T, K>) => {
   const consistency = value.consistency[valueKey] as KeyRegister<T, K>;
   return (
-    <Dialog mode="modal" open={open} onClose={onClose}>
+    <Dialog
+      mode="modal"
+      open={open}
+      onClose={onClose}
+      aria-label={`Edit History for ${valueKey}`}
+    >
       <DialogHeader title="Edit History" onClose={onClose} />
       <DialogBody className="p-2">
         <table className="w-full text-left table-fixed">

@@ -31,12 +31,16 @@ logpush = true
 
 [[env.staging.durable_objects.bindings]]
 name = "INCIDENTS"
-class_name = "EventIncidents"
+class_name = "ShareInstance"
 
 [[env.prod.durable_objects.bindings]]
 name = "INCIDENTS"
-class_name = "EventIncidents"
+class_name = "ShareInstance"
 
 [[migrations]]
 tag = "v1"
 new_classes = ["EventIncidents"]
+
+[[migrations]]
+tag = "v2"
+renamed_classes = [{ from = "EventIncidents", to = "ShareInstance" }]

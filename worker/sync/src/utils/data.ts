@@ -1,5 +1,5 @@
-import { Invitation, ShareInstance, User } from "@referee-fyi/share";
-import { Env } from "./types";
+import { Invitation, ShareInstanceMeta, User } from "@referee-fyi/share";
+import { Env } from "../types";
 
 export async function setUser(env: Env, user: User): Promise<void> {
   return env.USERS.put(user.key, JSON.stringify(user));
@@ -24,7 +24,7 @@ export async function deleteInvitation(env: Env, userKey: string, sku: string) {
   return env.INVITATIONS.delete(`${userKey}#${sku}`);
 }
 
-export async function setInstance(env: Env, instance: ShareInstance) {
+export async function setInstance(env: Env, instance: ShareInstanceMeta) {
   return env.SHARES.put(
     `${instance.sku}#${instance.secret}`,
     JSON.stringify(instance)
@@ -32,7 +32,7 @@ export async function setInstance(env: Env, instance: ShareInstance) {
 }
 
 export async function getInstance(env: Env, secret: string, sku: string) {
-  return env.SHARES.get<ShareInstance>(`${sku}#${secret}`, "json");
+  return env.SHARES.get<ShareInstanceMeta>(`${sku}#${secret}`, "json");
 }
 
 export type RequestCode = {

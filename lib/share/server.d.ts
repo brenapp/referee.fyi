@@ -1,4 +1,4 @@
-export type ShareInstance = {
+export type ShareInstanceMeta = {
   sku: string;
   admins: string[];
   invitations: string[];

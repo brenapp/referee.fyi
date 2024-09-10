@@ -16,14 +16,18 @@ import {
   useMutationState,
   useQuery,
 } from "@tanstack/react-query";
-import { Alliance, Match, MatchData } from "robotevents";
+import { Match, MatchData } from "robotevents";
 import { toast } from "~components/Toast";
 import { useShareConnection } from "~models/ShareConnection";
 import { queryClient } from "~utils/data/query";
 import { getShareProfile } from "~utils/data/share";
 import { initLWW } from "@referee-fyi/consistency";
+import { HookQueryOptions } from "./robotevents";
 
-export function useIncident(id: string | undefined | null) {
+export function useIncident(
+  id: string | undefined | null,
+  options?: HookQueryOptions<Incident | undefined>
+) {
   return useQuery<Incident | undefined>({
     queryKey: ["incidents", id],
     queryFn: () => {
@@ -33,6 +37,8 @@ export function useIncident(id: string | undefined | null) {
       return getIncident(id);
     },
     staleTime: 0,
+    refetchOnMount: "always",
+    ...options,
   });
 }
 
@@ -163,7 +169,10 @@ export function usePendingIncidents(
   };
 }
 
-export function useTeamIncidents(team: string | undefined | null) {
+export function useTeamIncidents(
+  team: string | undefined | null,
+  options?: HookQueryOptions<Incident[]>
+) {
   return useQuery<Incident[]>({
     queryKey: ["incidents", "team", team],
     queryFn: () => {
@@ -173,12 +182,15 @@ export function useTeamIncidents(team: string | undefined | null) {
       return getIncidentsByTeam(team);
     },
     staleTime: 0,
+    refetchOnMount: "always",
+    ...options,
   });
 }
 
 export function useTeamIncidentsByEvent(
   team: string | undefined | null,
-  sku: string | undefined | null
+  sku: string | undefined | null,
+  options?: HookQueryOptions<Incident[]>
 ) {
   return useQuery<Incident[]>({
     queryKey: ["incidents", "team", team, "event", sku],
@@ -196,6 +208,7 @@ export function useTeamIncidentsByEvent(
     },
     staleTime: 0,
     refetchOnMount: "always",
+    ...options,
   });
 }
 
@@ -205,19 +218,18 @@ export type TeamIncidentsByMatch = {
 }[];
 
 export function useTeamIncidentsByMatch(
-  matchData: MatchData | undefined | null
+  matchData?: MatchData | null,
+  options?: HookQueryOptions<TeamIncidentsByMatch>
 ): UseQueryResult<TeamIncidentsByMatch> {
   return useQuery({
-    queryKey: ["incidents", "match", matchData?.id],
+    queryKey: ["incidents", "match", matchData],
     queryFn: async () => {
       if (!matchData) {
         return [];
       }
 
       const match = new Match(matchData);
-      const alliances = [match.alliance("red"), match.alliance("blue")].filter(
-        (r) => !!r
-      ) as Alliance[];
+      const alliances = [match.alliance("red"), match.alliance("blue")];
       const teams =
         alliances.map((a) => a.teams.map((t) => t.team!.name)).flat() ?? [];
 
@@ -233,6 +245,6 @@ export function useTeamIncidentsByMatch(
 
       return incidentsByTeam;
     },
-    staleTime: 0,
+    ...options,
   });
 }

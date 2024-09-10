@@ -103,6 +103,7 @@ export const ClickableMatch: React.FC<ClickableMatch> = ({
         data-matchid={match.id}
         onClick={onClick}
         className="flex-1 active:bg-zinc-600"
+        aria-label={`Jump to ${match.name}`}
         id={id}
       >
         <p className="text-emerald-400">{match.shortName()} </p>

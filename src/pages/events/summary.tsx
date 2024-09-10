@@ -9,8 +9,6 @@ import {
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import { useEventIncidents } from "~utils/hooks/incident";
-import { FixedSizeList as List } from "react-window";
-import AutoSizer from "react-virtualized-auto-sizer";
 import { Incident } from "~components/Incident";
 import { Rule, useRulesForEvent } from "~utils/hooks/rules";
 import { Dialog, DialogBody } from "~components/Dialog";
@@ -21,6 +19,7 @@ import { useMutation } from "@tanstack/react-query";
 import { ReadyState, useShareConnection } from "~models/ShareConnection";
 import { useShareProfile } from "~utils/hooks/share";
 import { IncidentOutcome } from "@referee-fyi/share";
+import { VirtualizedList } from "~components/VirtualizedList";
 
 export type Filters = {
   outcomes: Record<IncidentOutcome, boolean>;
@@ -72,6 +71,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
       open={open}
       onClose={() => setOpen(false)}
       className="p-4"
+      aria-label="Filter Incidents"
     >
       <DialogBody>
         <nav className="w-full flex pt-1 gap-2">
@@ -158,6 +158,7 @@ export const ForceSyncButton: React.FC = () => {
         isForceSyncPending ? "animate-spin" : "animate-none"
       )}
       onClick={() => forceSync()}
+      aria-label="Force Sync"
       icon={<ArrowPathIcon height={24} />}
     />
   );
@@ -200,6 +201,7 @@ export const ExportButton: React.FC = () => {
     <IconButton
       className={twMerge("bg-transparent")}
       onClick={onClick}
+      aria-label="Export Incidents"
       icon={<ArrowDownTrayIcon height={24} />}
     />
   ) : null;
@@ -282,7 +284,7 @@ export const EventSummaryPage: React.FC = () => {
         setOpen={setFilterDialogOpen}
         apply={(filters) => setFilters(filters)}
       />
-      <section className="mt-4 flex flex-col">
+      <section className="mt-4 flex flex-col max-h-full">
         <nav className="flex gap-4 p-2 rounded-md">
           <p className="flex-1">{incidents?.length} Incidents</p>
           <ForceSyncButton />
@@ -290,6 +292,7 @@ export const EventSummaryPage: React.FC = () => {
           <IconButton
             className="bg-transparent"
             onClick={() => setFilterDialogOpen(true)}
+            aria-label="Filter Incidents"
             icon={<AdjustmentsHorizontalIcon height={24} />}
           />
         </nav>
@@ -304,35 +307,19 @@ export const EventSummaryPage: React.FC = () => {
             </p>
           ))}
         </section>
-        <section className="flex-1 mt-4">
-          <AutoSizer>
-            {(size) => (
-              <List
-                width={size.width}
-                height={size.height}
-                itemCount={incidents?.length ?? 0}
-                itemSize={64}
-              >
-                {({ index, style }) => {
-                  const incident = incidents?.[index];
-
-                  if (!incident) {
-                    return null;
-                  }
-
-                  return (
-                    <div style={style} key={incident.id}>
-                      <Incident
-                        incident={incidents?.[index]}
-                        className="h-14 overflow-hidden"
-                      />
-                    </div>
-                  );
-                }}
-              </List>
-            )}
-          </AutoSizer>
-        </section>
+        <VirtualizedList
+          data={incidents}
+          options={{ estimateSize: () => 64 }}
+          className="flex-1 mt-4"
+        >
+          {(incident) => (
+            <Incident
+              incident={incident}
+              key={incident.id}
+              className="h-14 overflow-hidden"
+            />
+          )}
+        </VirtualizedList>
       </section>
     </>
   );

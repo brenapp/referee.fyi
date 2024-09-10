@@ -1,14 +1,12 @@
 import { CodeBracketSquareIcon, StarIcon } from "@heroicons/react/20/solid";
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useMemo,
-} from "react";
+import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
 import { MatchData } from "robotevents";
 import { Checkbox, Radio } from "~components/Input";
-import { HighStakesMatchScratchpad, MatchScratchpad } from "@referee-fyi/share";
+import {
+  EditScratchpad,
+  HighStakesMatchScratchpad,
+  MatchScratchpad,
+} from "@referee-fyi/share";
 import {
   useDefaultScratchpad,
   useMatchScratchpad,
@@ -17,30 +15,43 @@ import {
 import { EditHistory } from "~components/EditHistory";
 
 type ScratchpadState<T extends MatchScratchpad, K extends keyof T> = {
-  data: T | null | undefined;
+  match: MatchData;
   key: K;
   fallback: T[K];
-  mutateAsync: ReturnType<typeof useUpdateMatchScratchpad<T>>["mutateAsync"];
 };
 
 function useScratchpadState<T extends MatchScratchpad, K extends keyof T>({
-  data,
+  match,
   key,
   fallback,
-  mutateAsync,
 }: ScratchpadState<T, K>): [T[K], Dispatch<SetStateAction<T[K]>>] {
-  const value = useMemo(() => data?.[key] ?? fallback, [data, fallback, key]);
-  const dispatch = useCallback(
+  const { data } = useMatchScratchpad<T>(match);
+  const { data: defaultScratchpad } = useDefaultScratchpad<T>(match);
+  const { mutate } = useUpdateMatchScratchpad<T>(match);
+
+  const value = useMemo(() => data?.[key] ?? fallback, [data, key, fallback]);
+
+  const dispatch: Dispatch<SetStateAction<T[K]>> = useCallback(
     (action: SetStateAction<T[K]>) => {
-      if (!data) return;
-      const newValue =
+      if (!match || !defaultScratchpad) {
+        return;
+      }
+      const updated =
         typeof action === "function"
           ? (action as (prev: T[K]) => T[K])(value)
           : action;
-      mutateAsync({ ...data, [key]: newValue });
+
+      const scratchpad: EditScratchpad<T> = {
+        ...defaultScratchpad,
+        ...data,
+        [key]: updated,
+      };
+
+      mutate(scratchpad);
     },
-    [data, key, mutateAsync, value]
+    [data, defaultScratchpad, key, match, mutate, value]
   );
+
   return [value, dispatch];
 }
 
@@ -51,89 +62,61 @@ export type HighStakesScratchpadProps = {
 export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
   match,
 }) => {
-  const { data, isSuccess } =
-    useMatchScratchpad<HighStakesMatchScratchpad>(match);
-  const { data: defaultScratchpad } =
-    useDefaultScratchpad<HighStakesMatchScratchpad>(match);
-  const { mutateAsync } =
-    useUpdateMatchScratchpad<HighStakesMatchScratchpad>(match);
+  const { data } = useMatchScratchpad<HighStakesMatchScratchpad>(match);
 
-  useEffect(() => {
-    if (isSuccess && !data && defaultScratchpad) {
-      mutateAsync(defaultScratchpad);
+  // Bindings
+  const [auto, setAuto] = useScratchpadState<HighStakesMatchScratchpad, "auto">(
+    {
+      match,
+      key: "auto",
+      fallback: "none",
     }
-  }, [data, defaultScratchpad, isSuccess, mutateAsync]);
+  );
 
-  const [auto, setAuto] = useScratchpadState({
-    data,
-    key: "auto",
-    fallback: "none",
-    mutateAsync,
-  });
-
-  const [awp, setAWP] = useScratchpadState({
-    data,
+  const [awp, setAWP] = useScratchpadState<HighStakesMatchScratchpad, "awp">({
+    match,
     key: "awp",
     fallback: { red: false, blue: false },
-    mutateAsync,
   });
 
   return (
     <section>
-      <section className="bg-zinc-800 p-4 mt-4 rounded-md">
+      <section
+        className="bg-zinc-800 p-4 mt-4 rounded-md"
+        aria-label="Auto Winner"
+      >
         <div className="flex items-center gap-2">
           <CodeBracketSquareIcon height={20} />
           <p>Auto Winner</p>
         </div>
-        <fieldset className="mt-2 flex gap-2">
+        <fieldset
+          className="mt-2 flex gap-2"
+          role="radiogroup"
+          aria-label="Auto Winner"
+        >
           <Radio
             name="autoWinner"
             label="Red"
-            bind={{
-              value: auto,
-              onChange: setAuto,
-              variant: "red",
-            }}
-            className="accent-red-400"
-            labelProps={{
-              className: "has-[:checked]:bg-red-800 mt-0 flex-1 px-2",
-            }}
+            bind={{ value: auto, onChange: setAuto, variant: "red" }}
+            className="data-[selected=true]:bg-red-800"
           />
           <Radio
             name="autoWinner"
             label="Blue"
-            bind={{
-              value: auto,
-              onChange: setAuto,
-              variant: "blue",
-            }}
-            className="accent-blue-400"
-            labelProps={{
-              className: "has-[:checked]:bg-blue-800 mt-0 flex-1 px-2",
-            }}
+            bind={{ value: auto, onChange: setAuto, variant: "blue" }}
+            className="data-[selected=true]:bg-blue-800"
           />
           <Radio
             name="autoWinner"
             label="Tie"
-            className="accent-purple-400"
-            bind={{
-              value: auto,
-              onChange: setAuto,
-              variant: "tie",
-            }}
-            labelProps={{
-              className: "has-[:checked]:bg-purple-800 mt-0 flex-1 px-2",
-            }}
+            bind={{ value: auto, onChange: setAuto, variant: "tie" }}
+            className="data-[selected=true]:bg-purple-800"
           />
           <Radio
             name="autoWinner"
             label="None"
-            bind={{
-              value: auto,
-              onChange: setAuto,
-              variant: "none",
-            }}
-            labelProps={{ className: "mt-0 flex-1 px-2" }}
+            bind={{ value: auto, onChange: setAuto, variant: "none" }}
+            className="data-[selected=true]:bg-zinc-900"
           />
         </fieldset>
         <EditHistory
@@ -154,12 +137,15 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
           }}
         />
       </section>
-      <section className="bg-zinc-800 p-4 mt-4 rounded-md">
+      <section
+        className="bg-zinc-800 p-4 mt-4 rounded-md"
+        aria-label="Auto Winner"
+      >
         <div className="flex items-center gap-2">
           <StarIcon height={20} />
           <p>AWP</p>
         </div>
-        <div className="mt-2 flex gap-2">
+        <fieldset className="mt-2 flex gap-2" aria-label="Autonomous Win Point">
           <Checkbox
             label="Red"
             bind={{
@@ -167,6 +153,7 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
               onChange: (value) => setAWP((awp) => ({ ...awp, red: value })),
             }}
             className="accent-red-400 mt-0"
+            aria-label="Red AWP"
             labelProps={{
               className: "has-[:checked]:bg-red-800 mt-0 flex-1 px-4",
             }}
@@ -177,12 +164,13 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
               value: awp.blue,
               onChange: (value) => setAWP((awp) => ({ ...awp, blue: value })),
             }}
+            aria-label="Blue AWP"
             className="accent-blue-400 mt-0"
             labelProps={{
               className: "has-[:checked]:bg-blue-800 mt-0 flex-1 px-4",
             }}
           />
-        </div>
+        </fieldset>
         <EditHistory
           value={data}
           valueKey="awp"

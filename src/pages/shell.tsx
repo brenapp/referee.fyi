@@ -120,7 +120,12 @@ const EventPicker: React.FC = () => {
 
   return (
     <>
-      <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
+      <Dialog
+        open={open}
+        mode="modal"
+        onClose={() => setOpen(false)}
+        aria-label="Pick an Event"
+      >
         <DialogHeader title="Pick An Event" onClose={() => setOpen(false)} />
         <DialogBody>
           <Spinner show={isLoadingEvents} />
@@ -163,7 +168,10 @@ const EventPicker: React.FC = () => {
             <h2 className="text-lg font-bold text-white mx-2">Events</h2>
             <ul>
               {results?.map((event) => (
-                <li key={event.sku}>
+                <li
+                  key={event.sku}
+                  aria-label={`${event.name} at ${event.location.venue}. ${event.sku}`}
+                >
                   <LinkButton
                     to={`/${event.sku}`}
                     onClick={() => {
@@ -196,6 +204,9 @@ const EventPicker: React.FC = () => {
         mode="none"
         className="flex-1 active:bg-zinc-600"
         onClick={onClick}
+        aria-description={
+          "Click to " + showDiv ? "Select Division" : "Select Event"
+        }
       >
         <div
           className="grid items-center gap-2"
@@ -253,7 +264,12 @@ const Rules: React.FC = () => {
 
   return (
     <>
-      <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
+      <Dialog
+        open={open}
+        mode="modal"
+        onClose={() => setOpen(false)}
+        aria-label="Rules Reference"
+      >
         <DialogCustomHeader>
           <IconButton
             icon={<XMarkIcon height={24} />}
@@ -359,10 +375,10 @@ export const AppShell: React.FC = () => {
 
   return (
     <main
-      className="w-screen h-[100dvh] grid mb-4 p-4 overflow"
+      className="w-screen h-[100dvh] grid mb-4 p-4 overflow-hidden"
       style={{
-        gridTemplateRows: "4rem 1fr",
-        gridTemplateColumns: "calc(100vw - 32px)",
+        gridTemplateRows: "4rem minmax(0, 1fr)",
+        gridTemplateColumns: "calc(100dvw - 32px)",
       }}
     >
       <Toaster />

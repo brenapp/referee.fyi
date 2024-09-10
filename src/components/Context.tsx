@@ -29,14 +29,28 @@ export const AllianceList: React.FC<AllianceListProps> = ({
         props.className
       )}
     >
-      <ul className={twMerge("rounded-md font-mono w-16 h-12")}>
+      <ul
+        className={twMerge("rounded-md font-mono w-16 h-12")}
+        aria-label={`${color} Alliance - ${teams
+          .map((t) => t.name)
+          .join(", ")}`}
+      >
         {teams.map((team) => (
-          <li key={team.id} className={reverse ? "text-right" : "text-left"}>
+          <li
+            key={team.id}
+            className={reverse ? "text-right" : "text-left"}
+            aria-label={`${color} team ${team.name}`}
+          >
             {team.name}
           </li>
         ))}
       </ul>
-      <p className={twMerge("font-mono text-xl")}>{score}</p>
+      <p
+        className={twMerge("font-mono text-xl")}
+        aria-label={`${color} score ${score}`}
+      >
+        {score}
+      </p>
     </div>
   );
 };
@@ -59,7 +73,7 @@ export const MatchContext: React.FC<MatchContextProps> = ({
     const teams = match.teams();
 
     return (
-      <div {...props}>
+      <div {...props} aria-label={match.name}>
         <AllianceList
           teams={teams}
           color="blue"

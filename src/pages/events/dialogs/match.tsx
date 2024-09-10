@@ -291,17 +291,18 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
 
   const match = useMemo(() => matches?.[matchIndex], [matchIndex, matches]);
 
+  const hasNextMatch = matchIndex + 1 < (matches?.length ?? Infinity);
+  const hasPrevMatch = matchIndex - 1 >= 0;
+
   const onClickNextMatch = useCallback(() => {
-    if (!matches) return;
-    if (matchIndex + 1 >= matches.length) return;
+    if (!matches || !hasNextMatch) return;
     setMatchIndex([matchIndex + 1, true]);
-  }, [matchIndex, matches]);
+  }, [hasNextMatch, matchIndex, matches]);
 
   const onClickPrevMatch = useCallback(() => {
-    if (!matches) return;
-    if (matchIndex - 1 < 0) return;
+    if (!matches || !hasPrevMatch) return;
     setMatchIndex([matchIndex - 1, true]);
-  }, [matchIndex, matches]);
+  }, [hasPrevMatch, matchIndex, matches]);
 
   // Swipey Swipe Animation
   const { ref: containerRef, width: containerWidth = 0 } =
@@ -353,7 +354,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
           onClick={onClickPrevMatch}
           className={twMerge(
             "bg-transparent p-2",
-            matchIndex > 0 ? "visible" : "invisible"
+            hasPrevMatch ? "visible" : "invisible"
           )}
         />
         <h1 className="text-xl flex-1">{match?.name}</h1>
@@ -363,7 +364,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
           onClick={onClickNextMatch}
           className={twMerge(
             "bg-transparent p-2",
-            matchIndex < (matches?.length ?? Infinity) ? "visible" : "invisible"
+            hasNextMatch ? "visible" : "invisible"
           )}
         />
       </DialogCustomHeader>

@@ -8,7 +8,7 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
 } from "@heroicons/react/20/solid";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { Spinner } from "~components/Spinner";
 import {
@@ -31,6 +31,7 @@ import { TeamIsolationDialog } from "./team";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import { MatchScratchpad } from "~components/scratchpad/Scratchpad";
 import { animate, motion, PanInfo, useMotionValue } from "framer-motion";
+import useResizeObserver from "use-resize-observer";
 
 const OUTCOME_PRIORITY: IncidentOutcome[] = [
   "Major",
@@ -302,19 +303,20 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
     setMatchIndex([matchIndex - 1, true]);
   }, [matchIndex, matches]);
 
-  const viewsToRender = [-1, 0, 1];
+  // Swipey Swipe Animation
+  const { ref: containerRef, width: containerWidth = 0 } =
+    useResizeObserver<HTMLDivElement>();
 
-  const containerRef = useRef<HTMLDivElement>(null);
+  const viewsToRender = [-1, 0, 1];
   const x = useMotionValue(0);
 
   const calculateNewX = useCallback(
-    () => -matchIndex * (containerRef.current?.clientWidth ?? 0),
-    [matchIndex, containerRef]
+    () => -matchIndex * containerWidth,
+    [matchIndex, containerWidth]
   );
 
   const onDragEnd = useCallback(
     (_: Event, dragProps: PanInfo) => {
-      const clientWidth = containerRef.current?.clientWidth ?? 0;
       const { offset, velocity } = dragProps;
 
       if (Math.abs(velocity.y) > Math.abs(velocity.x)) {
@@ -322,15 +324,15 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
         return;
       }
 
-      if (offset.x > clientWidth / 6) {
+      if (offset.x > containerWidth / 6) {
         onClickPrevMatch();
-      } else if (offset.x < -clientWidth / 6) {
+      } else if (offset.x < -containerWidth / 6) {
         onClickNextMatch();
       } else {
         animate(x, calculateNewX(), transition);
       }
     },
-    [calculateNewX, onClickNextMatch, onClickPrevMatch, x]
+    [calculateNewX, containerWidth, onClickNextMatch, onClickPrevMatch, x]
   );
 
   useEffect(() => {
@@ -401,8 +403,8 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                   width: "100%",
                   height: "100%",
                   x,
-                  left: `${(matchIndex + i) * 100}%`,
-                  right: `${(matchIndex + i) * 100}%`,
+                  left: (matchIndex + i) * containerWidth,
+                  right: (matchIndex + i) * containerWidth,
                   overflowY: "auto",
                 }}
                 draggable

@@ -97,7 +97,7 @@ export const Radio = <T extends string | number | symbol>({
 
   const checked = bind.value === bind.variant;
 
-  const onPointerDown = useCallback(() => {
+  const onPointerUp = useCallback(() => {
     bind.onChange(bind.variant);
   }, [bind]);
 
@@ -123,7 +123,7 @@ export const Radio = <T extends string | number | symbol>({
       data-selected={checked}
       aria-labelledby={id}
       tabIndex={0}
-      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
       onKeyDown={onKeyDown}
     >
       <RadioButton checked={checked} fill="currentColor" />

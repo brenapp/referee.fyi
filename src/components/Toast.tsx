@@ -12,19 +12,22 @@ export type ToastArguments = {
 export function toast({ type, ...options }: ToastArguments) {
   switch (type) {
     case "info": {
-      showToast.custom(() => <Info message={options.message} />, {
+      showToast.custom(() => <Info message={options.message} role="alert" />, {
         position: "bottom-right",
       });
       break;
     }
     case "warn": {
-      showToast.custom(() => <Warning message={options.message} />, {
-        position: "bottom-right",
-      });
+      showToast.custom(
+        () => <Warning message={options.message} role="alert" />,
+        {
+          position: "bottom-right",
+        }
+      );
       break;
     }
     case "error": {
-      showToast.custom(() => <ErrorToast {...options} />, {
+      showToast.custom(() => <ErrorToast {...options} role="alert" />, {
         position: "bottom-right",
       });
       break;

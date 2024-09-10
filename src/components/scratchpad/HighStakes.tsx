@@ -153,6 +153,7 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
               onChange: (value) => setAWP((awp) => ({ ...awp, red: value })),
             }}
             className="accent-red-400 mt-0"
+            aria-label="Red AWP"
             labelProps={{
               className: "has-[:checked]:bg-red-800 mt-0 flex-1 px-4",
             }}
@@ -163,6 +164,7 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
               value: awp.blue,
               onChange: (value) => setAWP((awp) => ({ ...awp, blue: value })),
             }}
+            aria-label="Blue AWP"
             className="accent-blue-400 mt-0"
             labelProps={{
               className: "has-[:checked]:bg-blue-800 mt-0 flex-1 px-4",

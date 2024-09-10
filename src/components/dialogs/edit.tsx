@@ -223,7 +223,14 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
   }, [editIncident, incident, setOpen]);
 
   return (
-    <Dialog mode="modal" onClose={() => setOpen(false)} open={open}>
+    <Dialog
+      mode="modal"
+      onClose={() => setOpen(false)}
+      open={open}
+      aria-label={`Edit incident for ${incident.team}${
+        incident.match ? `in ${matchToString(incident.match)}` : ""
+      }`}
+    >
       <DialogHeader onClose={() => setOpen(false)} title="Edit Incident" />
       <DialogBody>
         <label>

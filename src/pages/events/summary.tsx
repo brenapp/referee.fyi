@@ -71,6 +71,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
       open={open}
       onClose={() => setOpen(false)}
       className="p-4"
+      aria-label="Filter Incidents"
     >
       <DialogBody>
         <nav className="w-full flex pt-1 gap-2">
@@ -157,6 +158,7 @@ export const ForceSyncButton: React.FC = () => {
         isForceSyncPending ? "animate-spin" : "animate-none"
       )}
       onClick={() => forceSync()}
+      aria-label="Force Sync"
       icon={<ArrowPathIcon height={24} />}
     />
   );
@@ -199,6 +201,7 @@ export const ExportButton: React.FC = () => {
     <IconButton
       className={twMerge("bg-transparent")}
       onClick={onClick}
+      aria-label="Export Incidents"
       icon={<ArrowDownTrayIcon height={24} />}
     />
   ) : null;
@@ -289,6 +292,7 @@ export const EventSummaryPage: React.FC = () => {
           <IconButton
             className="bg-transparent"
             onClick={() => setFilterDialogOpen(true)}
+            aria-label="Filter Incidents"
             icon={<AdjustmentsHorizontalIcon height={24} />}
           />
         </nav>

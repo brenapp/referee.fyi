@@ -56,7 +56,12 @@ export const ReportIssueDialog: React.FC<ReportIssueDialogProps> = ({
   }, [reset, open, initComment]);
 
   return (
-    <Dialog mode="modal" open={open} onClose={() => setOpen(false)}>
+    <Dialog
+      mode="modal"
+      open={open}
+      onClose={() => setOpen(false)}
+      aria-label="Report Issues with Referee FYI"
+    >
       <DialogHeader
         onClose={() => setOpen(false)}
         title="Report Issues with Referee FYI"

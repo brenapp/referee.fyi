@@ -27,7 +27,12 @@ export const TeamIsolationDialog: React.FC<TeamIsolationDialogProps> = ({
   }
 
   return (
-    <Dialog open={open} onClose={() => setOpen(false)} mode="modal">
+    <Dialog
+      open={open}
+      onClose={() => setOpen(false)}
+      mode="modal"
+      aria-label={`Violations for ${team}`}
+    >
       <DialogHeader title={team} onClose={() => setOpen(false)} />
       <DialogBody>
         <VirtualizedList data={incidents} options={{ estimateSize: () => 64 }}>

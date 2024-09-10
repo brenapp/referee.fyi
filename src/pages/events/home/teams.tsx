@@ -65,6 +65,11 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
           <Link
             to={`/${event.sku}/team/${team.number}`}
             className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
+            aria-label={`Team ${team.number} ${team.team_name}. ${
+              majorIncidents.get(team.number) ?? 0
+            } major violations. ${
+              minorIncidents.get(team.number) ?? 0
+            } minor violations`}
           >
             <div className="flex-1">
               <p className="text-emerald-400 font-mono">{team.number}</p>
@@ -73,7 +78,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
               </p>
             </div>
             <p className="h-full w-32 px-2 flex items-center">
-              <span className="text-red-400 mr-4">
+              <span className="text-red-400 mr-4" aria-label={``}>
                 <FlagIcon height={24} className="inline" />
                 <span className="font-mono ml-2">
                   {majorIncidents.get(team.number) ?? 0}

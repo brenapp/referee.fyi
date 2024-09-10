@@ -40,10 +40,13 @@ export const VirtualizedList = <T,>({
       className={twMerge(props.className, "overflow-auto")}
       ref={parentRef}
     >
-      <div style={{ width: "100%", height: totalSize, position: "relative" }}>
+      <ol
+        style={{ width: "100%", height: totalSize, position: "relative" }}
+        aria-setsize={data?.length ?? 0}
+      >
         {data
           ? items.map(({ index, start, size }) => (
-              <div
+              <li
                 key={index}
                 style={{
                   position: "absolute",
@@ -55,10 +58,10 @@ export const VirtualizedList = <T,>({
                 }}
               >
                 {children(data[index], index)}
-              </div>
+              </li>
             ))
           : null}
-      </div>
+      </ol>
     </div>
   );
 };

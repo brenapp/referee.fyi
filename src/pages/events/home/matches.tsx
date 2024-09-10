@@ -39,6 +39,7 @@ export const UpcomingMatch: React.FC<UpcomingMatchProps> = ({
       className="text-left flex gap-2 items-center bg-zinc-700 mb-2"
       data-matchid={match?.id}
       onClick={onClickMatch}
+      aria-label={`Jump to Match ${match?.name}`}
     >
       <span className="flex-1">{match?.name}</span>
       <MatchTime match={match} />

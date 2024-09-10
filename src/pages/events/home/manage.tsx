@@ -96,11 +96,14 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
   }, [resetInvite, isInviteSuccess]);
 
   return (
-    <Dialog open={open} onClose={onClose} mode="modal">
+    <Dialog open={open} onClose={onClose} mode="modal" aria-label="Invite User">
       <DialogHeader onClose={onClose} title="Invite User" />
       <DialogBody className="px-2">
         <label>
           <h1 className="font-bold">Invite Code</h1>
+          <p>
+            To invite a user to this share instance, enter their invite code.
+          </p>
           <div className="relative">
             <Input
               className={twMerge("w-full font-mono text-6xl text-center")}
@@ -316,7 +319,13 @@ export const LeaveDialog: React.FC<ManageDialogProps> = ({
   });
 
   return (
-    <Dialog mode="modal" open={open} className="p-4" onClose={onClose}>
+    <Dialog
+      mode="modal"
+      open={open}
+      className="p-4"
+      onClose={onClose}
+      aria-label="Leave share instance"
+    >
       <DialogBody>
         <p>
           Are you sure? If you leave, you will need an admin to invite you
@@ -511,9 +520,9 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
               </span>
             </p>
           </nav>
-          <section className="mt-4">
+          <ul className="mt-4">
             {connection.invitations.map((user) => (
-              <div
+              <li
                 key={user.user.key}
                 className="py-2 px-4 rounded-md mt-2 flex"
               >
@@ -544,9 +553,9 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
                     className="bg-transparent"
                   />
                 ) : null}
-              </div>
+              </li>
             ))}
-          </section>
+          </ul>
         </div>
       ) : null}
       {!isSharing ? (
@@ -620,6 +629,7 @@ const DeleteData: React.FC<ManageTabProps> = ({ event }) => {
         mode="modal"
         className="absolute w-full rounded-md mt-4"
         onClose={() => setDeleteDataDialogOpen(false)}
+        aria-label="Delete Event Data Confirmation"
       >
         <DialogBody>
           <p>Really delete all event data? This action cannot be undone.</p>

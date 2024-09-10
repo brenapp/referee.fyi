@@ -209,6 +209,7 @@ const TeamFlagButton: React.FC<TeamFlagButtonProps> = ({
           props.className
         )}
         onClick={() => setOpen(true)}
+        aria-label={`New entry for ${team}`}
       >
         <FlagIcon height={20} className="mr-2" />
         <span>New</span>
@@ -346,12 +347,18 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
   }, [matchIndex, calculateNewX, x, animateMatchTransition]);
 
   return (
-    <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
+    <Dialog
+      open={open}
+      mode="modal"
+      onClose={() => setOpen(false)}
+      aria-label={`${match?.name} Dialog`}
+    >
       <DialogCustomHeader>
         <DialogCloseButton onClose={() => setOpen(false)} />
         <IconButton
           icon={<ArrowLeftIcon height={24} />}
           onClick={onClickPrevMatch}
+          aria-label={`Previous Match: ${matches?.[matchIndex - 1]?.name}`}
           className={twMerge(
             "bg-transparent p-2",
             hasPrevMatch ? "visible" : "invisible"
@@ -361,6 +368,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
         {match && <MatchTime match={match} />}
         <IconButton
           icon={<ArrowRightIcon height={24} />}
+          aria-label={`Next Match: ${matches?.[matchIndex + 1]?.name}`}
           onClick={onClickNextMatch}
           className={twMerge(
             "bg-transparent p-2",

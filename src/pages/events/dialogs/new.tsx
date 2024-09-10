@@ -317,8 +317,13 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   );
 
   return (
-    <Dialog open={open} mode="modal" onClose={() => setOpen(false)}>
-      <DialogHeader title="New Report" onClose={() => setOpen(false)} />
+    <Dialog
+      open={open}
+      mode="modal"
+      onClose={() => setOpen(false)}
+      aria-label="New Entry"
+    >
+      <DialogHeader title="New Entry" onClose={() => setOpen(false)} />
       <DialogBody>
         <Spinner show={isLoadingMetaData} />
         <label>

@@ -31,6 +31,7 @@ export const DialogCloseButton: React.FC<DialogCloseButtonProps> = ({
       icon={<XMarkIcon height={24} />}
       onClick={onClose}
       className="bg-transparent"
+      aria-label="Close dialog"
       autoFocus
     />
   );

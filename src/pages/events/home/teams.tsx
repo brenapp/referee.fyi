@@ -59,7 +59,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
       <VirtualizedList
         data={teams}
         options={{ estimateSize: () => 64 }}
-        className="flex-1"
+        className="flex-1 mb-12"
       >
         {(team) => (
           <Link

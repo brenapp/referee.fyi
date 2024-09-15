@@ -36,7 +36,7 @@ export const UpcomingMatch: React.FC<UpcomingMatchProps> = ({
   return (
     <Button
       mode="normal"
-      className="text-left flex gap-2 items-center bg-zinc-700 mb-2"
+      className="text-left flex gap-2 items-center bg-zinc-700 absolute bottom-14 left-0 z-10 w-full h-12 rounded-b-none"
       data-matchid={match?.id}
       onClick={onClickMatch}
       aria-label={`Jump to Match ${match?.name}`}
@@ -82,7 +82,7 @@ export const EventMatchesTab: React.FC<MatchesTabProps> = ({ event }) => {
         <VirtualizedList
           data={matches}
           options={{ estimateSize: () => 64 }}
-          className="flex-1"
+          className="flex-1 mb-24"
         >
           {(match) => <ClickableMatch match={match} onClick={onClickMatch} />}
         </VirtualizedList>

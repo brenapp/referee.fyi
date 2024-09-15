@@ -129,6 +129,7 @@ export const EventTeamsPage: React.FC = () => {
       <Tabs>
         {[
           {
+            type: "content",
             id: "incidents",
             label: "Incidents",
             icon: (active) =>
@@ -140,6 +141,7 @@ export const EventTeamsPage: React.FC = () => {
             content: <EventTeamsIncidents event={event} team={team} />,
           },
           {
+            type: "content",
             id: "schedule",
             label: "Schedule",
             icon: (active) =>

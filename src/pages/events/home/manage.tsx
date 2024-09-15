@@ -701,7 +701,7 @@ export type ManageTabProps = {
 
 export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
   return (
-    <section className="max-w-xl max-h-full w-full mx-auto flex-1 mb-4 overflow-y-auto">
+    <section className="max-w-xl max-h-full w-full mx-auto flex-1 mb-12 overflow-y-auto">
       <UpdatePrompt />
       <ShareManager event={event} />
       <EventSummaryLink event={event} />

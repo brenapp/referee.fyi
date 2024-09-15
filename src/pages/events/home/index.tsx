@@ -1,6 +1,3 @@
-import { Tabs } from "~components/Tabs";
-import { Button } from "~components/Button";
-import { FlagIcon } from "@heroicons/react/20/solid";
 import { useCurrentEvent } from "~hooks/state";
 import { useEffect, useState } from "react";
 import { EventNewIncidentDialog } from "../dialogs/new";
@@ -17,6 +14,9 @@ import { UserGroupIcon as TeamsIconSolid } from "@heroicons/react/24/solid";
 
 import { CloudIcon as ManageIconOutline } from "@heroicons/react/24/outline";
 import { CloudIcon as ManageIconSolid } from "@heroicons/react/24/solid";
+import { Tabs } from "~components/Tabs";
+import { Button } from "~components/Button";
+import { FlagIcon } from "@heroicons/react/20/solid";
 
 export const EventHome: React.FC = () => {
   const { data: event } = useCurrentEvent();
@@ -31,17 +31,25 @@ export const EventHome: React.FC = () => {
 
   return event ? (
     <section className="mt-4 flex flex-col">
-      <Button onClick={() => setIncidentDialogOpen(true)} mode="primary">
-        <FlagIcon height={20} className="inline mr-2 " />
-        New Entry
-      </Button>
       <EventNewIncidentDialog
         open={incidentDialogOpen}
         setOpen={setIncidentDialogOpen}
       />
-      <Tabs className="flex-1">
+      <Button
+        className="flex items-center gap-2 justify-center mb-4"
+        mode="primary"
+        onClick={() => setIncidentDialogOpen(true)}
+      >
+        <FlagIcon height={20} />
+        New Entry
+      </Button>
+      <Tabs
+        className="flex-1"
+        tablistClassName="absolute bottom-0 right-0 left-0 z-10 p-0 bg-zinc-900"
+      >
         {[
           {
+            type: "content",
             id: "matches",
             label: "Matches",
             icon: (active) =>
@@ -53,6 +61,7 @@ export const EventHome: React.FC = () => {
             content: <EventMatchesTab event={event} />,
           },
           {
+            type: "content",
             id: "team",
             label: "Teams",
             icon: (active) =>
@@ -64,6 +73,7 @@ export const EventHome: React.FC = () => {
             content: <EventTeamsTab event={event} />,
           },
           {
+            type: "content",
             id: "manage",
             label: "Manage",
             icon: (active) =>

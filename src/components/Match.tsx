@@ -102,7 +102,7 @@ export const ClickableMatch: React.FC<ClickableMatch> = ({
         mode={"transparent"}
         data-matchid={match.id}
         onClick={onClick}
-        className="flex-1 active:bg-zinc-600"
+        className="flex-1 active:bg-zinc-600 pl-0"
         aria-label={`Jump to ${match.name}`}
         id={id}
       >

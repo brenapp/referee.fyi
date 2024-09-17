@@ -25,6 +25,7 @@ export type Tab = TabContent | TabButton;
 export type TabsProps = Omit<React.HTMLProps<HTMLDivElement>, "children"> & {
   tablistClassName?: string;
   tabpanelClassName?: string;
+  tabClassName?: string;
   children: Tab[];
 };
 
@@ -59,16 +60,22 @@ export const Tabs: React.FC<TabsProps> = ({ children: tabs, ...props }) => {
             role="tab"
             aria-selected={index === activeTab}
             aria-controls={`tabpanel-${tab.id}`}
+            aria-label={tab.label}
+            aria-posinset={index + 1}
             id={`tab-${tab.id}`}
             onClick={() => onClickTab(index)}
+            data-selected={index === activeTab}
+            data-index={index}
             className={twMerge(
               "text-zinc-50 flex-1 text-center active:bg-zinc-600 first:rounded-tl-md last:rounded-tr-md"
             )}
           >
             <div
+              data-selected={index === activeTab}
+              data-index={index}
               className={twMerge(
-                "flex flex-1 justify-center gap-2 items-center py-4",
-                index === activeTab && "text-emerald-400 bg-zinc-950"
+                "flex flex-1 justify-center gap-2 items-center py-4 data-[selected=true]:text-emerald-400 data-[selected=true]:border-b-4 data-[selected=true]:border-emerald-400",
+                props.tabClassName
               )}
             >
               {tab.icon(index === activeTab)}

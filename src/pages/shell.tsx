@@ -381,7 +381,7 @@ export const AppShell: React.FC = () => {
         gridTemplateColumns: "calc(100dvw - 32px)",
       }}
     >
-      <Toaster />
+      <Toaster containerClassName="mb-16" />
       <ConnectionManager />
       <MigrationManager />
       <nav className="h-16 flex gap-4 max-w-full">

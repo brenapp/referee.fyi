@@ -56,6 +56,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
           className="flex-1"
           data={teams}
           options={{ estimateSize: () => 64 }}
+          listClassName="mb-12"
         >
           {(team) => {
             if (!team) {
@@ -122,7 +123,11 @@ export const EventSkillsPage: React.FC = () => {
 
   return (
     <section className="mt-4 flex flex-col">
-      <Button onClick={() => setIncidentDialogOpen(true)} mode="primary">
+      <Button
+        onClick={() => setIncidentDialogOpen(true)}
+        mode="primary"
+        className="mb-4"
+      >
         <FlagIcon height={20} className="inline mr-2 " />
         New Entry
       </Button>
@@ -130,9 +135,13 @@ export const EventSkillsPage: React.FC = () => {
         open={incidentDialogOpen}
         setOpen={setIncidentDialogOpen}
       />
-      <Tabs className="flex-1">
+      <Tabs
+        className="flex-1"
+        tablistClassName="absolute bottom-0 right-0 left-0 z-10 p-0 bg-zinc-900"
+      >
         {[
           {
+            type: "content",
             id: "team",
             label: "Teams",
             icon: (active) =>
@@ -144,6 +153,7 @@ export const EventSkillsPage: React.FC = () => {
             content: <TeamSkillsTab event={event} />,
           },
           {
+            type: "content",
             id: "manage",
             label: "Manage",
             icon: (active) =>

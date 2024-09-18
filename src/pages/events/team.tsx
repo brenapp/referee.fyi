@@ -13,8 +13,10 @@ import { MatchData } from "robotevents";
 import { Incident } from "~components/Incident";
 import { EventNewIncidentDialog } from "./dialogs/new";
 import { Button } from "~components/Button";
-import { FlagIcon } from "@heroicons/react/20/solid";
 import { VirtualizedList } from "~components/VirtualizedList";
+
+import { ClipboardDocumentListIcon } from "@heroicons/react/24/solid";
+import { FlagIcon } from "@heroicons/react/24/solid";
 
 type EventTeamsTabProps = {
   event: EventData | null | undefined;
@@ -127,6 +129,7 @@ export const EventTeamsPage: React.FC = () => {
       <Tabs>
         {[
           {
+            type: "content",
             id: "incidents",
             label: "Incidents",
             icon: (active) =>
@@ -138,13 +141,14 @@ export const EventTeamsPage: React.FC = () => {
             content: <EventTeamsIncidents event={event} team={team} />,
           },
           {
+            type: "content",
             id: "schedule",
             label: "Schedule",
             icon: (active) =>
               active ? (
-                <FlagIcon height={24} className="inline" />
+                <ClipboardDocumentListIcon height={24} className="inline" />
               ) : (
-                <FlagIcon height={24} className="inline" />
+                <ClipboardDocumentListIcon height={24} className="inline" />
               ),
             content: <EventTeamsMatches event={event} team={team} />,
           },

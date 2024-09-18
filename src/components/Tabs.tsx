@@ -1,26 +1,40 @@
 import { twMerge } from "tailwind-merge";
-import { useCallback, useId, useState } from "react";
+import { useCallback, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 
 export type TabsNavigationState = {
   tab?: number;
 };
 
-export type Tab = {
+export type TabContent = {
+  type: "content";
   id: string;
   label: string;
   icon: (active: boolean) => React.ReactNode;
   content: React.ReactNode;
 };
 
+export type TabButton = {
+  type: "action";
+  id: string;
+  content: React.ReactNode;
+};
+
+export type Tab = TabContent | TabButton;
+
 export type TabsProps = Omit<React.HTMLProps<HTMLDivElement>, "children"> & {
+  tablistClassName?: string;
+  tabpanelClassName?: string;
+  tabClassName?: string;
   children: Tab[];
 };
 
 export const Tabs: React.FC<TabsProps> = ({ children: tabs, ...props }) => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const contentTabs = tabs.filter((tab) => tab.type === "content");
+  const buttonTabs = tabs.filter((tab) => tab.type === "action");
 
   const [activeTab, setActiveTab] = useState<number>(location?.state?.tab ?? 0);
 
@@ -33,49 +47,50 @@ export const Tabs: React.FC<TabsProps> = ({ children: tabs, ...props }) => {
     [location, navigate]
   );
 
-  const tabLayoutId = useId();
-
   return (
     <div {...props} className={twMerge("contents", props.className)}>
-      <nav role="tablist" className="flex max-w-full pt-2">
-        {tabs.map((tab, index) => (
+      <nav
+        role="tablist"
+        className={twMerge("flex max-w-full pt-2", props.tablistClassName)}
+      >
+        {buttonTabs.map((tab) => tab.content)}
+        {contentTabs.map((tab, index) => (
           <button
             key={tab.id}
             role="tab"
             aria-selected={index === activeTab}
             aria-controls={`tabpanel-${tab.id}`}
+            aria-label={tab.label}
+            aria-posinset={index + 1}
             id={`tab-${tab.id}`}
             onClick={() => onClickTab(index)}
+            data-selected={index === activeTab}
+            data-index={index}
             className={twMerge(
-              "text-zinc-50 flex-1 text-center my-2 pt-2 active:bg-zinc-600 first:rounded-tl-md last:rounded-tr-md"
+              "text-zinc-50 flex-1 text-center active:bg-zinc-600 first:rounded-tl-md last:rounded-tr-md"
             )}
           >
             <div
+              data-selected={index === activeTab}
+              data-index={index}
               className={twMerge(
-                "mb-2 flex flex-1 justify-center gap-2 items-center pt-2",
-                index === activeTab && "text-emerald-400"
+                "flex flex-1 justify-center gap-2 items-center py-4 data-[selected=true]:text-emerald-400 data-[selected=true]:border-b-4 data-[selected=true]:border-emerald-400",
+                props.tabClassName
               )}
             >
               {tab.icon(index === activeTab)}
               {tab.label}
             </div>
-            {index === activeTab && (
-              <motion.div
-                layoutId={tabLayoutId}
-                transition={{ type: "spring", bounce: 0, duration: 0.25 }}
-                className="h-1 w-full bg-emerald-400"
-              ></motion.div>
-            )}
           </button>
         ))}
       </nav>
       <div
         role="tabpanel"
-        className="contents"
+        className={twMerge("contents", props.tabpanelClassName)}
         id={`tabpanel-${tabs[activeTab].id}`}
         aria-labelledby={`tab-${tabs[activeTab].id}}`}
       >
-        {tabs[activeTab].content}
+        {contentTabs[activeTab].content}
       </div>
     </div>
   );

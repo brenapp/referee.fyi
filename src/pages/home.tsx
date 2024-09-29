@@ -7,7 +7,7 @@ import "./markdown.css";
 import { Cog8ToothIcon, UserGroupIcon } from "@heroicons/react/20/solid";
 import { useEventSearch } from "~utils/hooks/robotevents";
 import { useRecentEvents } from "~utils/hooks/history";
-import { isSafariMobile, isWorldsBuild } from "~utils/data/state";
+import { isWorldsBuild } from "~utils/data/state";
 import { useQuery } from "@tanstack/react-query";
 import { getEventInvitation } from "~utils/data/share";
 import { ClickToCopy } from "~components/ClickToCopy";

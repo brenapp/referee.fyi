@@ -23,6 +23,8 @@ export const VirtualizedList = <T,>({
   data,
   children,
   options,
+  listClassName,
+  itemClassName,
   ...props
 }: VirtualizedListProps<T>) => {
   const parentRef = useRef<HTMLDivElement>(null);
@@ -45,7 +47,7 @@ export const VirtualizedList = <T,>({
       <ol
         style={{ width: "100%", height: totalSize, position: "relative" }}
         aria-setsize={data?.length ?? 0}
-        className={props.listClassName}
+        className={listClassName}
       >
         {data
           ? items.map(({ index, start, size }) => (
@@ -59,7 +61,7 @@ export const VirtualizedList = <T,>({
                   height: `${size}px`,
                   transform: `translateY(${start}px)`,
                 }}
-                className={props.itemClassName}
+                className={itemClassName}
               >
                 {children(data[index], index)}
               </li>

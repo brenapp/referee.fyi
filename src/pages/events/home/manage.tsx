@@ -387,6 +387,7 @@ export const ProfilePrompt: React.FC = () => {
         className={twMerge("mt-4", !localName ? "opacity-50" : "")}
         mode="primary"
         onClick={() => setNameContinue()}
+        disabled={!localName}
       >
         Continue
       </Button>

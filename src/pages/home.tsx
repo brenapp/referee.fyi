@@ -1,5 +1,5 @@
 import { Button, LinkButton } from "~components/Button";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Dialog, DialogHeader, DialogBody } from "~components/Dialog";
 import Markdown from "react-markdown";
 import { version } from "../../package.json";
@@ -12,6 +12,83 @@ import { useQuery } from "@tanstack/react-query";
 import { getEventInvitation } from "~utils/data/share";
 import { ClickToCopy } from "~components/ClickToCopy";
 import { UpdatePrompt } from "~components/UpdatePrompt";
+import { useDisplayMode, useInstallPrompt } from "~utils/hooks/pwa";
+
+import AppIcon from "../../public/icons/referee-fyi.svg";
+
+const UserWelcome: React.FC = () => {
+  return (
+    <section className="mt-4 bg-zinc-900 p-4 rounded-md">
+      <h2 className="font-bold">Getting Started</h2>
+      <p>
+        Referee FYI is a digital anomaly log for robotics events. To get
+        started, pick your event from the dropdown above.
+      </p>
+    </section>
+  );
+};
+
+const InstallPrompt: React.FC = () => {
+  const mode = useDisplayMode();
+  const prompt = useInstallPrompt();
+  const [hidden, setHidden] = useState(true);
+
+  useEffect(() => {
+    const value = localStorage.getItem("meta#installPromptHidden");
+    if (value === "true") {
+      setHidden(true);
+    } else {
+      setHidden(false);
+    }
+  }, []);
+
+  const shouldPrompt = useMemo(() => {
+    if (hidden) {
+      return false;
+    }
+
+    if (mode === "standalone") {
+      return false;
+    }
+
+    return prompt !== null;
+  }, [hidden, mode, prompt]);
+
+  const onClickInstall = useCallback(() => {
+    if (prompt) {
+      prompt.prompt();
+    }
+  }, [prompt]);
+
+  const onClickDismiss = useCallback(() => {
+    setHidden(true);
+    localStorage.setItem("meta#installPromptHidden", "true");
+  }, []);
+
+  if (!shouldPrompt) {
+    return null;
+  }
+
+  return (
+    <section className="mt-4 bg-zinc-900 p-4 rounded-md">
+      <header className="flex gap-4 items-center">
+        <img src={AppIcon} alt="Referee FYI" className="w-12 h-12" />
+        <p>
+          For a better experience, consider adding Referee FYI to your home
+          screen.
+        </p>
+      </header>
+      <nav className="flex items-end justify-center mt-4 gap-2">
+        <Button mode="primary" onClick={onClickInstall}>
+          Install
+        </Button>
+        <Button mode="normal" onClick={onClickDismiss}>
+          Dismiss
+        </Button>
+      </nav>
+    </section>
+  );
+};
 
 function useHomeEvents() {
   const { data: worldsEvents } = useEventSearch(
@@ -101,6 +178,8 @@ export const HomePage: React.FC = () => {
               <p>{event.name}</p>
             </LinkButton>
           ))}
+          {events?.length === 0 ? <UserWelcome /> : null}
+          <InstallPrompt />
         </section>
       </div>
       <Dialog

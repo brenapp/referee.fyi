@@ -16,6 +16,7 @@ routes = [
     { pattern = "referee.fyi/api/*", zone_name = "referee.fyi" },
 ]
 logpush = true
+tail_consumers = [{service = "referee-fyi-share-tail"}]
 
 [env.staging]
 name = "referee-fyi-share-staging"

@@ -14,7 +14,7 @@ import { ClickToCopy } from "~components/ClickToCopy";
 import { UpdatePrompt } from "~components/UpdatePrompt";
 import { useDisplayMode, useInstallPrompt } from "~utils/hooks/pwa";
 
-import AppIcon from "../../public/icons/referee-fyi.svg";
+import AppIcon from "/icons/referee-fyi.svg?url";
 
 const UserWelcome: React.FC = () => {
   return (

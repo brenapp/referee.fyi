@@ -95,11 +95,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
   }, [incidents]);
 
   return (
-    <details
-      open={open}
-      onToggle={(e) => setOpen(e.currentTarget.open)}
-      className="contents"
-    >
+    <details open={open} onToggle={(e) => setOpen(e.currentTarget.open)}>
       <summary className="flex gap-2 items-center active:bg-zinc-700 max-w-full mt-0 sticky top-0 bg-zinc-900 h-16 z-10">
         {open ? (
           <ChevronDownIcon height={16} width={16} className="flex-shrink-0" />

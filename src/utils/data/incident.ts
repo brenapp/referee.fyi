@@ -151,7 +151,8 @@ export async function bulkIndexInsert(indices: Record<string, Incident[]>) {
       const add = new Set<string>(
         indices[key as keyof typeof indices].map((i) => i.id)
       );
-      const value = current?.union(add) ?? add;
+      const set = new Set(current);
+      const value = set.union(add);
       return [key, value];
     })
   );

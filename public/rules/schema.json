@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "https://json-schema.org/draft-07/schema#",
   "$id": "https://referee.fyi/rules/schema.json",
   "title": "Referee FYI Game Schema",
   "description": "Describes the shape of Referee FYI game descriptions.",

@@ -20,6 +20,13 @@
         "$ref": "#/$defs/program"
       },
       "description": "The programs that the game is for."
+    },
+    "ruleGroups": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ruleGroup"
+      },
+      "description": "The rule groups in the game."
     }
   },
   "$defs": {

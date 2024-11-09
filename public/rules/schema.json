@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://referee.fyi/rules/schema.json",
+  "title": "Referee FYI Game Schema",
+  "description": "Describes the shape of Referee FYI game descriptions.",
+  "type": "object",
+  "required": ["title", "season", "programs", "ruleGroups"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "The game name."
+    },
+    "season": {
+      "type": "string",
+      "description": "The year (ex. 2024-2025) that the game applies to."
+    },
+    "programs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/program"
+      },
+      "description": "The programs that the game is for."
+    }
+  },
+  "$defs": {
+    "program": {
+      "enum": ["V5RC", "VURC", "VAIRC", "VIQRC", "ADC"],
+      "description": "The program abbreviation."
+    },
+    "ruleGroup": {
+      "required": ["title", "programs", "rules"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The rule group name."
+        },
+        "programs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/program"
+          },
+          "description": "The programs that the rule group is for."
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/rule"
+          },
+          "description": "The rules in the group."
+        }
+      }
+    },
+    "rule": {
+      "required": ["name", "description", "link"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The rule name."
+        },
+        "description": {
+          "type": "string",
+          "description": "Single-sentence quick-description of rule."
+        },
+        "link": {
+          "type": "string",
+          "format": "uri",
+          "description": "Game manual link to the rule."
+        }
+      }
+    }
+  }
+}

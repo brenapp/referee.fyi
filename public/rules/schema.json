@@ -58,11 +58,11 @@
       }
     },
     "rule": {
-      "required": ["name", "description", "link"],
+      "required": ["rule", "description", "link"],
       "properties": {
-        "name": {
+        "rule": {
           "type": "string",
-          "description": "The rule name."
+          "description": "The rule code, like <SG4>`"
         },
         "description": {
           "type": "string",

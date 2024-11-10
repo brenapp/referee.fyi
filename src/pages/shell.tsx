@@ -234,12 +234,14 @@ const Rules: React.FC = () => {
     programs.VIQRC,
     programs.VURC,
     programs.VAIRC,
+    programs.ADC,
   ];
   const selectableProgramAbbr: Partial<Record<ProgramCode, ProgramAbbr>> = {
     [programs.V5RC]: "V5RC",
     [programs.VIQRC]: "VIQRC",
     [programs.VURC]: "VURC",
     [programs.VAIRC]: "VAIRC",
+    [programs.ADC]: "ADC",
   };
 
   const [program, setProgram] = useState<ProgramCode>(programs.V5RC);

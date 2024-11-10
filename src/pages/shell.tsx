@@ -35,7 +35,7 @@ import { getShareProfile } from "~utils/data/share";
 
 function isValidSKU(sku: string) {
   return !!sku.match(
-    /RE-(VRC|V5RC|VEXU|VURC|VIQRC|VIQC|VAIRC)-[0-9]{2}-[0-9]{4}/g
+    /RE-(VRC|V5RC|VEXU|VURC|VIQRC|VIQC|VAIRC|ADC)-[0-9]{2}-[0-9]{4}/g
   );
 }
 
@@ -234,19 +234,21 @@ const Rules: React.FC = () => {
     programs.VIQRC,
     programs.VURC,
     programs.VAIRC,
+    programs.ADC,
   ];
   const selectableProgramAbbr: Partial<Record<ProgramCode, ProgramAbbr>> = {
     [programs.V5RC]: "V5RC",
     [programs.VIQRC]: "VIQRC",
     [programs.VURC]: "VURC",
     [programs.VAIRC]: "VAIRC",
+    [programs.ADC]: "ADC",
   };
 
   const [program, setProgram] = useState<ProgramCode>(programs.V5RC);
 
   const { data: currentSeasonForProgram } = useCurrentSeason(program);
   const { data: season } = useSeason(event?.season.id);
-  const rules = useRulesForSeason(season ?? currentSeasonForProgram);
+  const { data: rules } = useRulesForSeason(season ?? currentSeasonForProgram);
 
   const [rule, setRule] = useState<Rule | null>(null);
 

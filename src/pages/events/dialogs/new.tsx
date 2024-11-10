@@ -43,7 +43,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const { data: event, isLoading: isLoadingEvent } = useCurrentEvent();
   const division = useCurrentDivision();
 
-  const rules = useRulesForEvent(event);
+  const { data: rules } = useRulesForEvent(event);
   const { data: recentRules } = useRecentRules(
     event?.program.id ?? programs.V5RC,
     4
@@ -205,6 +205,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       if (e.target.value === "-1") {
         setMatch(undefined);
         setTeam(undefined);
+        setIncidentField("skills", undefined);
       }
 
       if (!newMatch) return;

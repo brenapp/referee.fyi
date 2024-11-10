@@ -70,7 +70,7 @@ export const EventDevTools: React.FC = () => {
   );
 
   const { data: season } = useCurrentSeason(event?.program.id as ProgramCode);
-  const game = useRulesForSeason(season);
+  const { data: game } = useRulesForSeason(season);
   const rules = game?.ruleGroups.flatMap((group) => group.rules);
 
   const { mutate: generateIncidents, isPending: isGeneratePending } =

@@ -1,6 +1,7 @@
-import { UseQueryResult, useQuery } from "@tanstack/react-query";
+import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { EventData, ProgramAbbr, Season, Year } from "robotevents";
-import { useSeason } from "./robotevents";
+import { HookQueryOptions, useSeason } from "./robotevents";
+import { GAME_FETCHERS } from "~utils/data/rules";
 
 export type Rule = {
   rule: string;
@@ -25,56 +26,26 @@ export type Rules = {
   games: Game[];
 };
 
-export function useRules(): UseQueryResult<Rules> {
+export function useRulesForSeason(
+  season?: Season | null,
+  options?: HookQueryOptions<Game | undefined>
+): UseQueryResult<Game | undefined> {
   return useQuery({
-    queryKey: ["rules"],
+    queryKey: ["@referee-fyi/useRulesForSeason", season?.id],
     queryFn: async () => {
-      const response = await fetch("/rules.json");
-      if (!response.ok) {
-        return { games: [] };
+      if (!season || !season.id) {
+        return undefined;
       }
 
-      return response.json();
+      return GAME_FETCHERS[season.id]?.();
     },
-    staleTime: 1000 * 60 * 60 * 24,
+    ...options,
   });
 }
 
-export function useGameRules(game: string): Game | undefined {
-  const { data: rules } = useRules();
-  return rules?.games.find((g) => g.title === game) as Game | undefined;
-}
-
-export function useRulesForSeason(season?: Season | null): Game | undefined {
-  const { data: rules } = useRules();
-
-  if (!season) {
-    return undefined;
-  }
-
-  const year = (season.years_start + "-" + season.years_end) as Year;
-  const currentGame = rules?.games.find(
-    (g) =>
-      g.season === year &&
-      g.programs.includes(season.program?.code as ProgramAbbr)
-  ) as Game | undefined;
-
-  if (!currentGame) {
-    return undefined;
-  }
-
-  const relevantRuleGroups: RuleGroup[] = [];
-
-  currentGame?.ruleGroups.forEach((ruleGroup) => {
-    if (ruleGroup.programs.includes(season.program?.code as ProgramAbbr)) {
-      relevantRuleGroups.push(ruleGroup);
-    }
-  });
-
-  return { ...currentGame, ruleGroups: relevantRuleGroups };
-}
-
-export function useRulesForEvent(event?: EventData | null): Game | undefined {
+export function useRulesForEvent(
+  event?: EventData | null
+): UseQueryResult<Game | undefined> {
   const { data: season } = useSeason(event?.season.id);
   return useRulesForSeason(season);
 }

@@ -61,7 +61,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
     return Object.entries(divisions);
   }, [teamMatches]);
 
-  const game = useRulesForEvent(eventData);
+  const { data: game } = useRulesForEvent(eventData);
 
   const [dirty, setDirty] = useState<Record<LWWKeys<Incident>, boolean>>({
     match: false,

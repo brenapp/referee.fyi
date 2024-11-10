@@ -47,7 +47,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
 }) => {
   const { data: event } = useCurrentEvent();
   const divisions = useMemo(() => event?.divisions ?? [], [event]);
-  const game = useRulesForEvent(event);
+  const { data: game } = useRulesForEvent(event);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const setFiltersField = useCallback(
     <T extends keyof Filters>(key: T, value: Filters[T]) => {

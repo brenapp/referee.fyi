@@ -2,8 +2,7 @@ import { Button, LinkButton } from "~components/Button";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Dialog, DialogHeader, DialogBody } from "~components/Dialog";
 import Markdown from "react-markdown";
-import { version } from "../../package.json";
-import "./markdown.css";
+
 import { Cog8ToothIcon, UserGroupIcon } from "@heroicons/react/20/solid";
 import { useEventSearch } from "~utils/hooks/robotevents";
 import { useRecentEvents } from "~utils/hooks/history";
@@ -15,6 +14,12 @@ import { UpdatePrompt } from "~components/UpdatePrompt";
 import { useDisplayMode, useInstallPrompt } from "~utils/hooks/pwa";
 
 import AppIcon from "/icons/referee-fyi.svg?url";
+import UpdateNotes from "/updateNotes.md?url";
+
+import "./markdown.css";
+
+// TODO: We probably should rely on a different signal to determine if we should display the update notes.
+import { version } from "../../package.json";
 
 const UserWelcome: React.FC = () => {
   return (
@@ -110,6 +115,16 @@ function useHomeEvents() {
   return isWorldsBuild() ? worldsEvents : recentUser;
 }
 
+function useUpdateNotes() {
+  return useQuery({
+    queryKey: ["update_notes"],
+    queryFn: async () => {
+      const response = await fetch(UpdateNotes);
+      return response.text();
+    },
+  });
+}
+
 export const HomePage: React.FC = () => {
   const events = useHomeEvents();
   const { data: eventsInvitations } = useQuery({
@@ -118,30 +133,23 @@ export const HomePage: React.FC = () => {
       Promise.all(events?.map((event) => getEventInvitation(event.sku)) ?? []),
   });
 
-  const [markdownContent, setMarkdownContent] = useState<string>("");
+  const { data: markdownContent, isSuccess: isFetchedUpdateNotesSuccess } =
+    useUpdateNotes();
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
 
   useEffect(() => {
-    const fetchMarkdownContent = async () => {
-      try {
-        const response = await fetch("/updateNotes.md");
-        const content = await response.text();
-        setMarkdownContent(content);
-      } catch (error) {
-        console.error("Error fetching Markdown content:", error);
-      }
-    };
+    if (!isFetchedUpdateNotesSuccess) {
+      return;
+    }
 
-    fetchMarkdownContent().then(() => {
-      const userVersion = localStorage.getItem("version");
+    const userVersion = localStorage.getItem("version");
 
-      if (userVersion && userVersion !== version) {
-        setUpdateDialogOpen(true);
-      }
+    if (userVersion && userVersion !== version) {
+      setUpdateDialogOpen(true);
+    }
 
-      localStorage.setItem("version", version);
-    });
-  }, []);
+    localStorage.setItem("version", version);
+  }, [isFetchedUpdateNotesSuccess]);
 
   return (
     <>

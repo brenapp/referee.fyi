@@ -23,8 +23,11 @@
   "dependencies": {
     "@cloudflare/workers-types": "^4.0.0",
     "@referee-fyi/consistency": "^1.0.0",
+    "@referee-fyi/pdf-export": "^1.0.0",
     "@referee-fyi/share": "^1.0.0",
-    "itty-router": "^5.0.17"
+    "itty-router": "^5.0.17",
+    "jspdf": "^2.5.2",
+    "robotevents": "^6.0.3"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",

@@ -657,9 +657,9 @@ const IntegrationInfo: React.FC<ManageTabProps> = ({ event }) => {
   const { data: bearerToken, isSuccess: isSuccessBearerToken } =
     useIntegrationBearer(event.sku);
 
-  const { jsonEndpoint, csvEndpoint } = useMemo(() => {
+  const { jsonEndpoint, csvEndpoint, pdfEndpoint } = useMemo(() => {
     if (!bearerToken) {
-      return { jsonEndpoint: "", csvEndpoint: "" };
+      return { jsonEndpoint: "", csvEndpoint: "", pdfEndpoint: "" };
     }
 
     const json = new URL(
@@ -672,10 +672,20 @@ const IntegrationInfo: React.FC<ManageTabProps> = ({ event }) => {
       import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER
     );
 
+    const pdf = new URL(
+      `/api/integration/v1/${event.sku}/incidents.pdf`,
+      import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER
+    );
+
     json.searchParams.set("token", bearerToken);
     csv.searchParams.set("token", bearerToken);
+    pdf.searchParams.set("token", bearerToken);
 
-    return { jsonEndpoint: json.toString(), csvEndpoint: csv.toString() };
+    return {
+      jsonEndpoint: json.toString(),
+      csvEndpoint: csv.toString(),
+      pdfEndpoint: pdf.toString(),
+    };
   }, [bearerToken, event.sku]);
 
   if (!isSuccessBearerToken || !bearerToken) {
@@ -684,14 +694,18 @@ const IntegrationInfo: React.FC<ManageTabProps> = ({ event }) => {
 
   return (
     <section>
-      <h2 className="mt-4 font-bold">Integration Bearer</h2>
+      <h2 className="mt-4 font-bold">Integrations</h2>
       <p>
-        Use this bearer token to allow external integrations to read data from
-        this instance.
+        Use these integration URLs to give others up-to-date read-only access to
+        the anomaly log for this instance.{" "}
+        <em>
+          Anyone who has this URL can pull this data at any time, so treat these
+          carefully!
+        </em>
       </p>
-      <ClickToCopy message={bearerToken ?? ""} />
       <ClickToCopy prefix="JSON" message={jsonEndpoint} />
       <ClickToCopy prefix="CSV" message={csvEndpoint} className="flex-1" />
+      <ClickToCopy prefix="PDF" message={pdfEndpoint} className="flex-1" />
     </section>
   );
 };

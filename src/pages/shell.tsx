@@ -35,7 +35,7 @@ import { getShareProfile } from "~utils/data/share";
 
 function isValidSKU(sku: string) {
   return !!sku.match(
-    /RE-(VRC|V5RC|VEXU|VURC|VIQRC|VIQC|VAIRC)-[0-9]{2}-[0-9]{4}/g
+    /RE-(VRC|V5RC|VEXU|VURC|VIQRC|VIQC|VAIRC|ADC)-[0-9]{2}-[0-9]{4}/g
   );
 }
 

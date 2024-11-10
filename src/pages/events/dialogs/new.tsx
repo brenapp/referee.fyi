@@ -205,6 +205,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       if (e.target.value === "-1") {
         setMatch(undefined);
         setTeam(undefined);
+        setIncidentField("skills", undefined);
       }
 
       if (!newMatch) return;

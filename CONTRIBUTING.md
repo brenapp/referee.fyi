@@ -13,25 +13,29 @@ We also anticipate that some users may need to install and join a share instance
 quickly after learning about the application for the first time that day. These
 constraints drive a lot of our technical decisions:
 
-1. Referee FYI should be available from the web, and quick to install even on
+1. Referee FYI should be available from the web and quick to install even on
    bad internet connections. We should strive for the entire application to be
-   less than 5 MB, so it can be easily installed from poor internet during an
+   less than 5 MB so it can be easily installed from poor internet during an
    event.
-2. Once installed, Referee FYI should make no assumptions about network
-   connectivity. Obviously, we depend on the Internet for RobotEvents data and
-   for the sharing server (if used). But the user should be able to perform all
+2. Referee FYI should make no assumptions about network connectivity once
+   installed. We depend on the Internet for RobotEvents data and
+   the sharing server (if used). However, the user should be able to perform all
    actions, even when offline, and the application should reconcile those
    changes when connectivity is restored. This includes strong caching for
    RobotEvents data.
-3. Referee FYI should design first for small, touch friendly devices, even at
-   the expense of the desktop.
-4. Referee FYI should protect incident data very carefully. The safest place
-   incident data can be is on the user's device.
-5. Sharing content between devices must be quick, reliable, and automatic. Users
+4. Referee FYI should be designed first for small, touch-friendly devices, even
+   at the expense of the desktop.
+5. Referee FYI should protect incident data very carefully. The safest place
+   Incident data can be stored on the user's device.
+6. Sharing content between devices must be quick, reliable, and automatic. Users
    must trust that they are seeing the entire set of data at all times, whenever
    possible.
+7. The job of a referee is not to enter data into our system. Referee FYI is just
+   one tool that helps referees do their job. They should be able to quickly make
+   a note after a match and then put their device away, trusting that everything
+   will be handled. 
 
-### Non Goals
+### Non-Goals
 
 1. Referee FYI does not replace Tournament Manager, RobotEvents, or TM Mobile.
    We are aiming to replace the paper anomaly log. 
@@ -41,7 +45,7 @@ constraints drive a lot of our technical decisions:
 
 ## Technologies
 
-This project makes use of the following technologies extensively.
+This project makes extensive use of the following technologies.
 
 - React 
 - Tailwind
@@ -54,15 +58,15 @@ This project makes use of the following technologies extensively.
 The general structure of Referee FYI is motivated by creating a Progressive Web
 App that end users can add to their home screen on their phone. The client
 application is a static react app hosted using Cloudflare Pages to provide
-low-latency throughout the world. The sharing service make use of Cloudflare
+low-latency services worldwide. The sharing service makes use of Cloudflare
 Workers to provide efficient, edge web services to reduce latency between mobile
-devices and the share server.
+devices and the sharing server.
 
 > Edge Services. Cloudflare Workers is really well adapted to this project
 > because the vast majority of cloud interactions we care about (sync actions
 > with the sync service) happen between devices that all are located in the same
 > facility. Since Cloudflare distributes the sync worker across all of its
-> datacenters, it can provide low latency (>20ms TTFB) communication around the
+> data centers, which can provide low latency (>20ms TTFB) communication around the
 > world, and requires little synchronization between data centers.
 
 ### Folder Structure
@@ -145,7 +149,7 @@ supply it here.
 VITE_LOGSERVER_TOKEN=<TOKEN>
 ```
 
-The token to use when submitting dumps to the LogServer (Brendan's
+The token to use when submitting crash reports to the LogServer (Brendan's
 project-agnostic system dump service). Contact Brendan to get a token.
 
 ```
@@ -157,13 +161,13 @@ Token to use when submitting issues to Sentry's error reporting system.
 > **Why do we have both Sentry and LogServer?** Partially historical, partial
 > practical. The logserver is used to submit dumps of the current state of the
 > application, including all locally stored. This is done intentionally by the
-> end user (via the submit feedback form) and includes a ton more data about the
+> end user (via the submit feedback form) and includes more data about the
 > user's session, including the contents of all locally stored data. Sentry is
 > for automatic reporting of issues without user intervention.
 
 ## Application Development
 
-Once you have dependencies installed, run a local instance of Referee FYI in
+Once you install dependencies, run a local instance of Referee FYI in
 development mode. This should prompt you to visit `http://localhost:3000` (or
 another URL), and includes watch mode for both `src` (application content) and
 `lib` (shared libraries between server and client).
@@ -175,14 +179,34 @@ npm run dev
 
 ## Share Server Development
 For most development, you should probably use the staging sync server at
-`https://staging.share.referee.fyi`, but if you 
+`https://staging.share.referee.fyi`, but if you plan to make changes to
+the share server, you can run it locally using this command
+
+```
+npm run worker:dev
+```
+You will need to update the share server URL in your `.env` to point to
+your local instance instead of the staging server.
 
 
 ### [Optional] Secure Share Server Development Locally
-If you wish to develop for the sync service locally, and have a mechanism
+If you wish to develop the sync service locally and have a mechanism
 allowing you to use HTTPS on your local network (this can be useful when testing
 multi-device setup), you can instruct Wrangler to use particular HTTPS
-certificates for the Sync Service by running `npm run `
+certificates for the Sync Service by running `npm run worker:dev:secure`. This will 
+prompt you for your password.
+
+One approach for this I take when doing share server development:
+- Configure static DNS routes for your development machine to a domain you have purchased. Brendan
+  uses `bren.haus` to assign network-only hostnames without fear of collision with real domains.
+- Configure NGINX on your development machine to listen to port 80 and provide an SSL proxy to the
+  locally running development server.
+- Configure LetsEncrypt (or another automated certificate management system) on your local machine to
+  automatically issue certificates to your development machine. Configure NGINX to serve these certificates
+  when providing a proxy to your local instance
+- Copy the appropriate `cert.pem` public key and `privkey.pem` private ket into the `.certs` path in the
+  project root.
+- When you run `npm run workers:dev:secure`, Wrangler will uses these certificates when hosting your worker locally.
 
 ## Code of Conduct
 As contributors and maintainers of this project, and in the interest of

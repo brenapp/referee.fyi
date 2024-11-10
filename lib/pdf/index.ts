@@ -1,5 +1,5 @@
 import { CellConfig, jsPDF } from "jspdf";
-import { Incident, User } from "@referee-fyi/share";
+import { Incident, IncidentMatch, User } from "@referee-fyi/share";
 import { RobotEventsClient } from "robotevents";
 
 export type GenerateIncidentReportPDFOptions = {
@@ -16,6 +16,118 @@ type IncidentRow = {
   contact: string;
   notes: string;
 };
+
+export function teamComparison(a: string, b: string): number {
+  const baseA = a.slice(0, -1);
+  const baseB = b.slice(0, -1);
+
+  if (baseA !== baseB) {
+    const numA = parseInt(baseA);
+    const numB = parseInt(baseB);
+
+    if (isNaN(numA) || isNaN(numB)) {
+      return baseA.localeCompare(baseB);
+    }
+
+    if (numA < numB) {
+      return -1;
+    } else if (numA > numB) {
+      return 1;
+    }
+  }
+
+  const letterA = a.slice(-1);
+  const letterB = b.slice(-1);
+
+  if (letterA !== letterB) {
+    return letterA.localeCompare(letterB);
+  }
+
+  return 0;
+}
+
+// The proper thing to do would be to fetch the actual round information from robotevents and compare them, but this is a good enough approximation for now.
+const matchNameOrder = [
+  "Practice",
+  "Qualifier",
+  "R16",
+  "QF",
+  "SF",
+  "F",
+  "Match",
+];
+
+export function matchComparison(
+  a: IncidentMatch | undefined,
+  b: IncidentMatch | undefined
+) {
+  if (!a && !b) {
+    return 0;
+  }
+
+  if (!a) {
+    return -1;
+  }
+
+  if (!b) {
+    return 1;
+  }
+
+  if (a.type === "skills" && b.type === "skills") {
+    return `${a.skillsType}${a.attempt}`.localeCompare(
+      `${b.skillsType}${b.attempt}`
+    );
+  }
+
+  if (a.type === "match" && b.type === "skills") {
+    return -1;
+  }
+
+  if (a.type === "skills" && b.type === "match") {
+    return 1;
+  }
+
+  if (a.type === "match" && b.type === "match") {
+    if (a.division !== b.division) {
+      return a.division - b.division;
+    }
+
+    const roundA = matchNameOrder.findIndex((name) => a.name.includes(name));
+    const roundB = matchNameOrder.findIndex((name) => b.name.includes(name));
+
+    if (roundA !== roundB) {
+      return roundA - roundB;
+    }
+
+    const instanceA = parseInt(a.name.match(/\d+$/)?.[0] ?? "0");
+    const instanceB = parseInt(b.name.match(/\d+$/)?.[0] ?? "0");
+
+    if (instanceA !== instanceB) {
+      return instanceA - instanceB;
+    }
+
+    return a.name.localeCompare(b.name);
+  }
+
+  return 0;
+}
+
+export function incidentComparison(a: Incident, b: Incident): number {
+  const teamComparisonResult = teamComparison(a.team, b.team);
+  if (teamComparisonResult !== 0) {
+    return teamComparisonResult;
+  }
+
+  const matchComparisonResult = matchComparison(a.match, b.match);
+  if (matchComparisonResult !== 0) {
+    return matchComparisonResult;
+  }
+
+  return (
+    new Date(a.consistency.outcome.instant).getTime() -
+    new Date(b.consistency.outcome.instant).getTime()
+  );
+}
 
 export async function generateIncidentReportPDF({
   sku,
@@ -54,9 +166,7 @@ export async function generateIncidentReportPDF({
 
   const data: IncidentRow[] = [];
 
-  const incidentsInOrder = incidents.sort((a, b) => {
-    return b.team.localeCompare(a.team);
-  });
+  const incidentsInOrder = incidents.sort(incidentComparison);
 
   for (const incident of incidentsInOrder) {
     const contact = users.find(
@@ -91,14 +201,14 @@ export async function generateIncidentReportPDF({
       name: "rule",
       prompt: "Rule",
       align: "left",
-      width: 100,
+      width: 120,
       padding: 2,
     },
     {
       name: "contact",
       prompt: "Contact",
       align: "left",
-      width: 140,
+      width: 120,
       padding: 2,
     },
     {

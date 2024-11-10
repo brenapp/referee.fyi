@@ -219,6 +219,8 @@ export async function generateIncidentReportPDF({
       padding: 2,
     },
   ];
+
+  document.setFont("helvetica", "normal");
   document.table(16, 56, data, headers, {
     autoSize: false,
   });

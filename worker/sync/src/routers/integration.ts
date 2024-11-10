@@ -131,11 +131,13 @@ integrationRouter
       });
     }
 
+    const invitations = await stub.getInvitationList();
+
     const output = await generateIncidentReportPDF({
       sku: request.params.sku,
       client,
       incidents: incidentResponse.data,
-      users: [],
+      users: invitations.map((invitation) => invitation.user),
     });
 
     return new Response(output, {

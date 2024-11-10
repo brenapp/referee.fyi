@@ -217,6 +217,8 @@ export function useDivisionTeams(
   });
 }
 
+const roundUnknown = 0;
+
 export function logicalMatchComparison(a: MatchData, b: MatchData) {
   const roundOrder = [
     rounds.Practice,
@@ -227,6 +229,7 @@ export function logicalMatchComparison(a: MatchData, b: MatchData) {
     rounds.Semifinals,
     rounds.Finals,
     rounds.TopN,
+    roundUnknown,
   ] as number[];
 
   if (a.round !== b.round) {

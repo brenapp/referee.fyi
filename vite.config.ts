@@ -52,6 +52,7 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "inline",
+      includeAssets: ["./rules/**/*.json", "rules.json", "updateNotes.md"],
       manifest: {
         id: "app.bren.kv.v1",
         name: "Referee FYI",

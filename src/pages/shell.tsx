@@ -246,7 +246,7 @@ const Rules: React.FC = () => {
 
   const { data: currentSeasonForProgram } = useCurrentSeason(program);
   const { data: season } = useSeason(event?.season.id);
-  const rules = useRulesForSeason(season ?? currentSeasonForProgram);
+  const { data: rules } = useRulesForSeason(season ?? currentSeasonForProgram);
 
   const [rule, setRule] = useState<Rule | null>(null);
 

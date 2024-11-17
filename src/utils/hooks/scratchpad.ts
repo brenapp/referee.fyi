@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { MatchData } from "robotevents";
+import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
 import {
   EditScratchpad,
   MatchScratchpad,
@@ -135,4 +136,48 @@ export function usePropertyLastChangeLogForScratchpad<
     | null
 ): LastWriteWinsConsistency<T, ScratchpadUnchangeableProperties> | undefined {
   return scratchpad?.consistency;
+}
+
+type ScratchpadState<T extends MatchScratchpad, K extends keyof T> = {
+  match: MatchData;
+  key: K;
+  fallback: T[K];
+};
+
+export function useScratchpadState<
+  T extends MatchScratchpad,
+  K extends keyof T,
+>({
+  match,
+  key,
+  fallback,
+}: ScratchpadState<T, K>): [T[K], Dispatch<SetStateAction<T[K]>>] {
+  const { data } = useMatchScratchpad<T>(match);
+  const { data: defaultScratchpad } = useDefaultScratchpad<T>(match);
+  const { mutate } = useUpdateMatchScratchpad<T>(match);
+
+  const value = useMemo(() => data?.[key] ?? fallback, [data, key, fallback]);
+
+  const dispatch: Dispatch<SetStateAction<T[K]>> = useCallback(
+    (action: SetStateAction<T[K]>) => {
+      if (!match || !defaultScratchpad) {
+        return;
+      }
+      const updated =
+        typeof action === "function"
+          ? (action as (prev: T[K]) => T[K])(value)
+          : action;
+
+      const scratchpad: EditScratchpad<T> = {
+        ...defaultScratchpad,
+        ...data,
+        [key]: updated,
+      };
+
+      mutate(scratchpad);
+    },
+    [data, defaultScratchpad, key, match, mutate, value]
+  );
+
+  return [value, dispatch];
 }

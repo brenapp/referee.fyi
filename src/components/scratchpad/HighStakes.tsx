@@ -3,66 +3,22 @@ import {
   StarIcon,
   ClockIcon,
 } from "@heroicons/react/20/solid";
-import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { MatchData, rounds } from "robotevents";
 import { Checkbox, Radio } from "~components/Input";
 import {
-  EditScratchpad,
   HighStakesMatchScratchpad,
   IncidentMatchHeadToHead,
-  MatchScratchpad,
 } from "@referee-fyi/share";
 import {
-  useDefaultScratchpad,
   useMatchScratchpad,
   useMatchScratchpads,
-  useUpdateMatchScratchpad,
+  useScratchpadState,
 } from "~utils/hooks/scratchpad";
 import { EditHistory } from "~components/EditHistory";
 import { useEventMatches } from "~utils/hooks/robotevents";
 import { useCurrentDivision, useCurrentEvent } from "~utils/hooks/state";
 import { isMatchElimination } from "~utils/data/robotevents";
-
-type ScratchpadState<T extends MatchScratchpad, K extends keyof T> = {
-  match: MatchData;
-  key: K;
-  fallback: T[K];
-};
-
-function useScratchpadState<T extends MatchScratchpad, K extends keyof T>({
-  match,
-  key,
-  fallback,
-}: ScratchpadState<T, K>): [T[K], Dispatch<SetStateAction<T[K]>>] {
-  const { data } = useMatchScratchpad<T>(match);
-  const { data: defaultScratchpad } = useDefaultScratchpad<T>(match);
-  const { mutate } = useUpdateMatchScratchpad<T>(match);
-
-  const value = useMemo(() => data?.[key] ?? fallback, [data, key, fallback]);
-
-  const dispatch: Dispatch<SetStateAction<T[K]>> = useCallback(
-    (action: SetStateAction<T[K]>) => {
-      if (!match || !defaultScratchpad) {
-        return;
-      }
-      const updated =
-        typeof action === "function"
-          ? (action as (prev: T[K]) => T[K])(value)
-          : action;
-
-      const scratchpad: EditScratchpad<T> = {
-        ...defaultScratchpad,
-        ...data,
-        [key]: updated,
-      };
-
-      mutate(scratchpad);
-    },
-    [data, defaultScratchpad, key, match, mutate, value]
-  );
-
-  return [value, dispatch];
-}
 
 export type HighStakesScratchpadProps = {
   match: MatchData;

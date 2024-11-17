@@ -4,6 +4,7 @@ import { Year } from "robotevents";
 import { useEvent, useSeason } from "~utils/hooks/robotevents";
 import { HighStakesScratchpad } from "./HighStakes";
 import { ProgramAbbr } from "robotevents";
+import { RapidRelayScratchpad } from "./RapidRelay";
 
 export type MatchScratchpadProps = {
   match: MatchData;
@@ -28,6 +29,9 @@ export const MatchScratchpad: React.FC<MatchScratchpadProps> = ({ match }) => {
     case "V5RC2023-2024":
     case "V5RC2024-2025": {
       return <HighStakesScratchpad key={match.id} match={match} />;
+    }
+    case "VIQRC2024-2025": {
+      return <RapidRelayScratchpad key={match.id} match={match} />;
     }
     default: {
       return null;

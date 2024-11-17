@@ -1,35 +1,30 @@
 import { CodeBracketSquareIcon, StarIcon } from "@heroicons/react/20/solid";
 import { MatchData } from "robotevents";
 import { Checkbox, Radio } from "~components/Input";
-import { HighStakesMatchScratchpad } from "@referee-fyi/share";
+import { RapidRelayMatchScratchpad } from "@referee-fyi/share";
 import {
   useMatchScratchpad,
   useScratchpadState,
 } from "~utils/hooks/scratchpad";
 import { EditHistory } from "~components/EditHistory";
 
-export type HighStakesScratchpadProps = {
+export type RapidRelayScratchpadProps = {
   match: MatchData;
 };
 
-export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
+export const RapidRelayScratchpad: React.FC<RapidRelayScratchpadProps> = ({
   match,
 }) => {
-  const { data } = useMatchScratchpad<HighStakesMatchScratchpad>(match);
+  const { data } = useMatchScratchpad<RapidRelayMatchScratchpad>(match);
 
   // Bindings
-  const [auto, setAuto] = useScratchpadState<HighStakesMatchScratchpad, "auto">(
-    {
-      match,
-      key: "auto",
-      fallback: "none",
-    }
-  );
-
-  const [awp, setAWP] = useScratchpadState<HighStakesMatchScratchpad, "awp">({
+  const [counts, setAuto] = useScratchpadState<
+    RapidRelayMatchScratchpad,
+    "counts"
+  >({
     match,
-    key: "awp",
-    fallback: { red: false, blue: false },
+    key: "counts",
+    fallback: {},
   });
 
   return (
@@ -50,25 +45,25 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
           <Radio
             name="autoWinner"
             label="Red"
-            bind={{ value: auto, onChange: setAuto, variant: "red" }}
+            bind={{ value: counts, onChange: setAuto, variant: "red" }}
             className="data-[selected=true]:bg-red-800"
           />
           <Radio
             name="autoWinner"
             label="Blue"
-            bind={{ value: auto, onChange: setAuto, variant: "blue" }}
+            bind={{ value: counts, onChange: setAuto, variant: "blue" }}
             className="data-[selected=true]:bg-blue-800"
           />
           <Radio
             name="autoWinner"
             label="Tie"
-            bind={{ value: auto, onChange: setAuto, variant: "tie" }}
+            bind={{ value: counts, onChange: setAuto, variant: "tie" }}
             className="data-[selected=true]:bg-purple-800"
           />
           <Radio
             name="autoWinner"
             label="None"
-            bind={{ value: auto, onChange: setAuto, variant: "none" }}
+            bind={{ value: counts, onChange: setAuto, variant: "none" }}
             className="data-[selected=true]:bg-zinc-900"
           />
         </fieldset>

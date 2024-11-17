@@ -40,8 +40,14 @@ export type HighStakesMatchScratchpad = WithLWWConsistency<
   ScratchpadUnchangeableProperties
 >;
 
+export type RapidRelayMatchScratchpadCounts = {
+  goals: number;
+  passes: number;
+};
+
 export type RapidRelayMatchScratchpadProperties = {
   game: "Rapid Relay";
+  counts: Record<string, RapidRelayMatchScratchpadCounts>;
 };
 export type BaseRapidRelayMatchScratchpad = BaseMatchScratchpad &
   RapidRelayMatchScratchpadProperties;

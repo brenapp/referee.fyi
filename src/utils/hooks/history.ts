@@ -12,11 +12,6 @@ export async function initHistoryStore() {
   if (!events) {
     await set("event_history", []);
   }
-
-  const rules = await get<Rule[]>("rule_history");
-  if (!rules) {
-    await set("rule_history", []);
-  }
 }
 
 export async function getRecentEvents() {
@@ -46,7 +41,7 @@ export function useRecentRules(
   limit?: number
 ) {
   return useQuery({
-    queryKey: ["recent_rules"],
+    queryKey: ["recent_rules", programId, season],
     queryFn: async () => {
       const rules = await getRecentRules(programId, season);
       return rules.slice(0, limit);

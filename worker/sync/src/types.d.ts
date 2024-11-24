@@ -27,4 +27,8 @@ export interface Env {
   USERS: KVNamespace;
   REQUEST_CODES: KVNamespace;
   INCIDENTS: DurableObjectNamespace<ShareInstance>;
+
+  // Secrets
+  SYSTEM_KEY: string;
+  ROBOTEVENTS_TOKEN: string;
 }

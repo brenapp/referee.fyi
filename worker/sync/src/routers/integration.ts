@@ -3,7 +3,15 @@ import { Env } from "../types";
 import { response } from "../utils/request";
 import { getInstance, getInvitation, getUser } from "../utils/data";
 import { importKey, KEY_PREFIX, verifyKeySignature } from "../utils/crypto";
-import { Invitation, ShareInstanceMeta, User } from "@referee-fyi/share";
+import {
+  Incident,
+  Invitation,
+  ShareInstanceMeta,
+  ShareResponse,
+  User,
+} from "@referee-fyi/share";
+import { generateIncidentReportPDF } from "@referee-fyi/pdf-export";
+import { getRobotEventsClient } from "../utils/robotevents";
 
 const verifyBearerToken = async (request: IRequest, env: Env) => {
   const sku = request.params.sku;
@@ -105,6 +113,38 @@ integrationRouter
     const id = env.INCIDENTS.idFromString(request.instance.secret);
     const stub = env.INCIDENTS.get(id);
     return stub.handleCSV();
+  })
+  .get("/incidents.pdf", async (request: VerifiedRequest, env: Env) => {
+    const client = getRobotEventsClient(env);
+
+    const id = env.INCIDENTS.idFromString(request.instance.secret);
+    const stub = env.INCIDENTS.get(id);
+
+    const incidentResponse = await stub
+      .handleJSON()
+      .then((response) => response.json<ShareResponse<Incident[]>>());
+    if (!incidentResponse.success) {
+      return response({
+        success: false,
+        reason: "bad_request",
+        details: "Could not get incidents from the sharing server.",
+      });
+    }
+
+    const invitations = await stub.getInvitationList();
+
+    const output = await generateIncidentReportPDF({
+      sku: request.params.sku,
+      client,
+      incidents: incidentResponse.data,
+      users: invitations.map((invitation) => invitation.user),
+    });
+
+    return new Response(output, {
+      headers: {
+        "Content-Type": "application/pdf",
+      },
+    });
   });
 
 export { integrationRouter };

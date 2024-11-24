@@ -6,8 +6,8 @@
   "scripts": {
     "frontend:dev": "vite --host --port 3000",
     "frontend:build": "tsc && vite build",
-    "lib:dev": "concurrently \"npm --prefix lib/share run dev\" \"npm --prefix lib/consistency run dev\"",
-    "lib:build": "concurrently \"npm --prefix lib/share run build\" \"npm --prefix lib/consistency run build\"",
+    "lib:dev": "concurrently \"npm --prefix lib/share run dev\" \"npm --prefix lib/consistency run dev\" \"npm --prefix lib/pdf  run dev\"",
+    "lib:build": "concurrently \"npm --prefix lib/share run build\" \"npm --prefix lib/consistency run build\" \"npm --prefix lib/pdf run build\"",
     "worker:dev": "npm --prefix worker/sync run dev",
     "worker:dev:secure": "npm --prefix worker/sync run dev:secure",
     "worker:build": "npm run lib:build && npm --prefix worker/sync run build",

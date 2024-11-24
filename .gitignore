@@ -33,8 +33,13 @@ utils/upload/*.json
 utils/upload/*.tsv
 utils/dupes/*.json
 
+
 # Sentry Config File
 .env.sentry-build-plugin
+
+# Secrets
+.dev.vars
+key.json
 
 # TLS Certificates (Used By Wrangler Dev)
 .certs

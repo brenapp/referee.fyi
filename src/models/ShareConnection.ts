@@ -1,8 +1,10 @@
 import {
+  APIRegisterUserResponseBody,
   Incident,
   INCIDENT_IGNORE,
   InvitationListItem,
   SCRATCHPAD_IGNORE,
+  ShareResponse,
   User,
   UserInvitation,
   WebSocketMessage,
@@ -53,9 +55,11 @@ export enum ReadyState {
   Open = WebSocket.OPEN,
 }
 
+export type UserMetadata = Omit<APIRegisterUserResponseBody, "user">;
+
 export type ShareConnectionData = {
   readyState: ReadyState;
-  profile: User;
+  profile: User & UserMetadata;
   websocket: WebSocket | null;
   invitation: UserInvitation | null;
   activeUsers: User[];
@@ -75,7 +79,9 @@ export type ShareConnectionActions = {
   connect(invitation: UserInvitation): Promise<void>;
   disconnect(): Promise<void>;
   forceSync(): Promise<void>;
-  updateProfile(profile: Partial<User>): Promise<void>;
+  updateProfile(
+    profile: Partial<User>
+  ): Promise<ShareResponse<APIRegisterUserResponseBody>>;
 };
 
 type ShareConnection = ShareConnectionData & ShareConnectionActions;
@@ -88,13 +94,22 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
   activeUsers: [],
   invitations: [],
 
-  profile: { name: "", key: "" },
+  profile: { name: "", key: "", isSystemKey: false },
   updateProfile: async (updates) => {
     const profile = { ...get().profile, ...updates };
+    const user = await registerUser(profile);
+
+    profile.isSystemKey = user.success && user.data.isSystemKey;
+
     set({ profile });
     saveShareProfile(profile);
-    registerUser(profile);
-    setUser({ id: profile.key, username: profile.name });
+    setUser({
+      id: profile.key,
+      username: profile.name,
+      isSystemKey: profile.isSystemKey,
+    });
+
+    return user;
   },
 
   reconnectTimer: null,

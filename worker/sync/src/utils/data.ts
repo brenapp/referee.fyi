@@ -35,6 +35,14 @@ export async function getInstance(env: Env, secret: string, sku: string) {
   return env.SHARES.get<ShareInstanceMeta>(`${sku}#${secret}`, "json");
 }
 
+export async function getInstancesForEvent(
+  env: Env,
+  sku: string
+): Promise<string[]> {
+  const result = await env.SHARES.list({ prefix: sku + "#" });
+  return result.keys.map((result) => result.name);
+}
+
 export type RequestCode = {
   key: string;
   version: string;

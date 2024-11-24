@@ -36,6 +36,7 @@ export type UserInvitation = Pick<
 // POST /api/user
 export type APIRegisterUserResponseBody = {
   user: User;
+  isSystemKey: boolean;
 };
 
 // PUT /api/:sku/request
@@ -58,6 +59,11 @@ export type APIGetInvitationResponseBody = UserInvitation;
 
 // PUT /api/:sku/accept
 export type APIPutInvitationAcceptResponseBody = UserInvitation;
+
+// GET /api/:sku/list
+export type APIGetListShareInstance = {
+  instances: string[];
+};
 
 // PUT /api/:sku/invite
 export type APIPutInviteResponseBody = Record<string, never>;

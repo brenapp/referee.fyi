@@ -29,6 +29,7 @@ router
   .post("/api/:sku/create", invitationRouter.fetch)
   .get("/api/:sku/invitation", invitationRouter.fetch)
   .put("/api/:sku/accept", invitationRouter.fetch)
+  .get("/api/:sku/list", invitationRouter.fetch)
 
   // Instance Actions
   .put("/api/:sku/invite", instanceRouter.fetch)

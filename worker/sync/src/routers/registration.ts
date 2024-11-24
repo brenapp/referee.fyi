@@ -4,6 +4,7 @@ import { Env, SignedRequest } from "../types";
 import { response } from "../utils/request";
 import { APIRegisterUserResponseBody, User } from "@referee-fyi/share";
 import { setUser } from "../utils/data";
+import { isSystemKey } from "../utils/systemKey";
 
 const registrationRouter = AutoRouter({
   before: [verifySignature],
@@ -28,9 +29,10 @@ registrationRouter.post(
 
     await setUser(env, user);
 
+    const systemKey = await isSystemKey(env, user.key);
     return response<APIRegisterUserResponseBody>({
       success: true,
-      data: { user },
+      data: { user, isSystemKey: systemKey },
     });
   }
 );

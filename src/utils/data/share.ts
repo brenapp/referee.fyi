@@ -15,6 +15,7 @@ import type {
   WebSocketSender,
   APIPutInvitationRequestResponseBody,
   APIGetInvitationRequestResponseBody,
+  APIGetListShareInstance,
 } from "@referee-fyi/share";
 import { Incident } from "./incident";
 import { queryClient } from "./query";
@@ -346,4 +347,47 @@ export async function getRequestCodeUserKey(
 
   const response = await signedFetch(url, { method: "GET" });
   return response.json();
+}
+
+export async function getInstancesForEvent(
+  sku: string
+): Promise<ShareResponse<APIGetListShareInstance>> {
+  const url = new URL(`/api/${sku}/list`, URL_BASE);
+  const response = await signedFetch(url, { method: "GET" });
+
+  return response.json();
+}
+
+export function getIntegrationAPIEndpoints(
+  sku: string,
+  query: { token: string; instance?: string }
+) {
+  const json = new URL(
+    `/api/integration/v1/${sku}/incidents.json`,
+    import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER
+  );
+
+  const csv = new URL(
+    `/api/integration/v1/${sku}/incidents.csv`,
+    import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER
+  );
+
+  const pdf = new URL(
+    `/api/integration/v1/${sku}/incidents.pdf`,
+    import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER
+  );
+
+  if (query.token) {
+    json.searchParams.set("token", query.token);
+    csv.searchParams.set("token", query.token);
+    pdf.searchParams.set("token", query.token);
+  }
+
+  if (query.instance) {
+    json.searchParams.set("instance", query.instance);
+    csv.searchParams.set("instance", query.instance);
+    pdf.searchParams.set("instance", query.instance);
+  }
+
+  return { json, csv, pdf };
 }

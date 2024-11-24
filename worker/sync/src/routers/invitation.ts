@@ -4,6 +4,7 @@ import { AuthenticatedRequest, Env, EventIncidentsInitData } from "../types";
 import { response } from "../utils/request";
 import {
   APIGetInvitationResponseBody,
+  APIGetListShareInstance,
   APIPostCreateResponseBody,
   APIPutInvitationAcceptResponseBody,
   Invitation,
@@ -11,11 +12,13 @@ import {
   User,
 } from "@referee-fyi/share";
 import {
+  getInstancesForEvent,
   getInvitation,
   getUser,
   setInstance,
   setInvitation,
 } from "../utils/data";
+import { isSystemKey } from "../utils/systemKey";
 
 const invitationRouter = AutoRouter({
   before: [verifySignature, verifyUser],
@@ -120,6 +123,26 @@ invitationRouter
       });
     }
   )
+  .get("/api/:sku/list", async (request: AuthenticatedRequest, env: Env) => {
+    const isSystem = await isSystemKey(env, request.user.key);
+    if (!isSystem) {
+      return response<APIGetListShareInstance>({
+        success: false,
+        reason: "incorrect_code",
+        details: "Invalid request.",
+      });
+    }
+
+    const sku = request.params.sku;
+    const ids = await getInstancesForEvent(env, sku);
+
+    const secrets = ids.map((id) => id.split("#")[1]);
+
+    return response<APIGetListShareInstance>({
+      success: true,
+      data: { instances: secrets },
+    });
+  })
   .put("/api/:sku/accept", async (request: AuthenticatedRequest, env: Env) => {
     const sku = request.params.sku;
     const id = request.query.invitation;

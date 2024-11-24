@@ -84,7 +84,7 @@
     "vite-plugin-pwa": "^0.17.2",
     "vite-plugin-version-mark": "^0.0.10",
     "vite-tsconfig-paths": "^4.2.1",
-    "wrangler": "^3.67.1"
+    "wrangler": "^3.90.0"
   },
   "overrides": {
     "vite-plugin-node-polyfills": {

@@ -5,12 +5,13 @@ import { ClickToCopy } from "~components/ClickToCopy";
 import { ReportIssueDialog } from "~components/dialogs/report";
 import { Input } from "~components/Input";
 import { toast } from "~components/Toast";
+import { Info } from "~components/Warning";
 import { isWorldsBuild } from "~utils/data/state";
 import { useShareProfile } from "~utils/hooks/share";
 import { clearCache } from "~utils/sentry";
 
 export const SettingsPage: React.FC = () => {
-  const { name, key: publicKey, persist } = useShareProfile();
+  const { name, key: publicKey, isSystemKey, persist } = useShareProfile();
   const [localName, setLocalName] = useState(name);
 
   const [reportIssueDialogOpen, setReportIssueDialogOpen] = useState(false);
@@ -46,6 +47,9 @@ export const SettingsPage: React.FC = () => {
         <h2 className="font-bold">Public Key</h2>
         <ClickToCopy message={publicKey ?? ""} />
       </section>
+      {isSystemKey ? (
+        <Info message="System Key Enabled" className="mt-4" />
+      ) : null}
       <section className="mt-4">
         <h2 className="font-bold">Report Issues with Referee FYI</h2>
         <p>

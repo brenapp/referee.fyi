@@ -12,17 +12,124 @@ import {
 } from "@referee-fyi/share";
 import { generateIncidentReportPDF } from "@referee-fyi/pdf-export";
 import { getRobotEventsClient } from "../utils/robotevents";
+import { getSystemKeyMetadata } from "../utils/systemKey";
 
-const verifyBearerToken = async (request: IRequest, env: Env) => {
+export type VerifyCredentialResponse =
+  | {
+      success: true;
+      user: User;
+      invitation: Invitation;
+      instance: ShareInstanceMeta;
+    }
+  | {
+      success: false;
+      reason: "bad_request" | "incorrect_code";
+      details: string;
+    };
+
+const verifySystemToken = async (
+  request: IRequest,
+  env: Env
+): Promise<VerifyCredentialResponse> => {
+  const sku = request.params.sku;
+  const token = request.query.token;
+  const instanceSecret = request.query.instance;
+
+  if (
+    typeof token !== "string" ||
+    typeof sku !== "string" ||
+    typeof instanceSecret !== "string"
+  ) {
+    return {
+      success: false,
+      reason: "bad_request",
+      details: `Must specify token and instance.`,
+    };
+  }
+
+  /**
+   * The format of the system token is a pipe delimited string:
+   * 1. Public key of the system token
+   * 2. Signed Message: <INSTANCE SECRET><SKU>
+   **/
+  const [publicKeyRaw, signedMessage] = token.split("|");
+
+  // Verify Key
+  const key = await importKey(publicKeyRaw);
+  if (!key) {
+    return {
+      success: false,
+      reason: "incorrect_code",
+      details: "Invalid Bearer Token: can't obtain user key.",
+    };
+  }
+
+  const keyHex = publicKeyRaw.slice(KEY_PREFIX.length);
+  const metadata = await getSystemKeyMetadata(env, keyHex);
+  if (!metadata) {
+    return {
+      success: false,
+      reason: "incorrect_code",
+      details: "Key is not system key",
+    };
+  }
+
+  const message = instanceSecret + sku;
+  console.log(message);
+  const valid = await verifyKeySignature(key, signedMessage, message);
+
+  if (!valid) {
+    return {
+      success: false,
+      reason: "incorrect_code",
+      details: "Invalid system token.",
+    };
+  }
+
+  const instance = await getInstance(env, instanceSecret, sku);
+  if (!instance) {
+    return {
+      success: false,
+      reason: "bad_request",
+      details: "Unknown Share Instance.",
+    };
+  }
+
+  const user = await getUser(env, keyHex);
+  if (!user) {
+    return {
+      success: false,
+      reason: "bad_request",
+      details: "Unknown User.",
+    };
+  }
+
+  const invitation: Invitation = {
+    accepted: true,
+    admin: true,
+    from: keyHex,
+    id: "system:" + crypto.randomUUID(),
+    sku,
+    instance_secret: instanceSecret,
+    user: keyHex,
+  };
+
+  return { success: true, user, invitation, instance };
+};
+
+const verifyBearerToken = async (
+  request: IRequest,
+  env: Env
+): Promise<VerifyCredentialResponse> => {
   const sku = request.params.sku;
   const token = request.query.token;
 
   if (typeof token !== "string" || typeof sku !== "string") {
-    return response({
+    return {
       success: false,
       reason: "bad_request",
       details: `Must specify bearer token and sku`,
-    });
+    };
   }
 
   /**
@@ -36,61 +143,89 @@ const verifyBearerToken = async (request: IRequest, env: Env) => {
   // Verify Key
   const key = await importKey(publicKeyRaw);
   if (!key) {
-    return response({
+    return {
       success: false,
       reason: "incorrect_code",
       details: "Invalid Bearer Token: can't obtain user key.",
-    });
+    };
   }
 
   const keyHex = publicKeyRaw.slice(KEY_PREFIX.length);
   const invitation = await getInvitation(env, keyHex, sku);
 
   if (!invitation) {
-    return response({
+    return {
       success: false,
       reason: "incorrect_code",
       details: "Invalid Bearer Token: User does not active invitation.",
-    });
+    };
   }
 
   if (!invitation.admin) {
-    return response({
+    return {
       success: false,
       reason: "incorrect_code",
       details: "Invalid Bearer Token: User does not have admin permissions.",
-    });
+    };
   }
 
   const message = invitation.id + sku;
   const valid = await verifyKeySignature(key, signedMessage, message);
 
   if (!valid) {
-    return response({
+    return {
       success: false,
       reason: "incorrect_code",
       details: "Invalid Bearer Token: Invalid signature.",
-    });
+    };
   }
 
   const instance = await getInstance(env, invitation.instance_secret, sku);
 
   if (!instance) {
-    return response({
+    return {
       success: false,
       reason: "bad_request",
       details: "Unknown Share Instance.",
-    });
+    };
   }
 
-  request.user = await getUser(env, keyHex);
-  request.invitation = invitation;
-  request.instance = instance;
+  const user = await getUser(env, keyHex);
+  if (!user) {
+    return {
+      success: false,
+      reason: "bad_request",
+      details: "Unknown User.",
+    };
+  }
+
+  return { success: true, user, invitation, instance };
+};
+
+const verify = async (request: IRequest, env: Env) => {
+  const system = await verifySystemToken(request, env);
+
+  if (system.success) {
+    request.user = system.user;
+    request.invitation = system.invitation;
+    request.instance = system.instance;
+    return;
+  }
+
+  const bearer = await verifyBearerToken(request, env);
+  if (bearer.success) {
+    request.user = bearer.user;
+    request.invitation = bearer.invitation;
+    request.instance = bearer.instance;
+    return;
+  }
+
+  return bearer;
 };
 
 const integrationRouter = AutoRouter<IRequest, [Env]>({
   base: "/api/integration/v1/:sku",
-  before: [verifyBearerToken],
+  before: [verify],
 });
 
 type VerifiedRequest = IRequest & {

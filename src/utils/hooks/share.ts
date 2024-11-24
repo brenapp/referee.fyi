@@ -67,3 +67,14 @@ export function useIntegrationBearer(sku: string) {
     enabled: isEventInvitationSuccess && !!invitation,
   });
 }
+
+export function useSystemKeyIntegrationBearer(sku: string, instance: string) {
+  return useQuery({
+    queryKey: ["system_key_integration_bearer", sku, instance],
+    queryFn: async () => {
+      const message = await signMessage(instance + sku);
+      const keyHex = await exportPublicKey(true);
+      return [keyHex, message].join("|");
+    },
+  });
+}

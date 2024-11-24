@@ -4,7 +4,6 @@ import { importKey, KEY_PREFIX, verifyKeySignature } from "./crypto";
 import { AuthenticatedRequest, Env, SignedRequest } from "../types";
 import { getInstance, getInvitation, getUser } from "./data";
 import { Invitation, ShareInstanceMeta, User } from "@referee-fyi/share";
-import { getSystemKeyMetadata } from "./systemKey";
 
 export const verifySignature = async (request: IRequest & Request) => {
   const now = new Date();
@@ -95,45 +94,17 @@ export const verifyUser = async (request: SignedRequest, env: Env) => {
   request.user = user;
 };
 
-async function getSystemKeyInvitation(
-  request: AuthenticatedRequest,
-  env: Env
-): Promise<Invitation | null> {
-  const metadata = await getSystemKeyMetadata(env, request.user.key);
-  if (!metadata) {
-    return null;
-  }
-
-  const secret = request.headers.get("X-Referee-Instance");
-  if (!secret) {
-    return null;
-  }
-
-  const instance = await getInstance(env, secret, request.params.sku);
-  if (!instance) {
-    return null;
-  }
-
-  return {
-    accepted: true,
-    admin: true,
-    from: request.user.key,
-    id: crypto.randomUUID(),
-    instance_secret: instance.secret,
-    sku: request.params.sku,
-    user: request.user.key,
-  };
-}
-
 export const verifyInvitation = async (
   request: AuthenticatedRequest,
   env: Env
 ) => {
   const sku = request.params.sku;
 
-  const invitation: Invitation | null =
-    (await getInvitation(env, request.user.key, sku)) ??
-    (await getSystemKeyInvitation(request, env));
+  const invitation: Invitation | null = await getInvitation(
+    env,
+    request.user.key,
+    sku
+  );
 
   if (!invitation) {
     return response({

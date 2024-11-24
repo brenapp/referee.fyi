@@ -5,6 +5,8 @@ import { deleteManyIncidents, getIncidentsByEvent } from "~utils/data/incident";
 import {
   acceptEventInvitation,
   fetchInvitation,
+  getInstancesForEvent,
+  getIntegrationAPIEndpoints,
   getRequestCodeUserKey,
   inviteUser,
   putRequestCode,
@@ -23,6 +25,7 @@ import {
   useEventInvitation,
   useIntegrationBearer,
   useShareProfile,
+  useSystemKeyIntegrationBearer,
 } from "~utils/hooks/share";
 import { Checkbox, Input } from "~components/Input";
 import { toast } from "~components/Toast";
@@ -657,35 +660,11 @@ const IntegrationInfo: React.FC<ManageTabProps> = ({ event }) => {
   const { data: bearerToken, isSuccess: isSuccessBearerToken } =
     useIntegrationBearer(event.sku);
 
-  const { jsonEndpoint, csvEndpoint, pdfEndpoint } = useMemo(() => {
+  const { json, csv, pdf } = useMemo(() => {
     if (!bearerToken) {
-      return { jsonEndpoint: "", csvEndpoint: "", pdfEndpoint: "" };
+      return { json: "", csv: "", pdf: "" };
     }
-
-    const json = new URL(
-      `/api/integration/v1/${event.sku}/incidents.json`,
-      import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER
-    );
-
-    const csv = new URL(
-      `/api/integration/v1/${event.sku}/incidents.csv`,
-      import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER
-    );
-
-    const pdf = new URL(
-      `/api/integration/v1/${event.sku}/incidents.pdf`,
-      import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER
-    );
-
-    json.searchParams.set("token", bearerToken);
-    csv.searchParams.set("token", bearerToken);
-    pdf.searchParams.set("token", bearerToken);
-
-    return {
-      jsonEndpoint: json.toString(),
-      csvEndpoint: csv.toString(),
-      pdfEndpoint: pdf.toString(),
-    };
+    return getIntegrationAPIEndpoints(event.sku, { token: bearerToken });
   }, [bearerToken, event.sku]);
 
   if (!isSuccessBearerToken || !bearerToken) {
@@ -703,9 +682,77 @@ const IntegrationInfo: React.FC<ManageTabProps> = ({ event }) => {
           carefully!
         </em>
       </p>
-      <ClickToCopy prefix="JSON" message={jsonEndpoint} />
-      <ClickToCopy prefix="CSV" message={csvEndpoint} className="flex-1" />
-      <ClickToCopy prefix="PDF" message={pdfEndpoint} className="flex-1" />
+      <ClickToCopy prefix="JSON" message={json.toString()} className="flex-1" />
+      <ClickToCopy prefix="CSV" message={csv.toString()} className="flex-1" />
+      <ClickToCopy prefix="PDF" message={pdf.toString()} className="flex-1" />
+    </section>
+  );
+};
+
+type SystemKeyIntegrationInfoProps = ManageTabProps & {
+  instance: string;
+};
+
+const SystemKeyIntegrationInfo: React.FC<SystemKeyIntegrationInfoProps> = ({
+  event,
+  instance,
+}) => {
+  const { data: bearerToken } = useSystemKeyIntegrationBearer(
+    event.sku,
+    instance
+  );
+
+  const { json, csv, pdf } = useMemo(() => {
+    if (!bearerToken) {
+      return { json: "", csv: "", pdf: "" };
+    }
+    return getIntegrationAPIEndpoints(event.sku, {
+      token: bearerToken,
+      instance,
+    });
+  }, [bearerToken, event.sku, instance]);
+
+  return (
+    <div className="mt-4">
+      <ClickToCopy prefix="INSTANCE" message={instance} className="flex-1" />
+      <ClickToCopy prefix="JSON" message={json.toString()} className="flex-1" />
+      <ClickToCopy prefix="CSV" message={csv.toString()} className="flex-1" />
+      <ClickToCopy prefix="PDF" message={pdf.toString()} className="flex-1" />
+    </div>
+  );
+};
+
+const SystemKeyInfo: React.FC<ManageTabProps> = ({ event }) => {
+  const { isSystemKey } = useShareProfile();
+
+  const { data: response, isLoading } = useQuery({
+    queryKey: ["@referee-fyi", "get_instance_list", event.sku],
+    queryFn: () => getInstancesForEvent(event.sku),
+    enabled: isSystemKey,
+  });
+
+  const instances = useMemo(() => {
+    return response?.success ? response.data.instances : [];
+  }, [response]);
+
+  if (!isSystemKey) {
+    return null;
+  }
+
+  if (isLoading) {
+    return <Spinner show />;
+  }
+
+  return (
+    <section>
+      <h2 className="mt-4 font-bold">Instance List</h2>
+      {instances.map((instance) => (
+        <SystemKeyIntegrationInfo
+          key={instance}
+          event={event}
+          instance={instance}
+        />
+      ))}
     </section>
   );
 };
@@ -722,6 +769,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
       <EventSummaryLink event={event} />
       {!isWorldsBuild() ? <DeleteData event={event} /> : null}
       <IntegrationInfo event={event} />
+      <SystemKeyInfo event={event} />
     </section>
   );
 };

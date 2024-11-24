@@ -60,6 +60,11 @@ export type APIGetInvitationResponseBody = UserInvitation;
 // PUT /api/:sku/accept
 export type APIPutInvitationAcceptResponseBody = UserInvitation;
 
+// GET /api/:sku/list
+export type APIGetListShareInstance = {
+  instances: string[];
+};
+
 // PUT /api/:sku/invite
 export type APIPutInviteResponseBody = Record<string, never>;
 

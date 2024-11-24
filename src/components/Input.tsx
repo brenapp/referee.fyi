@@ -243,7 +243,7 @@ export const Select = <T extends string>({
 };
 
 export type RulesSelectProps = SelectBaseProps & {
-  game?: Game;
+  game?: Game | null;
   rule: Rule | null;
   setRule: (rule: Rule | null) => void;
 };

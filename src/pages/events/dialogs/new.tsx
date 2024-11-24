@@ -46,6 +46,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const { data: rules } = useRulesForEvent(event);
   const { data: recentRules } = useRecentRules(
     event?.program.id ?? programs.V5RC,
+    event?.season.id ?? 0,
     4
   );
   const { mutateAsync: addRecentRules } = useAddRecentRules(

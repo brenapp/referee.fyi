@@ -165,7 +165,7 @@
           "link": "https://online.flippingbook.com/view/201482508/63/"
         }
       ]
-    }
+    },
     {
       "name": "General Rules",
       "programs": ["ADC"],
@@ -265,122 +265,6 @@
           "rule": "<T6>",
           "description": "Division Finals",
           "link": "https://online.flippingbook.com/view/201482508/30/"
-        }
-      ]
-    },
-    {
-      "name": "Teamwork Mission Rules",
-      "programs": ["ADC"],
-      "rules": [
-        {
-          "rule": "<TM1>",
-          "description": "Drop Zone Top Cleared.",
-          "link": "https://online.flippingbook.com/view/201482508/33/"
-        },
-        {
-          "rule": "<TM2>",
-          "description": "Bean Bag on Drop Zone",
-          "link": "https://online.flippingbook.com/view/201482508/33/"
-        },
-        {
-          "rule": "<TM3>",
-          "description": "Ball in Scoring Zone.",
-          "link": "https://online.flippingbook.com/view/201482508/35/"
-        },
-        {
-          "rule": "<TM4>",
-          "description": "Land on Small or Large Landing Cube.",
-          "link": "https://online.flippingbook.com/view/201482508/35/"
-        },
-        {
-          "rule": "<TM5>",
-          "description": "Land on a Landing Pad.",
-          "link": "https://online.flippingbook.com/view/201482508/36/"
-        },
-        {
-          "rule": "<TM6>",
-          "description": "Land on the bullseye.",
-          "link": "https://online.flippingbook.com/view/201482508/36/"
-        },
-        {
-          "rule": "<TM7>",
-          "description": "Drone starting position.",
-          "link": "https://online.flippingbook.com/view/201482508/37/"
-        },
-        {
-          "rule": "<TM8>",
-          "description": "Pilot Station.",
-          "link": "https://online.flippingbook.com/view/201482508/37/"
-        },
-        {
-          "rule": "<TM9>",
-          "description": "Visual Observer Station.",
-          "link": "https://online.flippingbook.com/view/201482508/37/"
-        },
-        {
-          "rule": "<TM10>",
-          "description": "Teams must clearly identify their Team color during a Match.",
-          "link": "https://online.flippingbook.com/view/201482508/37/"
-        },
-        {
-          "rule": "<TM11>",
-          "description": "Loading MatchLoad Balls at the Loading Station.",
-          "link": "https://online.flippingbook.com/view/201482508/38/"
-        },
-        {
-          "rule": "<TM12>",
-          "description": "Keep balls on the ramp and in the track.",
-          "link": "https://online.flippingbook.com/view/201482508/38/"
-        },
-        {
-          "rule": "<TM13>",
-          "description": "Only One Drone per Landing Field Element.",
-          "link": "https://online.flippingbook.com/view/201482508/39/"
-        },
-        {
-          "rule": "<TM14>",
-          "description": "Qualification will occur according to the official Match Schedule.",
-          "link": "https://online.flippingbook.com/view/201482508/39/"
-        },
-        {
-          "rule": "<TM15>",
-          "description": "Be at your Match on time.",
-          "link": "https://online.flippingbook.com/view/201482508/39/"
-        },
-        {
-          "rule": "<TM16>",
-          "description": "Each Team will be scheduled for at least 4 Qualification Matches.",
-          "link": "https://online.flippingbook.com/view/201482508/39/"
-        },
-        {
-          "rule": "<TM17>",
-          "description": "Teams are ranked by their average qualification Match scores.",
-          "link": "https://online.flippingbook.com/view/201482508/39/"
-        },
-        {
-          "rule": "<TM18>",
-          "description": "The Alliance Selection process forms 2-Team Alliances for the Elimination Matches.",
-          "link": "https://online.flippingbook.com/view/201482508/40/"
-        },
-        {
-          "rule": "<TM19>",
-          "description": "Send a Team representative to Alliance Selection.",
-          "link": "https://online.flippingbook.com/view/201482508/40/"
-        },
-        {
-          "rule": "<TM20>",
-          "description": "Each Team may only be invited once to join an Alliance.",
-          "link": "https://online.flippingbook.com/view/201482508/40/"
-        },
-        {
-          "rule": "<TM21>",
-          "description": "Number of Alliances for Elimination Matches.",
-          "link": "https://online.flippingbook.com/view/201482508/41/"
-        },
-        {
-          "rule": "<TM22>",
-          "description": "Elimination Matches are played sequentially in rounds.",
-          "link": "https://online.flippingbook.com/view/201482508/41/"
         }
       ]
     },

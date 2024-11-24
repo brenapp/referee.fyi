@@ -28,16 +28,16 @@ export type Rules = {
 
 export function useRulesForSeason(
   season?: Season | null,
-  options?: HookQueryOptions<Game | undefined>
-): UseQueryResult<Game | undefined> {
+  options?: HookQueryOptions<Game | null>
+): UseQueryResult<Game | null> {
   return useQuery({
     queryKey: ["@referee-fyi/useRulesForSeason", season?.id],
     queryFn: async () => {
       if (!season || !season.id) {
-        return undefined;
+        return null;
       }
 
-      return GAME_FETCHERS[season.id]?.();
+      return GAME_FETCHERS[season.id]?.() ?? null;
     },
     ...options,
   });
@@ -45,7 +45,7 @@ export function useRulesForSeason(
 
 export function useRulesForEvent(
   event?: EventData | null
-): UseQueryResult<Game | undefined> {
+): UseQueryResult<Game | null> {
   const { data: season } = useSeason(event?.season.id);
   return useRulesForSeason(season);
 }

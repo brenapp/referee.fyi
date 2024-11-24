@@ -29,7 +29,13 @@ export type TabsProps = Omit<React.HTMLProps<HTMLDivElement>, "children"> & {
   children: Tab[];
 };
 
-export const Tabs: React.FC<TabsProps> = ({ children: tabs, ...props }) => {
+export const Tabs: React.FC<TabsProps> = ({
+  children: tabs,
+  tabClassName,
+  tablistClassName,
+  tabpanelClassName,
+  ...props
+}) => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -51,7 +57,7 @@ export const Tabs: React.FC<TabsProps> = ({ children: tabs, ...props }) => {
     <div {...props} className={twMerge("contents", props.className)}>
       <nav
         role="tablist"
-        className={twMerge("flex max-w-full pt-2", props.tablistClassName)}
+        className={twMerge("flex max-w-full pt-2", tablistClassName)}
       >
         {buttonTabs.map((tab) => tab.content)}
         {contentTabs.map((tab, index) => (
@@ -75,7 +81,7 @@ export const Tabs: React.FC<TabsProps> = ({ children: tabs, ...props }) => {
               data-index={index}
               className={twMerge(
                 "flex flex-1 justify-center gap-2 items-center py-4 data-[selected=true]:text-emerald-400 data-[selected=true]:border-b-4 data-[selected=true]:border-emerald-400",
-                props.tabClassName
+                tabClassName
               )}
             >
               {tab.icon(index === activeTab)}
@@ -86,7 +92,7 @@ export const Tabs: React.FC<TabsProps> = ({ children: tabs, ...props }) => {
       </nav>
       <div
         role="tabpanel"
-        className={twMerge("contents", props.tabpanelClassName)}
+        className={twMerge("contents", tabpanelClassName)}
         id={`tabpanel-${tabs[activeTab].id}`}
         aria-labelledby={`tab-${tabs[activeTab].id}}`}
       >

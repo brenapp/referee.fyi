@@ -1,4 +1,4 @@
-import { Match } from "robotevents";
+import { Match, ProgramAbbr } from "robotevents";
 import { useEvent } from "~utils/hooks/robotevents";
 import { twMerge } from "tailwind-merge";
 import { IdInfo } from "robotevents";
@@ -60,6 +60,27 @@ export type MatchContextProps = {
   allianceClassName?: string;
 } & React.HTMLProps<HTMLDivElement>;
 
+export const SingleAllianceMatchContext: React.FC<MatchContextProps> = ({
+  match,
+  allianceClassName,
+  ...props
+}) => {
+  const teams = match.teams();
+
+  return (
+    <div {...props} aria-label={match.name}>
+      <AllianceList
+        teams={teams}
+        color="blue"
+        score={match.alliances[0].score}
+        className={allianceClassName}
+      />
+    </div>
+  );
+};
+
+const SINGLE_ALLIANCE_PROGRAMS: ProgramAbbr[] = ["ADC", "VIQRC"];
+
 export const MatchContext: React.FC<MatchContextProps> = ({
   match,
   allianceClassName,
@@ -69,18 +90,13 @@ export const MatchContext: React.FC<MatchContextProps> = ({
 
   if (!event) return null;
 
-  if (event.program.code === "VIQRC") {
-    const teams = match.teams();
-
+  if (SINGLE_ALLIANCE_PROGRAMS.includes(event.program?.code as ProgramAbbr)) {
     return (
-      <div {...props} aria-label={match.name}>
-        <AllianceList
-          teams={teams}
-          color="blue"
-          score={match.alliances[0].score}
-          className={allianceClassName}
-        />
-      </div>
+      <SingleAllianceMatchContext
+        match={match}
+        allianceClassName={allianceClassName}
+        {...props}
+      />
     );
   }
 

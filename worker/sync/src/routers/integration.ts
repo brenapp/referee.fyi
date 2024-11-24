@@ -120,10 +120,13 @@ integrationRouter
     const id = env.INCIDENTS.idFromString(request.instance.secret);
     const stub = env.INCIDENTS.get(id);
 
-    const incidentResponse = await stub
-      .handleJSON()
-      .then((response) => response.json<ShareResponse<Incident[]>>());
-    if (!incidentResponse.success) {
+    const incidentResponse = await stub.handleJSON();
+
+    const body = await (incidentResponse.json() as Promise<
+      ShareResponse<Incident[]>
+    >);
+
+    if (!body.success) {
       return response({
         success: false,
         reason: "bad_request",
@@ -136,7 +139,7 @@ integrationRouter
     const output = await generateIncidentReportPDF({
       sku: request.params.sku,
       client,
-      incidents: incidentResponse.data,
+      incidents: body.data,
       users: invitations.map((invitation) => invitation.user),
     });
 

@@ -36,6 +36,7 @@ export type UserInvitation = Pick<
 // POST /api/user
 export type APIRegisterUserResponseBody = {
   user: User;
+  isSystemKey: boolean;
 };
 
 // PUT /api/:sku/request

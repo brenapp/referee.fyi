@@ -23,6 +23,7 @@ jobs:
         working-directory: "lib/share"
   deploy:
     runs-on: ubuntu-latest
+    needs: test-lib
     name: Deploy Main
     steps:
       - uses: actions/checkout@v3

@@ -22,6 +22,7 @@ jobs:
       - run: npm run test
         working-directory: "lib/share"
   deploy:
+    needs: test-lib
     runs-on: ubuntu-latest
     name: Deploy Staging
     steps:

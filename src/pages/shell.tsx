@@ -237,19 +237,23 @@ const Rules: React.FC = () => {
 
   const [rule, setRule] = useState<Rule | null>(null);
 
+  const onClose = useCallback(() => {
+    setRule(null);
+    setOpen(false);
+  }, []);
 
   return (
     <>
       <Dialog
         open={open}
         mode="modal"
-        onClose={() => setOpen(false)}
+        onClose={onClose}
         aria-label="Rules Reference"
       >
         <DialogCustomHeader>
           <IconButton
             icon={<XMarkIcon height={24} />}
-            onClick={() => setOpen(false)}
+            onClick={onClose}
             className="bg-transparent"
             autoFocus
           />
@@ -263,6 +267,7 @@ const Rules: React.FC = () => {
         <DialogBody className="px-2 flex gap-5 flex-col">
           <section className="bg-white flex-1 rounded-md">
             <iframe
+              key={program}
               src={rule?.link ?? "about:blank"}
               className="w-full h-full"
             ></iframe>

@@ -1,4 +1,4 @@
-name: Deploy Prod
+name: Production Build
 
 on:
   push:
@@ -6,6 +6,21 @@ on:
       - main
 
 jobs:
+  test-lib:
+    runs-on: ubuntu-latest
+    name: Test Library
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+      - run: npm ci
+      - run: npm run test
+        working-directory: "lib/consistency"
+      - run: npm run test
+        working-directory: "lib/pdf"
+      - run: npm run test
+        working-directory: "lib/share"
   deploy:
     runs-on: ubuntu-latest
     name: Deploy Main

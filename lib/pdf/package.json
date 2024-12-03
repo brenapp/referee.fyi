@@ -7,7 +7,8 @@
   "exports": "./index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "tsc -w"
+    "dev": "tsc -w",
+    "test": "echo 'No Tests'"
   },
   "author": "",
   "license": "ISC",

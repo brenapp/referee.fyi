@@ -22,8 +22,8 @@ import {
   DialogCustomHeader,
   DialogHeader,
 } from "~components/Dialog";
-import { ProgramAbbr, ProgramCode, programs } from "robotevents";
-import { Input, RulesSelect, Select } from "~components/Input";
+import { ProgramCode } from "robotevents";
+import { Input, RulesSelect } from "~components/Input";
 import { Rule, useRulesForSeason } from "~utils/hooks/rules";
 import { Toaster } from "react-hot-toast";
 import { useEventInvitation } from "~utils/hooks/share";
@@ -229,22 +229,7 @@ const Rules: React.FC = () => {
   const { data: event } = useCurrentEvent();
 
   const [open, setOpen] = useState(false);
-  const selectablePrograms: ProgramCode[] = [
-    programs.V5RC,
-    programs.VIQRC,
-    programs.VURC,
-    programs.VAIRC,
-    programs.ADC,
-  ];
-  const selectableProgramAbbr: Partial<Record<ProgramCode, ProgramAbbr>> = {
-    [programs.V5RC]: "V5RC",
-    [programs.VIQRC]: "VIQRC",
-    [programs.VURC]: "VURC",
-    [programs.VAIRC]: "VAIRC",
-    [programs.ADC]: "ADC",
-  };
-
-  const [program, setProgram] = useState<ProgramCode>(programs.V5RC);
+  const program = useMemo(() => event?.program.id as ProgramCode, [event]);
 
   const { data: currentSeasonForProgram } = useCurrentSeason(program);
   const { data: season } = useSeason(event?.season.id);
@@ -252,17 +237,6 @@ const Rules: React.FC = () => {
 
   const [rule, setRule] = useState<Rule | null>(null);
 
-  useEffect(() => {
-    if (program) {
-      setRule(null);
-    }
-  }, [program]);
-
-  useEffect(() => {
-    if (event) {
-      setProgram(event.program.id as ProgramCode);
-    }
-  }, [event]);
 
   return (
     <>
@@ -279,28 +253,15 @@ const Rules: React.FC = () => {
             className="bg-transparent"
             autoFocus
           />
-          <Select
-            value={program}
-            onChange={(e) =>
-              setProgram(Number.parseInt(e.target.value) as ProgramCode)
-            }
-            className="flex-1"
-          >
-            {selectablePrograms.map((program) => (
-              <option key={program} value={program}>
-                {selectableProgramAbbr[program]}
-              </option>
-            ))}
-          </Select>
-        </DialogCustomHeader>
-        <DialogBody className="px-2 flex gap-5 flex-col">
           <RulesSelect
             game={rules}
             rule={rule}
             setRule={setRule}
             className="w-full"
           />
-          <section className="p-4 bg-white flex-1 rounded-md">
+        </DialogCustomHeader>
+        <DialogBody className="px-2 flex gap-5 flex-col">
+          <section className="bg-white flex-1 rounded-md">
             <iframe
               src={rule?.link ?? "about:blank"}
               className="w-full h-full"

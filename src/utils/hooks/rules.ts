@@ -37,7 +37,15 @@ export function useRulesForSeason(
         return null;
       }
 
-      return GAME_FETCHERS[season.id]?.() ?? null;
+      const game = (await GAME_FETCHERS[season.id]?.()) ?? null;
+      const ruleGroups = game.ruleGroups.filter((group) =>
+        group.programs.includes(season.program?.code as ProgramAbbr)
+      );
+
+      return {
+        ...game,
+        ruleGroups,
+      };
     },
     ...options,
   });

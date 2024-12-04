@@ -242,6 +242,10 @@ const Rules: React.FC = () => {
     setOpen(false);
   }, []);
 
+  if (!program || !event) {
+    return null;
+  }
+
   return (
     <>
       <Dialog

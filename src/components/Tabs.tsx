@@ -1,6 +1,7 @@
 import { twMerge } from "tailwind-merge";
 import { useCallback, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { ComponentParts } from "./parts";
 
 export type TabsNavigationState = {
   tab?: number;
@@ -22,18 +23,19 @@ export type TabButton = {
 
 export type Tab = TabContent | TabButton;
 
+export type TabParts = ComponentParts<{
+  tab: React.HTMLProps<HTMLDivElement>;
+  tablist: React.HTMLProps<HTMLDivElement>;
+  tabpanel: React.HTMLProps<HTMLDivElement>;
+}>;
+
 export type TabsProps = Omit<React.HTMLProps<HTMLDivElement>, "children"> & {
-  tablistClassName?: string;
-  tabpanelClassName?: string;
-  tabClassName?: string;
   children: Tab[];
-};
+} & TabParts;
 
 export const Tabs: React.FC<TabsProps> = ({
   children: tabs,
-  tabClassName,
-  tablistClassName,
-  tabpanelClassName,
+  parts,
   ...props
 }) => {
   const location = useLocation();
@@ -57,7 +59,8 @@ export const Tabs: React.FC<TabsProps> = ({
     <div {...props} className={twMerge("contents", props.className)}>
       <nav
         role="tablist"
-        className={twMerge("flex max-w-full pt-2", tablistClassName)}
+        {...parts?.tablist}
+        className={twMerge("flex max-w-full pt-2", parts?.tablist?.className)}
       >
         {buttonTabs.map((tab) => tab.content)}
         {contentTabs.map((tab, index) => (
@@ -79,9 +82,10 @@ export const Tabs: React.FC<TabsProps> = ({
             <div
               data-selected={index === activeTab}
               data-index={index}
+              {...parts?.tab}
               className={twMerge(
                 "flex flex-1 justify-center gap-2 items-center py-4 data-[selected=true]:text-emerald-400 data-[selected=true]:border-b-4 data-[selected=true]:border-emerald-400",
-                tabClassName
+                parts?.tab?.className
               )}
             >
               {tab.icon(index === activeTab)}
@@ -92,9 +96,10 @@ export const Tabs: React.FC<TabsProps> = ({
       </nav>
       <div
         role="tabpanel"
-        className={twMerge("contents", tabpanelClassName)}
         id={`tabpanel-${tabs[activeTab].id}`}
         aria-labelledby={`tab-${tabs[activeTab].id}}`}
+        {...parts?.tabpanel}
+        className={twMerge("contents", parts?.tabpanel?.className)}
       >
         {contentTabs[activeTab].content}
       </div>

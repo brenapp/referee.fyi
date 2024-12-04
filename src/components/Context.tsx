@@ -2,6 +2,7 @@ import { Match, ProgramAbbr } from "robotevents";
 import { useEvent } from "~utils/hooks/robotevents";
 import { twMerge } from "tailwind-merge";
 import { IdInfo } from "robotevents";
+import { ComponentParts } from "./parts";
 
 export type AllianceListProps = {
   teams: IdInfo[];
@@ -55,14 +56,18 @@ export const AllianceList: React.FC<AllianceListProps> = ({
   );
 };
 
+export type MatchContextParts = ComponentParts<{
+  alliance: Partial<AllianceListProps>;
+}>;
+
 export type MatchContextProps = {
   match: Match;
-  allianceClassName?: string;
-} & React.HTMLProps<HTMLDivElement>;
+} & React.HTMLProps<HTMLDivElement> &
+  MatchContextParts;
 
 export const SingleAllianceMatchContext: React.FC<MatchContextProps> = ({
   match,
-  allianceClassName,
+  parts,
   ...props
 }) => {
   const teams = match.teams();
@@ -73,7 +78,7 @@ export const SingleAllianceMatchContext: React.FC<MatchContextProps> = ({
         teams={teams}
         color="blue"
         score={match.alliances[0].score}
-        className={allianceClassName}
+        {...parts?.alliance}
       />
     </div>
   );
@@ -83,7 +88,7 @@ const SINGLE_ALLIANCE_PROGRAMS: ProgramAbbr[] = ["ADC", "VIQRC"];
 
 export const MatchContext: React.FC<MatchContextProps> = ({
   match,
-  allianceClassName,
+  parts,
   ...props
 }) => {
   const { data: event } = useEvent(match.event.code);
@@ -92,11 +97,7 @@ export const MatchContext: React.FC<MatchContextProps> = ({
 
   if (SINGLE_ALLIANCE_PROGRAMS.includes(event.program?.code as ProgramAbbr)) {
     return (
-      <SingleAllianceMatchContext
-        match={match}
-        allianceClassName={allianceClassName}
-        {...props}
-      />
+      <SingleAllianceMatchContext match={match} parts={parts} {...props} />
     );
   }
 
@@ -108,15 +109,15 @@ export const MatchContext: React.FC<MatchContextProps> = ({
       <AllianceList
         teams={red.teams.map((t) => t.team!)}
         color="red"
-        className={allianceClassName}
         score={red.score}
+        {...parts?.alliance}
       />
       <AllianceList
         teams={blue.teams.map((t) => t.team!)}
         color="blue"
         reverse
-        className={allianceClassName}
         score={blue.score}
+        {...parts?.alliance}
       />
     </div>
   );

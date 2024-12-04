@@ -56,7 +56,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
           className="flex-1"
           data={teams}
           options={{ estimateSize: () => 64 }}
-          listClassName="mb-12"
+          parts={{ list: { className: "mb-12" } }}
         >
           {(team) => {
             if (!team) {
@@ -137,7 +137,11 @@ export const EventSkillsPage: React.FC = () => {
       />
       <Tabs
         className="flex-1"
-        tablistClassName="absolute bottom-0 right-0 left-0 z-10 p-0 bg-zinc-900"
+        parts={{
+          tablist: {
+            className: "absolute bottom-0 right-0 left-0 z-10 p-0 bg-zinc-900",
+          },
+        }}
       >
         {[
           {

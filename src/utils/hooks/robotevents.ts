@@ -218,20 +218,19 @@ export function useDivisionTeams(
 }
 
 const roundUnknown = 0;
+const roundOrder = [
+  rounds.Practice,
+  rounds.Qualification,
+  rounds.RoundRobin,
+  rounds.RoundOf16,
+  rounds.Quarterfinals,
+  rounds.Semifinals,
+  rounds.Finals,
+  rounds.TopN,
+  roundUnknown,
+] as number[];
 
 export function logicalMatchComparison(a: MatchData, b: MatchData) {
-  const roundOrder = [
-    rounds.Practice,
-    rounds.Qualification,
-    rounds.RoundRobin,
-    rounds.RoundOf16,
-    rounds.Quarterfinals,
-    rounds.Semifinals,
-    rounds.Finals,
-    rounds.TopN,
-    roundUnknown,
-  ] as number[];
-
   if (a.round !== b.round) {
     return roundOrder.indexOf(a.round) - roundOrder.indexOf(b.round);
   }
@@ -240,7 +239,19 @@ export function logicalMatchComparison(a: MatchData, b: MatchData) {
     return a.instance - b.instance;
   }
 
-  return a.matchnum - b.matchnum;
+  if (a.matchnum !== b.matchnum) {
+    return a.matchnum - b.matchnum;
+  }
+
+  // League events may have multiple quals/practice with the same matchnum, so
+  // sort by scheduled time.
+  if (a.scheduled || b.scheduled) {
+    const scheduledA = new Date(a.scheduled ?? 0).getTime();
+    const scheduledB = new Date(b.scheduled ?? 0).getTime();
+    return scheduledA - scheduledB;
+  }
+
+  return 0;
 }
 
 export function useEventMatches<T = Match[]>(

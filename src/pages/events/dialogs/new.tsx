@@ -415,7 +415,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
           <MatchContext
             match={incident.match}
             className="mt-4 justify-between"
-            allianceClassName="w-full"
+            parts={{ alliance: { className: "w-full" } }}
           />
         )}
         <label>

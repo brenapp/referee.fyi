@@ -378,7 +378,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
           <MatchContext
             match={match}
             className="mb-4"
-            allianceClassName="w-full"
+            parts={{ alliance: { className: "w-full" } }}
           />
         ) : null}
         <motion.div

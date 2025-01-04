@@ -4,9 +4,9 @@ import {
   Incident as IncidentData,
   matchToString,
 } from "~utils/data/incident";
-import { IconButton } from "./Button";
+import { Button } from "./Button";
 import { EditIncidentDialog } from "./dialogs/edit";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { PencilSquareIcon } from "@heroicons/react/20/solid";
 
 const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
@@ -27,6 +27,23 @@ export const Incident: React.FC<IncidentProps> = ({
   ...props
 }) => {
   const [editIncidentOpen, setEditIncidentOpen] = useState(false);
+
+  const highlights = useMemo(() => {
+    const base = [
+      incident.team,
+      incident.match ? matchToString(incident.match) : "Non-Match",
+      incident.outcome,
+    ];
+
+    if (incident.rules.length > 1) {
+      base.push(incident.rules[0] + " + " + (incident.rules.length - 1));
+    } else {
+      base.push(incident.rules[0]);
+    }
+
+    return base;
+  }, [incident]);
+
   return (
     <>
       <EditIncidentDialog
@@ -43,14 +60,8 @@ export const Incident: React.FC<IncidentProps> = ({
           props.className
         )}
       >
-        <div className="flex-1">
-          <p className="text-sm">
-            {[
-              incident.team,
-              incident.match ? matchToString(incident.match) : "Non-Match",
-              incident.outcome,
-            ].join(" • ")}
-          </p>
+        <div className="flex-1 overflow-clip">
+          <p className="text-sm whitespace-nowrap">{highlights.join(" • ")}</p>
           <p>
             {incident.notes}
             {import.meta.env.DEV ? (
@@ -66,11 +77,13 @@ export const Incident: React.FC<IncidentProps> = ({
           </ul>
         </div>
         {!readonly ? (
-          <IconButton
-            icon={<PencilSquareIcon height={20} />}
-            className="bg-transparent text-black/75"
+          <Button
+            className="w-min text-black/75 active:bg-black/50"
+            mode="transparent"
             onClick={() => setEditIncidentOpen(true)}
-          />
+          >
+            <PencilSquareIcon height={20} />
+          </Button>
         ) : null}
       </div>
     </>

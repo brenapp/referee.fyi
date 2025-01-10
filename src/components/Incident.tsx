@@ -41,17 +41,28 @@ export const Incident: React.FC<IncidentProps> = ({
       </span>,
     ];
 
+    var validIcon;
+
     incident.rules.forEach((rule) => {
-      const icon = rules?.ruleGroups.flatMap((ruleGroup) => {
-        const result = ruleGroup.rules.find((r) => r.rule === rule); // Find a matching rule
-        return result?.icon ? (
-          <img
-            src={result.icon}
-            alt={`Icon`}
-            className="max-h-5 max-w-5 object-contain"
-          />
-        ) : null; // Return the icon as an <img> element
-      });
+      const icon = rules?.ruleGroups
+        .flatMap((ruleGroup) => {
+          const result = ruleGroup.rules.find((r) => r.rule === rule); // Find a matching rule
+
+          if (result?.icon) {
+            validIcon = (
+              <img
+                src={result.icon}
+                alt="Icon"
+                className="max-h-5 max-w-5 object-contain"
+              />
+            );
+            // Return the icon and stop further processing
+            return [validIcon]; // Wrap it in an array for flatMap to work
+          }
+
+          return [];
+        })
+        .find(Boolean); // Find the first valid icon and stop at that point
 
       if (icon) {
         base.push(<span>{icon}</span>);

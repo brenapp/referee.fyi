@@ -35,15 +35,14 @@ export const Incident: React.FC<IncidentProps> = ({
 
   const highlights = useMemo(() => {
     const base = [
-      <span>{incident.team}</span>,
-      <span>
+      <span key={`${incident.id}-name`}>{incident.team}</span>,
+      <span key={`${incident.id}-match`}>
         {incident.match ? matchToString(incident.match) : "Non-Match"}
       </span>,
     ];
 
     var validIcon;
-
-    incident.rules.forEach((rule) => {
+    incident.rules.forEach((rule, count) => {
       const icon = rules?.ruleGroups
         .flatMap((ruleGroup) => {
           const result = ruleGroup.rules.find((r) => r.rule === rule); // Find a matching rule
@@ -65,15 +64,15 @@ export const Incident: React.FC<IncidentProps> = ({
         .find(Boolean); // Find the first valid icon and stop at that point
 
       if (icon) {
-        base.push(<span>{icon}</span>);
+        base.push(<span key={`${incident.id}-icon-${count}`}>{icon}</span>);
       }
 
-      base.push(<span>{rule}</span>);
+      base.push(<span key={`${incident.id}-rule-${count}`}>{rule}</span>);
     });
 
     // The background colour should make it obvious if an incident is major or minor
     // But add the info at the end for accessability anyway
-    base.push(<span>{incident.outcome}</span>);
+    base.push(<span key={`${incident.id}-outcome`}>{incident.outcome}</span>);
 
     return base;
   }, [incident, rules]);

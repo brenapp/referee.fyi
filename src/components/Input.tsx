@@ -357,7 +357,7 @@ export const RulesMultiSelect: React.FC<RulesMultiSelectProps> = ({
                     <div className="flex items-center justify-center w-6 h-">
                       <img
                         src={rule.icon}
-                        alt={`${rule.rule} icon`}
+                        alt={`Icon`}
                         className="max-h-6 max-w-6 object-contain"
                       />
                     </div>
@@ -376,7 +376,16 @@ export const RulesMultiSelect: React.FC<RulesMultiSelectProps> = ({
             className="p-2 flex w-full items-center bg-zinc-800 rounded-md"
           >
             <p className="flex-1 mr-1">
-              <strong className="font-mono mr-2">{rule.rule}</strong>
+              <div className="flex items-center gap-x-1">
+                <strong className="font-mono mr-2">{rule.rule}</strong>
+                {rule.icon && (
+                  <img
+                    src={rule.icon}
+                    alt={`Icon`}
+                    className="max-h-6 w-auto"
+                  />
+                )}
+              </div>
               <span>{rule.description}</span>
             </p>
             <IconButton

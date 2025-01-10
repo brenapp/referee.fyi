@@ -8,6 +8,8 @@ import { Button } from "./Button";
 import { EditIncidentDialog } from "./dialogs/edit";
 import { useMemo, useState } from "react";
 import { PencilSquareIcon } from "@heroicons/react/20/solid";
+import { useCurrentEvent } from "~utils/hooks/state";
+import { useRulesForEvent } from "~utils/hooks/rules";
 
 const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
   Minor: "bg-yellow-400 text-yellow-900",
@@ -28,21 +30,42 @@ export const Incident: React.FC<IncidentProps> = ({
 }) => {
   const [editIncidentOpen, setEditIncidentOpen] = useState(false);
 
+  const { data: eventData } = useCurrentEvent();
+  const { data: rules } = useRulesForEvent(eventData);
+
   const highlights = useMemo(() => {
     const base = [
-      incident.team,
-      incident.match ? matchToString(incident.match) : "Non-Match",
-      incident.outcome,
+      <span>{incident.team}</span>,
+      <span>
+        {incident.match ? matchToString(incident.match) : "Non-Match"}
+      </span>,
     ];
 
-    if (incident.rules.length > 1) {
-      base.push(incident.rules[0] + " + " + (incident.rules.length - 1));
-    } else {
-      base.push(incident.rules[0]);
-    }
+    incident.rules.forEach((rule) => {
+      const icon = rules?.ruleGroups.flatMap((ruleGroup) => {
+        const result = ruleGroup.rules.find((r) => r.rule === rule); // Find a matching rule
+        return result?.icon ? (
+          <img
+            src={result.icon}
+            alt={`Icon`}
+            className="max-h-5 max-w-5 object-contain"
+          />
+        ) : null; // Return the icon as an <img> element
+      });
+
+      if (icon) {
+        base.push(<span>{icon}</span>);
+      }
+
+      base.push(<span>{rule}</span>);
+    });
+
+    // The background colour should make it obvious if an incident is major or minor
+    // But add the info at the end for accessability anyway
+    base.push(<span>{incident.outcome}</span>);
 
     return base;
-  }, [incident]);
+  }, [incident, rules]);
 
   return (
     <>
@@ -60,8 +83,10 @@ export const Incident: React.FC<IncidentProps> = ({
           props.className
         )}
       >
-        <div className="flex-1 overflow-clip">
-          <p className="text-sm whitespace-nowrap">{highlights.join(" • ")}</p>
+        <div className="flex-1 overflow-x-auto">
+          <div className="text-sm whitespace-nowrap">
+            <div className="flex items-center gap-x-3">{highlights}</div>
+          </div>
           <p>
             {incident.notes}
             {import.meta.env.DEV ? (

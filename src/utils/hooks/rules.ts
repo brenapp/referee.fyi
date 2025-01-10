@@ -7,6 +7,7 @@ export type Rule = {
   rule: string;
   description: string;
   link: string;
+  icon?: string;
 };
 
 export type RuleGroup = {

@@ -475,7 +475,16 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
                 onClick={() => onToggleRule(rule)}
                 key={rule.rule}
               >
-                {rule.rule}
+                <div className="flex items-center gap-x-1">
+                  {rule.rule}
+                  {rule.icon && (
+                    <img
+                      src={rule.icon}
+                      alt={`Icon`}
+                      className="max-h-6 w-auto"
+                    />
+                  )}
+                </div>
               </Button>
             ))}
           </div>

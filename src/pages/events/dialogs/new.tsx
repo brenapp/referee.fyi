@@ -212,6 +212,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       if (!newMatch) return;
 
       setIncidentField("match", newMatch);
+      setIncidentField("skills", undefined);
       setMatch(newMatch.id);
     },
     [matches, allTeamMatches, division]

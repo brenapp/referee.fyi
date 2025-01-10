@@ -351,7 +351,19 @@ export const RulesMultiSelect: React.FC<RulesMultiSelectProps> = ({
                 data-rulegroup={group.name}
                 key={rule.rule}
               >
-                {rule.rule} {rule.description}
+                <div className="flex items-center gap-x-1">
+                  <div>{rule.rule}</div>
+                  {rule.icon && (
+                    <div className="flex items-center justify-center w-6 h-">
+                      <img
+                        src={rule.icon}
+                        alt={`${rule.rule} icon`}
+                        className="max-h-6 max-w-6 object-contain"
+                      />
+                    </div>
+                  )}
+                  <div>{rule.description}</div>
+                </div>
               </option>
             ))}
           </optgroup>

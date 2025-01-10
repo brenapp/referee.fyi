@@ -475,14 +475,14 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
                 key={rule.rule}
               >
                 <div className="flex items-center gap-x-1">
+                  {rule.rule}
                   {rule.icon && (
                     <img
                       src={rule.icon}
-                      alt={`${rule.rule} icon`}
-                      className="w-6 h-6"
+                      alt={`Icon`}
+                      className="max-h-6 w-auto"
                     />
                   )}
-                  {rule.rule}
                 </div>
               </Button>
             ))}

@@ -375,7 +375,7 @@ export const RulesMultiSelect: React.FC<RulesMultiSelectProps> = ({
             key={rule.rule}
             className="p-2 flex w-full items-center bg-zinc-800 rounded-md"
           >
-            <p className="flex-1 mr-1">
+            <div className="flex-1 mr-1">
               <div className="flex items-center gap-x-1">
                 <strong className="font-mono mr-2">{rule.rule}</strong>
                 {rule.icon && (
@@ -387,7 +387,7 @@ export const RulesMultiSelect: React.FC<RulesMultiSelectProps> = ({
                 )}
               </div>
               <span>{rule.description}</span>
-            </p>
+            </div>
             <IconButton
               className="bg-transparent"
               icon={<TrashIcon height={24} />}

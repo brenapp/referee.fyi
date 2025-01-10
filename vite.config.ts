@@ -114,6 +114,16 @@ export default defineConfig({
             sizes: "512x512",
             type: "image/svg",
           },
+          {
+            src: "High_Stakes_Goal.png",
+            sizes: "240x362",
+            type: "image/png",
+          },
+          {
+            src: "High_Stakes_Ring.png",
+            sizes: "379x318",
+            type: "image/svg",
+          },
         ],
         screenshots: [
           {

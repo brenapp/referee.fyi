@@ -93,7 +93,7 @@ export const Incident: React.FC<IncidentProps> = ({
           props.className
         )}
       >
-        <div className="flex-1 overflow-x-auto">
+        <div className="flex-1 overflow-x-auto overflow-y-clip">
           <div className="text-sm whitespace-nowrap">
             <div className="flex items-center gap-x-3">{highlights}</div>
           </div>

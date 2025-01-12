@@ -23,6 +23,15 @@ export async function getRecentRules(programId: number, season: number) {
   return (await get<Rule[]>(key)) ?? [];
 }
 
+export async function setRecentRules(
+  programId: number,
+  season: number,
+  rules: Rule[]
+) {
+  const key = `rule_history_${programId}_${season}`;
+  await set(key, rules);
+}
+
 export function useRecentEvents(limit?: number) {
   return useQuery({
     queryKey: ["recent_events"],

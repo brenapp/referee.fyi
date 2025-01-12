@@ -37,13 +37,13 @@
           "rule": "<SG6-R>",
           "description": "Possession is limited to two Rings",
           "link": "https://www.robotevents.com/storage/game_manual/V5RC_2024-2025_High_Stakes/rules/SG6.html",
-          "icon": "/icons/High_Stakes_Ring.png"
+          "icon": "/rules/V5RC/2024-2025/icons/High_Stakes_Goal.png"
         },
         {
           "rule": "<SG6-G>",
           "description": "Possession is limited to one Mobile Goal",
           "link": "https://www.robotevents.com/storage/game_manual/V5RC_2024-2025_High_Stakes/rules/SG6.html",
-          "icon": "/icons/High_Stakes_Goal.png"
+          "icon": "/rules/V5RC/2024-2025/icons/High_Stakes_Ring.png"
         },
         {
           "rule": "<SG7>",

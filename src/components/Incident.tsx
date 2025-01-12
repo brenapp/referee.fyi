@@ -6,10 +6,8 @@ import {
 } from "~utils/data/incident";
 import { Button } from "./Button";
 import { EditIncidentDialog } from "./dialogs/edit";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { PencilSquareIcon } from "@heroicons/react/20/solid";
-import { useCurrentEvent } from "~utils/hooks/state";
-import { useRulesForEvent } from "~utils/hooks/rules";
 
 const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
   Minor: "bg-yellow-400 text-yellow-900",
@@ -23,59 +21,45 @@ export type IncidentProps = {
   readonly?: boolean;
 } & React.HTMLProps<HTMLDivElement>;
 
+export type IncidentHighlightProps = {
+  incident: IncidentData;
+};
+
+export const IncidentHighlights: React.FC<IncidentHighlightProps> = ({
+  incident,
+}) => {
+  const rule1 = incident.rules[0];
+  const img1 = "";
+  return (
+    <>
+      <span key={`${incident.id}-name`}>{incident.team}</span>
+      {"•"}
+      <span key={`${incident.id}-match`}>
+        {incident.match ? matchToString(incident.match) : "Non-Match"}
+      </span>
+      {"•"}
+      <span>
+        {incident.rules.length >= 2 ? (
+          `${incident.rules.length} Rules`
+        ) : (
+          <>
+            <img src={img1}></img>
+            <span>{rule1}</span>
+          </>
+        )}
+      </span>
+      {"•"}
+      <span key={`${incident.id}-outcome`}>{incident.outcome}</span>
+    </>
+  );
+};
+
 export const Incident: React.FC<IncidentProps> = ({
   incident,
   readonly,
   ...props
 }) => {
   const [editIncidentOpen, setEditIncidentOpen] = useState(false);
-
-  const { data: eventData } = useCurrentEvent();
-  const { data: rules } = useRulesForEvent(eventData);
-
-  const highlights = useMemo(() => {
-    const base = [
-      <span key={`${incident.id}-name`}>{incident.team}</span>,
-      <span key={`${incident.id}-match`}>
-        {incident.match ? matchToString(incident.match) : "Non-Match"}
-      </span>,
-    ];
-
-    var validIcon;
-    incident.rules.forEach((rule, count) => {
-      const icon = rules?.ruleGroups
-        .flatMap((ruleGroup) => {
-          const result = ruleGroup.rules.find((r) => r.rule === rule); // Find a matching rule
-
-          if (result?.icon) {
-            validIcon = (
-              <img
-                src={result.icon}
-                alt="Icon"
-                className="max-h-5 max-w-5 object-contain"
-              />
-            );
-            // Return the icon and stop further processing
-            return [validIcon]; // Wrap it in an array for flatMap to work
-          }
-
-          return [];
-        })
-        .find(Boolean); // Find the first valid icon and stop at that point
-
-      if (icon) {
-        base.push(<span key={`${incident.id}-icon-${count}`}>{icon}</span>);
-      }
-
-      base.push(<span key={`${incident.id}-rule-${count}`}>{rule}</span>);
-    });
-
-    // The background colour should make it obvious if an incident is major or minor
-    // But add the info at the end for accessability anyway
-    base.push(<span key={`${incident.id}-outcome`}>{incident.outcome}</span>);
-
-    return base;
-  }, [incident, rules]);
 
   return (
     <>
@@ -93,9 +77,11 @@ export const Incident: React.FC<IncidentProps> = ({
           props.className
         )}
       >
-        <div className="flex-1 overflow-x-auto overflow-y-clip">
+        <div className="flex-1 overflow-clip">
           <div className="text-sm whitespace-nowrap">
-            <div className="flex items-center gap-x-3">{highlights}</div>
+            <div className="flex items-center gap-x-1">
+              <IncidentHighlights incident={incident} />
+            </div>
           </div>
           <p>
             {incident.notes}

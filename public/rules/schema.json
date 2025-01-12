@@ -75,9 +75,8 @@
         },
         "icon": {
           "type": "string",
-          "format": "uri",
-          "description": "A link to a small image icon which represents the rule",
-          "required": "false"
+          "format": "uri-reference",
+          "description": "A link to a small image icon which represents the rule"
         }
       }
     }

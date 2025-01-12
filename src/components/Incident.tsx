@@ -8,6 +8,8 @@ import { Button } from "./Button";
 import { EditIncidentDialog } from "./dialogs/edit";
 import { useState } from "react";
 import { PencilSquareIcon } from "@heroicons/react/20/solid";
+import { useCurrentEvent } from "~utils/hooks/state";
+import { useRulesForEvent } from "~utils/hooks/rules";
 
 const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
   Minor: "bg-yellow-400 text-yellow-900",
@@ -28,8 +30,12 @@ export type IncidentHighlightProps = {
 export const IncidentHighlights: React.FC<IncidentHighlightProps> = ({
   incident,
 }) => {
-  const rule1 = incident.rules[0];
-  const img1 = "";
+  const { data: eventData } = useCurrentEvent();
+  const { data: game } = useRulesForEvent(eventData);
+
+  const firstRule = incident.rules[0];
+  const firstRuleIcon = game?.rulesLookup?.[firstRule]?.icon;
+
   return (
     <>
       <span key={`${incident.id}-name`}>{incident.team}</span>
@@ -42,10 +48,16 @@ export const IncidentHighlights: React.FC<IncidentHighlightProps> = ({
         {incident.rules.length >= 2 ? (
           `${incident.rules.length} Rules`
         ) : (
-          <>
-            <img src={img1}></img>
-            <span>{rule1}</span>
-          </>
+          <div className="flex gap-x-1">
+            {firstRuleIcon && (
+              <img
+                alt="Icon"
+                className="max-h-5 max-w-5 object-contain"
+                src={firstRuleIcon}
+              ></img>
+            )}
+            <span>{firstRule}</span>
+          </div>
         )}
       </span>
       {"•"}

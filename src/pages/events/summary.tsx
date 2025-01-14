@@ -298,7 +298,7 @@ export const EventSummaryPage: React.FC = () => {
         </nav>
         <section className="flex gap-1 flex-wrap">
           {commonRules.slice(0, 5).map(([rule, count]) => (
-            <p
+            <div
               className="font-mono bg-emerald-900 rounded-lg px-2 py-1 text-sm text-center"
               key={rule}
             >
@@ -313,7 +313,7 @@ export const EventSummaryPage: React.FC = () => {
                 {rule.replace(/[<>]/g, "")}
                 <span className="text-emerald-400 pl-1">{count}</span>
               </div>
-            </p>
+            </div>
           ))}
         </section>
         <VirtualizedList

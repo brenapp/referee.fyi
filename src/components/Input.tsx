@@ -358,31 +358,33 @@ export const RulesMultiSelect: React.FC<RulesMultiSelectProps> = ({
         ))}
       </Select>
       <ul className="mt-4 flex flex-wrap gap-2">
-        {rules.map((rule) => (
-          <li
-            key={rule.rule}
-            className="p-2 flex w-full items-center bg-zinc-800 rounded-md"
-          >
-            <div className="flex-1 mr-1">
-              <div className="flex items-center gap-x-1">
-                <strong className="font-mono mr-2">{rule.rule}</strong>
-                {rule.icon && (
-                  <img
-                    src={rule.icon}
-                    alt={`Icon`}
-                    className="max-h-6 w-auto"
-                  />
-                )}
+        {rules
+          .filter((rule) => rule)
+          .map((rule) => (
+            <li
+              key={rule.rule}
+              className="p-2 flex w-full items-center bg-zinc-800 rounded-md"
+            >
+              <div className="flex-1 mr-1">
+                <div className="flex items-center gap-x-1">
+                  <strong className="font-mono mr-2">{rule.rule}</strong>
+                  {rule.icon && (
+                    <img
+                      src={rule.icon}
+                      alt={`Icon`}
+                      className="max-h-6 w-auto"
+                    />
+                  )}
+                </div>
+                <span>{rule.description}</span>
               </div>
-              <span>{rule.description}</span>
-            </div>
-            <IconButton
-              className="bg-transparent"
-              icon={<TrashIcon height={24} />}
-              onClick={() => onRemoveRule(rule)}
-            ></IconButton>
-          </li>
-        ))}
+              <IconButton
+                className="bg-transparent"
+                icon={<TrashIcon height={24} />}
+                onClick={() => onRemoveRule(rule)}
+              ></IconButton>
+            </li>
+          ))}
       </ul>
     </>
   );

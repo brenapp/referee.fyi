@@ -2,13 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { MatchData } from "robotevents";
 import { Button } from "~components/Button";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
-import {
-  Input,
-  Radio,
-  RulesMultiSelect,
-  Select,
-  TextArea,
-} from "~components/Input";
+import { Radio, RulesMultiSelect, Select, TextArea } from "~components/Input";
 import { toast } from "~components/Toast";
 import { IncidentMatchSkills } from "@referee-fyi/share";
 import { IncidentOutcome, Incident, matchToString } from "~utils/data/incident";
@@ -235,7 +229,9 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
       <DialogBody>
         <label>
           <p className="mt-4">Team</p>
-          <Input value={incident.team} readOnly className="w-full" />
+          <div className="rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2 hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500 w-full">
+            {incident.team}
+          </div>
         </label>
         <label>
           <p className="mt-4">Match</p>

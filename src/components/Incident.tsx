@@ -98,13 +98,6 @@ export const Incident: React.FC<IncidentProps> = ({
               <span className="font-mono text-sm">{incident.id}</span>
             ) : null}
           </p>
-          <ul>
-            {incident.rules.map((r) => (
-              <li key={r} className="text-sm font-mono">
-                {r}
-              </li>
-            ))}
-          </ul>
         </div>
         {!readonly ? (
           <Button

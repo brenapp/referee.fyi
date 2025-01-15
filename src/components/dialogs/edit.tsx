@@ -231,7 +231,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
       <DialogBody>
         <div>
           <p>Team</p>
-          <p className="font-mono text-lg">{incident.team}</p>
+          <p className="font-mono">{incident.team}</p>
         </div>
         <label>
           <p className="mt-4">Match</p>

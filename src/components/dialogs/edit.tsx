@@ -147,7 +147,9 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
   const enrichRules = useCallback(
     (rules: string[]) => {
       const gameRules = game?.ruleGroups.flatMap((group) => group.rules) ?? [];
-      return rules.map((rule) => gameRules.find((r) => r.rule === rule)!);
+      return rules
+        .map((rule) => gameRules.find((r) => r.rule === rule))
+        .filter((x) => !!x);
     },
     [game]
   );

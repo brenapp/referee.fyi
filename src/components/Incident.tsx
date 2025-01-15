@@ -44,22 +44,19 @@ export const IncidentHighlights: React.FC<IncidentHighlightProps> = ({
         {incident.match ? matchToString(incident.match) : "Non-Match"}
       </span>
       {"•"}
-      <span>
-        {incident.rules.length >= 2 ? (
-          `${incident.rules.length} Rules`
-        ) : (
-          <div className="flex gap-x-1">
-            {firstRuleIcon && (
-              <img
-                alt="Icon"
-                className="max-h-5 max-w-5 object-contain"
-                src={firstRuleIcon}
-              ></img>
-            )}
-            <span>{firstRule}</span>
-          </div>
+      <span className="flex gap-x-1">
+        {firstRuleIcon && (
+          <img
+            alt="Icon"
+            className="max-h-5 max-w-5 object-contain"
+            src={firstRuleIcon}
+          ></img>
         )}
+        <span>{firstRule}</span>
       </span>
+      {incident.rules.length >= 2 ? (
+        <span>+ {incident.rules.length - 1}</span>
+      ) : null}
       {"•"}
       <span key={`${incident.id}-outcome`}>{incident.outcome}</span>
     </>

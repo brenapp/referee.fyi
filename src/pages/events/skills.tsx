@@ -100,7 +100,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
                     {team.team_name}
                   </p>
                 </div>
-                <p className="h-full pl-2 flex items-center">
+                <div className="absolute right-0 bg-zinc-800 h-full pl-2 flex items-center">
                   <span className="mr-4">
                     <PlayIcon height={20} className="inline" />
                     <span className="font-mono ml-2">
@@ -113,7 +113,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
                       {programming?.attempts ?? 0}
                     </span>
                   </span>
-                </p>
+                </div>
               </Link>
             );
           }}

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { EventData } from "robotevents";
 import { Spinner } from "~components/Spinner";
 import { useEventIncidents } from "~utils/hooks/incident";
@@ -20,6 +20,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
     isPaused,
   } = useDivisionTeams(event, division);
   const { data: incidents } = useEventIncidents(event.sku);
+  const [filter, setFilter] = useState("");
 
   const teams = divisionTeams?.teams ?? [];
 
@@ -53,11 +54,28 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
     return grouped;
   }, [incidents]);
 
+  const filteredTeams = useMemo(() => {
+    if (!filter) return teams;
+
+    return teams.filter(
+      (team) =>
+        team.number.startsWith(filter) ||
+        team.team_name?.toUpperCase().includes(filter)
+    );
+  }, [filter, teams]);
+
   return (
     <section className="contents">
       <Spinner show={isLoading || isPaused} />
+      <input
+        type="text"
+        placeholder="Team Name or Number"
+        id="searchBar"
+        className="rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2 hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500 max-w-full w-full"
+        onChange={(e) => setFilter(e.currentTarget.value.toUpperCase())}
+      ></input>
       <VirtualizedList
-        data={teams}
+        data={filteredTeams}
         options={{ estimateSize: () => 64 }}
         className="flex-1"
         parts={{ list: { className: "mb-12" } }}
@@ -78,7 +96,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
                 {team.team_name}
               </p>
             </div>
-            <p className="h-full w-32 px-2 flex items-center">
+            <div className="absolute right-0 bg-zinc-800 h-full w-32 px-2 flex items-center">
               <span className="text-red-400 mr-4" aria-label={``}>
                 <FlagIcon height={24} className="inline" />
                 <span className="font-mono ml-2">
@@ -91,7 +109,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
                   {minorIncidents.get(team.number) ?? 0}
                 </span>
               </span>
-            </p>
+            </div>
           </Link>
         )}
       </VirtualizedList>

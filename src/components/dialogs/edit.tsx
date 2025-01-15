@@ -229,12 +229,10 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
     >
       <DialogHeader onClose={() => setOpen(false)} title="Edit Incident" />
       <DialogBody>
-        <label>
-          <p className="mt-4">Team</p>
-          <div className="rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2 w-fit font-semibold">
-            {incident.team}
-          </div>
-        </label>
+        <div>
+          <p>Team</p>
+          <p className="font-mono text-sm">{incident.team}</p>
+        </div>
         <label>
           <p className="mt-4">Match</p>
           <Select

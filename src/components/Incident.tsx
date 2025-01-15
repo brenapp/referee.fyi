@@ -82,19 +82,10 @@ export const Incident: React.FC<IncidentProps> = ({
         {...props}
         className={twMerge(
           IncidentOutcomeClasses[incident.outcome],
-          "pr-4 py-2 rounded-md mt-2 flex",
+          "px-4 py-2 rounded-md mt-2 flex",
           props.className
         )}
       >
-        {!readonly ? (
-          <Button
-            className="w-min text-black/75 active:bg-black/50 px-4"
-            mode="transparent"
-            onClick={() => setEditIncidentOpen(true)}
-          >
-            <PencilSquareIcon height={20} />
-          </Button>
-        ) : null}
         <div className="flex-1 overflow-clip">
           <div className="text-sm whitespace-nowrap">
             <div className="flex items-center gap-x-1">
@@ -115,6 +106,15 @@ export const Incident: React.FC<IncidentProps> = ({
             ))}
           </ul>
         </div>
+        {!readonly ? (
+          <Button
+            className="w-min text-black/75 active:bg-black/50 px-4"
+            mode="transparent"
+            onClick={() => setEditIncidentOpen(true)}
+          >
+            <PencilSquareIcon height={20} />
+          </Button>
+        ) : null}
       </div>
     </>
   );

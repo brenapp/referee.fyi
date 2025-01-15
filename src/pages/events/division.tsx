@@ -20,18 +20,23 @@ export const EventDivisionPickerPage: React.FC = () => {
 
   return (
     <section className="mt-4 flex flex-col gap-4">
-      <ol className="contents">
+      <ol className="overflow-auto max-h-screen">
         {event.divisions
           ?.sort((a, b) => a.order! - b.order!)
           .map((division) => (
-            <li className="contents">
-              <LinkButton to={`/${event.sku}/${division.id}`} key={division.id}>
+            <li key={division.id} className="mb-4">
+              <LinkButton
+                className={"w-full"}
+                to={`/${event.sku}/${division.id}`}
+              >
                 {division.name}
               </LinkButton>
             </li>
           ))}
-        <li className="contents">
-          <LinkButton to={`/${event.sku}/skills`}>Skills</LinkButton>
+        <li className="mt-2">
+          <LinkButton className={"w-full"} to={`/${event.sku}/skills`}>
+            Skills
+          </LinkButton>
         </li>
       </ol>
     </section>

@@ -101,7 +101,10 @@ export const Incident: React.FC<IncidentProps> = ({
         </div>
         {!readonly ? (
           <Button
-            className="w-min text-black/75 active:bg-black/50 px-4"
+            className={twMerge(
+              IncidentOutcomeClasses[incident.outcome],
+              "w-min text-back/75 active:bg-black/50 py-4 px-4 my-0.5 absolute right-0 top-2"
+            )}
             mode="transparent"
             onClick={() => setEditIncidentOpen(true)}
           >

@@ -26,6 +26,7 @@ type TeamSkillsTabProps = {
 const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
   const { data: teams, isLoading: isLoadingTeams } = useEventTeams(event);
   const { data: skills, isLoading: isLoadingSkills } = useEventSkills(event);
+  const [filter, setFilter] = useState("");
 
   const skillsByTeam = useMemo(() => {
     if (!skills) {
@@ -48,13 +49,30 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
 
   const isLoading = isLoadingTeams || isLoadingSkills;
 
+  const filteredTeams = useMemo(() => {
+    if (!filter) return teams;
+
+    return teams?.filter(
+      (team) =>
+        team.number.startsWith(filter) ||
+        team.team_name?.toUpperCase().includes(filter)
+    );
+  }, [filter, teams]);
+
   return (
     <>
       <section className="contents">
         <Spinner show={isLoading} />
+        <input
+          type="text"
+          placeholder="Team Name or Number"
+          id="searchBar"
+          className="rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2 hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500 max-w-full w-full"
+          onChange={(e) => setFilter(e.currentTarget.value.toUpperCase())}
+        ></input>
         <VirtualizedList
           className="flex-1"
-          data={teams}
+          data={filteredTeams}
           options={{ estimateSize: () => 64 }}
           parts={{ list: { className: "mb-12" } }}
         >
@@ -82,7 +100,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
                     {team.team_name}
                   </p>
                 </div>
-                <p className="h-full pl-2 flex items-center">
+                <div className="absolute right-0 bg-zinc-800 h-full pl-2 flex items-center">
                   <span className="mr-4">
                     <PlayIcon height={20} className="inline" />
                     <span className="font-mono ml-2">
@@ -95,7 +113,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
                       {programming?.attempts ?? 0}
                     </span>
                   </span>
-                </p>
+                </div>
               </Link>
             );
           }}

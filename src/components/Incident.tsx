@@ -82,7 +82,7 @@ export const Incident: React.FC<IncidentProps> = ({
         {...props}
         className={twMerge(
           IncidentOutcomeClasses[incident.outcome],
-          "px-4 py-2 rounded-md mt-2 flex",
+          "px-4 py-2 rounded-md mt-2 flex relative",
           props.className
         )}
       >
@@ -103,7 +103,7 @@ export const Incident: React.FC<IncidentProps> = ({
           <Button
             className={twMerge(
               IncidentOutcomeClasses[incident.outcome],
-              "w-min text-back/75 active:bg-black/50 py-4 px-4 my-0.5 absolute right-0 top-2"
+              "w-min text-back/75 active:bg-black/50 py-4 px-4 my-0.5 absolute right-0 top-0 bottom-0"
             )}
             mode="transparent"
             onClick={() => setEditIncidentOpen(true)}

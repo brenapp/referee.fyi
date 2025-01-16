@@ -2,13 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { MatchData } from "robotevents";
 import { Button } from "~components/Button";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
-import {
-  Input,
-  Radio,
-  RulesMultiSelect,
-  Select,
-  TextArea,
-} from "~components/Input";
+import { Radio, RulesMultiSelect, Select, TextArea } from "~components/Input";
 import { toast } from "~components/Toast";
 import { IncidentMatchSkills } from "@referee-fyi/share";
 import { IncidentOutcome, Incident, matchToString } from "~utils/data/incident";
@@ -153,7 +147,9 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
   const enrichRules = useCallback(
     (rules: string[]) => {
       const gameRules = game?.ruleGroups.flatMap((group) => group.rules) ?? [];
-      return rules.map((rule) => gameRules.find((r) => r.rule === rule)!);
+      return rules
+        .map((rule) => gameRules.find((r) => r.rule === rule))
+        .filter((x) => !!x);
     },
     [game]
   );
@@ -233,10 +229,10 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
     >
       <DialogHeader onClose={() => setOpen(false)} title="Edit Incident" />
       <DialogBody>
-        <label>
-          <p className="mt-4">Team</p>
-          <Input value={incident.team} readOnly className="w-full" />
-        </label>
+        <div>
+          <p>Team</p>
+          <p className="font-mono">{incident.team}</p>
+        </div>
         <label>
           <p className="mt-4">Match</p>
           <Select

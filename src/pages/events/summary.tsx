@@ -209,7 +209,7 @@ export const ExportButton: React.FC = () => {
 
 export const EventSummaryPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
-  const game = useRulesForEvent(event);
+  const { data: game } = useRulesForEvent(event);
   const { mutateAsync: addEvent, isSuccess } = useAddEventVisited();
 
   const [filterDialogOpen, setFilterDialogOpen] = useState(false);
@@ -298,13 +298,22 @@ export const EventSummaryPage: React.FC = () => {
         </nav>
         <section className="flex gap-1 flex-wrap">
           {commonRules.slice(0, 5).map(([rule, count]) => (
-            <p
+            <div
               className="font-mono bg-emerald-900 rounded-lg px-2 py-1 text-sm text-center"
               key={rule}
             >
-              {rule.replace(/[<>]/g, "")}{" "}
-              <span className="text-emerald-400">{count}</span>
-            </p>
+              <div className="flex gap-x-1">
+                {game?.rulesLookup?.[rule]?.icon && (
+                  <img
+                    alt="Icon"
+                    className="max-h-5 max-w-5 object-contain"
+                    src={game?.rulesLookup?.[rule]?.icon}
+                  ></img>
+                )}
+                {rule.replace(/[<>]/g, "")}
+                <span className="text-emerald-400 pl-1">{count}</span>
+              </div>
+            </div>
           ))}
         </section>
         <VirtualizedList

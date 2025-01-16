@@ -6,8 +6,10 @@ import {
 } from "~utils/data/incident";
 import { Button } from "./Button";
 import { EditIncidentDialog } from "./dialogs/edit";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { PencilSquareIcon } from "@heroicons/react/20/solid";
+import { useCurrentEvent } from "~utils/hooks/state";
+import { useRulesForEvent } from "~utils/hooks/rules";
 
 const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
   Minor: "bg-yellow-400 text-yellow-900",
@@ -21,28 +23,52 @@ export type IncidentProps = {
   readonly?: boolean;
 } & React.HTMLProps<HTMLDivElement>;
 
+export type IncidentHighlightProps = {
+  incident: IncidentData;
+};
+
+export const IncidentHighlights: React.FC<IncidentHighlightProps> = ({
+  incident,
+}) => {
+  const { data: eventData } = useCurrentEvent();
+  const { data: game } = useRulesForEvent(eventData);
+
+  const firstRule = incident.rules[0];
+  const firstRuleIcon = game?.rulesLookup?.[firstRule]?.icon;
+
+  return (
+    <>
+      <span key={`${incident.id}-name`}>{incident.team}</span>
+      {"•"}
+      <span key={`${incident.id}-match`}>
+        {incident.match ? matchToString(incident.match) : "Non-Match"}
+      </span>
+      {"•"}
+      <span className="flex gap-x-1">
+        {firstRuleIcon && (
+          <img
+            alt="Icon"
+            className="max-h-5 max-w-5 object-contain"
+            src={firstRuleIcon}
+          ></img>
+        )}
+        <span>{firstRule}</span>
+      </span>
+      {incident.rules.length >= 2 ? (
+        <span>+ {incident.rules.length - 1}</span>
+      ) : null}
+      {"•"}
+      <span key={`${incident.id}-outcome`}>{incident.outcome}</span>
+    </>
+  );
+};
+
 export const Incident: React.FC<IncidentProps> = ({
   incident,
   readonly,
   ...props
 }) => {
   const [editIncidentOpen, setEditIncidentOpen] = useState(false);
-
-  const highlights = useMemo(() => {
-    const base = [
-      incident.team,
-      incident.match ? matchToString(incident.match) : "Non-Match",
-      incident.outcome,
-    ];
-
-    if (incident.rules.length > 1) {
-      base.push(incident.rules[0] + " + " + (incident.rules.length - 1));
-    } else {
-      base.push(incident.rules[0]);
-    }
-
-    return base;
-  }, [incident]);
 
   return (
     <>
@@ -56,29 +82,29 @@ export const Incident: React.FC<IncidentProps> = ({
         {...props}
         className={twMerge(
           IncidentOutcomeClasses[incident.outcome],
-          "px-4 py-2 rounded-md mt-2 flex",
+          "px-4 py-2 rounded-md mt-2 flex relative",
           props.className
         )}
       >
         <div className="flex-1 overflow-clip">
-          <p className="text-sm whitespace-nowrap">{highlights.join(" • ")}</p>
+          <div className="text-sm whitespace-nowrap">
+            <div className="flex items-center gap-x-1">
+              <IncidentHighlights incident={incident} />
+            </div>
+          </div>
           <p>
             {incident.notes}
             {import.meta.env.DEV ? (
               <span className="font-mono text-sm">{incident.id}</span>
             ) : null}
           </p>
-          <ul>
-            {incident.rules.map((r) => (
-              <li key={r} className="text-sm font-mono">
-                {r}
-              </li>
-            ))}
-          </ul>
         </div>
         {!readonly ? (
           <Button
-            className="w-min text-black/75 active:bg-black/50"
+            className={twMerge(
+              IncidentOutcomeClasses[incident.outcome],
+              "w-min text-back/75 active:bg-black/50 py-4 px-4 my-0.5 absolute right-0 top-0 bottom-0"
+            )}
             mode="transparent"
             onClick={() => setEditIncidentOpen(true)}
           >

@@ -37,7 +37,11 @@ export const TeamIsolationDialog: React.FC<TeamIsolationDialogProps> = ({
       <DialogBody>
         <VirtualizedList data={incidents} options={{ estimateSize: () => 64 }}>
           {(incident) => (
-            <Incident incident={incident} className="h-14 overflow-hidden" />
+            <Incident
+              incident={incident}
+              className="h-14 overflow-hidden"
+              readonly
+            />
           )}
         </VirtualizedList>
       </DialogBody>

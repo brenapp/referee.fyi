@@ -72,6 +72,11 @@
           "type": "string",
           "format": "uri",
           "description": "Game manual link to the rule."
+        },
+        "icon": {
+          "type": "string",
+          "format": "uri-reference",
+          "description": "A link to a small image icon which represents the rule"
         }
       }
     }

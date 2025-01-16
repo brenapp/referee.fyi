@@ -7,6 +7,7 @@ export type Rule = {
   rule: string;
   description: string;
   link: string;
+  icon?: string;
 };
 
 export type RuleGroup = {
@@ -20,11 +21,22 @@ export type Game = {
   season: Year;
   programs: ProgramAbbr[];
   ruleGroups: RuleGroup[];
-};
+  rulesLookup?: Record<string, Rule>;
+}
 
 export type Rules = {
   games: Game[];
 };
+
+function createRulesLookup(ruleGroups: RuleGroup[]): Record<string, Rule> {
+  const lookup: Record<string, Rule> = {};
+  ruleGroups.forEach((group) => {
+    group.rules.forEach((rule) => {
+      lookup[rule.rule] = rule;
+    });
+  });
+  return lookup;
+}
 
 export function useRulesForSeason(
   season?: Season | null,
@@ -42,9 +54,12 @@ export function useRulesForSeason(
         group.programs.includes(season.program?.code as ProgramAbbr)
       );
 
+      const rulesLookup = createRulesLookup(ruleGroups);
+
       return {
         ...game,
         ruleGroups,
+        rulesLookup,
       };
     },
     ...options,

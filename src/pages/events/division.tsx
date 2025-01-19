@@ -19,8 +19,8 @@ export const EventDivisionPickerPage: React.FC = () => {
   }
 
   return (
-    <section className="mt-4 flex flex-col gap-4">
-      <ol className="overflow-auto max-h-screen">
+    <section className="mt-4 flex flex-col gap-4 overflow-auto max-h-screen">
+      <ol className="contents">
         {event.divisions
           ?.sort((a, b) => a.order! - b.order!)
           .map((division) => (

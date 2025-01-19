@@ -152,7 +152,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
         <>
           {incidents.map((incident) => (
             <Incident
-              className="h-14 overflow-hidden"
+              className="max-h-20 overflow-hidden"
               incident={incident}
               key={incident.id}
             />

@@ -86,7 +86,7 @@ export const Incident: React.FC<IncidentProps> = ({
           props.className
         )}
       >
-        <div className="flex-1 overflow-clip">
+        <div className="flex-auto overflow-hidden">
           <div className="text-sm whitespace-nowrap">
             <div className="flex items-center gap-x-1">
               <IncidentHighlights incident={incident} />
@@ -103,7 +103,7 @@ export const Incident: React.FC<IncidentProps> = ({
           <Button
             className={twMerge(
               IncidentOutcomeClasses[incident.outcome],
-              "w-min text-back/75 active:bg-black/50 py-4 px-4 my-0.5 absolute right-0 top-0 bottom-0"
+              "w-min text-back/75 active:bg-black/50 flex-none basis-auto"
             )}
             mode="transparent"
             onClick={() => setEditIncidentOpen(true)}

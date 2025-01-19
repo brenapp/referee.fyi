@@ -7,6 +7,7 @@ import { useCurrentDivision } from "~utils/hooks/state";
 import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { Link } from "react-router-dom";
 import { VirtualizedList } from "~components/VirtualizedList";
+import { Input } from "~components/Input";
 
 export type EventTagProps = {
   event: EventData;
@@ -67,13 +68,30 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
   return (
     <section className="contents">
       <Spinner show={isLoading || isPaused} />
-      <input
-        type="text"
-        placeholder="Team Name or Number"
-        id="searchBar"
-        className="rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2 hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-500 max-w-full w-full"
-        onChange={(e) => setFilter(e.currentTarget.value.toUpperCase())}
-      ></input>
+      <div className="flex items-center gap-4">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="size-6"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+          />
+        </svg>
+
+        <Input
+          type="text"
+          placeholder="Team Name or Number"
+          id="searchBar"
+          className="z-10 w-full"
+          onChange={(e) => setFilter(e.currentTarget.value.toUpperCase())}
+        ></Input>
+      </div>
       <VirtualizedList
         data={filteredTeams}
         options={{ estimateSize: () => 64 }}

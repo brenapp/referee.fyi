@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
 import { ConsistentMap, mergeMap } from "./map.js";
-import { initLWW, updateLWW, WithLWWConsistency } from "./lww.js";
+import { initLWW, mergeLWW, updateLWW, WithLWWConsistency } from "./lww.js";
 
 type BaseIncident = {
   id: string;
@@ -36,17 +36,21 @@ test("new local entries uploaded", () => {
     values: {},
   };
 
-  const result = mergeMap({ local, remote, ignore });
+  const result = mergeMap({
+    local,
+    remote,
+    merge: (local, remote) => mergeLWW({ local, remote, ignore }),
+  });
   expect(result.resolved.deleted).toEqual(["incident12"]);
   expect(result.resolved.values).toEqual(local.values);
 
-  expect(result.local.create).toEqual([]);
-  expect(result.local.update).toEqual([]);
-  expect(result.local.remove).toEqual(["incident12"]);
+  expect(result.local.added).toEqual([]);
+  expect(result.local.changed).toEqual([]);
+  expect(result.local.removed).toEqual(["incident12"]);
 
-  expect(result.remote.create).toEqual(["incident1"]);
-  expect(result.remote.update).toEqual([]);
-  expect(result.remote.remove).toEqual([]);
+  expect(result.remote.added).toEqual(["incident1"]);
+  expect(result.remote.changed).toEqual([]);
+  expect(result.remote.removed).toEqual([]);
 });
 
 test("new remote entries saved", () => {
@@ -72,17 +76,21 @@ test("new remote entries saved", () => {
     },
   };
 
-  const result = mergeMap({ local, remote, ignore });
+  const result = mergeMap({
+    local,
+    remote,
+    merge: (local, remote) => mergeLWW({ local, remote, ignore }),
+  });
   expect(result.resolved.deleted).toEqual(["incident12"]);
   expect(result.resolved.values).toEqual(remote.values);
 
-  expect(result.local.create).toEqual(["incident1"]);
-  expect(result.local.update).toEqual([]);
-  expect(result.local.remove).toEqual([]);
+  expect(result.local.added).toEqual(["incident1"]);
+  expect(result.local.changed).toEqual([]);
+  expect(result.local.removed).toEqual([]);
 
-  expect(result.remote.create).toEqual([]);
-  expect(result.remote.update).toEqual([]);
-  expect(result.remote.remove).toEqual(["incident12"]);
+  expect(result.remote.added).toEqual([]);
+  expect(result.remote.changed).toEqual([]);
+  expect(result.remote.removed).toEqual(["incident12"]);
 });
 
 test("local update handled", () => {
@@ -125,18 +133,22 @@ test("local update handled", () => {
     },
   };
 
-  const result = mergeMap({ local, remote, ignore });
+  const result = mergeMap({
+    local,
+    remote,
+    merge: (local, remote) => mergeLWW({ local, remote, ignore }),
+  });
   console.log(result);
   expect(result.resolved.deleted).toEqual(["incident12"]);
   expect(result.resolved.values).toEqual(local.values);
 
-  expect(result.local.create).toEqual([]);
-  expect(result.local.update).toEqual([]);
-  expect(result.local.remove).toEqual([]);
+  expect(result.local.added).toEqual([]);
+  expect(result.local.changed).toEqual([]);
+  expect(result.local.removed).toEqual([]);
 
-  expect(result.remote.create).toEqual([]);
-  expect(result.remote.update).toEqual(["incident1"]);
-  expect(result.remote.remove).toEqual(["incident12"]);
+  expect(result.remote.added).toEqual([]);
+  expect(result.remote.changed).toEqual(["incident1"]);
+  expect(result.remote.removed).toEqual(["incident12"]);
 });
 
 test("remote update handled", () => {
@@ -184,7 +196,11 @@ test("remote update handled", () => {
     peer: "REMOTE",
   });
 
-  const result = mergeMap({ local, remote, ignore });
+  const result = mergeMap({
+    local,
+    remote,
+    merge: (local, remote) => mergeLWW({ local, remote, ignore }),
+  });
   expect(result.resolved.deleted).toEqual(["incident12"]);
   expect(result.resolved.values["incident1"]).toEqual({
     id: "incident1",
@@ -198,13 +214,13 @@ test("remote update handled", () => {
     },
   });
 
-  expect(result.local.create).toEqual([]);
-  expect(result.local.update).toEqual(["incident1"]);
-  expect(result.local.remove).toEqual([]);
+  expect(result.local.added).toEqual([]);
+  expect(result.local.changed).toEqual(["incident1"]);
+  expect(result.local.removed).toEqual([]);
 
-  expect(result.remote.create).toEqual([]);
-  expect(result.remote.update).toEqual(["incident1"]);
-  expect(result.remote.remove).toEqual(["incident12"]);
+  expect(result.remote.added).toEqual([]);
+  expect(result.remote.changed).toEqual(["incident1"]);
+  expect(result.remote.removed).toEqual(["incident12"]);
 });
 
 test("deleted values merged", () => {
@@ -218,7 +234,11 @@ test("deleted values merged", () => {
     values: {},
   };
 
-  const result = mergeMap({ local, remote, ignore });
+  const result = mergeMap({
+    local,
+    remote,
+    merge: (local, remote) => mergeLWW({ local, remote, ignore }),
+  });
   expect(result.resolved.deleted).toEqual([
     "incident1",
     "incident2",
@@ -228,11 +248,11 @@ test("deleted values merged", () => {
   ]);
   expect(result.resolved.values).toEqual({});
 
-  expect(result.local.create).toEqual([]);
-  expect(result.local.update).toEqual([]);
-  expect(result.local.remove).toEqual(["incident4", "incident5"]);
+  expect(result.local.added).toEqual([]);
+  expect(result.local.changed).toEqual([]);
+  expect(result.local.removed).toEqual(["incident4", "incident5"]);
 
-  expect(result.remote.create).toEqual([]);
-  expect(result.remote.update).toEqual([]);
-  expect(result.remote.remove).toEqual(["incident1", "incident2"]);
+  expect(result.remote.added).toEqual([]);
+  expect(result.remote.changed).toEqual([]);
+  expect(result.remote.removed).toEqual(["incident1", "incident2"]);
 });

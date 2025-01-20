@@ -1,8 +1,9 @@
-import { mergeLWW, WithLWWConsistency } from "./lww.js";
+import { WithLWWConsistency } from "./lww.js";
 import { mergeGrowSet } from "./gset.js";
 
 // July 2024 - Samsung Internet does not support Set.prototype.intersection or Set.prototype.difference
 import "core-js/actual/set";
+import { MergeResult, PeerOutcome } from "./merge.js";
 
 type ConsistentMapElement = WithLWWConsistency<
   Record<string, unknown> & { id: string },
@@ -17,26 +18,14 @@ export type ConsistentMap<T extends ConsistentMapElement> = {
 export type ConsistentMapMergeOptions<T extends ConsistentMapElement> = {
   local: ConsistentMap<T>;
   remote: ConsistentMap<T>;
-  ignore: readonly string[];
-};
-
-export type ConsistentMapPeerOutcome = {
-  remove: string[];
-  update: string[];
-  create: string[];
-};
-
-export type ConsistentMapMergeResult<T extends ConsistentMapElement> = {
-  resolved: ConsistentMap<T>;
-  local: ConsistentMapPeerOutcome;
-  remote: ConsistentMapPeerOutcome;
+  merge: (local: T, remote: T) => MergeResult<T | null | undefined, string>;
 };
 
 export function mergeMap<T extends ConsistentMapElement>({
   local,
   remote,
-  ignore,
-}: ConsistentMapMergeOptions<T>): ConsistentMapMergeResult<T> {
+  merge,
+}: ConsistentMapMergeOptions<T>): MergeResult<ConsistentMap<T>, string> {
   const localIds = new Set(Object.keys(local.values));
   const remoteIds = new Set(Object.keys(remote.values));
 
@@ -45,11 +34,7 @@ export function mergeMap<T extends ConsistentMapElement>({
 
   const sharedIds = [...localIds.intersection(remoteIds)];
   const mergeResults = sharedIds.map((id) =>
-    mergeLWW({
-      ignore: ignore,
-      local: local.values[id],
-      remote: remote.values[id],
-    })
+    merge(local.values[id], remote.values[id])
   );
 
   // Deleted Set
@@ -58,19 +43,19 @@ export function mergeMap<T extends ConsistentMapElement>({
     remote: remote.deleted,
   });
 
-  const localOutcome: ConsistentMapPeerOutcome = {
-    create: [...remoteOnlyIds],
-    remove: deleted.remoteOnly,
-    update: mergeResults
-      .filter((result) => result.changed.length > 0)
+  const localOutcome: PeerOutcome<string> = {
+    added: [...remoteOnlyIds],
+    removed: deleted.local.added,
+    changed: mergeResults
+      .filter((result) => result.local.changed.length > 0)
       .map((result) => result.resolved!.id),
   };
 
-  const remoteOutcome: ConsistentMapPeerOutcome = {
-    create: [...localOnlyIds],
-    remove: deleted.localOnly,
-    update: mergeResults
-      .filter((result) => result.rejected.length > 0)
+  const remoteOutcome: PeerOutcome<string> = {
+    added: [...localOnlyIds],
+    removed: deleted.remote.added,
+    changed: mergeResults
+      .filter((result) => result.remote.changed.length > 0)
       .map((result) => result.resolved!.id),
   };
 

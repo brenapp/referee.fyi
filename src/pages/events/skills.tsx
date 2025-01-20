@@ -19,6 +19,7 @@ import { UserGroupIcon as TeamsIconSolid } from "@heroicons/react/24/solid";
 import { Cog8ToothIcon as ManageIconOutline } from "@heroicons/react/24/outline";
 import { Cog8ToothIcon as ManageIconSolid } from "@heroicons/react/24/solid";
 import { VirtualizedList } from "~components/VirtualizedList";
+import { filterTeams } from "~utils/filterteams";
 
 type TeamSkillsTabProps = {
   event: EventData;
@@ -50,15 +51,8 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
 
   const isLoading = isLoadingTeams || isLoadingSkills;
 
-  const filteredTeams = useMemo(() => {
-    if (!filter) return teams;
-
-    return teams?.filter(
-      (team) =>
-        team.number.startsWith(filter) ||
-        team.team_name?.toUpperCase().includes(filter)
-    );
-  }, [filter, teams]);
+  const filteredTeams =
+    teams && useMemo(() => filterTeams(teams, filter), [filter, teams]);
 
   return (
     <>

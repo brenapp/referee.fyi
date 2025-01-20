@@ -8,6 +8,7 @@ import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { Link } from "react-router-dom";
 import { VirtualizedList } from "~components/VirtualizedList";
 import { Input } from "~components/Input";
+import { filterTeams } from "~utils/filterteams";
 
 export type EventTagProps = {
   event: EventData;
@@ -55,15 +56,8 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
     return grouped;
   }, [incidents]);
 
-  const filteredTeams = useMemo(() => {
-    if (!filter) return teams;
-
-    return teams.filter(
-      (team) =>
-        team.number.startsWith(filter) ||
-        team.team_name?.toUpperCase().includes(filter)
-    );
-  }, [filter, teams]);
+  const filteredTeams =
+    teams && useMemo(() => filterTeams(teams, filter), [filter, teams]);
 
   return (
     <section className="contents">

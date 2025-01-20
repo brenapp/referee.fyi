@@ -23,14 +23,14 @@ test("greater-count local value persists", () => {
   });
 
   const result = mergeLWW({ local, remote, ignore });
-  expect(result).toEqual({ resolved: local, changed: [], rejected: ["a"] });
+  expect(result.resolved).toEqual(local);
+  expect(result.local).toEqual({ added: [], changed: [], removed: [] });
+  expect(result.remote).toEqual({ added: [], changed: ["a"], removed: [] });
 
   const opposite = mergeLWW({ local: remote, remote: local, ignore });
-  expect(opposite).toEqual({
-    resolved: result.resolved,
-    changed: ["a"],
-    rejected: [],
-  });
+  expect(opposite.resolved).toEqual(local);
+  expect(opposite.local).toEqual({ added: [], changed: ["a"], removed: [] });
+  expect(opposite.remote).toEqual({ added: [], changed: [], removed: [] });
 });
 
 test("greater-count remote value persists", () => {
@@ -48,10 +48,14 @@ test("greater-count remote value persists", () => {
   remote.consistency.a.count = 2;
 
   const result = mergeLWW({ local, remote, ignore });
-  expect(result).toEqual({ resolved: remote, changed: ["a"], rejected: [] });
+  expect(result.resolved).toEqual(remote);
+  expect(result.local).toEqual({ added: [], changed: ["a"], removed: [] });
+  expect(result.remote).toEqual({ added: [], changed: [], removed: [] });
 
   const opposite = mergeLWW({ local: remote, remote: local, ignore });
-  expect(opposite).toEqual({ resolved: remote, changed: [], rejected: ["a"] });
+  expect(opposite.resolved).toEqual(remote);
+  expect(opposite.local).toEqual({ added: [], changed: [], removed: [] });
+  expect(opposite.remote).toEqual({ added: [], changed: ["a"], removed: [] });
 });
 
 test("tie goes to higher peer value", () => {
@@ -68,10 +72,9 @@ test("tie goes to higher peer value", () => {
   });
 
   const result = mergeLWW({ local, remote, ignore });
-  expect(result).toEqual({ resolved: remote, changed: ["a"], rejected: [] });
-
-  const opposite = mergeLWW({ local: remote, remote: local, ignore });
-  expect(opposite).toEqual({ resolved: remote, changed: [], rejected: [] });
+  expect(result.resolved).toEqual(remote);
+  expect(result.local).toEqual({ added: [], changed: ["a"], removed: [] });
+  expect(result.remote).toEqual({ added: [], changed: [], removed: [] });
 });
 
 type BaseComplexObject = {
@@ -101,26 +104,18 @@ test("lww is resolved on a key-by-key basis", () => {
   });
 
   const result = mergeLWW({ local, remote, ignore });
-  expect(result).toEqual({
-    resolved: {
-      a: { b: 1 },
-      c: "remote prev",
-      constant: "Constant",
-      consistency: {
-        a: local.consistency.a,
-        c: remote.consistency.c,
-      },
-    },
-    changed: ["c"],
-    rejected: ["a"],
-  });
 
-  const opposite = mergeLWW({ local: remote, remote: local, ignore });
-  expect(opposite).toEqual({
-    resolved: result.resolved,
-    changed: ["a"],
-    rejected: ["c"],
+  expect(result.resolved).toEqual({
+    a: { b: 1 },
+    c: "remote prev",
+    constant: "Constant",
+    consistency: {
+      a: local.consistency.a,
+      c: remote.consistency.c,
+    },
   });
+  expect(result.local.changed).toEqual(["c"]);
+  expect(result.remote.changed).toEqual(["a"]);
 });
 
 test("handles null and undefined", () => {
@@ -134,15 +129,15 @@ test("handles null and undefined", () => {
 
   const result = mergeLWW({ local, remote, ignore });
   expect(result.resolved).toEqual(local);
-  expect(result.changed).toEqual([]);
+  expect(result.local.changed).toEqual([]);
 
   const opposite = mergeLWW({ local: null, remote: local, ignore });
   expect(opposite.resolved).toEqual(local);
-  expect(opposite.changed).toEqual(["a"]);
+  expect(opposite.local.changed).toEqual(["a"]);
 
   const bothNull = mergeLWW({ local: null, remote: null, ignore: [] });
   expect(bothNull.resolved).toBeNull();
-  expect(bothNull.changed).toEqual([]);
+  expect(bothNull.local.changed).toEqual([]);
 });
 
 test("merge is idempotent", async () => {
@@ -200,6 +195,10 @@ test("merge is associative", async () => {
   const ABxC = mergeLWW({ local: AB.resolved, remote: C, ignore });
   const AxBC = mergeLWW({ local: A, remote: BC.resolved, ignore });
   const ACxB = mergeLWW({ local: AC.resolved, remote: B, ignore });
+
+  console.log("ABxC", ABxC.resolved);
+  console.log("AxBC", AxBC.resolved);
+  console.log("ACxB", ACxB.resolved);
 
   expect(ABxC.resolved).toEqual(ACxB.resolved);
   expect(ABxC.resolved).toEqual(AxBC.resolved);

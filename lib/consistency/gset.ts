@@ -1,3 +1,5 @@
+import { MergeResult } from "./merge.js";
+
 export type GrowSetElement = string | number | boolean | undefined | null;
 export type GrowSet<T extends GrowSetElement> = T[];
 
@@ -15,7 +17,7 @@ export type MergeGrowSetResults<T extends GrowSetElement> = {
 export function mergeGrowSet<T extends GrowSetElement>({
   local,
   remote,
-}: MergeGrowSetOptions<T>): MergeGrowSetResults<T> {
+}: MergeGrowSetOptions<T>): MergeResult<GrowSet<T>, T> {
   const localSet = new Set(local);
   const remoteSet = new Set(remote);
 
@@ -25,7 +27,15 @@ export function mergeGrowSet<T extends GrowSetElement>({
 
   return {
     resolved: [...resolved],
-    localOnly: [...localOnly],
-    remoteOnly: [...remoteOnly],
+    local: {
+      added: [...remoteOnly],
+      changed: [],
+      removed: [],
+    },
+    remote: {
+      added: [...localOnly],
+      changed: [],
+      removed: [],
+    },
   };
 }

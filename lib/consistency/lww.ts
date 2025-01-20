@@ -1,3 +1,5 @@
+import { MergeResult } from "./merge.js";
+
 export type History<T extends Record<string, unknown>, K extends keyof T> = {
   prev: T[K];
   peer: string;
@@ -44,12 +46,6 @@ export type MergeOptions<T extends BaseWithLWWConsistency> = {
   ignore: readonly string[];
 };
 
-export type MergeResult<T extends BaseWithLWWConsistency> = {
-  resolved: T | null | undefined;
-  changed: LWWKeys<T>[];
-  rejected: LWWKeys<T>[];
-};
-
 /**
  * Enforces last-write wins consistency on the given consistent object
  *
@@ -60,23 +56,39 @@ export type MergeResult<T extends BaseWithLWWConsistency> = {
  */
 export function mergeLWW<T extends BaseWithLWWConsistency>(
   options: MergeOptions<T>
-): MergeResult<T> {
+): MergeResult<T | null | undefined, LWWKeys<T>> {
   if (!options.local && options.remote) {
-    const changed = Object.keys(options.remote).filter(
+    const keys = Object.keys(options.remote).filter(
       (key) => key !== "consistency" && !options.ignore.includes(key)
     ) as LWWKeys<T>[];
-    return { resolved: options.remote, changed, rejected: [] };
+    return {
+      resolved: options.remote,
+      local: {
+        added: [],
+        changed: keys,
+        removed: [],
+      },
+      remote: { added: [], changed: [], removed: [] },
+    };
   }
 
   if (!options.remote && options.local) {
-    const rejected = Object.keys(options.local).filter(
+    const keys = Object.keys(options.local).filter(
       (key) => key !== "consistency" && !options.ignore.includes(key)
     ) as LWWKeys<T>[];
-    return { resolved: options.local, changed: [], rejected };
+    return {
+      resolved: options.local,
+      local: { added: [], changed: [], removed: [] },
+      remote: { added: [], changed: keys, removed: [] },
+    };
   }
 
   if (!options.remote && !options.local) {
-    return { resolved: options.local, changed: [], rejected: [] };
+    return {
+      resolved: options.local,
+      local: { added: [], changed: [], removed: [] },
+      remote: { added: [], changed: [], removed: [] },
+    };
   }
 
   const local = options.local!;
@@ -120,7 +132,11 @@ export function mergeLWW<T extends BaseWithLWWConsistency>(
     }
   }
 
-  return { resolved, changed, rejected };
+  return {
+    resolved,
+    local: { added: [], changed, removed: [] },
+    remote: { added: [], changed: rejected, removed: [] },
+  };
 }
 
 export type InitOptions<T extends BaseWithLWWConsistency> = {

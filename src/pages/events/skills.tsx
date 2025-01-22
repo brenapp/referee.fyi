@@ -51,8 +51,10 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
 
   const isLoading = isLoadingTeams || isLoadingSkills;
 
-  const filteredTeams =
-    teams && useMemo(() => filterTeams(teams, filter), [filter, teams]);
+  const filteredTeams = useMemo(
+    () => (teams ? filterTeams(teams, filter) : []),
+    [filter, teams]
+  );
 
   return (
     <>

@@ -24,7 +24,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
   const { data: incidents } = useEventIncidents(event.sku);
   const [filter, setFilter] = useState("");
 
-  const teams = divisionTeams?.teams ?? [];
+  const teams = useMemo(() => divisionTeams?.teams ?? [], [divisionTeams]);
 
   const majorIncidents = useMemo(() => {
     if (!incidents) return new Map<string, number>();
@@ -56,8 +56,10 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
     return grouped;
   }, [incidents]);
 
-  const filteredTeams =
-    teams && useMemo(() => filterTeams(teams, filter), [filter, teams]);
+  const filteredTeams = useMemo(
+    () => (teams ? filterTeams(teams, filter) : []),
+    [filter, teams]
+  );
 
   return (
     <section className="contents">

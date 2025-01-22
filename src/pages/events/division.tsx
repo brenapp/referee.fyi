@@ -24,7 +24,7 @@ export const EventDivisionPickerPage: React.FC = () => {
         {event.divisions
           ?.sort((a, b) => a.order! - b.order!)
           .map((division) => (
-            <li key={division.id} className="mb-4">
+            <li key={division.id}>
               <LinkButton
                 className={"w-full"}
                 to={`/${event.sku}/${division.id}`}
@@ -33,7 +33,7 @@ export const EventDivisionPickerPage: React.FC = () => {
               </LinkButton>
             </li>
           ))}
-        <li className="mt-2">
+        <li>
           <LinkButton className={"w-full"} to={`/${event.sku}/skills`}>
             Skills
           </LinkButton>

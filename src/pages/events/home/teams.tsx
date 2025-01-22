@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { EventData } from "robotevents";
 import { Spinner } from "~components/Spinner";
 import { useEventIncidents } from "~utils/hooks/incident";
@@ -7,6 +7,9 @@ import { useCurrentDivision } from "~utils/hooks/state";
 import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { Link } from "react-router-dom";
 import { VirtualizedList } from "~components/VirtualizedList";
+import { IconLabel, Input } from "~components/Input";
+import { filterTeams } from "~utils/filterteams";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 export type EventTagProps = {
   event: EventData;
@@ -20,8 +23,9 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
     isPaused,
   } = useDivisionTeams(event, division);
   const { data: incidents } = useEventIncidents(event.sku);
+  const [filter, setFilter] = useState("");
 
-  const teams = divisionTeams?.teams ?? [];
+  const teams = useMemo(() => divisionTeams?.teams ?? [], [divisionTeams]);
 
   const majorIncidents = useMemo(() => {
     if (!incidents) return new Map<string, number>();
@@ -53,11 +57,24 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
     return grouped;
   }, [incidents]);
 
+  const filteredTeams = useMemo(
+    () => (teams ? filterTeams(teams, filter) : []),
+    [filter, teams]
+  );
+
   return (
     <section className="contents">
+      <IconLabel icon={<MagnifyingGlassIcon height={24} />}>
+        <Input
+          placeholder="Search teams..."
+          className="flex-1"
+          value={filter}
+          onChange={(e) => setFilter(e.currentTarget.value.toUpperCase())}
+        />
+      </IconLabel>
       <Spinner show={isLoading || isPaused} />
       <VirtualizedList
-        data={teams}
+        data={filteredTeams}
         options={{ estimateSize: () => 64 }}
         className="flex-1"
         parts={{ list: { className: "mb-12" } }}
@@ -78,7 +95,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
                 {team.team_name}
               </p>
             </div>
-            <p className="h-full w-32 px-2 flex items-center">
+            <div className="absolute right-0 bg-zinc-800 h-full w-32 px-2 flex items-center">
               <span className="text-red-400 mr-4" aria-label={``}>
                 <FlagIcon height={24} className="inline" />
                 <span className="font-mono ml-2">
@@ -91,7 +108,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
                   {minorIncidents.get(team.number) ?? 0}
                 </span>
               </span>
-            </p>
+            </div>
           </Link>
         )}
       </VirtualizedList>

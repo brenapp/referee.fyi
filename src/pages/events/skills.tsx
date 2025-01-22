@@ -11,13 +11,18 @@ import { EventData } from "robotevents";
 import { useEventSkills, useEventTeams } from "~utils/hooks/robotevents";
 import { Link } from "react-router-dom";
 import { Skill } from "robotevents";
+import { IconLabel, Input } from "~components/Input";
 
-import { UserGroupIcon as TeamsIconOutline } from "@heroicons/react/24/outline";
+import {
+  MagnifyingGlassIcon,
+  UserGroupIcon as TeamsIconOutline,
+} from "@heroicons/react/24/outline";
 import { UserGroupIcon as TeamsIconSolid } from "@heroicons/react/24/solid";
 
 import { Cog8ToothIcon as ManageIconOutline } from "@heroicons/react/24/outline";
 import { Cog8ToothIcon as ManageIconSolid } from "@heroicons/react/24/solid";
 import { VirtualizedList } from "~components/VirtualizedList";
+import { filterTeams } from "~utils/filterteams";
 
 type TeamSkillsTabProps = {
   event: EventData;
@@ -26,6 +31,7 @@ type TeamSkillsTabProps = {
 const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
   const { data: teams, isLoading: isLoadingTeams } = useEventTeams(event);
   const { data: skills, isLoading: isLoadingSkills } = useEventSkills(event);
+  const [filter, setFilter] = useState("");
 
   const skillsByTeam = useMemo(() => {
     if (!skills) {
@@ -48,13 +54,26 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
 
   const isLoading = isLoadingTeams || isLoadingSkills;
 
+  const filteredTeams = useMemo(
+    () => (teams ? filterTeams(teams, filter) : []),
+    [filter, teams]
+  );
+
   return (
     <>
       <section className="contents">
+        <IconLabel icon={<MagnifyingGlassIcon height={24} />}>
+          <Input
+            placeholder="Search teams..."
+            className="flex-1"
+            value={filter}
+            onChange={(e) => setFilter(e.currentTarget.value.toUpperCase())}
+          />
+        </IconLabel>
         <Spinner show={isLoading} />
         <VirtualizedList
           className="flex-1"
-          data={teams}
+          data={filteredTeams}
           options={{ estimateSize: () => 64 }}
           parts={{ list: { className: "mb-12" } }}
         >
@@ -82,7 +101,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
                     {team.team_name}
                   </p>
                 </div>
-                <p className="h-full pl-2 flex items-center">
+                <div className="absolute right-0 bg-zinc-800 h-full pl-2 flex items-center">
                   <span className="mr-4">
                     <PlayIcon height={20} className="inline" />
                     <span className="font-mono ml-2">
@@ -95,7 +114,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
                       {programming?.attempts ?? 0}
                     </span>
                   </span>
-                </p>
+                </div>
               </Link>
             );
           }}

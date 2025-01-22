@@ -3,6 +3,7 @@ import { Game, Rule } from "~utils/hooks/rules";
 import React, {
   Dispatch,
   forwardRef,
+  ReactNode,
   SetStateAction,
   useCallback,
   useId,
@@ -387,5 +388,28 @@ export const RulesMultiSelect: React.FC<RulesMultiSelectProps> = ({
           ))}
       </ul>
     </>
+  );
+};
+
+export type LabelSymbolProps = React.HTMLProps<HTMLLabelElement> & {
+  icon: ReactNode;
+};
+
+export const IconLabel: React.FC<LabelSymbolProps> = ({
+  icon,
+  children,
+  ...props
+}) => {
+  return (
+    <label
+      {...props}
+      className={twMerge(
+        "flex items-center gap-4 bg-zinc-700 pl-2 rounded-md",
+        props.className
+      )}
+    >
+      {icon}
+      {children}
+    </label>
   );
 };

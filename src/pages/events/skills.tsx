@@ -11,9 +11,12 @@ import { EventData } from "robotevents";
 import { useEventSkills, useEventTeams } from "~utils/hooks/robotevents";
 import { Link } from "react-router-dom";
 import { Skill } from "robotevents";
-import { Input } from "~components/Input";
+import { IconLabel, Input } from "~components/Input";
 
-import { UserGroupIcon as TeamsIconOutline } from "@heroicons/react/24/outline";
+import {
+  MagnifyingGlassIcon,
+  UserGroupIcon as TeamsIconOutline,
+} from "@heroicons/react/24/outline";
 import { UserGroupIcon as TeamsIconSolid } from "@heroicons/react/24/solid";
 
 import { Cog8ToothIcon as ManageIconOutline } from "@heroicons/react/24/outline";
@@ -59,30 +62,15 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
   return (
     <>
       <section className="contents">
-        <Spinner show={isLoading} />
-        <div className="flex items-center gap-4">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="size-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-            />
-          </svg>
+        <IconLabel icon={<MagnifyingGlassIcon height={24} />}>
           <Input
-            type="text"
-            placeholder="Team Name or Number"
-            id="searchBar"
-            className="z-10 w-full"
+            placeholder="Search teams..."
+            className="flex-1"
+            value={filter}
             onChange={(e) => setFilter(e.currentTarget.value.toUpperCase())}
-          ></Input>
-        </div>
+          />
+        </IconLabel>
+        <Spinner show={isLoading} />
         <VirtualizedList
           className="flex-1"
           data={filteredTeams}

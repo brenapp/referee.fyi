@@ -7,7 +7,7 @@ import { useCurrentDivision } from "~utils/hooks/state";
 import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { Link } from "react-router-dom";
 import { VirtualizedList } from "~components/VirtualizedList";
-import { Input } from "~components/Input";
+import { IconLabel, Input } from "~components/Input";
 import { filterTeams } from "~utils/filterteams";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
@@ -64,17 +64,15 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
 
   return (
     <section className="contents">
-      <Spinner show={isLoading || isPaused} />
-      <div className="flex items-center gap-4">
-        <MagnifyingGlassIcon height={24} />
+      <IconLabel icon={<MagnifyingGlassIcon height={24} />}>
         <Input
-          type="text"
-          placeholder="Team Name or Number"
-          id="searchBar"
-          className="z-10 w-full"
+          placeholder="Search teams..."
+          className="flex-1"
+          value={filter}
           onChange={(e) => setFilter(e.currentTarget.value.toUpperCase())}
-        ></Input>
-      </div>
+        />
+      </IconLabel>
+      <Spinner show={isLoading || isPaused} />
       <VirtualizedList
         data={filteredTeams}
         options={{ estimateSize: () => 64 }}

@@ -151,7 +151,11 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
       {open ? (
         <>
           {incidents.map((incident) => (
-            <Incident incident={incident} key={incident.id} />
+            <Incident
+              className="max-h-20 overflow-hidden"
+              incident={incident}
+              key={incident.id}
+            />
           ))}
           {incidents.length > 0 ? (
             <>

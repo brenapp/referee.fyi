@@ -30,6 +30,7 @@ export type HighStakesMatchScratchpadProperties = {
   game: "High Stakes";
   awp: Record<Color, boolean>;
   auto: Color | "tie" | "none";
+  timeout_used: Record<Color, boolean>;
 };
 
 export type BaseHighStakesMatchScratchpad = BaseMatchScratchpad &

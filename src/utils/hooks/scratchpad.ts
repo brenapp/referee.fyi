@@ -39,6 +39,29 @@ export function useMatchScratchpad<T extends MatchScratchpad>(
   });
 }
 
+export function useMatchScratchpads<T extends MatchScratchpad>(
+  matches?: MatchData[] | null
+) {
+  return useQuery({
+    queryKey: ["scratchpads", matches],
+    queryFn: async () => {
+      if (!matches) {
+        return [];
+      }
+
+      const scratchpads = await Promise.all(
+        matches.map(async (match) => {
+          const id = getScratchpadID(match);
+          const scratchpad = await getMatchScratchpad<T>(id);
+          return scratchpad ?? null;
+        })
+      );
+
+      return scratchpads;
+    },
+  });
+}
+
 export function useDefaultScratchpad<T extends MatchScratchpad>(
   match?: MatchData | null
 ) {
@@ -94,7 +117,10 @@ export function useUpdateMatchScratchpad<T extends MatchScratchpad>(
       connection.updateScratchpad(id, value!);
       queryClient.invalidateQueries({
         exact: true,
-        queryKey: [`scratchpad`, match],
+        queryKey: ["scratchpad", match],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["scratchpads"],
       });
     },
   });

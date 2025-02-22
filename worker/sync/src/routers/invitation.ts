@@ -187,6 +187,20 @@ invitationRouter
 
     await setInvitation(env, invitation);
 
+    // Tell DO to send an update
+    const stub = env.INCIDENTS.get(
+      env.INCIDENTS.idFromString(invitation.instance_secret)
+    );
+    stub.broadcast(
+      {
+        type: "server_user_add",
+        user: request.user,
+        activeUsers: await stub.getActiveUsers(),
+        invitations: await stub.getInvitationList(),
+      },
+      { type: "server" }
+    );
+
     return response<APIPutInvitationAcceptResponseBody>({
       success: true,
       data: {

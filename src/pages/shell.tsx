@@ -214,9 +214,9 @@ const EventPicker: React.FC = () => {
         >
           <div className="flex-1 overflow-hidden whitespace-nowrap text-ellipsis">
             <p>{event ? event.name : "Select Event"}</p>
-            {showDiv && (
-              <p className="text-sm text-emerald-400">{selectedDiv?.name}</p>
-            )}
+            <p className="text-sm text-emerald-400">
+              {showDiv ? <span>{selectedDiv?.name}</span> : event?.sku}
+            </p>
           </div>
           <ChevronDownIcon className="w-5 h-5" />
         </div>

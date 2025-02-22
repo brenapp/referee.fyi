@@ -469,7 +469,8 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
     (connection.readyState !== ReadyState.Closed &&
       connection.readyState !== ReadyState.Open) ||
     isPendingRemoveUser ||
-    isCreateInstancePending;
+    isCreateInstancePending ||
+    (invitation?.accepted && connection.readyState !== ReadyState.Open);
 
   return (
     <section>
@@ -488,7 +489,7 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
         open={leaveDialogOpen}
         onClose={() => setLeaveDialogOpen(false)}
       />
-      <Spinner show={showSpinner} />
+
       <h2 className="font-bold">Sharing</h2>
       <p>Share Name: {name} </p>
       {isSharing ? (
@@ -524,6 +525,7 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
               </span>
             </p>
           </nav>
+          <Spinner show={showSpinner} />
           <ul className="mt-4">
             {connection.invitations.map((user) => (
               <li
@@ -583,6 +585,7 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
           >
             Join Existing
           </Button>
+          <Spinner show={showSpinner} />
         </section>
       ) : null}
     </section>

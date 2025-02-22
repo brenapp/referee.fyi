@@ -11,12 +11,17 @@ import { timeAgo } from "~utils/time";
 import { Button } from "./Button";
 import { Dialog, DialogBody, DialogHeader } from "./Dialog";
 import { UserCircleIcon, ClockIcon } from "@heroicons/react/20/solid";
+import { useShareProfile } from "~utils/hooks/share";
 
-function usePeerUser(peer?: string) {
+function usePeerUserName(peer?: string) {
+  const profile = useShareProfile();
   const { invitations } = useShareConnection(["invitations"]);
   return useMemo(
-    () => invitations.find((v) => v.user.key === peer),
-    [invitations, peer]
+    () =>
+      peer == profile.key
+        ? profile.name
+        : invitations.find((v) => v.user.key === peer)?.user.name,
+    [invitations, peer, profile.key, profile.name]
   );
 }
 
@@ -41,7 +46,7 @@ export const EditHistoryItem = <
 }: EditHistoryItemProps<T, K>) => {
   const history = register.history[i] as History<T, K>;
   const to = register.history[i + 1]?.prev ?? currentValue;
-  const user = usePeerUser(history.peer);
+  const user = usePeerUserName(history.peer);
   const date = new Date(history.instant);
   return (
     <section className="bg-zinc-700 p-2 rounded-md mb-4 grid gap-2 grid-cols-2">
@@ -52,7 +57,7 @@ export const EditHistoryItem = <
           aria-hidden="true"
         />
         <span className="sr-only">User: </span>
-        {user?.user.name}
+        {user}
       </p>
       <p>
         <ClockIcon height={20} className="inline mr-2" aria-hidden="true" />
@@ -138,7 +143,7 @@ export const EditHistory = <
   render,
 }: EditHistoryProps<T, K>) => {
   const consistency = value?.consistency[valueKey];
-  const user = usePeerUser(consistency?.peer);
+  const user = usePeerUserName(consistency?.peer);
   const [historyOpen, setHistoryOpen] = useState(false);
 
   if (!consistency || !value) {
@@ -164,7 +169,7 @@ export const EditHistory = <
             : "text-emerald-400"
         )}
       >
-        {user ? `${user.user.name}, ` : ""}
+        {user ? `${user}, ` : ""}
         {timeAgo(new Date(consistency.instant))}
       </p>
       <EditHistoryDialog

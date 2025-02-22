@@ -5,8 +5,10 @@ import {
 } from "@heroicons/react/20/solid";
 import { MatchData } from "robotevents";
 import { Button } from "~components/Button";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { useShareProfile } from "~utils/hooks/share";
+import { useScratchpadState } from "~utils/hooks/scratchpad";
+import { RapidRelayMatchScratchpad } from "@referee-fyi/share";
 
 export type RapidRelayScratchpadProps = {
   match: MatchData;
@@ -15,13 +17,30 @@ export type RapidRelayScratchpadProps = {
 export const RapidRelayScratchpad: React.FC<RapidRelayScratchpadProps> = ({
   match,
 }) => {
-  const { name } = useShareProfile();
+  const { name, key } = useShareProfile();
+  const [matchCounts, setMatchCounts] = useScratchpadState<
+    RapidRelayMatchScratchpad,
+    "counts"
+  >({
+    match,
+    key: "counts",
+    fallback: { [key]: { goals: 0, passes: 0 } },
+  });
 
-  const [passes, setPasses] = useState<number>(0);
-  const [goals, setGoals] = useState<number>(0);
+  const counts = useMemo(() => matchCounts[key], [key, matchCounts]);
+  const incrementPass = useCallback(() => {
+    setMatchCounts((prev) => ({
+      ...prev,
+      [key]: { goals: prev[key].goals, passes: prev[key].passes + 1 },
+    }));
+  }, [key, setMatchCounts]);
 
-  const onPass = useCallback(() => setPasses((prev) => prev + 1), []);
-  const onGoal = useCallback(() => setGoals((prev) => prev + 1), []);
+  const incrementGoal = useCallback(() => {
+    setMatchCounts((prev) => ({
+      ...prev,
+      [key]: { goals: prev[key].goals + 1, passes: prev[key].passes },
+    }));
+  }, [key, setMatchCounts]);
 
   return (
     <section className="mt-4">
@@ -33,15 +52,14 @@ export const RapidRelayScratchpad: React.FC<RapidRelayScratchpadProps> = ({
           <p className="flex gap-2 items-center">
             <UserCircleIcon height={20} />
             {name}
-            <span className="italic">{new Date().toTimeString()}</span>
           </p>
           <p className="flex gap-2 items-center">
             <PlusCircleIcon height={20} />
-            <span>{passes}</span>
+            <span>{counts.passes}</span>
           </p>
           <p className="flex gap-2 items-center">
             <SquaresPlusIcon height={20} />
-            <span>{goals}</span>
+            <span>{counts.goals}</span>
           </p>
         </li>
       </ul>
@@ -49,14 +67,14 @@ export const RapidRelayScratchpad: React.FC<RapidRelayScratchpadProps> = ({
         <Button
           mode="normal"
           className="flex gap-2 items-center mt-2 justify-center h-12"
-          onClick={onPass}
+          onClick={incrementPass}
         >
           <PlusCircleIcon height={20} /> Pass
         </Button>
         <Button
           mode="normal"
           className="flex gap-2 items-center mt-2 justify-center h-12"
-          onClick={onGoal}
+          onClick={incrementGoal}
         >
           <SquaresPlusIcon height={20} /> Goal
         </Button>

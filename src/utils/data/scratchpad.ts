@@ -153,7 +153,7 @@ export function getDefaultScratchpad(
       return initLWW<RapidRelayMatchScratchpad>({
         peer,
         ignore: SCRATCHPAD_IGNORE,
-        value: { ...base, game: "Rapid Relay" },
+        value: { ...base, game: "Rapid Relay", counts: {} },
       });
     }
   }

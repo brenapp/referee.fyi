@@ -257,17 +257,18 @@ export function logicalMatchComparison(a: MatchData, b: MatchData) {
 export function useEventMatches<T = Match[]>(
   eventData: EventData | null | undefined,
   division: number | null | undefined,
+  query?: operations["event_getDivisionMatches"]["parameters"]["query"],
   options?: HookQueryOptions<Match[], Error, T>
 ): UseQueryResult<T> {
   return useQuery({
-    queryKey: ["matches", eventData?.sku, division],
+    queryKey: ["matches", eventData?.sku, division, query],
     queryFn: async () => {
       if (!eventData || !division) {
         return [];
       }
 
       const event = new Event(eventData, client.api);
-      const matches = await event.matches(division);
+      const matches = await event.matches(division, query);
 
       if (!matches.data) {
         return [];
@@ -336,9 +337,14 @@ export function useEventMatch(
   division: number | null | undefined,
   match: number | null | undefined
 ): UseQueryResult<Match | undefined> {
-  return useEventMatches(event, division, {
-    select: (matches) => matches?.find((m) => m.id === match),
-  });
+  return useEventMatches(
+    event,
+    division,
+    {},
+    {
+      select: (matches) => matches?.find((m) => m.id === match),
+    }
+  );
 }
 
 export function useEventTeam(

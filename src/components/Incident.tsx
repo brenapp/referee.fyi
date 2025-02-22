@@ -73,8 +73,7 @@ export const Incident: React.FC<IncidentProps> = ({
   return (
     <>
       <EditIncidentDialog
-        incident={incident}
-        key={incident.id}
+        id={incident.id}
         open={editIncidentOpen}
         setOpen={setEditIncidentOpen}
       />

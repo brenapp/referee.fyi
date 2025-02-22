@@ -265,11 +265,13 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
 
         queryClient.invalidateQueries({ queryKey: ["incidents"] });
         queryClient.invalidateQueries({ queryKey: ["scratchpad"] });
+        queryClient.invalidateQueries({ queryKey: ["scratchpads"] });
         break;
       }
       case "scratchpad_update": {
         await setMatchScratchpad(data.id, data.scratchpad);
         queryClient.invalidateQueries({ queryKey: ["scratchpad"] });
+        queryClient.invalidateQueries({ queryKey: ["scratchpads"] });
         break;
       }
       case "server_user_add": {

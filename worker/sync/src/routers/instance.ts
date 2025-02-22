@@ -6,10 +6,12 @@ import {
   APIDeleteInviteResponseBody,
   APIPutInviteResponseBody,
   Invitation,
+  WebsocketServerUserRemoveMessage,
 } from "@referee-fyi/share";
 import {
   deleteInvitation,
   getInvitation,
+  getUser,
   setInstance,
   setInvitation,
 } from "../utils/data";
@@ -143,6 +145,20 @@ instanceRouter
 
       await deleteInvitation(env, user, invitation.sku);
       await setInstance(env, instance);
+
+      // Tell the DO to send a user update
+      const id = env.INCIDENTS.idFromString(instance.secret);
+      const stub = env.INCIDENTS.get(id);
+
+      const removedUser = await getUser(env, user);
+      const message = {
+        type: "server_user_remove",
+        user: removedUser ?? { key: user, name: "Unknown User" },
+        activeUsers: await stub.getActiveUsers(),
+        invitations: await stub.getInvitationList(),
+      } satisfies WebsocketServerUserRemoveMessage;
+
+      stub.broadcast(message, { type: "server" });
 
       return response<APIDeleteInviteResponseBody>({
         success: true,

@@ -145,6 +145,7 @@ export function getDefaultScratchpad(
           game: "High Stakes",
           auto: "none",
           awp: { blue: false, red: false },
+          timeout_used: { blue: false, red: false },
         },
       });
     }

@@ -9,14 +9,19 @@ import { twMerge } from "tailwind-merge";
 import { useShareConnection } from "~models/ShareConnection";
 import { timeAgo } from "~utils/time";
 import { Button } from "./Button";
-import { ClockIcon } from "@heroicons/react/24/outline";
 import { Dialog, DialogBody, DialogHeader } from "./Dialog";
+import { UserCircleIcon, ClockIcon } from "@heroicons/react/20/solid";
+import { useShareProfile } from "~utils/hooks/share";
 
-function usePeerUser(peer?: string) {
+function usePeerUserName(peer?: string) {
+  const profile = useShareProfile();
   const { invitations } = useShareConnection(["invitations"]);
   return useMemo(
-    () => invitations.find((v) => v.user.key === peer),
-    [invitations, peer]
+    () =>
+      peer == profile.key
+        ? profile.name
+        : invitations.find((v) => v.user.key === peer)?.user.name,
+    [invitations, peer, profile.key, profile.name]
   );
 }
 
@@ -41,15 +46,33 @@ export const EditHistoryItem = <
 }: EditHistoryItemProps<T, K>) => {
   const history = register.history[i] as History<T, K>;
   const to = register.history[i + 1]?.prev ?? currentValue;
-  const user = usePeerUser(history.peer);
+  const user = usePeerUserName(history.peer);
   const date = new Date(history.instant);
   return (
-    <tr>
-      <td>{date.toLocaleTimeString()}</td>
-      <td>{user?.user.name}</td>
-      <td>{render(history.prev)}</td>
-      <td>{render(to)}</td>
-    </tr>
+    <section className="bg-zinc-700 p-2 rounded-md mb-4 grid gap-2 grid-cols-2">
+      <p className="mr-4">
+        <UserCircleIcon
+          height={20}
+          className="inline mr-2"
+          aria-hidden="true"
+        />
+        <span className="sr-only">User: </span>
+        {user}
+      </p>
+      <p>
+        <ClockIcon height={20} className="inline mr-2" aria-hidden="true" />
+        <span className="sr-only">Time: </span>
+        {date.toLocaleTimeString()}
+      </p>
+      <p>
+        <span>From </span>
+        {render(history.prev)}
+      </p>
+      <p>
+        <span>To </span>
+        {render(to)}
+      </p>
+    </section>
   );
 };
 
@@ -84,27 +107,15 @@ const EditHistoryDialog = <
     >
       <DialogHeader title="Edit History" onClose={onClose} />
       <DialogBody className="p-2">
-        <table className="w-full text-left table-fixed">
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>User</th>
-              <th>From</th>
-              <th>To</th>
-            </tr>
-          </thead>
-          <tbody>
-            {consistency.history.map((history, i) => (
-              <EditHistoryItem
-                register={consistency}
-                i={i}
-                render={render}
-                currentValue={value[valueKey]}
-                key={history.instant}
-              />
-            ))}
-          </tbody>
-        </table>
+        {consistency.history.map((history, i) => (
+          <EditHistoryItem
+            register={consistency}
+            i={i}
+            render={render}
+            currentValue={value[valueKey]}
+            key={history.instant}
+          />
+        ))}
       </DialogBody>
     </Dialog>
   );
@@ -132,7 +143,7 @@ export const EditHistory = <
   render,
 }: EditHistoryProps<T, K>) => {
   const consistency = value?.consistency[valueKey];
-  const user = usePeerUser(consistency?.peer);
+  const user = usePeerUserName(consistency?.peer);
   const [historyOpen, setHistoryOpen] = useState(false);
 
   if (!consistency || !value) {
@@ -158,7 +169,7 @@ export const EditHistory = <
             : "text-emerald-400"
         )}
       >
-        {user ? `${user.user.name}, ` : ""}
+        {user ? `${user}, ` : ""}
         {timeAgo(new Date(consistency.instant))}
       </p>
       <EditHistoryDialog

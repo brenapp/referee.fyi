@@ -1,18 +1,27 @@
-import { CodeBracketSquareIcon, StarIcon } from "@heroicons/react/20/solid";
+import {
+  CodeBracketSquareIcon,
+  StarIcon,
+  ClockIcon,
+} from "@heroicons/react/20/solid";
 import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
-import { MatchData } from "robotevents";
+import { MatchData, rounds } from "robotevents";
 import { Checkbox, Radio } from "~components/Input";
 import {
   EditScratchpad,
   HighStakesMatchScratchpad,
+  IncidentMatchHeadToHead,
   MatchScratchpad,
 } from "@referee-fyi/share";
 import {
   useDefaultScratchpad,
   useMatchScratchpad,
+  useMatchScratchpads,
   useUpdateMatchScratchpad,
 } from "~utils/hooks/scratchpad";
 import { EditHistory } from "~components/EditHistory";
+import { useEventMatches } from "~utils/hooks/robotevents";
+import { useCurrentDivision, useCurrentEvent } from "~utils/hooks/state";
+import { isMatchElimination } from "~utils/data/robotevents";
 
 type ScratchpadState<T extends MatchScratchpad, K extends keyof T> = {
   match: MatchData;
@@ -182,6 +191,171 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
           }
         />
       </section>
+      {isMatchElimination(match) && (
+        <AllianceTimeoutUsedScratchpad match={match} />
+      )}
+    </section>
+  );
+};
+
+export const AllianceTimeoutUsedScratchpad: React.FC<
+  HighStakesScratchpadProps
+> = ({ match }) => {
+  const { data } = useMatchScratchpad<HighStakesMatchScratchpad>(match);
+  const { data: event } = useCurrentEvent();
+  const division = useCurrentDivision();
+  1;
+  const { data: eliminationMatches } = useEventMatches(event, division, {
+    "round[]": [
+      rounds.RoundOf16,
+      rounds.Quarterfinals,
+      rounds.Semifinals,
+      rounds.Finals,
+    ],
+  });
+
+  const [currentMatchTimeouts, setCurrentMatchTimeouts] = useScratchpadState<
+    HighStakesMatchScratchpad,
+    "timeout_used"
+  >({
+    match,
+    key: "timeout_used",
+    fallback: { blue: false, red: false },
+  });
+
+  const { data: matchScratchpads } =
+    useMatchScratchpads<HighStakesMatchScratchpad>(eliminationMatches);
+
+  const allianceTimeouts = useMemo(() => {
+    const timeouts: Record<string, IncidentMatchHeadToHead[]> = {};
+
+    for (const scratchpad of matchScratchpads ?? []) {
+      if (!scratchpad) {
+        continue;
+      }
+
+      const match = eliminationMatches?.find(
+        (match) => match.name === scratchpad.match.name
+      );
+
+      if (scratchpad.timeout_used.red) {
+        const teams = match
+          ?.alliance("red")
+          .teams.map((t) => t.team!.name)
+          ?.join("-");
+
+        if (teams && timeouts[teams]) {
+          timeouts[teams].push(scratchpad.match);
+        } else if (teams) {
+          timeouts[teams] = [scratchpad.match];
+        }
+      }
+
+      if (scratchpad.timeout_used.blue) {
+        const teams = match
+          ?.alliance("blue")
+          .teams.map((t) => t.team!.name)
+          ?.join("-");
+
+        if (teams && timeouts[teams]) {
+          timeouts[teams].push(scratchpad.match);
+        } else if (teams) {
+          timeouts[teams] = [scratchpad.match];
+        }
+      }
+    }
+
+    return timeouts;
+  }, [matchScratchpads, eliminationMatches]);
+
+  const redTeams = useMemo(
+    () =>
+      match.alliances
+        .find((a) => a.color === "red")
+        ?.teams.map((t) => t.team!.name)
+        ?.join("-"),
+    [match]
+  );
+  const redTimeouts = useMemo(
+    () => allianceTimeouts[redTeams ?? ""],
+    [allianceTimeouts, redTeams]
+  );
+
+  const blueTeams = useMemo(
+    () =>
+      match.alliances
+        .find((a) => a.color === "blue")
+        ?.teams.map((t) => t.team!.name)
+        ?.join("-"),
+    [match]
+  );
+  const blueTimeouts = useMemo(
+    () => allianceTimeouts[blueTeams ?? ""],
+    [allianceTimeouts, blueTeams]
+  );
+
+  console.log(allianceTimeouts);
+
+  return (
+    <section
+      className="bg-zinc-800 p-4 mt-4 rounded-md"
+      aria-label="Timeouts Used"
+    >
+      <div className="flex items-center gap-2">
+        <ClockIcon height={20} />
+        <p>Timeouts Used</p>
+      </div>
+      <fieldset className="mt-2 flex gap-2" aria-label="Autonomous Win Point">
+        <Checkbox
+          label={
+            "Red " + (redTimeouts?.length > 0 ? `(${redTimeouts[0].name})` : "")
+          }
+          bind={{
+            value: currentMatchTimeouts.red,
+            onChange: (value) =>
+              setCurrentMatchTimeouts((timeouts) => ({
+                ...timeouts,
+                red: value,
+              })),
+          }}
+          disabled={redTimeouts?.length > 0 && !currentMatchTimeouts.red}
+          className="accent-red-400 mt-0"
+          aria-label="Red AWP"
+          labelProps={{
+            className: "has-[:checked]:bg-red-800 mt-0 flex-1 px-4",
+          }}
+        />
+        <Checkbox
+          label={
+            "Blue " +
+            (blueTimeouts?.length > 0 ? `(${blueTimeouts[0].name})` : "")
+          }
+          disabled={blueTimeouts?.length > 0 && !currentMatchTimeouts.blue}
+          bind={{
+            value: currentMatchTimeouts.blue,
+            onChange: (value) =>
+              setCurrentMatchTimeouts((timeouts) => ({
+                ...timeouts,
+                blue: value,
+              })),
+          }}
+          aria-label="Blue AWP"
+          className="accent-blue-400 mt-0"
+          labelProps={{
+            className: "has-[:checked]:bg-blue-800 mt-0 flex-1 px-4",
+          }}
+        />
+      </fieldset>
+      <EditHistory
+        value={data}
+        valueKey="timeout_used"
+        className="mt-4"
+        render={(value) =>
+          `${value.red ? "Red Used Timeout" : ""} ${
+            value.blue ? "Blue Used Timeout" : ""
+          }${!value.blue && !value.red ? "No Timeouts Used" : ""}`
+        }
+      />
     </section>
   );
 };

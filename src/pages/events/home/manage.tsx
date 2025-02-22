@@ -5,6 +5,7 @@ import { deleteManyIncidents, getIncidentsByEvent } from "~utils/data/incident";
 import {
   acceptEventInvitation,
   fetchInvitation,
+  forceEventInvitationSync,
   getInstancesForEvent,
   getIntegrationAPIEndpoints,
   getRequestCodeUserKey,
@@ -400,7 +401,7 @@ export const ProfilePrompt: React.FC = () => {
 };
 
 export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
-  const { name } = useShareProfile();
+  const { name, key } = useShareProfile();
 
   // Dialogs
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
@@ -416,6 +417,21 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
     "forceSync",
     "disconnect",
   ]);
+
+  // If we are not in the instance, force an invalidation
+  useEffect(() => {
+    if (!invitation?.accepted) {
+      return;
+    }
+
+    const instanceInList = connection.invitations.some(
+      (inv) => inv.user.key === key
+    );
+
+    if (!instanceInList) {
+      forceEventInvitationSync(event.sku);
+    }
+  }, [invitation, connection.invitations, key, event.sku]);
 
   const { data: entries } = useEventIncidents(event.sku);
   const isSharing = useMemo(

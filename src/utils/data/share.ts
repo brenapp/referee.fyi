@@ -185,6 +185,11 @@ export async function getEventInvitation(
   return body.data;
 }
 
+export async function forceEventInvitationSync(sku: string) {
+  await del(`invitation_${sku}`);
+  queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
+}
+
 export async function verifyEventInvitation(
   sku: string
 ): Promise<UserInvitation | null> {

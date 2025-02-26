@@ -149,7 +149,6 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
         "Synchronized with the server!" +
         (import.meta.env.DEV ? ` (Took ${end - start}ms)` : ""),
     });
-    reportMeasurement("ShareConnection#sync", end - start, "ms");
   },
 
   handleWebsocketMessage: async (data: WebSocketPayload<WebSocketMessage>) => {
@@ -264,6 +263,8 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
             "Synchronized with the server!" +
             (import.meta.env.DEV ? ` (Took ${end - start}ms)` : ""),
         });
+
+        reportMeasurement("ShareConnection#sync", end - start, "ms");
 
         queryClient.invalidateQueries({ queryKey: ["incidents"] });
         queryClient.invalidateQueries({ queryKey: ["scratchpad"] });

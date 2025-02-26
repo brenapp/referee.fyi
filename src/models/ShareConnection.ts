@@ -47,6 +47,7 @@ import {
   setMatchScratchpad,
 } from "~utils/data/scratchpad";
 import { setUser } from "@sentry/react";
+import { reportMeasurement } from "~utils/sentry";
 
 export enum ReadyState {
   Closed = WebSocket.CLOSED,
@@ -148,6 +149,7 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
         "Synchronized with the server!" +
         (import.meta.env.DEV ? ` (Took ${end - start}ms)` : ""),
     });
+    reportMeasurement("ShareConnection#sync", end - start, "ms");
   },
 
   handleWebsocketMessage: async (data: WebSocketPayload<WebSocketMessage>) => {

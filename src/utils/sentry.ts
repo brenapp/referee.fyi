@@ -1,4 +1,10 @@
-import { init, browserTracingIntegration, setUser } from "@sentry/react";
+import {
+  init,
+  browserTracingIntegration,
+  setUser,
+  setMeasurement,
+} from "@sentry/react";
+import type { MeasurementUnit } from "@sentry/types";
 import { queryClient } from "./data/query";
 import { getShareProfile } from "./data/share";
 
@@ -50,3 +56,21 @@ window.addEventListener("load", async () => {
     });
   }
 });
+
+export function reportMeasurement(
+  name: string,
+  value: number,
+  unit: MeasurementUnit
+) {
+  return setMeasurement(name, value, unit);
+}
+
+export function measure(name: string, executor: () => void) {
+  const start = performance.now();
+  executor();
+  const end = performance.now();
+
+  const duration = end - start;
+  reportMeasurement(name, duration, "millisecond");
+  return duration;
+}

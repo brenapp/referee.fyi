@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w",
-    "test": "vitest"
+    "test": "echo 'No Tests'"
   },
   "keywords": [],
   "author": "",

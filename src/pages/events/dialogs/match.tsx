@@ -401,7 +401,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                 ? {
                     "aria-hidden": true,
                     tabIndex: -1,
-                    inert: "",
+                    inert: true,
                   }
                 : {};
             return (

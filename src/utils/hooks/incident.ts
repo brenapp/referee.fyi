@@ -5,9 +5,11 @@ import {
   deleteIncident,
   editIncident,
   generateIncidentId,
+  getDeletedIncidentsForEvent,
   getIncident,
   getIncidentsByEvent,
   getIncidentsByTeam,
+  getManyIncidents,
   newIncident,
 } from "../data/incident";
 import {
@@ -50,6 +52,21 @@ export function useEventIncidents(sku: string | undefined | null) {
         return [];
       }
       return getIncidentsByEvent(sku);
+    },
+    staleTime: 0,
+  });
+}
+
+export function useEventDeletedIncidents(sku: string | undefined | null) {
+  return useQuery<Incident[]>({
+    queryKey: ["incidents", "event", sku, "deleted"],
+    queryFn: async () => {
+      if (!sku) {
+        return [];
+      }
+      const deleted = await getDeletedIncidentsForEvent(sku);
+      const incidents = await getManyIncidents([...deleted]);
+      return incidents.filter((i) => i !== undefined);
     },
     staleTime: 0,
   });

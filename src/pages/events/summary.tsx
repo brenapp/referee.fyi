@@ -2,11 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Spinner } from "~components/Spinner";
 import { useAddEventVisited } from "~utils/hooks/history";
 import { useCurrentEvent } from "~utils/hooks/state";
-import { Button, IconButton } from "~components/Button";
+import { Button, IconButton, LinkButton } from "~components/Button";
 import {
   AdjustmentsHorizontalIcon,
   ArrowDownTrayIcon,
   ArrowPathIcon,
+  ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 import { useEventIncidents } from "~utils/hooks/incident";
 import { Incident } from "~components/Incident";
@@ -329,6 +330,15 @@ export const EventSummaryPage: React.FC = () => {
             />
           )}
         </VirtualizedList>
+        <section className="mt-4">
+          <LinkButton
+            to={`/${event.sku}/deleted`}
+            className="w-full flex items-center"
+          >
+            <span className="flex-1">Deleted Incidents</span>
+            <ArrowRightIcon height={20} className="text-emerald-400" />
+          </LinkButton>
+        </section>
       </section>
     </>
   );

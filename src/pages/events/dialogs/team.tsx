@@ -17,7 +17,7 @@ import { useTeamIncidentsByEvent } from "~utils/hooks/incident";
 import { useEventMatchesForTeam, useTeam } from "~utils/hooks/robotevents";
 import { useCurrentEvent } from "~utils/hooks/state";
 import { EventNewIncidentDialog } from "./new";
-import { Button } from "~components/Button";
+import { Button, MenuButton } from "~components/Button";
 import { ClipboardDocumentListIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { Tabs } from "~components/Tabs";
 import { EventMatchDialog } from "./match";
@@ -149,10 +149,19 @@ export const TeamDialog: React.FC<TeamDialogProps> = ({
         </div>
       </DialogCustomHeader>
       <DialogBody>
-        <Button onClick={() => setIncidentDialogOpen(true)} mode="primary">
+        <MenuButton
+          onClick={() => setIncidentDialogOpen(true)}
+          mode="primary"
+          menu={
+            <nav className="gap-4 flex flex-col">
+              <Button mode="normal">Inspection</Button>
+              <Button mode="normal">Skills</Button>
+            </nav>
+          }
+        >
           <FlagIcon height={20} className="inline mr-2 " />
           New Entry
-        </Button>
+        </MenuButton>
         <Spinner show={isPending} />
         <Tabs>
           {[

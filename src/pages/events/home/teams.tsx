@@ -1,15 +1,16 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { EventData } from "robotevents";
 import { Spinner } from "~components/Spinner";
 import { useEventIncidents } from "~utils/hooks/incident";
 import { useDivisionTeams } from "~utils/hooks/robotevents";
 import { useCurrentDivision } from "~utils/hooks/state";
 import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
-import { Link } from "react-router-dom";
 import { VirtualizedList } from "~components/VirtualizedList";
 import { IconLabel, Input } from "~components/Input";
 import { filterTeams } from "~utils/filterteams";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { TeamDialog } from "../dialogs/team";
+import { Button } from "~components/Button";
 
 export type EventTagProps = {
   event: EventData;
@@ -24,6 +25,14 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
   } = useDivisionTeams(event, division);
   const { data: incidents } = useEventIncidents(event.sku);
   const [filter, setFilter] = useState("");
+
+  const [teamsDialogOpen, setTeamsDialogOpen] = useState(false);
+  const [teamDialogTeam, setTeamDialogTeam] = useState<string | undefined>();
+
+  const onClickTeam = useCallback((team: string) => {
+    setTeamDialogTeam(team);
+    setTeamsDialogOpen(true);
+  }, []);
 
   const teams = useMemo(() => divisionTeams?.teams ?? [], [divisionTeams]);
 
@@ -73,6 +82,11 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
         />
       </IconLabel>
       <Spinner show={isLoading || isPaused} />
+      <TeamDialog
+        open={teamsDialogOpen}
+        setOpen={setTeamsDialogOpen}
+        team={teamDialogTeam}
+      />
       <VirtualizedList
         data={filteredTeams}
         options={{ estimateSize: () => 64 }}
@@ -80,8 +94,9 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
         parts={{ list: { className: "mb-12" } }}
       >
         {(team) => (
-          <Link
-            to={`/${event.sku}/team/${team.number}`}
+          <Button
+            mode="transparent"
+            onClick={() => onClickTeam(team.number)}
             className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
             aria-label={`Team ${team.number} ${team.team_name}. ${
               majorIncidents.get(team.number) ?? 0
@@ -109,7 +124,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
                 </span>
               </span>
             </div>
-          </Link>
+          </Button>
         )}
       </VirtualizedList>
     </section>

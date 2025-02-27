@@ -27,7 +27,7 @@ import { Match } from "robotevents";
 import { MatchContext } from "~components/Context";
 import { Incident } from "~components/Incident";
 import { MatchTime } from "~components/Match";
-import { TeamIsolationDialog } from "./team";
+import { TeamDialog } from "./team";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import { MatchScratchpad } from "~components/scratchpad/Scratchpad";
 import { animate, motion, PanInfo, useMotionValue } from "framer-motion";
@@ -159,7 +159,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
           ))}
           {incidents.length > 0 ? (
             <>
-              <TeamIsolationDialog
+              <TeamDialog
                 key={number}
                 team={number}
                 open={isolationOpen}
@@ -181,12 +181,12 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
   );
 };
 
-type TeamFlagButtonProps = {
-  match: Match;
+export type TeamFlagButtonProps = {
+  match?: Match;
   team: string;
 } & ButtonProps;
 
-const TeamFlagButton: React.FC<TeamFlagButtonProps> = ({
+export const TeamFlagButton: React.FC<TeamFlagButtonProps> = ({
   match,
   team,
   ...props
@@ -199,7 +199,7 @@ const TeamFlagButton: React.FC<TeamFlagButtonProps> = ({
         open={open}
         setOpen={setOpen}
         initial={{ match, team }}
-        key={match.id + team}
+        key={match?.id + team}
       />
       <Button
         mode="primary"

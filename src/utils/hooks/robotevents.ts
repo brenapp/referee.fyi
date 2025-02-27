@@ -99,13 +99,13 @@ export function useEventSearch(
 
 export function useTeam(
   number: string | null | undefined,
-  program: ProgramCode,
+  program?: ProgramCode | null,
   options?: HookQueryOptions<TeamData | null | undefined>
 ): UseQueryResult<TeamData | null | undefined> {
   return useQuery({
     queryKey: ["team", number, program],
     queryFn: async ({ signal }) => {
-      if (!number) {
+      if (!number || !program) {
         return null;
       }
 

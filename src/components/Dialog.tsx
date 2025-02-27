@@ -1,19 +1,26 @@
 import { twMerge } from "tailwind-merge";
 import { IconButton } from "./Button";
 import { XMarkIcon } from "@heroicons/react/20/solid";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 export type DialogMode = "modal" | "nonmodal";
 
 export type DialogCustomHeaderProps = {
   children?: React.ReactNode;
-};
+} & React.HTMLProps<HTMLDivElement>;
 
 export const DialogCustomHeader: React.FC<DialogCustomHeaderProps> = ({
   children,
+  ...props
 }) => {
   return (
-    <nav className="h-16 flex p-2 gap-2 items-center max-w-full">
+    <nav
+      {...props}
+      className={twMerge(
+        "h-16 flex p-2 gap-2 items-center max-w-full",
+        props.className
+      )}
+    >
       {children}
     </nav>
   );

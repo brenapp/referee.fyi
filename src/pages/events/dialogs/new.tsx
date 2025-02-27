@@ -455,6 +455,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             className="max-w-full w-full"
           >
             <option value="General">General</option>
+            <option value="Inspection">Inspection</option>
             <option value="Minor">Minor</option>
             <option value="Major">Major</option>
             <option value="Disabled">Disabled</option>

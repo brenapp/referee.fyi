@@ -29,7 +29,13 @@ export type Filters = {
 };
 
 const DEFAULT_FILTERS: Filters = {
-  outcomes: { Disabled: true, General: true, Major: true, Minor: true },
+  outcomes: {
+    Disabled: true,
+    General: true,
+    Major: true,
+    Minor: true,
+    Inspection: true,
+  },
   rules: [],
 };
 

@@ -1,6 +1,11 @@
 import { WithLWWConsistency } from "@referee-fyi/consistency";
 
-export type IncidentOutcome = "Minor" | "Major" | "Disabled" | "General";
+export type IncidentOutcome =
+  | "Minor"
+  | "Major"
+  | "Disabled"
+  | "General"
+  | "Inspection";
 
 export type IncidentMatchHeadToHead = {
   type: "match";

@@ -16,6 +16,7 @@ const IncidentOutcomeClasses: { [O in IncidentOutcome]: string } = {
   Major: "bg-red-400 text-red-900",
   Disabled: "bg-blue-400 text-blue-900",
   General: "bg-zinc-300 text-zinc-900",
+  Inspection: "bg-zinc-300 text-zinc-900",
 };
 
 export type IncidentProps = {

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { EventData } from "robotevents";
 import { Button, IconButton, LinkButton } from "~components/Button";
-import { deleteManyIncidents, getIncidentsByEvent } from "~utils/data/incident";
 import {
   acceptEventInvitation,
   fetchInvitation,
@@ -37,7 +36,6 @@ import { useEventIncidents } from "~utils/hooks/incident";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { queryClient } from "~utils/data/query";
 import { ReadyState, useShareConnection } from "~models/ShareConnection";
-import { isWorldsBuild } from "~utils/data/state";
 import { ClickToCopy } from "~components/ClickToCopy";
 import { twMerge } from "tailwind-merge";
 import { tryPersistStorage } from "~utils/data/keyval";
@@ -624,57 +622,6 @@ const EventSummaryLink: React.FC<ManageTabProps> = ({ event }) => {
   );
 };
 
-const DeleteData: React.FC<ManageTabProps> = ({ event }) => {
-  const [deleteDataDialogOpen, setDeleteDataDialogOpen] = useState(false);
-
-  const onConfirmDeleteData = useCallback(async () => {
-    const incidents = await getIncidentsByEvent(event.sku);
-    await removeInvitation(event.sku);
-    await deleteManyIncidents(incidents.map((i) => i.id));
-    setDeleteDataDialogOpen(false);
-  }, [event.sku]);
-
-  return (
-    <section className="mt-4 relative">
-      <h2 className="font-bold">Delete Event Data</h2>
-      <p>
-        This will delete all anomaly logs associated with this event. This
-        action cannot be undone.
-      </p>
-      <Button
-        className="w-full mt-4 bg-red-500 text-center"
-        onClick={() => setDeleteDataDialogOpen(true)}
-      >
-        Delete Event Data
-      </Button>
-      <Dialog
-        open={deleteDataDialogOpen}
-        mode="modal"
-        className="absolute w-full rounded-md mt-4"
-        onClose={() => setDeleteDataDialogOpen(false)}
-        aria-label="Delete Event Data Confirmation"
-      >
-        <DialogBody>
-          <p>Really delete all event data? This action cannot be undone.</p>
-          <Button
-            className="w-full mt-4 bg-red-500 text-center"
-            onClick={onConfirmDeleteData}
-          >
-            Confirm Deletion
-          </Button>
-          <Button
-            className="w-full mt-4 text-center"
-            onClick={() => setDeleteDataDialogOpen(false)}
-            autoFocus
-          >
-            Cancel
-          </Button>
-        </DialogBody>
-      </Dialog>
-    </section>
-  );
-};
-
 const IntegrationInfo: React.FC<ManageTabProps> = ({ event }) => {
   const { data: bearerToken, isSuccess: isSuccessBearerToken } =
     useIntegrationBearer(event.sku);
@@ -786,7 +733,6 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
       <UpdatePrompt />
       <ShareManager event={event} />
       <EventSummaryLink event={event} />
-      {!isWorldsBuild() ? <DeleteData event={event} /> : null}
       <IntegrationInfo event={event} />
       <SystemKeyInfo event={event} />
     </section>

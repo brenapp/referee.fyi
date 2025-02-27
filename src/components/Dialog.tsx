@@ -2,6 +2,7 @@ import { twMerge } from "tailwind-merge";
 import { IconButton } from "./Button";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 import React, { useEffect, useRef } from "react";
+import { HTMLMotionProps, motion } from "framer-motion";
 
 export type DialogMode = "modal" | "nonmodal";
 
@@ -84,7 +85,8 @@ export type DialogProps = {
   open: boolean;
   onClose: () => void;
   mode: DialogMode;
-} & Omit<React.HTMLProps<HTMLDialogElement>, "ref">;
+} & Omit<HTMLMotionProps<"dialog">, "ref"> &
+  React.RefAttributes<HTMLDialogElement>;
 
 export const Dialog: React.FC<DialogProps> = ({
   open,
@@ -115,7 +117,7 @@ export const Dialog: React.FC<DialogProps> = ({
   }
 
   return (
-    <dialog
+    <motion.dialog
       onPointerDown={(e) => e.stopPropagation()}
       {...props}
       ref={ref}
@@ -127,6 +129,6 @@ export const Dialog: React.FC<DialogProps> = ({
       )}
     >
       {children}
-    </dialog>
+    </motion.dialog>
   );
 };

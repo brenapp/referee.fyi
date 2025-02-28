@@ -102,11 +102,18 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
     outcome: false,
     rules: false,
     notes: false,
+    assets: false,
   });
 
   useEffect(() => {
     if (!open) {
-      setDirty({ match: false, outcome: false, rules: false, notes: false });
+      setDirty({
+        match: false,
+        outcome: false,
+        rules: false,
+        notes: false,
+        assets: false,
+      });
     }
   }, [open]);
 

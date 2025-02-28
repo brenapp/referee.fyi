@@ -8,6 +8,10 @@ export type LocalAsset = {
   data: Blob;
 };
 
+export type ImageLocalAsset = LocalAsset & {
+  type: "image";
+};
+
 export function getLocalAsset(id: string) {
   return get<LocalAsset>(`asset_${id}`);
 }

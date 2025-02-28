@@ -3,7 +3,7 @@ import {
   useVirtualizer,
   VirtualizerOptions,
 } from "@tanstack/react-virtual";
-import { useRef } from "react";
+import { useRef, JSX } from "react";
 import { twMerge } from "tailwind-merge";
 import { ComponentParts } from "./parts";
 

@@ -61,7 +61,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     division
   );
 
-  // Initialise current team and match
+  // Initialize current team and match
   const [team, setTeam] = useState<string | undefined>(
     initial?.team ?? undefined
   );
@@ -128,6 +128,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     rules: [],
     notes: "",
     outcome: "Minor",
+    assets: [],
     ...initial,
   });
 

@@ -35,6 +35,7 @@ export type BaseIncident = {
   outcome: IncidentOutcome;
   rules: string[];
   notes: string;
+  assets: string[];
 };
 
 export const INCIDENT_IGNORE = ["id", "time", "event", "team"] as const;

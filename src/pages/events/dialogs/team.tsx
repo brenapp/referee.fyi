@@ -18,6 +18,9 @@ import { Button } from "~components/Button";
 import { FlagIcon } from "@heroicons/react/20/solid";
 import { useEventAssetsForTeam } from "~utils/hooks/assets";
 import { AssetPreview } from "~components/Assets";
+import { useTeamIncidentsByEvent } from "~utils/hooks/incident";
+import { VirtualizedList } from "~components/VirtualizedList";
+import { Incident } from "~components/Incident";
 
 export type EventTeamAssetsProps = {
   team: string;
@@ -55,6 +58,7 @@ export const TeamDialog: React.FC<TeamDialogProps> = ({
     number,
     event?.program.id as ProgramCode
   );
+  const { data: incidents } = useTeamIncidentsByEvent(team?.number, event?.sku);
 
   const isPending = isPendingTeam;
 
@@ -98,7 +102,23 @@ export const TeamDialog: React.FC<TeamDialogProps> = ({
           New Entry
         </Button>
         <Spinner show={isPending} />
-        <EventTeamAssets sku={event!.sku} team={number} />
+        <div className="mt-4">
+          <EventTeamAssets sku={event!.sku} team={number} />
+        </div>
+        <div className="mt-4">
+          <VirtualizedList
+            data={incidents}
+            options={{ estimateSize: () => 88 }}
+          >
+            {(incident) => (
+              <Incident
+                incident={incident}
+                key={incident.id}
+                className="h-20"
+              />
+            )}
+          </VirtualizedList>
+        </div>
       </DialogBody>
     </Dialog>
   );

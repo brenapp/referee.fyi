@@ -2,95 +2,39 @@
  * Team Isolation Dialog
  **/
 
-import { useCallback, useMemo, useState } from "react";
-import { EventData, MatchData, ProgramCode, TeamData } from "robotevents";
+import { useMemo, useState } from "react";
+import { ProgramCode } from "robotevents";
 import {
   Dialog,
   DialogBody,
   DialogCloseButton,
   DialogCustomHeader,
 } from "~components/Dialog";
-import { Incident } from "~components/Incident";
 import { Spinner } from "~components/Spinner";
-import { VirtualizedList } from "~components/VirtualizedList";
-import { useTeamIncidentsByEvent } from "~utils/hooks/incident";
-import { useEventMatchesForTeam, useTeam } from "~utils/hooks/robotevents";
+import { useTeam } from "~utils/hooks/robotevents";
 import { useCurrentEvent } from "~utils/hooks/state";
 import { EventNewIncidentDialog } from "./new";
-import { Button, MenuButton } from "~components/Button";
-import { ClipboardDocumentListIcon, FlagIcon } from "@heroicons/react/20/solid";
-import { Tabs } from "~components/Tabs";
-import { EventMatchDialog } from "./match";
-import { ClickableMatch } from "~components/Match";
+import { Button } from "~components/Button";
+import { FlagIcon } from "@heroicons/react/20/solid";
+import { useEventAssetsForTeam } from "~utils/hooks/assets";
+import { AssetPreview } from "~components/Assets";
 
-type EventTeamsTabProps = {
-  event: EventData | null | undefined;
-  team: TeamData | null | undefined;
+export type EventTeamAssetsProps = {
+  team: string;
+  sku: string;
 };
 
-export const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({
-  event,
+export const EventTeamAssets: React.FC<EventTeamAssetsProps> = ({
   team,
+  sku,
 }) => {
-  const { data: matches, isLoading } = useEventMatchesForTeam(event, team);
-
-  const [matchId, setMatchId] = useState<number>(0);
-  const [division, setDivision] = useState(1);
-  const [matchDialogOpen, setMatchDialogOpen] = useState(false);
-
-  const onClickMatch = useCallback((match: MatchData) => {
-    setMatchId(match.id);
-    setDivision(match.division.id);
-    setTimeout(() => {
-      setMatchDialogOpen(true);
-    }, 0);
-  }, []);
-
+  const { data: assets } = useEventAssetsForTeam(sku, team);
   return (
-    <>
-      <EventMatchDialog
-        initialMatchId={matchId}
-        open={matchDialogOpen}
-        setOpen={setMatchDialogOpen}
-        division={division}
-      />
-      <Spinner show={isLoading} />
-      <ul className="flex-1 overflow-auto">
-        {matches?.map((match) => (
-          <ClickableMatch
-            match={match}
-            key={match.id}
-            onClick={() => onClickMatch(match)}
-          />
-        ))}
-      </ul>
-    </>
-  );
-};
-
-export const EventTeamsIncidents: React.FC<EventTeamsTabProps> = ({
-  team,
-  event,
-}) => {
-  const {
-    data: incidents,
-    isLoading: isIncidentsLoading,
-    isSuccess,
-  } = useTeamIncidentsByEvent(team?.number, event?.sku);
-
-  if (isSuccess && incidents.length < 1) {
-    return <p className="mt-4">No Recorded Entries!</p>;
-  }
-
-  return (
-    <ul className="contents">
-      <Spinner show={isIncidentsLoading} />
-      <VirtualizedList data={incidents} options={{ estimateSize: () => 88 }}>
-        {(incident) => (
-          <Incident incident={incident} key={incident.id} className="h-20" />
-        )}
-      </VirtualizedList>
-    </ul>
+    <div className="grid grid-cols-4 mt-4">
+      {assets?.map((asset) =>
+        asset ? <AssetPreview key={asset.id} asset={asset} /> : null
+      )}
+    </div>
   );
 };
 
@@ -149,48 +93,12 @@ export const TeamDialog: React.FC<TeamDialogProps> = ({
         </div>
       </DialogCustomHeader>
       <DialogBody>
-        <MenuButton
-          onClick={() => setIncidentDialogOpen(true)}
-          mode="primary"
-          menu={
-            <nav className="gap-4 flex flex-col">
-              <Button mode="normal">Inspection</Button>
-              <Button mode="normal">Skills</Button>
-            </nav>
-          }
-        >
+        <Button onClick={() => setIncidentDialogOpen(true)} mode="primary">
           <FlagIcon height={20} className="inline mr-2 " />
           New Entry
-        </MenuButton>
+        </Button>
         <Spinner show={isPending} />
-        <Tabs>
-          {[
-            {
-              type: "content",
-              id: "incidents",
-              label: "Incidents",
-              icon: (active) =>
-                active ? (
-                  <FlagIcon height={24} className="inline" />
-                ) : (
-                  <FlagIcon height={24} className="inline" />
-                ),
-              content: <EventTeamsIncidents event={event} team={team} />,
-            },
-            {
-              type: "content",
-              id: "schedule",
-              label: "Schedule",
-              icon: (active) =>
-                active ? (
-                  <ClipboardDocumentListIcon height={24} className="inline" />
-                ) : (
-                  <ClipboardDocumentListIcon height={24} className="inline" />
-                ),
-              content: <EventTeamsMatches event={event} team={team} />,
-            },
-          ]}
-        </Tabs>
+        <EventTeamAssets sku={event!.sku} team={number} />
       </DialogBody>
     </Dialog>
   );

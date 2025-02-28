@@ -540,7 +540,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
                 <AssetPreview key={asset.id} asset={asset} />
               </div>
             ))}
-            <label className="aspect-square bg-zinc-700 rounded-md flex items-center justify-center active:bg-zinc-800 cursor-pointer">
+            <label className="aspect-square bg-zinc-700 rounded-md flex items-center justify-center active:bg-zinc-800 focus-within:bg-zinc-800 focus-within:ring-2 ring-zinc-200 cursor-pointer">
               <CameraIcon className="w-8 h-8 text-zinc-50" />
               <AssetPicker
                 capture="environment"

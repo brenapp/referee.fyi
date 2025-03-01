@@ -1,9 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
 import { ImageLocalAsset, LocalAsset } from "~utils/data/assets";
 import { twMerge } from "tailwind-merge";
-import { Dialog, DialogHeader } from "./Dialog";
+import { Dialog, DialogBody, DialogHeader } from "./Dialog";
 import { useAssetOriginalURL, useAssetPreviewURL } from "~utils/hooks/assets";
 import { useCurrentEvent } from "~utils/hooks/state";
+import { PhotoIcon } from "@heroicons/react/20/solid";
 
 export type AssetPickerProps = Omit<
   React.HTMLProps<HTMLInputElement>,
@@ -43,6 +44,46 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
   );
 };
 
+export type ImagePreviewProps = {
+  previewUrl: string;
+  originalUrl?: string | null;
+} & React.HTMLProps<HTMLImageElement>;
+
+export const ImagePreview: React.FC<ImagePreviewProps> = ({
+  originalUrl,
+  previewUrl,
+  ...props
+}) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Dialog
+        mode="modal"
+        open={open}
+        onClose={() => setOpen(false)}
+        className="w-full h-full"
+      >
+        <DialogHeader title="Image" onClose={() => setOpen(false)} />
+        <DialogBody className="flex items-center justify-center">
+          <div>
+            <img
+              className="max-w-full max-h-full object-cover rounded-md"
+              src={originalUrl ?? previewUrl}
+              {...props}
+            />
+          </div>
+        </DialogBody>
+      </Dialog>
+      <img
+        className="w-full h-full object-cover aspect-square rounded-md"
+        onClick={() => setOpen(true)}
+        src={previewUrl}
+        {...props}
+      />
+    </>
+  );
+};
+
 export type LocalImageAssetPreviewProps = {
   asset: ImageLocalAsset;
 } & React.HTMLProps<HTMLDivElement>;
@@ -51,26 +92,7 @@ export const ImageAssetPreview: React.FC<LocalImageAssetPreviewProps> = ({
   asset,
 }) => {
   const url = useMemo(() => URL.createObjectURL(asset.data), [asset.data]);
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <Dialog
-        mode="modal"
-        open={open}
-        onClose={() => setOpen(false)}
-        className="w-full h-full bg-contain bg-no-repeat bg-center"
-        style={{ backgroundImage: `url(${url})` }}
-      >
-        <DialogHeader title="Image" onClose={() => setOpen(false)} />
-      </Dialog>
-      <img
-        className="w-full h-full object-cover aspect-square rounded-md"
-        onClick={() => setOpen(true)}
-        src={url}
-        alt="Asset"
-      />
-    </>
-  );
+  return <ImagePreview previewUrl={url} originalUrl={url} />;
 };
 
 export type LocalAssetPreviewProps = {
@@ -97,31 +119,20 @@ export type AssetPreviewProps = {
 };
 
 export const AssetPreview: React.FC<AssetPreviewProps> = ({ asset }) => {
-  const [open, setOpen] = useState(false);
   const { data: event } = useCurrentEvent();
 
   const { data: previewUrl } = useAssetPreviewURL(event?.sku, asset);
-  const { data: originalUrl } = useAssetOriginalURL(event?.sku, asset, {
-    enabled: open,
-  });
+  const { data: originalUrl } = useAssetOriginalURL(event?.sku, asset);
+
+  if (!previewUrl) {
+    return (
+      <div className="bg-zinc-700 animate-pulse rounded-md flex place-content-center">
+        <PhotoIcon className="h-8 w-8 text-zinc-200" />
+      </div>
+    );
+  }
 
   return (
-    <>
-      <Dialog
-        mode="modal"
-        open={open}
-        onClose={() => setOpen(false)}
-        className="w-full h-full bg-contain bg-no-repeat bg-center"
-        style={{ backgroundImage: `url(${originalUrl ?? previewUrl})` }}
-      >
-        <DialogHeader title="Image" onClose={() => setOpen(false)} />
-      </Dialog>
-      <img
-        className="w-full h-full object-cover aspect-square rounded-md"
-        onClick={() => setOpen(true)}
-        src={previewUrl ?? undefined}
-        alt="Asset"
-      />
-    </>
+    <ImagePreview previewUrl={previewUrl ?? ""} originalUrl={originalUrl} />
   );
 };

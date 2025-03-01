@@ -13,7 +13,6 @@ import {
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import { Button, LinkButton } from "~components/Button";
-import { TeamIsolationDialog } from "../dialogs/team";
 import { RichIncident } from "~utils/data/incident";
 import { EventNewIncidentDialog } from "../dialogs/new";
 import { MenuButton } from "~components/MenuButton";

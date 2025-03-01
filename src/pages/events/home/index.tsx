@@ -1,6 +1,5 @@
 import { useCurrentEvent } from "~hooks/state";
-import { useEffect, useState } from "react";
-import { EventNewIncidentDialog } from "../dialogs/new";
+import { useEffect } from "react";
 import { useAddEventVisited } from "~utils/hooks/history";
 import { EventMatchesTab } from "./matches";
 import { EventTeamsTab } from "./teams";
@@ -15,12 +14,9 @@ import { UserGroupIcon as TeamsIconSolid } from "@heroicons/react/24/solid";
 import { CloudIcon as ManageIconOutline } from "@heroicons/react/24/outline";
 import { CloudIcon as ManageIconSolid } from "@heroicons/react/24/solid";
 import { Tabs } from "~components/Tabs";
-import { Button } from "~components/Button";
-import { FlagIcon } from "@heroicons/react/20/solid";
 
 export const EventHome: React.FC = () => {
   const { data: event } = useCurrentEvent();
-  const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
   const { mutateAsync: addEvent, isSuccess } = useAddEventVisited();
 
   useEffect(() => {
@@ -31,18 +27,6 @@ export const EventHome: React.FC = () => {
 
   return event ? (
     <section className="mt-4 flex flex-col">
-      <EventNewIncidentDialog
-        open={incidentDialogOpen}
-        setOpen={setIncidentDialogOpen}
-      />
-      <Button
-        className="flex items-center gap-2 justify-center mb-4"
-        mode="primary"
-        onClick={() => setIncidentDialogOpen(true)}
-      >
-        <FlagIcon height={20} />
-        New Entry
-      </Button>
       <Tabs
         className="flex-1"
         parts={{

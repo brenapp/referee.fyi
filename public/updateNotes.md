@@ -1,4 +1,26 @@
-## 15 July 2024
+## 1 March 2025
+
+- Added support for images in incidents. When you create a new incident, you can
+  use the capture button to take images to attach to the incident. All images
+  are stored locally unless you connect to a sharing instance for that event.
+- If you have enabled sharing for an event, images will be available to other
+  devices on the same sharing instance.
+- Added "Inspection" as an outcome for incidents
+- UI improvements to the teams tab
+
+### 22 February 2025
+
+- Improved performance when adding and removing devices from a share instance
+- Visual improvements with edit history for incidents and scratchpads
+- Added the ability to track timeouts in V5RC, VURC, and VAIRC games
+
+### 23 Jan 2025
+
+- Split SG6 to separate rules for Goals and Rings in High Stakes matches
+- Add team search functionality
+
+### 15 July 2024
+
 - Improved sync performance and correctness when connecting to a share instance.
 - Added Scratchpad for High Stakes matches to record Auto Winner and AWP
 
@@ -10,7 +32,7 @@
 ### 13 May 2024
 
 - Added support for "Skills" as a match type. Entries marked as "Skills" are not shown on the team summary in the match dialog, but are shown when expanding the team summary.
-- Added option to export list of entries from the event summary page. 
+- Added option to export list of entries from the event summary page.
 - Fixed bug where some shared entries were not being displayed for all users.
 - Minor bug fixes and usability improvements.
 

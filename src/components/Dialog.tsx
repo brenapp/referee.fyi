@@ -81,6 +81,11 @@ export const DialogBody: React.FC<DialogBodyProps> = ({
   );
 };
 
+export type DialogFooterProps = React.HTMLProps<HTMLDivElement>;
+export const DialogFooter = (props: DialogFooterProps) => {
+  return <div {...props}>{props.children}</div>;
+};
+
 export type DialogProps = {
   open: boolean;
   onClose: () => void;
@@ -123,7 +128,7 @@ export const Dialog: React.FC<DialogProps> = ({
       ref={ref}
       onClose={onClose}
       className={twMerge(
-        "bg-zinc-900 flex-col p-2 gap-2 z-50 w-svw h-svh max-w-3xl max-h-[1152px] overscroll-none text-zinc-100 rounded-md m-auto",
+        "bg-zinc-900 flex-col p-2 gap-2 z-50 w-svw h-svh max-w-3xl max-h-[1152px] overscroll-none overflow-hidden text-zinc-100 rounded-md m-auto",
         props.className,
         open ? "flex" : ""
       )}

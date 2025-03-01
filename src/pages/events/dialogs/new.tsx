@@ -17,7 +17,12 @@ import {
   packIncident,
 } from "~utils/data/incident";
 import { useNewIncident } from "~hooks/incident";
-import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
+import {
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  DialogHeader,
+} from "~components/Dialog";
 import { useAddRecentRules, useRecentRules } from "~utils/hooks/history";
 import { twMerge } from "tailwind-merge";
 import { toast } from "~components/Toast";
@@ -553,13 +558,15 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
           </section>
         </div>
       </DialogBody>
-      <Button
-        className="w-full text-center my-4 bg-emerald-400 text-black"
-        disabled={!canSave}
-        onClick={onSubmit}
-      >
-        Submit
-      </Button>
+      <DialogFooter>
+        <Button
+          className="w-full text-center my-4 bg-emerald-400 text-black"
+          disabled={!canSave}
+          onClick={onSubmit}
+        >
+          Submit
+        </Button>
+      </DialogFooter>
     </Dialog>
   );
 };

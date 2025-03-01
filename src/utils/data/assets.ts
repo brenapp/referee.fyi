@@ -28,3 +28,16 @@ export function generateLocalAsset(type: LocalAssetType, data: Blob) {
     data,
   } satisfies LocalAsset;
 }
+
+export type AssetUploadStatus = {
+  success: boolean;
+  date: string; // ISO
+};
+
+export function getAssetUploadStatus(id: string) {
+  return get<AssetUploadStatus>(`asset_upload_${id}`);
+}
+
+export function setAssetUploadStatus(id: string, status: AssetUploadStatus) {
+  return set(`asset_upload_${id}`, status);
+}

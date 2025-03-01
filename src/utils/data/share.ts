@@ -17,6 +17,8 @@ import type {
   APIGetInvitationRequestResponseBody,
   APIGetListShareInstance,
   AssetType,
+  APIGetAssetUploadURLResponseBody,
+  ApiGetAssetPreviewURLResponseBody,
 } from "@referee-fyi/share";
 import { Incident } from "./incident";
 import { queryClient } from "./query";
@@ -402,10 +404,42 @@ export async function getAssetUploadURL(
   sku: string,
   id: string,
   type: AssetType
-) {
+): Promise<ShareResponse<APIGetAssetUploadURLResponseBody>> {
   const url = new URL(`/api/${sku}/asset/upload_url`, URL_BASE);
   url.searchParams.set("id", id);
   url.searchParams.set("type", type);
+  const response = await signedFetch(url, { method: "GET" });
+
+  return response.json();
+}
+
+export async function uploadAsset(url: string, data: Blob) {
+  const formData = new FormData();
+  formData.append("file", data);
+
+  const response = await fetch(url, {
+    method: "POST",
+    body: formData,
+  });
+
+  return response.json();
+}
+
+export async function getAssetPreviewURL(
+  sku: string,
+  id: string
+): Promise<ShareResponse<ApiGetAssetPreviewURLResponseBody>> {
+  const url = new URL(`/api/${sku}/asset/${id}/preview_url`, URL_BASE);
+  const response = await signedFetch(url, { method: "GET" });
+
+  return response.json();
+}
+
+export async function getAssetOriginalURL(
+  sku: string,
+  id: string
+): Promise<ShareResponse<ApiGetAssetPreviewURLResponseBody>> {
+  const url = new URL(`/api/${sku}/asset/${id}/url`, URL_BASE);
   const response = await signedFetch(url, { method: "GET" });
 
   return response.json();

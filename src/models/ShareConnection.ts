@@ -18,6 +18,7 @@ import {
   deleteServerIncident,
   editServerIncident,
   fetchInvitation,
+  getAssetUploadURL,
   getSender,
   getShareData,
   registerUser,
@@ -48,6 +49,7 @@ import {
 } from "~utils/data/scratchpad";
 import { setUser } from "@sentry/react";
 import { reportMeasurement } from "~utils/sentry";
+import { getLocalAsset, LocalAsset } from "~utils/data/assets";
 
 export enum ReadyState {
   Closed = WebSocket.CLOSED,
@@ -66,6 +68,7 @@ export type ShareConnectionData = {
   activeUsers: User[];
   invitations: InvitationListItem[];
   reconnectTimer: NodeJS.Timeout | null;
+  asset_uploads: Record<string, Promise<ShareResponse<null>>>;
 };
 
 export type ShareConnectionActions = {
@@ -73,6 +76,7 @@ export type ShareConnectionActions = {
     data: WebSocketPayload<WebSocketMessage>
   ): Promise<void>;
   send(message: WebSocketPeerMessage): Promise<void>;
+  uploadAsset(sku: string, asset: LocalAsset): Promise<ShareResponse<null>>;
   addIncident(incident: Incident): Promise<void>;
   editIncident(incident: Incident): Promise<void>;
   deleteIncident(id: string): Promise<void>;
@@ -94,6 +98,8 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
 
   activeUsers: [],
   invitations: [],
+
+  asset_uploads: {},
 
   profile: { name: "", key: "", isSystemKey: false },
   updateProfile: async (updates) => {
@@ -306,16 +312,54 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
     get().websocket?.send(JSON.stringify(payload));
   },
 
+  uploadAsset: async (sku: string, asset: LocalAsset) => {
+    const uploadURL = await getAssetUploadURL(sku, asset.id, asset.type);
+    if (!uploadURL.success) {
+      toast({ type: "error", message: `Could not upload asset to server!` });
+      return uploadURL;
+    }
+
+    const formData = new FormData();
+    formData.append("file", asset.data);
+
+    const response = await fetch(uploadURL.data.uploadURL, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      toast({ type: "error", message: `Could not upload asset to server!` });
+      return {
+        success: false,
+        reason: "server_error",
+        details: response.statusText,
+      } satisfies ShareResponse<null>;
+    }
+
+    toast({ type: "info", message: `Saved asset to server.` });
+
+    return { success: true, data: null } satisfies ShareResponse<null>;
+  },
+
   addIncident: async (incident: Incident) => {
     const store = get();
     const connected = store.readyState === WebSocket.OPEN;
     const invitation = store.invitation;
+
     if (!connected && invitation) {
       await addServerIncident(incident);
       return;
     }
 
-    return get().send({ type: "add_incident", incident });
+    const assets = await Promise.all(incident.assets?.map(getLocalAsset));
+    for (const asset of assets) {
+      if (!asset) {
+        continue;
+      }
+      store.asset_uploads[asset.id] = store.uploadAsset(incident.event, asset);
+    }
+
+    return store.send({ type: "add_incident", incident });
   },
 
   editIncident: async (incident: Incident) => {

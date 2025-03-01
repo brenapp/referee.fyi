@@ -83,6 +83,23 @@ export type APIPatchIncidentResponseBody = Incident;
 // DELETE /api/:sku/incident
 export type APIDeleteIncidentResponseBody = Record<string, never>;
 
+// GET /api/:sku/asset/upload_url
+export type APIGetAssetUploadURLResponseBody = {
+  uploadURL: string;
+};
+
+// GET /api/:sku/asset/:id/preview_url
+export type ApiGetAssetPreviewURLResponseBody = {
+  owner: string;
+  previewURL: string;
+};
+
+// GET /api/:sku/asset/:id/url
+export type ApiGetAssetOriginalURLResponseBody = {
+  owner: string;
+  url: string;
+};
+
 // WebSocket communications
 
 export type WebSocketAddIncidentMessage = {

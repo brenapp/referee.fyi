@@ -11,6 +11,7 @@ kv_namespaces = [
     { binding = "USERS", id = "5af999adc77a401880ed7339dd3c02c2" },
     { binding = "REQUEST_CODES", id = "8aff2d84d528425689cd1d110053313f" },
     { binding = "SYSTEM_KEYS", id = "57ca4e6108bb4f3a8ac1a069d68aaae8" },
+    { binding = "ASSETS", id = "b7df12c587e3445d823e33fc1a4a213e" },
 ]
 routes = [
     { pattern = "share.referee.fyi", custom_domain = true },
@@ -18,6 +19,10 @@ routes = [
 ]
 logpush = true
 tail_consumers = [{ service = "referee-fyi-share-tail" }]
+
+[env.prod.vars]
+CLOUDFLARE_EMAIL = "brendan@bren.app"
+CLOUDFLARE_IMAGES_ACCOUNT_ID = "f9b9e088206092e25d77f0def608c799"
 
 [env.staging]
 name = "referee-fyi-share-staging"
@@ -29,8 +34,14 @@ kv_namespaces = [
     { binding = "USERS", id = "5af999adc77a401880ed7339dd3c02c2", preview_id = "5af999adc77a401880ed7339dd3c02c2" },
     { binding = "REQUEST_CODES", id = "8aff2d84d528425689cd1d110053313f", preview_id = "8aff2d84d528425689cd1d110053313f" },
     { binding = "SYSTEM_KEYS", id = "57ca4e6108bb4f3a8ac1a069d68aaae8", preview_id = "57ca4e6108bb4f3a8ac1a069d68aaae8" },
+    { binding = "ASSETS", id = "a0a3ad56955b4c829f6756a69ae48d39" },
 ]
 logpush = true
+
+
+[env.staging.vars]
+CLOUDFLARE_EMAIL = "brendan@bren.app"
+CLOUDFLARE_IMAGES_ACCOUNT_ID = "f9b9e088206092e25d77f0def608c799"
 
 [[env.staging.durable_objects.bindings]]
 name = "INCIDENTS"

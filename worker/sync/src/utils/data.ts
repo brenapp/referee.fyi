@@ -1,4 +1,9 @@
-import { Invitation, ShareInstanceMeta, User } from "@referee-fyi/share";
+import {
+  AssetType,
+  Invitation,
+  ShareInstanceMeta,
+  User,
+} from "@referee-fyi/share";
 import { Env } from "../types";
 
 export async function setUser(env: Env, user: User): Promise<void> {
@@ -68,4 +73,23 @@ export async function getRequestCodeUserKey(
   sku: string
 ) {
   return env.REQUEST_CODES.get<RequestCode>(`${sku}#${code}`, "json");
+}
+
+export type AssetMeta<T extends AssetType = AssetType> = {
+  id: string; // UUID (from client)
+  type: T;
+  owner: string; // Peer ID of asset
+  sku: string; // Event SKU of associated asset
+};
+
+export type ImageAssetMeta = AssetMeta<"image"> & {
+  images_id: string | null; // The ID from cloudflare.
+};
+
+export async function getAssetMeta(env: Env, id: string) {
+  return env.ASSETS.get<AssetMeta>(id, "json");
+}
+
+export async function setAssetMeta(env: Env, meta: AssetMeta) {
+  return env.ASSETS.put(meta.id, JSON.stringify(meta));
 }

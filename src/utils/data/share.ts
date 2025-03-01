@@ -16,6 +16,7 @@ import type {
   APIPutInvitationRequestResponseBody,
   APIGetInvitationRequestResponseBody,
   APIGetListShareInstance,
+  AssetType,
 } from "@referee-fyi/share";
 import { Incident } from "./incident";
 import { queryClient } from "./query";
@@ -395,4 +396,17 @@ export function getIntegrationAPIEndpoints(
   }
 
   return { json, csv, pdf };
+}
+
+export async function getAssetUploadURL(
+  sku: string,
+  id: string,
+  type: AssetType
+) {
+  const url = new URL(`/api/${sku}/asset/upload_url`, URL_BASE);
+  url.searchParams.set("id", id);
+  url.searchParams.set("type", type);
+  const response = await signedFetch(url, { method: "GET" });
+
+  return response.json();
 }

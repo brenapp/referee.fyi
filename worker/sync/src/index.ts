@@ -7,6 +7,7 @@ import { registrationRouter } from "./routers/registration";
 import { keyExchangeRouter } from "./routers/keyexchange";
 import { invitationRouter } from "./routers/invitation";
 import { instanceRouter } from "./routers/instance";
+import { assetRouter } from "./routers/assets";
 
 const router = AutoRouter<IRequest, [Env]>({
   before: [preflight, withParams],
@@ -30,6 +31,9 @@ router
   .get("/api/:sku/invitation", invitationRouter.fetch)
   .put("/api/:sku/accept", invitationRouter.fetch)
   .get("/api/:sku/list", invitationRouter.fetch)
+
+  // Asset Actions
+  .get("/api/:sku/asset/upload_url", assetRouter.fetch)
 
   // Instance Actions
   .put("/api/:sku/invite", instanceRouter.fetch)

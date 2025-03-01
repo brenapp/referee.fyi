@@ -1,6 +1,7 @@
+import { AssetType } from "@referee-fyi/share";
 import { get, set } from "./keyval";
 
-export type LocalAssetType = "image";
+export type LocalAssetType = AssetType;
 
 export type LocalAsset = {
   id: string;

@@ -1,6 +1,11 @@
 export const KEY_PREFIX = "ECDSA:";
 export const KEY_ALGORITHM = { name: "ECDSA", namedCurve: "P-384" };
 
+const bufferToHex = (buffer: ArrayBuffer) =>
+  [...new Uint8Array(buffer)]
+    .map((x) => x.toString(16).padStart(2, "0"))
+    .join("");
+
 export function ingestHex(hex: string): Uint8Array | null {
   const keyBuffer = new Uint8Array(hex.length / 2);
 
@@ -62,4 +67,36 @@ export async function verifyKeySignature(
   );
 
   return valid;
+}
+
+export async function signAssetUrl(
+  url: string,
+  token: string,
+  ttl: number
+): Promise<URL> {
+  const base = new URL(url);
+
+  const encoder = new TextEncoder();
+  const secretKeyData = encoder.encode(token);
+  const key = await crypto.subtle.importKey(
+    "raw",
+    secretKeyData,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const expiry = Math.floor(Date.now() / 1000) + ttl;
+  base.searchParams.set("exp", expiry.toString());
+
+  const stringToSign = base.pathname + "?" + base.search;
+  const mac = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    encoder.encode(stringToSign)
+  );
+  const sig = bufferToHex(new Uint8Array(mac).buffer);
+  base.searchParams.set("sig", sig);
+
+  return base;
 }

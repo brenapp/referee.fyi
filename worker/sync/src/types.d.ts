@@ -28,7 +28,13 @@ export interface Env {
   REQUEST_CODES: KVNamespace;
   INCIDENTS: DurableObjectNamespace<ShareInstance>;
   SYSTEM_KEYS: KVNamespace;
+  ASSETS: KVNamespace;
 
   // Secrets
   ROBOTEVENTS_TOKEN: string;
+
+  CLOUDFLARE_EMAIL: string;
+  CLOUDFLARE_API_KEY: string;
+  CLOUDFLARE_IMAGES_ACCOUNT_ID: string;
+  CLOUDFLARE_IMAGES_SIGNATURE_TOKEN: string;
 }

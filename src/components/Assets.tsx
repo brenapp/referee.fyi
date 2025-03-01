@@ -6,6 +6,22 @@ import { useAssetOriginalURL, useAssetPreviewURL } from "~utils/hooks/assets";
 import { useCurrentEvent } from "~utils/hooks/state";
 import { PhotoIcon } from "@heroicons/react/20/solid";
 
+export const PhotoFallback: React.FC<React.HTMLProps<HTMLDivElement>> = (
+  props
+) => {
+  return (
+    <div
+      {...props}
+      className={twMerge(
+        "bg-zinc-700 animate-pulse rounded-md flex justify-center items-center aspect-square",
+        props.className
+      )}
+    >
+      <PhotoIcon className="h-8 w-8 text-zinc-200" />
+    </div>
+  );
+};
+
 export type AssetPickerProps = Omit<
   React.HTMLProps<HTMLInputElement>,
   "onChange" | "multiple" | "value"
@@ -65,17 +81,18 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
       >
         <DialogHeader title="Image" onClose={() => setOpen(false)} />
         <DialogBody className="flex items-center justify-center">
-          <div>
+          <div className="relative inset-0 flex items-center justify-center">
             <img
-              className="max-w-full max-h-full object-cover rounded-md"
+              className="max-w-full max-h-full object-cover rounded-md z-10"
               src={originalUrl ?? previewUrl}
               {...props}
             />
+            <PhotoFallback className="absolute w-full h-full" />
           </div>
         </DialogBody>
       </Dialog>
       <img
-        className="w-full h-full object-cover aspect-square rounded-md"
+        className="w-full h-full object-cover aspect-square z-10 rounded-md bg-zinc-700"
         onClick={() => setOpen(true)}
         src={previewUrl}
         {...props}
@@ -125,11 +142,7 @@ export const AssetPreview: React.FC<AssetPreviewProps> = ({ asset }) => {
   const { data: originalUrl } = useAssetOriginalURL(event?.sku, asset);
 
   if (!previewUrl) {
-    return (
-      <div className="bg-zinc-700 animate-pulse rounded-md flex place-content-center">
-        <PhotoIcon className="h-8 w-8 text-zinc-200" />
-      </div>
-    );
+    return <PhotoFallback />;
   }
 
   return (

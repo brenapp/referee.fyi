@@ -49,7 +49,14 @@ import {
 } from "~utils/data/scratchpad";
 import { setUser } from "@sentry/react";
 import { reportMeasurement } from "~utils/sentry";
-import { getLocalAsset, LocalAsset } from "~utils/data/assets";
+import {
+  AssetUploadStatus,
+  getLocalAsset,
+  getManyAssetUploadStatus,
+  getManyLocalAssets,
+  LocalAsset,
+  setAssetUploadStatus,
+} from "~utils/data/assets";
 
 export enum ReadyState {
   Closed = WebSocket.CLOSED,
@@ -76,7 +83,7 @@ export type ShareConnectionActions = {
     data: WebSocketPayload<WebSocketMessage>
   ): Promise<void>;
   send(message: WebSocketPeerMessage): Promise<void>;
-  uploadAsset(sku: string, asset: LocalAsset): Promise<ShareResponse<null>>;
+  uploadAsset(sku: string, asset: LocalAsset): Promise<AssetUploadStatus>;
   addIncident(incident: Incident): Promise<void>;
   editIncident(incident: Incident): Promise<void>;
   deleteIncident(id: string): Promise<void>;
@@ -261,6 +268,24 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
           update.map((id) => [id, scratchpadsResults.resolved.values[id]])
         );
 
+        // Upload assets if needed
+        const assets = localIncidents.flatMap((i) => i.assets ?? []);
+        const localAssets = (
+          await getManyLocalAssets(assets.map((a) => a))
+        ).filter((asset) => !!asset);
+
+        const uploadStatus = await getManyAssetUploadStatus(
+          localAssets.map((a) => a.id)
+        );
+
+        const toUpload = localAssets.filter(
+          (_, index) => !uploadStatus[index]?.success
+        );
+
+        for (const asset of toUpload) {
+          store.uploadAsset(data.sku, asset); // ignoring the response here - we do not want to await this
+        }
+
         const end = performance.now();
 
         toast({
@@ -315,15 +340,19 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
   uploadAsset: async (sku: string, asset: LocalAsset) => {
     const uploadURL = await getAssetUploadURL(sku, asset.id, asset.type);
     if (!uploadURL.success) {
-      toast({ type: "error", message: `Could not upload asset to server!` });
-      return uploadURL;
+      toast({ type: "warn", message: "Could not upload asset to server." });
+      const status: AssetUploadStatus = {
+        success: false,
+        date: new Date().toISOString(),
+        step: "get_upload_url",
+      };
+      setAssetUploadStatus(asset.id, status);
+      return status;
     }
 
     const file = new File([asset.data], `${sku}-${asset.id}`, {
       type: asset.data.type,
     });
-
-    console.log(file);
 
     const formData = new FormData();
     formData.append("file", file);
@@ -334,17 +363,26 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
     });
 
     if (!response.ok) {
-      toast({ type: "error", message: `Could not upload asset to server!` });
-      return {
+      toast({ type: "warn", message: "Could not upload asset to server." });
+      const status: AssetUploadStatus = {
         success: false,
-        reason: "server_error",
-        details: response.statusText,
-      } satisfies ShareResponse<null>;
+        date: new Date().toISOString(),
+        step: "upload",
+      };
+      setAssetUploadStatus(asset.id, status);
+      return status;
     }
 
     toast({ type: "info", message: `Saved asset to server.` });
 
-    return { success: true, data: null } satisfies ShareResponse<null>;
+    const status: AssetUploadStatus = {
+      success: true,
+      date: new Date().toISOString(),
+      step: "complete",
+    };
+
+    setAssetUploadStatus(asset.id, status);
+    return status;
   },
 
   addIncident: async (incident: Incident) => {
@@ -357,12 +395,14 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
       return;
     }
 
-    const assets = await Promise.all(incident.assets?.map(getLocalAsset));
-    for (const asset of assets) {
-      if (!asset) {
-        continue;
+    if (invitation) {
+      const assets = await Promise.all(incident.assets?.map(getLocalAsset));
+      for (const asset of assets) {
+        if (!asset) {
+          continue;
+        }
+        store.uploadAsset(incident.event, asset); // ignoring the response here - we do not want to await this
       }
-      store.asset_uploads[asset.id] = store.uploadAsset(incident.event, asset);
     }
 
     return store.send({ type: "add_incident", incident });

@@ -524,15 +524,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             onChange={onChangeIncidentRules}
           />
         </div>
-        <label>
-          <p className="mt-4">Notes</p>
-          <TextArea
-            className="w-full mt-2 h-32"
-            value={incident.notes}
-            onChange={onChangeIncidentNotes}
-          />
-        </label>
-        <div className="mt-4">
+        <div>
           <p className="mt-4">Images</p>
           <section className="grid grid-cols-4 gap-2 mt-2">
             {incident.assets.map((asset) => (
@@ -557,6 +549,14 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             </label>
           </section>
         </div>
+        <label>
+          <p className="mt-4">Notes</p>
+          <TextArea
+            className="w-full mt-2 h-32"
+            value={incident.notes}
+            onChange={onChangeIncidentNotes}
+          />
+        </label>
       </DialogBody>
       <DialogFooter>
         <Button

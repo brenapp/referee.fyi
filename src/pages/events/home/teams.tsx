@@ -8,9 +8,15 @@ import { ExclamationTriangleIcon, FlagIcon } from "@heroicons/react/20/solid";
 import { VirtualizedList } from "~components/VirtualizedList";
 import { IconLabel, Input } from "~components/Input";
 import { filterTeams } from "~utils/filterteams";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { TeamDialog } from "../dialogs/team";
-import { Button } from "~components/Button";
+import {
+  ArrowRightIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
+import { Button, LinkButton } from "~components/Button";
+import { TeamIsolationDialog } from "../dialogs/team";
+import { RichIncident } from "~utils/data/incident";
+import { EventNewIncidentDialog } from "../dialogs/new";
+import { MenuButton } from "~components/MenuButton";
 
 export type EventTagProps = {
   event: EventData;
@@ -26,14 +32,20 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
   const { data: incidents } = useEventIncidents(event.sku);
   const [filter, setFilter] = useState("");
 
-  const [teamsDialogOpen, setTeamsDialogOpen] = useState(false);
-  const [teamDialogTeam, setTeamDialogTeam] = useState<string | undefined>();
+  const [newIncidentDialogOpen, setNewIncidentDialogOpen] = useState(false);
+  const [newIncidentDialogInitial, setNewIncidentDialogInitial] = useState<
+    Partial<RichIncident>
+  >({});
 
-  const onClickTeam = useCallback((team: string) => {
-    setTeamDialogTeam(team);
-    setTeamsDialogOpen(true);
-  }, []);
-
+  const openNewIncidentDialog = useCallback(
+    (initial: Partial<RichIncident> = {}) => {
+      setNewIncidentDialogInitial(initial);
+      setTimeout(() => {
+        setNewIncidentDialogOpen(true);
+      }, 0);
+    },
+    []
+  );
   const teams = useMemo(() => divisionTeams?.teams ?? [], [divisionTeams]);
 
   const majorIncidents = useMemo(() => {
@@ -82,10 +94,10 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
         />
       </IconLabel>
       <Spinner show={isLoading || isPaused} />
-      <TeamDialog
-        open={teamsDialogOpen}
-        setOpen={setTeamsDialogOpen}
-        team={teamDialogTeam}
+      <EventNewIncidentDialog
+        open={newIncidentDialogOpen}
+        setOpen={setNewIncidentDialogOpen}
+        initial={newIncidentDialogInitial}
       />
       <VirtualizedList
         data={filteredTeams}
@@ -94,9 +106,68 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
         parts={{ list: { className: "mb-12" } }}
       >
         {(team) => (
-          <Button
+          <MenuButton
             mode="transparent"
-            onClick={() => onClickTeam(team.number)}
+            menu={
+              <nav className="mt-2">
+                <div className="flex items-center gap-4 mb-4">
+                  <p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-full flex-1">
+                    <span className="font-mono text-emerald-400">
+                      {team.number}
+                    </span>
+                    {" • "}
+                    <span>{team.team_name}</span>
+                  </p>
+                </div>
+                <LinkButton
+                  to={`/${event.sku}/team/${team.number}`}
+                  className="w-full mt-2 flex items-center"
+                >
+                  <span className="flex-1">Details</span>
+                  <ArrowRightIcon height={20} className="text-emerald-400" />
+                </LinkButton>
+                <hr className="mt-4 border-zinc-600" />
+                <Button
+                  mode="normal"
+                  className="mt-4"
+                  onClick={() =>
+                    openNewIncidentDialog({
+                      team: team.number,
+                      outcome: "Inspection",
+                    })
+                  }
+                >
+                  <FlagIcon height={20} className="inline mr-2 " />
+                  Inspection
+                </Button>
+                <Button
+                  mode="normal"
+                  className="mt-4"
+                  onClick={() =>
+                    openNewIncidentDialog({
+                      team: team.number,
+                      outcome: "Minor",
+                    })
+                  }
+                >
+                  <FlagIcon height={20} className="inline mr-2 " />
+                  Minor
+                </Button>
+                <Button
+                  mode="normal"
+                  className="mt-4"
+                  onClick={() =>
+                    openNewIncidentDialog({
+                      team: team.number,
+                      outcome: "Major",
+                    })
+                  }
+                >
+                  <FlagIcon height={20} className="inline mr-2 " />
+                  Major
+                </Button>
+              </nav>
+            }
             className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
             aria-label={`Team ${team.number} ${team.team_name}. ${
               majorIncidents.get(team.number) ?? 0
@@ -112,19 +183,19 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
             </div>
             <div className="absolute right-0 bg-zinc-800 h-full w-32 px-2 flex items-center">
               <span className="text-red-400 mr-4" aria-label={``}>
-                <FlagIcon height={24} className="inline" />
+                <FlagIcon height={20} className="inline" />
                 <span className="font-mono ml-2">
                   {majorIncidents.get(team.number) ?? 0}
                 </span>
               </span>
               <span className="text-yellow-400">
-                <ExclamationTriangleIcon height={24} className="inline" />
+                <ExclamationTriangleIcon height={20} className="inline" />
                 <span className="font-mono ml-2">
                   {minorIncidents.get(team.number) ?? 0}
                 </span>
               </span>
             </div>
-          </Button>
+          </MenuButton>
         )}
       </VirtualizedList>
     </section>

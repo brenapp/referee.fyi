@@ -27,7 +27,7 @@ import { Match } from "robotevents";
 import { MatchContext } from "~components/Context";
 import { Incident } from "~components/Incident";
 import { MatchTime } from "~components/Match";
-import { TeamDialog } from "./team";
+import { TeamIsolationDialog } from "./team";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import { MatchScratchpad } from "~components/scratchpad/Scratchpad";
 import { animate, motion, PanInfo, useMotionValue } from "framer-motion";
@@ -160,7 +160,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
           ))}
           {incidents.length > 0 ? (
             <>
-              <TeamDialog
+              <TeamIsolationDialog
                 key={number}
                 team={number}
                 open={isolationOpen}

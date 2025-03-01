@@ -15,8 +15,30 @@ import { EventNewIncidentDialog } from "./dialogs/new";
 import { Button } from "~components/Button";
 import { VirtualizedList } from "~components/VirtualizedList";
 
-import { ClipboardDocumentListIcon } from "@heroicons/react/24/solid";
-import { FlagIcon } from "@heroicons/react/24/solid";
+import {
+  ClipboardDocumentListIcon,
+  FlagIcon,
+  PhotoIcon,
+} from "@heroicons/react/24/solid";
+import { useEventAssetsForTeam } from "~utils/hooks/assets";
+import { AssetPreview } from "~components/Assets";
+
+export type EventTeamAssetsProps = {
+  team?: string;
+  sku?: string;
+};
+
+export const EventTeamAssets: React.FC<EventTeamAssetsProps> = ({
+  team,
+  sku,
+}) => {
+  const assets = useEventAssetsForTeam(sku, team);
+  return (
+    <div className="grid lg:grid-cols-6 grid-cols-2 md:grid-cols-3 mt-4 gap-2">
+      {assets?.map((asset) => (asset ? <AssetPreview asset={asset} /> : null))}
+    </div>
+  );
+};
 
 type EventTeamsTabProps = {
   event: EventData | null | undefined;
@@ -151,6 +173,18 @@ export const EventTeamsPage: React.FC = () => {
                 <ClipboardDocumentListIcon height={24} className="inline" />
               ),
             content: <EventTeamsMatches event={event} team={team} />,
+          },
+          {
+            type: "content",
+            id: "assets",
+            label: "Images",
+            icon: (active) =>
+              active ? (
+                <PhotoIcon height={24} className="inline" />
+              ) : (
+                <PhotoIcon height={24} className="inline" />
+              ),
+            content: <EventTeamAssets sku={event?.sku} team={team?.number} />,
           },
         ]}
       </Tabs>

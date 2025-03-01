@@ -89,7 +89,7 @@ export async function signAssetUrl(
   const expiry = Math.floor(Date.now() / 1000) + ttl;
   base.searchParams.set("exp", expiry.toString());
 
-  const stringToSign = base.pathname + "?" + base.search;
+  const stringToSign = base.pathname + base.search;
   const mac = await crypto.subtle.sign(
     "HMAC",
     key,

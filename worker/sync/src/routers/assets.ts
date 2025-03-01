@@ -3,7 +3,12 @@ import { AutoRouter } from "itty-router";
 import { Env, RequestHasInvitation } from "../types";
 import { verifyInvitation, verifySignature, verifyUser } from "../utils/verify";
 import { response } from "../utils/request";
-import { getInvitation, ImageAssetMeta, setAssetMeta } from "../utils/data";
+import {
+  getAssetMeta,
+  getInvitation,
+  ImageAssetMeta,
+  setAssetMeta,
+} from "../utils/data";
 import {
   ApiGetAssetOriginalURLResponseBody,
   ApiGetAssetPreviewURLResponseBody,
@@ -39,7 +44,7 @@ assetRouter.get(
     }
 
     // We will allow the owner to overwrite the asset, but not others.
-    const current = await env.ASSETS.get<ImageAssetMeta>(id, "json");
+    const current = await getAssetMeta(env, id);
     if (current && current.owner !== request.user.key) {
       return response({
         success: false,
@@ -96,7 +101,14 @@ type RequestHasAssetAuthorization = RequestHasInvitation & {
 };
 
 async function ensureImageAuthorized(request: RequestHasInvitation, env: Env) {
-  const id = request.params.id;
+  const id = request.query.id;
+  if (typeof id !== "string") {
+    return response({
+      success: false,
+      reason: "bad_request",
+      details: "Missing asset ID",
+    });
+  }
 
   const meta = await env.ASSETS.get<ImageAssetMeta>(id, "json");
 
@@ -144,7 +156,7 @@ async function ensureImageAuthorized(request: RequestHasInvitation, env: Env) {
 }
 
 assetRouter.get(
-  "/api/:sku/asset/:id/preview_url",
+  "/api/:sku/asset/preview_url",
   ensureImageAuthorized,
   async (request: RequestHasAssetAuthorization) => {
     const url = request.image.variants?.find((variant) =>
@@ -169,7 +181,7 @@ assetRouter.get(
 );
 
 assetRouter.get(
-  "/api/:sku/asset/:id/url",
+  "/api/:sku/asset/url",
   ensureImageAuthorized,
   async (request: RequestHasAssetAuthorization, env: Env) => {
     const url = request.image.variants?.find((variant) =>
@@ -179,7 +191,7 @@ assetRouter.get(
       return response({
         success: false,
         reason: "bad_request",
-        details: "Preview not found",
+        details: "Original not found",
       });
     }
 

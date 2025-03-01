@@ -19,6 +19,7 @@ import type {
   AssetType,
   APIGetAssetUploadURLResponseBody,
   ApiGetAssetPreviewURLResponseBody,
+  ApiGetAssetOriginalURLResponseBody,
 } from "@referee-fyi/share";
 import { Incident } from "./incident";
 import { queryClient } from "./query";
@@ -429,7 +430,8 @@ export async function getAssetPreviewURL(
   sku: string,
   id: string
 ): Promise<ShareResponse<ApiGetAssetPreviewURLResponseBody>> {
-  const url = new URL(`/api/${sku}/asset/${id}/preview_url`, URL_BASE);
+  const url = new URL(`/api/${sku}/asset/preview_url`, URL_BASE);
+  url.searchParams.set("id", id);
   const response = await signedFetch(url, { method: "GET" });
 
   return response.json();
@@ -438,8 +440,9 @@ export async function getAssetPreviewURL(
 export async function getAssetOriginalURL(
   sku: string,
   id: string
-): Promise<ShareResponse<ApiGetAssetPreviewURLResponseBody>> {
-  const url = new URL(`/api/${sku}/asset/${id}/url`, URL_BASE);
+): Promise<ShareResponse<ApiGetAssetOriginalURLResponseBody>> {
+  const url = new URL(`/api/${sku}/asset/url`, URL_BASE);
+  url.searchParams.set("id", id);
   const response = await signedFetch(url, { method: "GET" });
 
   return response.json();

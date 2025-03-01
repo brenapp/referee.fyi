@@ -2,6 +2,8 @@ import { useCallback, useMemo, useState } from "react";
 import { ImageLocalAsset, LocalAsset } from "~utils/data/assets";
 import { twMerge } from "tailwind-merge";
 import { Dialog, DialogHeader } from "./Dialog";
+import { useAssetOriginalURL, useAssetPreviewURL } from "~utils/hooks/assets";
+import { useCurrentEvent } from "~utils/hooks/state";
 
 export type AssetPickerProps = Omit<
   React.HTMLProps<HTMLInputElement>,
@@ -41,11 +43,11 @@ export const AssetPicker: React.FC<AssetPickerProps> = ({
   );
 };
 
-export type ImageAssetPreviewProps = {
+export type LocalImageAssetPreviewProps = {
   asset: ImageLocalAsset;
 } & React.HTMLProps<HTMLDivElement>;
 
-export const ImageAssetPreview: React.FC<ImageAssetPreviewProps> = ({
+export const ImageAssetPreview: React.FC<LocalImageAssetPreviewProps> = ({
   asset,
 }) => {
   const url = useMemo(() => URL.createObjectURL(asset.data), [asset.data]);
@@ -71,11 +73,11 @@ export const ImageAssetPreview: React.FC<ImageAssetPreviewProps> = ({
   );
 };
 
-export type AssetPreviewProps = {
+export type LocalAssetPreviewProps = {
   asset: LocalAsset;
 } & React.HTMLProps<HTMLDivElement>;
 
-export const AssetPreview: React.FC<AssetPreviewProps> = ({
+export const LocalAssetPreview: React.FC<LocalAssetPreviewProps> = ({
   asset,
   ...props
 }) => {
@@ -87,5 +89,39 @@ export const AssetPreview: React.FC<AssetPreviewProps> = ({
     <div className="w-full h-full bg-gray-200 flex items-center justify-center">
       <span>Unsupported asset type</span>
     </div>
+  );
+};
+
+export type AssetPreviewProps = {
+  asset: string;
+};
+
+export const AssetPreview: React.FC<AssetPreviewProps> = ({ asset }) => {
+  const [open, setOpen] = useState(false);
+  const { data: event } = useCurrentEvent();
+
+  const { data: previewUrl } = useAssetPreviewURL(event?.sku, asset);
+  const { data: originalUrl } = useAssetOriginalURL(event?.sku, asset, {
+    enabled: open,
+  });
+
+  return (
+    <>
+      <Dialog
+        mode="modal"
+        open={open}
+        onClose={() => setOpen(false)}
+        className="w-full h-full bg-contain bg-no-repeat bg-center"
+        style={{ backgroundImage: `url(${originalUrl ?? previewUrl})` }}
+      >
+        <DialogHeader title="Image" onClose={() => setOpen(false)} />
+      </Dialog>
+      <img
+        className="w-full h-full object-cover aspect-square rounded-md"
+        onClick={() => setOpen(true)}
+        src={previewUrl ?? undefined}
+        alt="Asset"
+      />
+    </>
   );
 };

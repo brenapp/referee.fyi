@@ -2,6 +2,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { getLocalAsset, LocalAsset, saveLocalAsset } from "~utils/data/assets";
 import { useTeamIncidentsByEvent } from "./incident";
 import { HookQueryOptions } from "./robotevents";
+import { getAssetOriginalURL, getAssetPreviewURL } from "~utils/data/share";
+import { useMemo } from "react";
 
 export function useLocalAsset(id?: string | null) {
   return useQuery({
@@ -31,11 +33,11 @@ export function useLocalAssets(
 }
 
 export function useEventAssetsForTeam(sku?: string, team?: string) {
-  const { data: incidents, isPending } = useTeamIncidentsByEvent(team, sku);
-  console.log(sku, team, incidents);
-  return useLocalAssets(incidents?.flatMap((i) => i.assets ?? []) ?? [], {
-    enabled: !isPending,
-  });
+  const { data: incidents } = useTeamIncidentsByEvent(team, sku);
+  return useMemo(
+    () => incidents?.flatMap((incident) => incident.assets ?? []) ?? [],
+    [incidents]
+  );
 }
 
 export function useSaveAssets(assets: LocalAsset[]) {
@@ -44,5 +46,61 @@ export function useSaveAssets(assets: LocalAsset[]) {
     mutationFn: async () => {
       return assets.map(saveLocalAsset);
     },
+  });
+}
+
+export function useAssetPreviewURL(
+  sku: string | undefined,
+  id: string,
+  options?: HookQueryOptions<string | null>
+) {
+  return useQuery({
+    queryKey: ["assets", id, sku, "preview"],
+    queryFn: async () => {
+      const local = await getLocalAsset(id);
+      if (local) {
+        return URL.createObjectURL(local.data);
+      }
+
+      if (!sku) {
+        return null;
+      }
+
+      const remote = await getAssetPreviewURL(sku, id);
+      if (!remote || !remote.success) {
+        return null;
+      }
+
+      return remote.data.previewURL;
+    },
+    ...options,
+  });
+}
+
+export function useAssetOriginalURL(
+  sku: string | undefined,
+  id: string,
+  options?: HookQueryOptions<string | null>
+) {
+  return useQuery({
+    queryKey: ["assets", id, "original"],
+    queryFn: async () => {
+      const local = await getLocalAsset(id);
+      if (local) {
+        return URL.createObjectURL(local.data);
+      }
+
+      if (!sku) {
+        return null;
+      }
+
+      const remote = await getAssetOriginalURL(sku, id);
+      if (!remote || !remote.success) {
+        return null;
+      }
+
+      return remote.data.url;
+    },
+    ...options,
   });
 }

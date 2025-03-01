@@ -25,7 +25,7 @@ import { Spinner } from "~components/Spinner";
 import { MatchData, programs } from "robotevents";
 import { queryClient } from "~utils/data/query";
 import { IncidentMatchSkills } from "@referee-fyi/share";
-import { AssetPicker, AssetPreview } from "~components/Assets";
+import { AssetPicker, LocalAssetPreview } from "~components/Assets";
 import { LocalAsset } from "~utils/data/assets";
 import { CameraIcon, TrashIcon } from "@heroicons/react/20/solid";
 import { useSaveAssets } from "~utils/hooks/assets";
@@ -537,7 +537,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
                   icon={<TrashIcon height={16} />}
                   onClick={() => onRemoveAsset(asset)}
                 />
-                <AssetPreview key={asset.id} asset={asset} />
+                <LocalAssetPreview key={asset.id} asset={asset} />
               </div>
             ))}
             <label className="aspect-square bg-zinc-700 rounded-md flex items-center justify-center active:bg-zinc-800 focus-within:bg-zinc-800 focus-within:ring-2 ring-zinc-200 cursor-pointer">

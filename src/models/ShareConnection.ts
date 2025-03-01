@@ -319,8 +319,14 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
       return uploadURL;
     }
 
+    const file = new File([asset.data], `${sku}-${asset.id}`, {
+      type: asset.data.type,
+    });
+
+    console.log(file);
+
     const formData = new FormData();
-    formData.append("file", asset.data);
+    formData.append("file", file);
 
     const response = await fetch(uploadURL.data.uploadURL, {
       method: "POST",

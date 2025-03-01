@@ -16,7 +16,6 @@ import { Rule, useRulesForEvent } from "~utils/hooks/rules";
 import { useCurrentEvent } from "~utils/hooks/state";
 import { EditHistory } from "~components/EditHistory";
 import { LWWKeys } from "@referee-fyi/consistency";
-import { useLocalAssets } from "~utils/hooks/assets";
 import { AssetPreview } from "~components/Assets";
 
 export type EditIncidentDialogProps = {
@@ -33,8 +32,6 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
   const [incident, setIncident] = useState<Incident>();
   const { mutateAsync: deleteIncident } = useDeleteIncident();
   const { mutateAsync: editIncident } = useEditIncident();
-
-  const { data: assets } = useLocalAssets(incident?.assets ?? []);
 
   // Handle external updates - since we're using a local state, this needs to be
   // done manually
@@ -413,7 +410,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
         <section className="mt-4">
           <p>Images</p>
           <div className="grid grid-cols-4 gap-4 mt-2">
-            {assets?.map((asset) =>
+            {incident?.assets?.map((asset) =>
               asset ? <AssetPreview asset={asset} /> : null
             )}
           </div>

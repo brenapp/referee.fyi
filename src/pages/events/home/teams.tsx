@@ -16,6 +16,7 @@ import { Button, LinkButton } from "~components/Button";
 import { RichIncident } from "~utils/data/incident";
 import { EventNewIncidentDialog } from "../dialogs/new";
 import { MenuButton } from "~components/MenuButton";
+import { RulesSummary } from "~components/RulesSummary";
 
 export type EventTagProps = {
   event: EventData;
@@ -118,9 +119,13 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
                     <span>{team.team_name}</span>
                   </p>
                 </div>
+                <RulesSummary
+                  incidents={incidents ?? []}
+                  filter={(i) => i.team == team.number}
+                />
                 <LinkButton
                   to={`/${event.sku}/team/${team.number}`}
-                  className="w-full mt-2 flex items-center"
+                  className="w-full mt-4 flex items-center"
                 >
                   <span className="flex-1">Details</span>
                   <ArrowRightIcon height={20} className="text-emerald-400" />
@@ -167,7 +172,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
                 </Button>
               </nav>
             }
-            className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
+            className="flex items-center gap-4 mt-4 p-0 h-12 text-zinc-50"
             aria-label={`Team ${team.number} ${team.team_name}. ${
               majorIncidents.get(team.number) ?? 0
             } major violations. ${
@@ -176,7 +181,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
           >
             <div className="flex-1">
               <p className="text-emerald-400 font-mono">{team.number}</p>
-              <p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose">
+              <p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-[24ch] lg:max-w-prose">
                 {team.team_name}
               </p>
             </div>

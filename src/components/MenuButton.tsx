@@ -1,7 +1,7 @@
-import { useCallback, useId, useRef, useState } from "react";
+import { useCallback, useId, useState } from "react";
 import { Button, ButtonProps } from "./Button";
-import { AnimatePresence } from "framer-motion";
 import { Dialog } from "./Dialog";
+import { AnimatePresence } from "framer-motion";
 
 export type MenuButtonProps = ButtonProps & {
   menu: React.ReactNode;
@@ -9,8 +9,6 @@ export type MenuButtonProps = ButtonProps & {
 export const MenuButton: React.FC<MenuButtonProps> = ({ menu, ...props }) => {
   const id = useId();
   const [show, setShow] = useState(false);
-
-  const ref = useRef<HTMLDialogElement>(null);
 
   const onButtonClick = useCallback(() => {
     setShow((s) => !s);
@@ -20,6 +18,7 @@ export const MenuButton: React.FC<MenuButtonProps> = ({ menu, ...props }) => {
     (e: React.PointerEvent<HTMLDialogElement>) => {
       e.stopPropagation();
       if (e.currentTarget === e.target) {
+        e.preventDefault();
         setShow(false);
       }
     },
@@ -29,6 +28,7 @@ export const MenuButton: React.FC<MenuButtonProps> = ({ menu, ...props }) => {
   const onDialogPointerUp = useCallback(
     (e: React.PointerEvent<HTMLDialogElement>) => {
       e.stopPropagation();
+      e.preventDefault();
       setShow(false);
     },
     []
@@ -39,7 +39,6 @@ export const MenuButton: React.FC<MenuButtonProps> = ({ menu, ...props }) => {
       <AnimatePresence>
         {show ? (
           <Dialog
-            ref={ref}
             popover="auto"
             aria-modal="true"
             mode="modal"

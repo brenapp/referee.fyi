@@ -25,12 +25,15 @@ import { VirtualizedList } from "~components/VirtualizedList";
 import { filterTeams } from "~utils/filterteams";
 import { MenuButton } from "~components/MenuButton";
 import { RichIncident } from "~utils/data/incident";
+import { useEventIncidents } from "~utils/hooks/incident";
+import { RulesSummary } from "~components/RulesSummary";
 
 type TeamSkillsTabProps = {
   event: EventData;
 };
 
 const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
+  const { data: incidents } = useEventIncidents(event?.sku);
   const { data: teams, isLoading: isLoadingTeams } = useEventTeams(event);
   const { data: skills, isLoading: isLoadingSkills } = useEventSkills(event);
   const [filter, setFilter] = useState("");
@@ -137,9 +140,15 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
                         </span>
                       </span>
                     </div>
+                    <RulesSummary
+                      incidents={incidents ?? []}
+                      filter={(i) =>
+                        i.team == team.number && i.match?.type !== "match"
+                      }
+                    />
                     <LinkButton
                       to={`/${event.sku}/team/${team.number}`}
-                      className="w-full mt-2 flex items-center"
+                      className="w-full mt-4 flex items-center"
                     >
                       <span className="flex-1">Details</span>
                       <ArrowRightIcon

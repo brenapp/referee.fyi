@@ -146,7 +146,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
                 </Button>
                 <Button
                   mode="normal"
-                  className="mt-4"
+                  className="mt-4 bg-yellow-500"
                   onClick={() =>
                     openNewIncidentDialog({
                       team: team.number,
@@ -159,7 +159,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
                 </Button>
                 <Button
                   mode="normal"
-                  className="mt-4"
+                  className="mt-4 bg-red-500"
                   onClick={() =>
                     openNewIncidentDialog({
                       team: team.number,
@@ -185,7 +185,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
                 {team.team_name}
               </p>
             </div>
-            <div className="absolute right-0 bg-zinc-800 h-full w-32 px-2 flex items-center">
+            <div className="absolute right-0 bg-zinc-800 h-full w-32 px-2 flex items-center justify-between">
               <span className="text-red-400 mr-4" aria-label={``}>
                 <FlagIcon height={20} className="inline" />
                 <span className="font-mono ml-2">

@@ -189,25 +189,25 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
                       <FlagIcon height={20} className="inline mr-2 " />
                       Driver Skills
                     </Button>
-                    <Button mode="normal" className="mt-4">
-                      <FlagIcon
-                        height={20}
-                        className="inline mr-2 "
-                        onClick={() =>
-                          openNewIncidentDialog({
-                            team: team.number,
-                            skills: {
-                              type: "skills",
-                              skillsType: "programming",
-                              attempt: Math.min(
-                                3,
-                                (programming?.attempts ?? 0) + 1
-                              ),
-                            },
-                            outcome: "Minor",
-                          })
-                        }
-                      />
+                    <Button
+                      mode="normal"
+                      className="mt-4"
+                      onClick={() =>
+                        openNewIncidentDialog({
+                          team: team.number,
+                          skills: {
+                            type: "skills",
+                            skillsType: "programming",
+                            attempt: Math.min(
+                              3,
+                              (programming?.attempts ?? 0) + 1
+                            ),
+                          },
+                          outcome: "Minor",
+                        })
+                      }
+                    >
+                      <FlagIcon height={20} className="inline mr-2 " />
                       Auto Skills
                     </Button>
                   </nav>

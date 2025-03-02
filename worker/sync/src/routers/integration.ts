@@ -271,11 +271,20 @@ integrationRouter
 
     const invitations = await stub.getInvitationList();
 
+    const formatters = {
+      date: new Intl.DateTimeFormat("en-US", {
+        timeZone: `${request.cf?.timezone ?? "America/Chicago"}`,
+        dateStyle: "full",
+        timeStyle: "long",
+      }),
+    };
+
     const output = await generateIncidentReportPDF({
       sku: request.params.sku,
       client,
       incidents: body.data,
       users: invitations.map((invitation) => invitation.user),
+      formatters,
     });
 
     return new Response(output, {

@@ -11,8 +11,6 @@ import { ClickableMatch } from "~components/Match";
 import { EventMatchDialog } from "./dialogs/match";
 import { MatchData } from "robotevents";
 import { Incident } from "~components/Incident";
-import { EventNewIncidentDialog } from "./dialogs/new";
-import { Button } from "~components/Button";
 import { VirtualizedList } from "~components/VirtualizedList";
 
 import {
@@ -115,7 +113,6 @@ export const EventTeamsPage: React.FC = () => {
   const { number } = useParams();
   const { data: event } = useCurrentEvent();
   const { data: team } = useEventTeam(event, number ?? "");
-  const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
 
   const teamLocation = useMemo(() => {
     if (!team) return null;
@@ -130,17 +127,7 @@ export const EventTeamsPage: React.FC = () => {
 
   return (
     <section className="flex flex-col">
-      <EventNewIncidentDialog
-        open={incidentDialogOpen}
-        setOpen={setIncidentDialogOpen}
-        initial={{ team: team?.number }}
-        key={team?.id}
-      />
-      <header className="mt-4">
-        <Button onClick={() => setIncidentDialogOpen(true)} mode="primary">
-          <FlagIcon height={20} className="inline mr-2 " />
-          New Entry
-        </Button>
+      <header>
         <h1 className="text-xl overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose mt-4">
           <span className="font-mono text-emerald-400">{number}</span>
           {" • "}
@@ -148,7 +135,13 @@ export const EventTeamsPage: React.FC = () => {
         </h1>
         <p className="italic">{teamLocation}</p>
       </header>
-      <Tabs>
+      <Tabs
+        parts={{
+          tablist: {
+            className: "absolute bottom-0 right-0 left-0 z-10 p-0 bg-zinc-900",
+          },
+        }}
+      >
         {[
           {
             type: "content",

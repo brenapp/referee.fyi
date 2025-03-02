@@ -81,7 +81,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
 
   return (
     <>
-      <section className="contents">
+      <section className="contents mb-12">
         <IconLabel icon={<MagnifyingGlassIcon height={24} />}>
           <Input
             placeholder="Search teams..."
@@ -247,7 +247,6 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
 export const EventSkillsPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
 
-  const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
   const { mutateAsync: addEvent, isSuccess } = useAddEventVisited();
 
   useEffect(() => {
@@ -262,18 +261,6 @@ export const EventSkillsPage: React.FC = () => {
 
   return (
     <section className="mt-4 flex flex-col">
-      <Button
-        onClick={() => setIncidentDialogOpen(true)}
-        mode="primary"
-        className="mb-4"
-      >
-        <FlagIcon height={20} className="inline mr-2 " />
-        New Entry
-      </Button>
-      <EventNewIncidentDialog
-        open={incidentDialogOpen}
-        setOpen={setIncidentDialogOpen}
-      />
       <Tabs
         className="flex-1"
         parts={{

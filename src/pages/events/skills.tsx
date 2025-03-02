@@ -141,6 +141,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
                       </span>
                     </div>
                     <RulesSummary
+                      className="break-all"
                       incidents={incidents ?? []}
                       filter={(i) =>
                         i.team == team.number && i.match?.type !== "match"

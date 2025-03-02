@@ -120,6 +120,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
                   </p>
                 </div>
                 <RulesSummary
+                  className="break-all"
                   incidents={incidents ?? []}
                   filter={(i) => i.team == team.number}
                 />

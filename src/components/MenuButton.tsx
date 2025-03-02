@@ -26,9 +26,13 @@ export const MenuButton: React.FC<MenuButtonProps> = ({ menu, ...props }) => {
     []
   );
 
-  const onDialogPointerUp = useCallback(() => {
-    setShow(false);
-  }, []);
+  const onDialogPointerUp = useCallback(
+    (e: React.PointerEvent<HTMLDialogElement>) => {
+      e.stopPropagation();
+      setShow(false);
+    },
+    []
+  );
 
   return (
     <div className="relative">

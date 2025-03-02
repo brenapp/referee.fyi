@@ -25,21 +25,11 @@ export const MenuButton: React.FC<MenuButtonProps> = ({ menu, ...props }) => {
     []
   );
 
-  const onDialogPointerUp = useCallback(
-    (e: React.PointerEvent<HTMLDialogElement>) => {
-      e.stopPropagation();
-      e.preventDefault();
-      setShow(false);
-    },
-    []
-  );
-
   return (
     <div className="relative">
       <AnimatePresence>
         {show ? (
           <Dialog
-            popover="auto"
             aria-modal="true"
             mode="modal"
             id={id}
@@ -52,7 +42,6 @@ export const MenuButton: React.FC<MenuButtonProps> = ({ menu, ...props }) => {
             style={{ maxHeight: "unset", height: "max-content" }}
             onClose={() => setShow(false)}
             onPointerDown={onDialogPointerDown}
-            onPointerUp={onDialogPointerUp}
           >
             {menu}
           </Dialog>
@@ -62,8 +51,7 @@ export const MenuButton: React.FC<MenuButtonProps> = ({ menu, ...props }) => {
         {...props}
         aria-haspopup="menu"
         aria-controls={id}
-        popoverTarget={id}
-        onClick={onButtonClick}
+        onPointerDown={onButtonClick}
       />
     </div>
   );

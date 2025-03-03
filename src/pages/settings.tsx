@@ -1,6 +1,6 @@
-import { GlobeAmericasIcon } from "@heroicons/react/20/solid";
+import { ArrowRightIcon, GlobeAmericasIcon } from "@heroicons/react/20/solid";
 import { useCallback, useState } from "react";
-import { Button } from "~components/Button";
+import { Button, LinkButton } from "~components/Button";
 import { ClickToCopy } from "~components/ClickToCopy";
 import { ReportIssueDialog } from "~components/dialogs/report";
 import { Input } from "~components/Input";
@@ -76,6 +76,12 @@ export const SettingsPage: React.FC = () => {
         >
           Delete Cache
         </Button>
+      </section>
+      <section className="mt-4">
+        <LinkButton to="/privacy" className="w-full flex items-center">
+          <span className="flex-1">Privacy Policy</span>
+          <ArrowRightIcon height={20} className="text-emerald-400" />
+        </LinkButton>
       </section>
     </main>
   );

@@ -8,7 +8,7 @@ import {
 import { Rule, useRulesForEvent } from "~utils/hooks/rules";
 import { Radio, RulesMultiSelect, Select, TextArea } from "~components/Input";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button } from "~components/Button";
+import { Button, IconButton } from "~components/Button";
 import { MatchContext } from "~components/Context";
 import { useCurrentDivision, useCurrentEvent, useSKU } from "~hooks/state";
 import {
@@ -17,7 +17,12 @@ import {
   packIncident,
 } from "~utils/data/incident";
 import { useNewIncident } from "~hooks/incident";
-import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
+import {
+  Dialog,
+  DialogBody,
+  DialogFooter,
+  DialogHeader,
+} from "~components/Dialog";
 import { useAddRecentRules, useRecentRules } from "~utils/hooks/history";
 import { twMerge } from "tailwind-merge";
 import { toast } from "~components/Toast";
@@ -25,6 +30,10 @@ import { Spinner } from "~components/Spinner";
 import { MatchData, programs } from "robotevents";
 import { queryClient } from "~utils/data/query";
 import { IncidentMatchSkills } from "@referee-fyi/share";
+import { AssetPicker, LocalAssetPreview } from "~components/Assets";
+import { LocalAsset } from "~utils/data/assets";
+import { CameraIcon, TrashIcon } from "@heroicons/react/20/solid";
+import { useSaveAssets } from "~utils/hooks/assets";
 
 export type EventNewIncidentDialogProps = {
   open: boolean;
@@ -61,7 +70,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     division
   );
 
-  // Initialise current team and match
+  // Initialize current team and match
   const [team, setTeam] = useState<string | undefined>(
     initial?.team ?? undefined
   );
@@ -128,6 +137,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     rules: [],
     notes: "",
     outcome: "Minor",
+    assets: [],
     ...initial,
   });
 
@@ -289,6 +299,24 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     []
   );
 
+  const onPickAsset = useCallback(
+    (asset: LocalAsset) => {
+      setIncidentField("assets", [...incident.assets, asset]);
+    },
+    [incident.assets]
+  );
+
+  const onRemoveAsset = useCallback(
+    (asset: LocalAsset) => {
+      setIncidentField(
+        "assets",
+        incident.assets.filter((a) => a.id !== asset.id)
+      );
+    },
+    [incident.assets]
+  );
+
+  const { mutateAsync: saveAssets } = useSaveAssets(incident.assets);
   const onSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement> | React.MouseEvent) => {
       e.preventDefault();
@@ -297,6 +325,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       setOpen(false);
 
       try {
+        await saveAssets();
         await createIncident(packed);
 
         setIncidentField("team", undefined);
@@ -316,7 +345,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 
       queryClient.invalidateQueries({ queryKey: ["incidents"] });
     },
-    [incident, createIncident, setOpen, addRecentRules]
+    [incident, setOpen, saveAssets, createIncident, addRecentRules]
   );
 
   return (
@@ -455,6 +484,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             className="max-w-full w-full"
           >
             <option value="General">General</option>
+            <option value="Inspection">Inspection</option>
             <option value="Minor">Minor</option>
             <option value="Major">Major</option>
             <option value="Disabled">Disabled</option>
@@ -494,6 +524,31 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             onChange={onChangeIncidentRules}
           />
         </div>
+        <div>
+          <p className="mt-4">Images</p>
+          <section className="grid grid-cols-4 gap-2 mt-2">
+            {incident.assets.map((asset) => (
+              <div className="relative" key={asset.id}>
+                <IconButton
+                  className="absolute top-0 right-0 p-2 rounded-none rounded-bl-md rounded-tr-md bg-red-500"
+                  icon={<TrashIcon height={16} />}
+                  onClick={() => onRemoveAsset(asset)}
+                />
+                <LocalAssetPreview key={asset.id} asset={asset} />
+              </div>
+            ))}
+            <label className="aspect-square bg-zinc-700 rounded-md flex items-center justify-center active:bg-zinc-800 focus-within:bg-zinc-800 focus-within:ring-2 ring-zinc-200 cursor-pointer">
+              <CameraIcon className="w-8 h-8 text-zinc-50" />
+              <AssetPicker
+                capture="environment"
+                accept="image/*"
+                className="sr-only"
+                fields={{ type: "image" }}
+                onPick={onPickAsset}
+              />
+            </label>
+          </section>
+        </div>
         <label>
           <p className="mt-4">Notes</p>
           <TextArea
@@ -503,13 +558,15 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
           />
         </label>
       </DialogBody>
-      <Button
-        className="w-full text-center my-4 bg-emerald-400 text-black"
-        disabled={!canSave}
-        onClick={onSubmit}
-      >
-        Submit
-      </Button>
+      <DialogFooter>
+        <Button
+          className="w-full text-center my-4 bg-emerald-400 text-black"
+          disabled={!canSave}
+          onClick={onSubmit}
+        >
+          Submit
+        </Button>
+      </DialogFooter>
     </Dialog>
   );
 };

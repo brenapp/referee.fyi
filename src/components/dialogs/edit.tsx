@@ -16,6 +16,7 @@ import { Rule, useRulesForEvent } from "~utils/hooks/rules";
 import { useCurrentEvent } from "~utils/hooks/state";
 import { EditHistory } from "~components/EditHistory";
 import { LWWKeys } from "@referee-fyi/consistency";
+import { AssetPreview } from "~components/Assets";
 
 export type EditIncidentDialogProps = {
   open: boolean;
@@ -102,11 +103,18 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
     outcome: false,
     rules: false,
     notes: false,
+    assets: false,
   });
 
   useEffect(() => {
     if (!open) {
-      setDirty({ match: false, outcome: false, rules: false, notes: false });
+      setDirty({
+        match: false,
+        outcome: false,
+        rules: false,
+        notes: false,
+        assets: false,
+      });
     }
   }, [open]);
 
@@ -399,6 +407,14 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
           dirty={dirty.notes}
           render={(value) => value}
         />
+        <section className="mt-4">
+          <p>Images</p>
+          <div className="grid grid-cols-4 gap-4 mt-2">
+            {incident?.assets?.map((asset) =>
+              asset ? <AssetPreview asset={asset} /> : null
+            )}
+          </div>
+        </section>
       </DialogBody>
       <nav className="flex gap-4 p-2">
         <Button mode="dangerous" onClick={onClickDelete}>

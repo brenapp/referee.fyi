@@ -149,6 +149,12 @@ export default defineConfig({
     sentryVitePlugin({
       org: "referee-fyi",
       project: "referee-fyi",
+      bundleSizeOptimizations: {
+        excludeDebugStatements: true,
+        excludeReplayIframe: true,
+        excludeReplayShadowDom: true,
+        excludeReplayWorker: true,
+      },
     }),
   ],
 

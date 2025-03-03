@@ -11,6 +11,7 @@ import React, {
 } from "react";
 import { IconButton } from "./Button";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { LocalAsset } from "~utils/data/assets";
 
 export type CheckboxBinding = {
   value: boolean;
@@ -411,5 +412,43 @@ export const IconLabel: React.FC<LabelSymbolProps> = ({
       {icon}
       {children}
     </label>
+  );
+};
+
+export type AssetPickerProps = Omit<
+  React.HTMLProps<HTMLInputElement>,
+  "onChange" | "multiple" | "value"
+> & {
+  onPick?: (buffer: LocalAsset) => void;
+  readonly fields: Omit<LocalAsset, "data" | "id">;
+};
+
+export const AssetPicker: React.FC<AssetPickerProps> = ({
+  onPick,
+  fields,
+  ...props
+}) => {
+  const onChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const blob = e.target.files?.[0];
+      if (!blob) return;
+
+      const asset: LocalAsset = {
+        id: crypto.randomUUID(),
+        data: blob,
+        ...fields,
+      };
+
+      onPick?.(asset);
+    },
+    [fields, onPick]
+  );
+  return (
+    <input
+      type="file"
+      {...props}
+      className={twMerge("sr-only", props.className)}
+      onChange={onChange}
+    />
   );
 };

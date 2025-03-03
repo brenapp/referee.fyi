@@ -19,10 +19,7 @@ import {
 } from "~components/Dialog";
 import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
-import {
-  IncidentOutcome,
-  Incident as IncidentData,
-} from "~utils/data/incident";
+import { Incident as IncidentData } from "~utils/data/incident";
 import { Match } from "robotevents";
 import { MatchContext } from "~components/Context";
 import { Incident } from "~components/Incident";
@@ -32,13 +29,7 @@ import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import { MatchScratchpad } from "~components/scratchpad/Scratchpad";
 import { animate, motion, PanInfo, useMotionValue } from "framer-motion";
 import useResizeObserver from "use-resize-observer";
-
-const OUTCOME_PRIORITY: IncidentOutcome[] = [
-  "Major",
-  "Disabled",
-  "Minor",
-  "General",
-];
+import { RulesSummary } from "~components/RulesSummary";
 
 type TeamSummaryProps = {
   number: string;
@@ -57,38 +48,6 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
   const teamAlliance = match.alliances.find((alliance) =>
     alliance.teams.some((t) => t.team?.name === number)
   );
-
-  const rulesSummary = useMemo(() => {
-    const rules: Record<string, IncidentData[]> = {};
-
-    for (const incident of incidents) {
-      if (incident.outcome === "General") {
-        continue;
-      }
-
-      if (incident.match?.type !== "match") {
-        continue;
-      }
-
-      if (incident.rules.length < 1) {
-        if (rules["NA"]) {
-          rules["NA"].push(incident);
-        } else {
-          rules["NA"] = [incident];
-        }
-      }
-
-      for (const rule of incident.rules) {
-        if (rules[rule]) {
-          rules[rule].push(incident);
-        } else {
-          rules[rule] = [incident];
-        }
-      }
-    }
-
-    return Object.entries(rules).sort((a, b) => a[1].length - b[1].length);
-  }, [incidents]);
 
   const hasGeneral = useMemo(() => {
     return incidents.some((incident) => incident.outcome === "General");
@@ -113,38 +72,10 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
             <span className="text-zinc-300">{hasGeneral ? "*" : ""}</span>
           </p>
         </div>
-        <ul className="text-sm flex-1 flex-shrink break-normal overflow-x-hidden">
-          {rulesSummary.map(([rule, incidents]) => {
-            let outcome: IncidentOutcome = "Minor";
-            for (const incident of incidents) {
-              if (
-                OUTCOME_PRIORITY.indexOf(incident.outcome) <
-                OUTCOME_PRIORITY.indexOf(outcome)
-              ) {
-                outcome = incident.outcome;
-              }
-            }
-
-            const highlights: Record<IncidentOutcome, string> = {
-              Minor: "text-yellow-300",
-              Disabled: "text-blue-300",
-              Major: "text-red-300",
-              General: "text-zinc-300",
-            };
-
-            return (
-              <li
-                key={rule}
-                className={twMerge(
-                  highlights[outcome],
-                  "text-sm font-mono inline mx-1"
-                )}
-              >
-                {incidents.length}x{rule.replace(/[<>]/g, "")}
-              </li>
-            );
-          })}
-        </ul>
+        <RulesSummary
+          incidents={incidents}
+          filter={(i) => i.outcome !== "General" && i.match?.type !== "skills"}
+        />
         <TeamFlagButton match={match} team={number} />
       </summary>
       {/* For performance - don't render Incidents unless the dialog is open */}
@@ -181,12 +112,12 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
   );
 };
 
-type TeamFlagButtonProps = {
-  match: Match;
+export type TeamFlagButtonProps = {
+  match?: Match;
   team: string;
 } & ButtonProps;
 
-const TeamFlagButton: React.FC<TeamFlagButtonProps> = ({
+export const TeamFlagButton: React.FC<TeamFlagButtonProps> = ({
   match,
   team,
   ...props
@@ -199,7 +130,7 @@ const TeamFlagButton: React.FC<TeamFlagButtonProps> = ({
         open={open}
         setOpen={setOpen}
         initial={{ match, team }}
-        key={match.id + team}
+        key={match?.id + team}
       />
       <Button
         mode="primary"
@@ -400,7 +331,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                 ? {
                     "aria-hidden": true,
                     tabIndex: -1,
-                    inert: "",
+                    inert: true,
                   }
                 : {};
             return (

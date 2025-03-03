@@ -11,12 +11,32 @@ import { ClickableMatch } from "~components/Match";
 import { EventMatchDialog } from "./dialogs/match";
 import { MatchData } from "robotevents";
 import { Incident } from "~components/Incident";
-import { EventNewIncidentDialog } from "./dialogs/new";
-import { Button } from "~components/Button";
 import { VirtualizedList } from "~components/VirtualizedList";
 
-import { ClipboardDocumentListIcon } from "@heroicons/react/24/solid";
-import { FlagIcon } from "@heroicons/react/24/solid";
+import {
+  ClipboardDocumentListIcon,
+  FlagIcon,
+  PhotoIcon,
+} from "@heroicons/react/24/solid";
+import { useEventAssetsForTeam } from "~utils/hooks/assets";
+import { AssetPreview } from "~components/Assets";
+
+export type EventTeamAssetsProps = {
+  team?: string;
+  sku?: string;
+};
+
+export const EventTeamAssets: React.FC<EventTeamAssetsProps> = ({
+  team,
+  sku,
+}) => {
+  const assets = useEventAssetsForTeam(sku, team);
+  return (
+    <div className="grid lg:grid-cols-6 grid-cols-2 md:grid-cols-3 mt-4 gap-2">
+      {assets?.map((asset) => (asset ? <AssetPreview asset={asset} /> : null))}
+    </div>
+  );
+};
 
 type EventTeamsTabProps = {
   event: EventData | null | undefined;
@@ -93,7 +113,6 @@ export const EventTeamsPage: React.FC = () => {
   const { number } = useParams();
   const { data: event } = useCurrentEvent();
   const { data: team } = useEventTeam(event, number ?? "");
-  const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
 
   const teamLocation = useMemo(() => {
     if (!team) return null;
@@ -108,17 +127,7 @@ export const EventTeamsPage: React.FC = () => {
 
   return (
     <section className="flex flex-col">
-      <EventNewIncidentDialog
-        open={incidentDialogOpen}
-        setOpen={setIncidentDialogOpen}
-        initial={{ team: team?.number }}
-        key={team?.id}
-      />
-      <header className="mt-4">
-        <Button onClick={() => setIncidentDialogOpen(true)} mode="primary">
-          <FlagIcon height={20} className="inline mr-2 " />
-          New Entry
-        </Button>
+      <header>
         <h1 className="text-xl overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose mt-4">
           <span className="font-mono text-emerald-400">{number}</span>
           {" • "}
@@ -126,7 +135,13 @@ export const EventTeamsPage: React.FC = () => {
         </h1>
         <p className="italic">{teamLocation}</p>
       </header>
-      <Tabs>
+      <Tabs
+        parts={{
+          tablist: {
+            className: "absolute bottom-0 right-0 left-0 z-10 p-0 bg-zinc-900",
+          },
+        }}
+      >
         {[
           {
             type: "content",
@@ -151,6 +166,18 @@ export const EventTeamsPage: React.FC = () => {
                 <ClipboardDocumentListIcon height={24} className="inline" />
               ),
             content: <EventTeamsMatches event={event} team={team} />,
+          },
+          {
+            type: "content",
+            id: "assets",
+            label: "Images",
+            icon: (active) =>
+              active ? (
+                <PhotoIcon height={24} className="inline" />
+              ) : (
+                <PhotoIcon height={24} className="inline" />
+              ),
+            content: <EventTeamAssets sku={event?.sku} team={team?.number} />,
           },
         ]}
       </Tabs>

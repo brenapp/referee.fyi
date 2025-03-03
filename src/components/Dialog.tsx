@@ -1,19 +1,27 @@
 import { twMerge } from "tailwind-merge";
 import { IconButton } from "./Button";
 import { XMarkIcon } from "@heroicons/react/20/solid";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
+import { HTMLMotionProps, motion } from "framer-motion";
 
 export type DialogMode = "modal" | "nonmodal";
 
 export type DialogCustomHeaderProps = {
   children?: React.ReactNode;
-};
+} & React.HTMLProps<HTMLDivElement>;
 
 export const DialogCustomHeader: React.FC<DialogCustomHeaderProps> = ({
   children,
+  ...props
 }) => {
   return (
-    <nav className="h-16 flex p-2 gap-2 items-center max-w-full">
+    <nav
+      {...props}
+      className={twMerge(
+        "h-16 flex p-2 gap-2 items-center max-w-full",
+        props.className
+      )}
+    >
       {children}
     </nav>
   );
@@ -73,11 +81,17 @@ export const DialogBody: React.FC<DialogBodyProps> = ({
   );
 };
 
+export type DialogFooterProps = React.HTMLProps<HTMLDivElement>;
+export const DialogFooter = (props: DialogFooterProps) => {
+  return <div {...props}>{props.children}</div>;
+};
+
 export type DialogProps = {
   open: boolean;
   onClose: () => void;
   mode: DialogMode;
-} & Omit<React.HTMLProps<HTMLDialogElement>, "ref">;
+} & Omit<HTMLMotionProps<"dialog">, "ref"> &
+  React.RefAttributes<HTMLDialogElement>;
 
 export const Dialog: React.FC<DialogProps> = ({
   open,
@@ -108,18 +122,18 @@ export const Dialog: React.FC<DialogProps> = ({
   }
 
   return (
-    <dialog
+    <motion.dialog
       onPointerDown={(e) => e.stopPropagation()}
       {...props}
       ref={ref}
       onClose={onClose}
       className={twMerge(
-        "bg-zinc-900 flex-col p-2 gap-2 z-50 w-svw h-svh max-w-3xl max-h-[1152px] overscroll-none text-zinc-100 rounded-md m-auto",
+        "bg-zinc-900 flex-col p-2 gap-2 z-50 w-svw h-svh max-w-3xl max-h-[1152px] overscroll-none overflow-hidden text-zinc-100 rounded-md m-auto",
         props.className,
         open ? "flex" : ""
       )}
     >
       {children}
-    </dialog>
+    </motion.dialog>
   );
 };

@@ -20,6 +20,7 @@ import "core-js/actual/set";
 
 // September 2024 - Older versions of Safari do not support Object.groupBy
 import "core-js/actual/object/group-by";
+import { LocalAsset } from "./assets";
 
 export type { IncidentOutcome, Incident };
 
@@ -35,6 +36,7 @@ export type RichIncidentElements = {
   outcome: IncidentOutcome;
   rules: Rule[];
   notes: string;
+  assets: LocalAsset[];
 };
 
 export type RichIncident = Omit<NewIncident, keyof RichIncidentElements> &
@@ -53,6 +55,7 @@ export function packIncident(incident: RichIncident): NewIncident {
       : incident.skills,
     team: incident.team!,
     rules: incident.rules.map((rule) => rule.rule),
+    assets: incident.assets.map((asset) => asset.id),
   };
 }
 

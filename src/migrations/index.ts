@@ -5,5 +5,6 @@ import "./2024_07_12_setIndicesAll";
 import "./2024_07_24_consistency";
 import "./2024_07_28_keys";
 import "./2025_01_12_clearSG6";
+import "./2025_02_27_addAssets";
 
 export { runMigrations } from "./utils";

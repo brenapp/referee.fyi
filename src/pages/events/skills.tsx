@@ -1,7 +1,7 @@
 import { useCurrentEvent } from "~utils/hooks/state";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAddEventVisited } from "~utils/hooks/history";
-import { Button } from "~components/Button";
+import { Button, LinkButton } from "~components/Button";
 import { CodeBracketIcon, FlagIcon, PlayIcon } from "@heroicons/react/20/solid";
 import { EventNewIncidentDialog } from "./dialogs/new";
 import { Tabs } from "~components/Tabs";
@@ -9,11 +9,11 @@ import { EventManageTab } from "./home/manage";
 import { Spinner } from "~components/Spinner";
 import { EventData } from "robotevents";
 import { useEventSkills, useEventTeams } from "~utils/hooks/robotevents";
-import { Link } from "react-router-dom";
 import { Skill } from "robotevents";
 import { IconLabel, Input } from "~components/Input";
 
 import {
+  ArrowRightIcon,
   MagnifyingGlassIcon,
   UserGroupIcon as TeamsIconOutline,
 } from "@heroicons/react/24/outline";
@@ -23,15 +23,35 @@ import { Cog8ToothIcon as ManageIconOutline } from "@heroicons/react/24/outline"
 import { Cog8ToothIcon as ManageIconSolid } from "@heroicons/react/24/solid";
 import { VirtualizedList } from "~components/VirtualizedList";
 import { filterTeams } from "~utils/filterteams";
+import { MenuButton } from "~components/MenuButton";
+import { RichIncident } from "~utils/data/incident";
+import { useEventIncidents } from "~utils/hooks/incident";
+import { RulesSummary } from "~components/RulesSummary";
 
 type TeamSkillsTabProps = {
   event: EventData;
 };
 
 const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
+  const { data: incidents } = useEventIncidents(event?.sku);
   const { data: teams, isLoading: isLoadingTeams } = useEventTeams(event);
   const { data: skills, isLoading: isLoadingSkills } = useEventSkills(event);
   const [filter, setFilter] = useState("");
+
+  const [newIncidentDialogOpen, setNewIncidentDialogOpen] = useState(false);
+  const [newIncidentDialogInitial, setNewIncidentDialogInitial] = useState<
+    Partial<RichIncident>
+  >({});
+
+  const openNewIncidentDialog = useCallback(
+    (initial: Partial<RichIncident> = {}) => {
+      setNewIncidentDialogInitial(initial);
+      setTimeout(() => {
+        setNewIncidentDialogOpen(true);
+      }, 0);
+    },
+    []
+  );
 
   const skillsByTeam = useMemo(() => {
     if (!skills) {
@@ -61,7 +81,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
 
   return (
     <>
-      <section className="contents">
+      <section className="contents mb-12">
         <IconLabel icon={<MagnifyingGlassIcon height={24} />}>
           <Input
             placeholder="Search teams..."
@@ -70,6 +90,11 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
             onChange={(e) => setFilter(e.currentTarget.value.toUpperCase())}
           />
         </IconLabel>
+        <EventNewIncidentDialog
+          open={newIncidentDialogOpen}
+          setOpen={setNewIncidentDialogOpen}
+          initial={newIncidentDialogInitial}
+        />
         <Spinner show={isLoading} />
         <VirtualizedList
           className="flex-1"
@@ -91,8 +116,103 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
             );
 
             return (
-              <Link
-                to={`/${event.sku}/team/${team.number}`}
+              <MenuButton
+                menu={
+                  <nav className="mt-2">
+                    <div className="flex items-center gap-4 mb-4">
+                      <p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-full flex-1">
+                        <span className="font-mono text-emerald-400">
+                          {team.number}
+                        </span>
+                        {" • "}
+                        <span>{team.team_name}</span>
+                      </p>
+                      <span className="mr-4">
+                        <PlayIcon height={20} className="inline" />
+                        <span className="font-mono ml-2">
+                          {driver?.attempts ?? 0}
+                        </span>
+                      </span>
+                      <span className="">
+                        <CodeBracketIcon height={20} className="inline" />
+                        <span className="font-mono ml-2">
+                          {programming?.attempts ?? 0}
+                        </span>
+                      </span>
+                    </div>
+                    <RulesSummary
+                      className="break-all"
+                      incidents={incidents ?? []}
+                      filter={(i) =>
+                        i.team == team.number && i.match?.type !== "match"
+                      }
+                    />
+                    <LinkButton
+                      to={`/${event.sku}/team/${team.number}`}
+                      className="w-full mt-4 flex items-center"
+                    >
+                      <span className="flex-1">Details</span>
+                      <ArrowRightIcon
+                        height={20}
+                        className="text-emerald-400"
+                      />
+                    </LinkButton>
+                    <hr className="mt-4 border-zinc-600" />
+                    <Button
+                      mode="normal"
+                      className="mt-4"
+                      onClick={() =>
+                        openNewIncidentDialog({
+                          team: team.number,
+                          outcome: "Inspection",
+                        })
+                      }
+                    >
+                      <FlagIcon height={20} className="inline mr-2 " />
+                      Inspection
+                    </Button>
+                    <Button
+                      mode="normal"
+                      className="mt-4"
+                      onClick={() =>
+                        openNewIncidentDialog({
+                          team: team.number,
+                          skills: {
+                            type: "skills",
+                            skillsType: "driver",
+                            attempt: Math.min(3, (driver?.attempts ?? 0) + 1),
+                          },
+                          outcome: "Minor",
+                        })
+                      }
+                    >
+                      <FlagIcon height={20} className="inline mr-2 " />
+                      Driver Skills
+                    </Button>
+                    <Button
+                      mode="normal"
+                      className="mt-4"
+                      onClick={() =>
+                        openNewIncidentDialog({
+                          team: team.number,
+                          skills: {
+                            type: "skills",
+                            skillsType: "programming",
+                            attempt: Math.min(
+                              3,
+                              (programming?.attempts ?? 0) + 1
+                            ),
+                          },
+                          outcome: "Minor",
+                        })
+                      }
+                    >
+                      <FlagIcon height={20} className="inline mr-2 " />
+                      Auto Skills
+                    </Button>
+                  </nav>
+                }
+                mode="transparent"
                 className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
               >
                 <div className="flex-1">
@@ -115,7 +235,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
                     </span>
                   </span>
                 </div>
-              </Link>
+              </MenuButton>
             );
           }}
         </VirtualizedList>
@@ -127,7 +247,6 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
 export const EventSkillsPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
 
-  const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
   const { mutateAsync: addEvent, isSuccess } = useAddEventVisited();
 
   useEffect(() => {
@@ -142,18 +261,6 @@ export const EventSkillsPage: React.FC = () => {
 
   return (
     <section className="mt-4 flex flex-col">
-      <Button
-        onClick={() => setIncidentDialogOpen(true)}
-        mode="primary"
-        className="mb-4"
-      >
-        <FlagIcon height={20} className="inline mr-2 " />
-        New Entry
-      </Button>
-      <EventNewIncidentDialog
-        open={incidentDialogOpen}
-        setOpen={setIncidentDialogOpen}
-      />
       <Tabs
         className="flex-1"
         parts={{

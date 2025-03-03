@@ -1,6 +1,11 @@
 import { WithLWWConsistency } from "@referee-fyi/consistency";
 
-export type IncidentOutcome = "Minor" | "Major" | "Disabled" | "General";
+export type IncidentOutcome =
+  | "Minor"
+  | "Major"
+  | "Disabled"
+  | "General"
+  | "Inspection";
 
 export type IncidentMatchHeadToHead = {
   type: "match";
@@ -30,6 +35,7 @@ export type BaseIncident = {
   outcome: IncidentOutcome;
   rules: string[];
   notes: string;
+  assets: string[];
 };
 
 export const INCIDENT_IGNORE = ["id", "time", "event", "team"] as const;

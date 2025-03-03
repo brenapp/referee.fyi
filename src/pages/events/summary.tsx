@@ -29,11 +29,23 @@ export type Filters = {
 };
 
 const DEFAULT_FILTERS: Filters = {
-  outcomes: { Disabled: true, General: true, Major: true, Minor: true },
+  outcomes: {
+    Disabled: true,
+    General: true,
+    Major: true,
+    Minor: true,
+    Inspection: true,
+  },
   rules: [],
 };
 
-const OUTCOMES: IncidentOutcome[] = ["General", "Minor", "Major", "Disabled"];
+const OUTCOMES: IncidentOutcome[] = [
+  "General",
+  "Minor",
+  "Major",
+  "Inspection",
+  "Disabled",
+];
 
 type FilterDialogProps = {
   open: boolean;

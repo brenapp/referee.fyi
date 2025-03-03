@@ -118,6 +118,7 @@ export const EventDevTools: React.FC = () => {
               rules: rule ? [rule.rule] : [],
               time: new Date(),
               notes,
+              assets: [],
             },
             peer,
             id: generateIncidentId(),

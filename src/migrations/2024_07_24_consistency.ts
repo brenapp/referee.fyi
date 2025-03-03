@@ -102,6 +102,7 @@ queueMigration({
       output.push(newIncident);
     }
 
+    //@ts-expect-error assets
     await setManyIncidents(output);
 
     return { success: true, details: `Migrated ${output.length} incidents` };

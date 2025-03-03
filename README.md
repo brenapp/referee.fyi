@@ -1,9 +1,15 @@
 # Referee FYI
 
-Digital anomaly log for Head Referees in VRC, VIQRC, and VEX U. Referee FYI allows you to record violations quickly, see summaries before a match, and share your log with others.
+Referee FYI is a digital anomaly log for Head Referees in robotics competitions.
+Referee FYI allows you to record violations quickly, see summaries before a
+match, and share your log with others. It designed to replace the paper entries
+referees would use before, and is meant to complement existing competition
+technology tooling.
 
-- Record match anomaly logs by match and see citations by team, including summaries for each match.
+### Resources
 
-- Works offline* and stores all data locally on-device. The intention here is that your phone doesn’t need to be continuously connected
+- [Using the Referee FYI Digital Match Anomaly Log - REC Foundation Library](https://kb.roboticseducation.org/hc/en-us/articles/30288201102615-Using-the-Referee-FYI-Digital-Match-Anomaly-Log)
 
-- Built-in sharing system that allows users to synchronize anomaly log entries across multiple devices
+- [Referee FYI System Design Overview](https://docs.google.com/document/d/1RO-_xEvwzACjK_dqksD8rj3MRBHTFQBLiYOTrM4Bkjs/edit?tab=t.0)
+
+- [Privacy Policy](https://referee.fyi/privacy)

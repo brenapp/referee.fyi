@@ -8,6 +8,7 @@ import "./App.css";
 const HomePage = React.lazy(() => import("./pages/home"));
 const SettingsPage = React.lazy(() => import("./pages/settings"));
 const EventPage = React.lazy(() => import("./pages/events"));
+const PrivacyPage = React.lazy(() => import("./pages/privacy"));
 
 function App() {
   return (
@@ -27,6 +28,14 @@ function App() {
             element={
               <React.Suspense fallback={<Spinner show />}>
                 <SettingsPage />
+              </React.Suspense>
+            }
+          />
+          <Route
+            path="/privacy"
+            element={
+              <React.Suspense fallback={<Spinner show />}>
+                <PrivacyPage />
               </React.Suspense>
             }
           />

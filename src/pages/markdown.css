@@ -20,3 +20,7 @@
 .markdown h6 {
   margin-top: 1rem;
 }
+
+.markdown p {
+  margin-bottom: 1rem;
+}

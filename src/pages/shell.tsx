@@ -60,12 +60,17 @@ const EventPicker: React.FC = () => {
     setEnd((end) => new Date(end.getTime() + 1000 * 60 * 60 * 24 * 31));
   }, [setEnd]);
 
-  const { data: events, isLoading: isLoadingEvents } = useEventSearch({
-    "season[]": currentSeasons,
-    "eventTypes[]": ["tournament"],
-    start: start.current,
-    end: end.toISOString(),
-  });
+  const { data: events, isLoading: isLoadingEvents } = useEventSearch(
+    {
+      "season[]": currentSeasons,
+      "eventTypes[]": ["tournament"],
+      start: start.current,
+      end: end.toISOString(),
+    },
+    {
+      placeholderData: (prev) => prev,
+    }
+  );
   const { data: event } = useCurrentEvent();
   const division = useCurrentDivision();
 

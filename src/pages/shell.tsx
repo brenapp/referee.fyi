@@ -100,12 +100,18 @@ const EventPicker: React.FC = () => {
   }, [query, events]);
 
   const regionResults = useMemo(() => {
-    if (!geo?.region) {
+    if (!geo?.region || !geo.country) {
       return [];
     }
 
-    return results.filter((event) => event.location.region === geo.region);
-  }, [results, geo?.region]);
+    if (geo.country === "United States") {
+      return results.filter((event) => event.location.region === geo.region);
+    }
+
+    return results.filter((event) => event.location.country === geo.country);
+  }, [geo?.region, geo?.country, results]);
+
+  console.log(geo);
 
   useEffect(() => {
     const maxTime = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30 * 3);

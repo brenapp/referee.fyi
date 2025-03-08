@@ -26,6 +26,7 @@
     "@referee-fyi/pdf-export": "^1.0.0",
     "@referee-fyi/share": "^1.0.0",
     "cloudflare": "^4.1.0",
+    "iso-3166-1": "^2.1.1",
     "itty-router": "^5.0.17",
     "jspdf": "^2.5.2",
     "robotevents": "^6.0.3"

@@ -8,6 +8,7 @@ import { keyExchangeRouter } from "./routers/keyexchange";
 import { invitationRouter } from "./routers/invitation";
 import { instanceRouter } from "./routers/instance";
 import { assetRouter } from "./routers/assets";
+import { metaRouter } from "./routers/meta";
 
 const router = AutoRouter<IRequest, [Env]>({
   before: [preflight, withParams],
@@ -18,6 +19,9 @@ router
 
   // External Integration API (just requires bearer token)
   .all("/api/integration/v1/:sku/*", integrationRouter.fetch)
+
+  // Meta Routes
+  .get("/api/meta/location", metaRouter.fetch)
 
   // User Registration
   .post("/api/user", registrationRouter.fetch)

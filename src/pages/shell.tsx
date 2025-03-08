@@ -32,6 +32,7 @@ import { useMutation } from "@tanstack/react-query";
 import { runMigrations } from "../migrations";
 import { toast } from "~components/Toast";
 import { getShareProfile } from "~utils/data/share";
+import { useGeolocation } from "~utils/hooks/meta";
 
 function isValidSKU(sku: string) {
   return !!sku.match(
@@ -43,6 +44,8 @@ const EventPicker: React.FC = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { data: geo } = useGeolocation();
 
   const [query, setQuery] = useState("");
   const { data: eventFromSKU, isLoading: isLoadingEventFromSKU } = useEvent(
@@ -60,12 +63,17 @@ const EventPicker: React.FC = () => {
     setEnd((end) => new Date(end.getTime() + 1000 * 60 * 60 * 24 * 31));
   }, [setEnd]);
 
-  const { data: events, isLoading: isLoadingEvents } = useEventSearch({
-    "season[]": currentSeasons,
-    "eventTypes[]": ["tournament"],
-    start: start.current,
-    end: end.toISOString(),
-  });
+  const { data: events, isPending: isLoadingEvents } = useEventSearch(
+    {
+      "season[]": currentSeasons,
+      "eventTypes[]": ["tournament"],
+      start: start.current,
+      end: end.toISOString(),
+    },
+    {
+      placeholderData: (prev) => prev,
+    }
+  );
   const { data: event } = useCurrentEvent();
   const division = useCurrentDivision();
 
@@ -90,6 +98,20 @@ const EventPicker: React.FC = () => {
       }) ?? []
     );
   }, [query, events]);
+
+  const regionResults = useMemo(() => {
+    if (!geo?.region || !geo.country) {
+      return [];
+    }
+
+    if (geo.country === "United States") {
+      return results.filter((event) => event.location.region === geo.region);
+    }
+
+    return results.filter((event) => event.location.country === geo.country);
+  }, [geo?.region, geo?.country, results]);
+
+  console.log(geo);
 
   useEffect(() => {
     const maxTime = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30 * 3);
@@ -134,7 +156,7 @@ const EventPicker: React.FC = () => {
             <Input
               type="text"
               placeholder="SKU or Event Name"
-              className="font-mono px-4 py-4 rounded-md invalid:bg-red-500 w-full"
+              className="font-mono px-4 py-4 rounded-md invalid:bg-red-500 w-full mt-2"
               value={query}
               onChange={(e) => setQuery(e.currentTarget.value.toUpperCase())}
             />
@@ -163,8 +185,41 @@ const EventPicker: React.FC = () => {
               </>
             )}
           </section>
-          <p className="italic text-center py-4">Or</p>
-          <section>
+          {regionResults.length > 0 && geo?.region ? (
+            <section className="mt-4">
+              <h2 className="text-lg font-bold text-white mx-2">
+                {geo.region}
+              </h2>
+              <ul>
+                {regionResults?.map((event) => (
+                  <li
+                    key={event.sku}
+                    aria-label={`${event.name} at ${event.location.venue}. ${event.sku}`}
+                  >
+                    <LinkButton
+                      to={`/${event.sku}`}
+                      onClick={() => {
+                        setOpen(false);
+                      }}
+                      className="w-full mt-2 bg-transparent"
+                    >
+                      <p className="text-sm whitespace-nowrap text-ellipsis overflow-hidden">
+                        <span className=" text-emerald-400 font-mono">
+                          {event.sku}
+                        </span>
+                        {" • "}
+                        <span>{event.location.venue}</span>
+                      </p>
+                      <p className="whitespace-nowrap text-ellipsis overflow-hidden">
+                        {event.name}
+                      </p>
+                    </LinkButton>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+          <section className="mt-4">
             <h2 className="text-lg font-bold text-white mx-2">Events</h2>
             <ul>
               {results?.map((event) => (
@@ -193,10 +248,10 @@ const EventPicker: React.FC = () => {
                 </li>
               ))}
             </ul>
+            <Spinner show={isLoadingEvents} />
             <Button onClick={onClickMore} mode="normal" className="mt-2">
               Load More
             </Button>
-            <Spinner show={isLoadingEvents} />
           </section>
         </DialogBody>
       </Dialog>

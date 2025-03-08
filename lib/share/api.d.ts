@@ -100,6 +100,17 @@ export type ApiGetAssetOriginalURLResponseBody = {
   url: string;
 };
 
+export type ApiGetMetaLocationResponseBody = {
+  location: {
+    city: string;
+    colo: string;
+    region: string;
+    country: string;
+    postcode: string;
+    continent: string;
+  } | null;
+};
+
 // WebSocket communications
 
 export type WebSocketAddIncidentMessage = {

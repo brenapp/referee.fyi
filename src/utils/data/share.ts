@@ -414,18 +414,6 @@ export async function getAssetUploadURL(
   return response.json();
 }
 
-export async function uploadAsset(url: string, data: Blob) {
-  const formData = new FormData();
-  formData.append("file", data);
-
-  const response = await fetch(url, {
-    method: "POST",
-    body: formData,
-  });
-
-  return response.json();
-}
-
 export async function getAssetPreviewURL(
   sku: string,
   id: string

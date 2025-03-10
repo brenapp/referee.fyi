@@ -294,8 +294,6 @@ export const AllianceTimeoutUsedScratchpad: React.FC<
     [allianceTimeouts, blueTeams]
   );
 
-  console.log(allianceTimeouts);
-
   return (
     <section
       className="bg-zinc-800 p-4 mt-4 rounded-md"

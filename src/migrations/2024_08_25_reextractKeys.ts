@@ -21,8 +21,6 @@ queueMigration({
     const publicJWK = await get<JsonWebKey>(PUBLIC_KEY);
     const privateJWK = await get<JsonWebKey>(PRIVATE_KEY);
 
-    console.log(publicJWK, privateJWK);
-
     if (!publicJWK || !privateJWK) {
       await generateKeys();
       return { success: true };

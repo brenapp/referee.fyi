@@ -111,8 +111,6 @@ const EventPicker: React.FC = () => {
     return results.filter((event) => event.location.country === geo.country);
   }, [geo?.region, geo?.country, results]);
 
-  console.log(geo);
-
   useEffect(() => {
     const maxTime = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30 * 3);
 

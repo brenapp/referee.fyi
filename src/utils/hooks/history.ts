@@ -34,7 +34,7 @@ export async function setRecentRules(
 
 export function useRecentEvents(limit?: number) {
   return useQuery({
-    queryKey: ["recent_events"],
+    queryKey: ["@referee-fyi/useRecentEvents", limit],
     queryFn: async () => {
       const events = await getRecentEvents();
       return events.slice(0, limit);
@@ -50,7 +50,7 @@ export function useRecentRules(
   limit?: number
 ) {
   return useQuery({
-    queryKey: ["recent_rules", programId, season],
+    queryKey: ["@referee-fyi/useRecentRules", programId, season, limit],
     queryFn: async () => {
       const rules = await getRecentRules(programId, season);
       return rules.slice(0, limit);
@@ -74,6 +74,7 @@ export function useAddEventVisited() {
 export function useAddRecentRules(programId: number, season: number) {
   const key = `rule_history_${programId}_${season}`;
   return useMutation({
+    mutationKey: ["@referee-fyi/useAddRecentRules", programId, season],
     mutationFn: async (rules: Rule[]) => {
       if (rules.length < 1) {
         return;

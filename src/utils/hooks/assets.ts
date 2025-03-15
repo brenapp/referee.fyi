@@ -7,7 +7,7 @@ import { useMemo } from "react";
 
 export function useLocalAsset(id?: string | null) {
   return useQuery({
-    queryKey: ["assets", id],
+    queryKey: ["@referee-fyi/useLocalAsset", id],
     queryFn: async () => {
       if (!id) {
         return undefined;
@@ -23,7 +23,7 @@ export function useLocalAssets(
   options?: HookQueryOptions<(LocalAsset | undefined)[]>
 ) {
   return useQuery({
-    queryKey: ["assets", ids],
+    queryKey: ["@referee-fyi/useLocalAssets", ids],
     queryFn: async () => {
       const assets = await Promise.all(ids.map(getLocalAsset));
       return assets;
@@ -42,20 +42,19 @@ export function useEventAssetsForTeam(sku?: string, team?: string) {
 
 export function useSaveAssets(assets: LocalAsset[]) {
   return useMutation({
-    mutationKey: ["assets", "save"],
+    mutationKey: ["@referee-fyi/useSaveAssets", assets],
     mutationFn: async () => {
       return assets.map(saveLocalAsset);
     },
   });
 }
-
 export function useAssetPreviewURL(
   sku: string | undefined,
   id: string,
   options?: HookQueryOptions<string | null>
 ) {
   return useQuery({
-    queryKey: ["assets", id, sku, "preview"],
+    queryKey: ["@referee-fyi/useAssetPreviewURL", id, sku],
     queryFn: async () => {
       const local = await getLocalAsset(id);
       if (local) {
@@ -83,7 +82,7 @@ export function useAssetOriginalURL(
   options?: HookQueryOptions<string | null>
 ) {
   return useQuery({
-    queryKey: ["assets", id, "original"],
+    queryKey: ["@referee-fyi/useAssetOriginalURL", id, sku],
     queryFn: async () => {
       const local = await getLocalAsset(id);
       if (local) {

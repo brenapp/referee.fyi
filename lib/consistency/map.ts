@@ -1,4 +1,4 @@
-import { mergeLWW, WithLWWConsistency } from "./lww.js";
+import { MergeFunction, mergeLWW, WithLWWConsistency } from "./lww.js";
 import { mergeGrowSet } from "./gset.js";
 
 // July 2024 - Samsung Internet does not support Set.prototype.intersection or Set.prototype.difference
@@ -18,6 +18,7 @@ export type ConsistentMapMergeOptions<T extends ConsistentMapElement> = {
   local: ConsistentMap<T>;
   remote: ConsistentMap<T>;
   ignore: readonly string[];
+  merge?: MergeFunction<T>;
 };
 
 export type ConsistentMapPeerOutcome = {
@@ -36,6 +37,7 @@ export function mergeMap<T extends ConsistentMapElement>({
   local,
   remote,
   ignore,
+  merge = mergeLWW,
 }: ConsistentMapMergeOptions<T>): ConsistentMapMergeResult<T> {
   const localIds = new Set(Object.keys(local.values));
   const remoteIds = new Set(Object.keys(remote.values));
@@ -45,7 +47,7 @@ export function mergeMap<T extends ConsistentMapElement>({
 
   const sharedIds = [...localIds.intersection(remoteIds)];
   const mergeResults = sharedIds.map((id) =>
-    mergeLWW({
+    merge({
       ignore: ignore,
       local: local.values[id],
       remote: remote.values[id],

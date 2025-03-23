@@ -50,6 +50,10 @@ export type MergeResult<T extends BaseWithLWWConsistency> = {
   rejected: LWWKeys<T>[];
 };
 
+export type MergeFunction<T extends BaseWithLWWConsistency> = (
+  options: MergeOptions<T>
+) => MergeResult<T>;
+
 /**
  * Enforces last-write wins consistency on the given consistent object
  *

@@ -1,5 +1,5 @@
 import type { Color } from "robotevents";
-import { WithLWWConsistency } from "@referee-fyi/consistency";
+import { ConsistentMap, WithLWWConsistency } from "@referee-fyi/consistency";
 import { IncidentMatchHeadToHead } from "./incident.js";
 
 export type SupportedGame = "High Stakes" | "Rapid Relay";
@@ -41,8 +41,17 @@ export type HighStakesMatchScratchpad = WithLWWConsistency<
   ScratchpadUnchangeableProperties
 >;
 
+export type RapidRelayCounterType = "pass" | "goal";
+export type BaseRapidRelayCounter = {
+  id: string;
+  type: RapidRelayCounterType;
+};
+
+export type RapidRelayCounter = WithLWWConsistency<BaseRapidRelayCounter, "id">;
+
 export type RapidRelayMatchScratchpadProperties = {
   game: "Rapid Relay";
+  counters: ConsistentMap<RapidRelayCounter>;
 };
 export type BaseRapidRelayMatchScratchpad = BaseMatchScratchpad &
   RapidRelayMatchScratchpadProperties;

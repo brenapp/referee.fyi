@@ -45,6 +45,7 @@ import { mergeMap } from "@referee-fyi/consistency";
 import {
   getManyMatchScratchpads,
   getScratchpadIdsForEvent,
+  mergeScratchpad,
   setManyMatchScratchpad,
   setMatchScratchpad,
 } from "~utils/data/scratchpad";
@@ -187,9 +188,9 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
         break;
       }
 
-      // Sent when you first join, We definitely don't want to
-      // *delete* incidents the user creates before joining the share, unless they are listed as
-      // being deleted on the server.
+      // Sent when you first join, We definitely don't want to *delete*
+      // incidents the user creates before joining the instance, unless they are
+      // listed as being deleted on the server.
       case "server_share_info": {
         const start = performance.now();
         set({
@@ -249,6 +250,7 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
           local: { deleted: [], values: localScratchpads },
           remote: data.scratchpads,
           ignore: SCRATCHPAD_IGNORE,
+          merge: mergeScratchpad,
         });
 
         // Notify Remote

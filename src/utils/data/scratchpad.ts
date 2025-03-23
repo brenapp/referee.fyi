@@ -7,6 +7,7 @@ import {
   SCRATCHPAD_IGNORE,
   HighStakesMatchScratchpad,
   RapidRelayMatchScratchpad,
+  RapidRelayCounter,
 } from "@referee-fyi/share";
 import { getShareProfile } from "./share";
 import { MatchData, programs } from "robotevents";
@@ -15,6 +16,11 @@ import {
   initLWW,
   isKeyLWW,
   LWWKeys,
+  MergeFunction,
+  mergeLWW,
+  mergeMap,
+  MergeOptions,
+  MergeResult,
   updateLWW,
 } from "@referee-fyi/consistency";
 
@@ -153,8 +159,64 @@ export function getDefaultScratchpad(
       return initLWW<RapidRelayMatchScratchpad>({
         peer,
         ignore: SCRATCHPAD_IGNORE,
-        value: { ...base, game: "Rapid Relay" },
+        value: {
+          ...base,
+          game: "Rapid Relay",
+          counters: { values: {}, deleted: [] },
+        },
       });
+    }
+  }
+}
+
+export const mergeHighStakesScratchpad: MergeFunction<
+  HighStakesMatchScratchpad
+> = (options) => mergeLWW<HighStakesMatchScratchpad>(options);
+
+export const mergeRapidRelayScratchpad: MergeFunction<
+  RapidRelayMatchScratchpad
+> = (options) => {
+  const base = mergeLWW<RapidRelayMatchScratchpad>({
+    ...options,
+    ignore: [...options.ignore, "counters"],
+  });
+
+  const counters = mergeMap<RapidRelayCounter>({
+    local: options.local?.counters ?? { values: {}, deleted: [] },
+    remote: options.remote?.counters ?? { values: {}, deleted: [] },
+    ignore: ["id"],
+  });
+
+  if (!base.resolved) {
+    return base;
+  }
+
+  const resolved: RapidRelayMatchScratchpad | null | undefined = {
+    ...base.resolved,
+    counters: counters.resolved,
+  };
+
+  return {
+    ...base,
+    resolved,
+  };
+};
+export function mergeScratchpad<T extends MatchScratchpad>(
+  options: MergeOptions<T>
+): MergeResult<MatchScratchpad> {
+  switch (options.local?.game) {
+    case "High Stakes": {
+      return mergeHighStakesScratchpad(
+        options as MergeOptions<HighStakesMatchScratchpad>
+      ) as MergeResult<MatchScratchpad>;
+    }
+    case "Rapid Relay": {
+      return mergeRapidRelayScratchpad(
+        options as MergeOptions<RapidRelayMatchScratchpad>
+      ) as MergeResult<MatchScratchpad>;
+    }
+    default: {
+      return mergeLWW<MatchScratchpad>(options);
     }
   }
 }

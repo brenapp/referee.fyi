@@ -21,6 +21,7 @@ import {
   getAssetUploadURL,
   getSender,
   getShareData,
+  getShareProfile,
   registerUser,
   saveShareProfile,
   URL_BASE,
@@ -453,7 +454,7 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
       url.protocol = "ws:";
     }
 
-    const { key: id, name } = get().profile;
+    const { key: id, name } = await getShareProfile();
 
     url.searchParams.set("id", id);
     url.searchParams.set("name", name);

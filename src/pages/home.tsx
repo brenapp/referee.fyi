@@ -3,11 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Dialog, DialogHeader, DialogBody } from "~components/Dialog";
 import Markdown from "react-markdown";
 
-import {
-  Cog8ToothIcon,
-  GlobeAmericasIcon,
-  UserGroupIcon,
-} from "@heroicons/react/20/solid";
+import { Cog8ToothIcon, UserGroupIcon } from "@heroicons/react/20/solid";
 import { useEventSearch } from "~utils/hooks/robotevents";
 import { useRecentEvents } from "~utils/hooks/history";
 import { isWorldsBuild } from "~utils/data/state";
@@ -167,15 +163,6 @@ export const HomePage: React.FC = () => {
               Update Notes
             </Button>
           </div>
-          {isWorldsBuild() ? (
-            <p className="bg-purple-600 text-zinc-300 p-2 rounded-md flex items-center gap-2">
-              <GlobeAmericasIcon height={20} />
-              Worlds
-              <span className="flex-1 text-right font-mono">
-                {__REFEREE_FYI_VERSION__}
-              </span>
-            </p>
-          ) : null}
           <LinkButton to="/settings" className="flex items-center gap-2">
             <Cog8ToothIcon height={20} />
             <p>Settings</p>

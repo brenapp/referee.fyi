@@ -24,9 +24,9 @@ export const SettingsPage: React.FC = () => {
   }, []);
 
   return (
-    <main>
+    <main className="mt-4">
       {isWorldsBuild() ? (
-        <p className="bg-purple-500 text-zinc-300 p-2 rounded-md flex items-center gap-2 mt-2">
+        <p className="bg-purple-500 text-zinc-300 p-2 rounded-md flex items-center gap-2 mt-4">
           <GlobeAmericasIcon height={20} />
           Worlds Build
           <span className="flex-1 text-right font-mono">

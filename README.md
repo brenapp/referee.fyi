@@ -1,4 +1,4 @@
-# Referee FYI
+# [Referee FYI](https://referee.fyi)
 
 Referee FYI is a digital anomaly log for Head Referees in robotics competitions.
 Referee FYI allows you to record violations quickly, see summaries before a

@@ -2,30 +2,41 @@
   "compilerOptions": {
     "target": "ES2022",
     "useDefineForClassFields": true,
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "module": "ESNext",
     "skipLibCheck": true,
-
     "baseUrl": "./src",
-
     /* Bundler mode */
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-
     "paths": {
-      "~utils/*": ["./utils/*"],
-      "~hooks/*": ["./utils/hooks/*"],
-      "~components/*": ["./components/*"],
-      "~models/*": ["./models/*"]
+      "~utils/*": [
+        "./utils/*"
+      ],
+      "~hooks/*": [
+        "./utils/hooks/*"
+      ],
+      "~components/*": [
+        "./components/*"
+      ],
+      "~models/*": [
+        "./models/*"
+      ],
+      "~documents/*": [
+        "./documents/*"
+      ],
     }
   },
   "include": [
@@ -33,5 +44,7 @@
     "node_modules/vite-plugin-pwa/client.d.ts",
     "src/types/barcode.d.ts"
   ],
-  "exclude": ["backend/**/*"]
+  "exclude": [
+    "backend/**/*"
+  ]
 }

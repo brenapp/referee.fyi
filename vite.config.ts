@@ -4,6 +4,7 @@ import { defineConfig } from "vite";
 import { vitePluginVersionMark } from "vite-plugin-version-mark";
 import { VitePWA } from "vite-plugin-pwa";
 import tsconfigPaths from "vite-tsconfig-paths";
+import { plugin as markdown, Mode } from "vite-plugin-markdown";
 import { exec } from "node:child_process";
 
 // Generate version.json
@@ -37,6 +38,8 @@ const generateVersionJson: Plugin = {
     });
   },
 };
+
+console.log("markdown", markdown);
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -155,6 +158,9 @@ export default defineConfig({
         excludeReplayShadowDom: true,
         excludeReplayWorker: true,
       },
+    }),
+    markdown({
+      mode: [Mode.REACT],
     }),
   ],
 

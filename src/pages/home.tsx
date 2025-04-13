@@ -1,7 +1,6 @@
 import { Button, LinkButton } from "~components/Button";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Dialog, DialogHeader, DialogBody } from "~components/Dialog";
-import Markdown from "react-markdown";
 
 import { Cog8ToothIcon, UserGroupIcon } from "@heroicons/react/20/solid";
 import { useEventSearch } from "~utils/hooks/robotevents";
@@ -14,7 +13,7 @@ import { UpdatePrompt } from "~components/UpdatePrompt";
 import { useDisplayMode, useInstallPrompt } from "~utils/hooks/pwa";
 
 import AppIcon from "/icons/referee-fyi.svg?url";
-import UpdateNotes from "/updateNotes.md?url";
+import { ReactComponent as UpdateNotes } from "../../documents/updateNotes.md";
 
 import "./markdown.css";
 
@@ -115,16 +114,6 @@ function useHomeEvents() {
   return isWorldsBuild() ? worldsEvents : recentUser;
 }
 
-function useUpdateNotes() {
-  return useQuery({
-    queryKey: ["update_notes"],
-    queryFn: async () => {
-      const response = await fetch(UpdateNotes);
-      return response.text();
-    },
-  });
-}
-
 export const HomePage: React.FC = () => {
   const events = useHomeEvents();
   const { data: eventsInvitations } = useQuery({
@@ -133,15 +122,9 @@ export const HomePage: React.FC = () => {
       Promise.all(events?.map((event) => getEventInvitation(event.sku)) ?? []),
   });
 
-  const { data: markdownContent, isSuccess: isFetchedUpdateNotesSuccess } =
-    useUpdateNotes();
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
 
   useEffect(() => {
-    if (!isFetchedUpdateNotesSuccess) {
-      return;
-    }
-
     const userVersion = localStorage.getItem("version");
 
     if (userVersion && userVersion !== version) {
@@ -149,7 +132,7 @@ export const HomePage: React.FC = () => {
     }
 
     localStorage.setItem("version", version);
-  }, [isFetchedUpdateNotesSuccess]);
+  }, []);
 
   return (
     <>
@@ -201,11 +184,11 @@ export const HomePage: React.FC = () => {
           onClose={() => setUpdateDialogOpen(false)}
         />
         <DialogBody className="markdown">
-          <section className="m-4 mt-0 ">
+          <section className="m-4 mt-0">
             <p>Build Version</p>
             <ClickToCopy message={__REFEREE_FYI_VERSION__} />
+            <UpdateNotes />
           </section>
-          <Markdown className="p-4 pt-0">{markdownContent}</Markdown>
         </DialogBody>
       </Dialog>
     </>

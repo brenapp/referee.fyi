@@ -99,12 +99,11 @@ function useHomeEvents() {
   const { data: worldsEvents } = useEventSearch(
     {
       "sku[]": [
-        "RE-VRC-23-3690",
-        "RE-VRC-23-3691",
-        "RE-VEXU-23-3692",
-        "RE-VRC-23-3695",
-        "RE-VIQRC-23-3693",
-        "RE-VIQRC-23-3694",
+        "RE-V5RC-24-8909",
+        "RE-V5RC-24-8910",
+        "RE-VURC-24-8911",
+        "RE-VIQRC-24-8913",
+        "RE-VIQRC-24-8914",
       ],
     },
     { enabled: isWorldsBuild() }

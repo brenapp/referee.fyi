@@ -25,11 +25,13 @@
     "@referee-fyi/consistency": "^1.0.0",
     "@referee-fyi/pdf-export": "^1.0.0",
     "@referee-fyi/share": "^1.0.0",
+    "chanfana": "^2.8.0",
     "cloudflare": "^4.1.0",
     "iso-3166-1": "^2.1.1",
     "itty-router": "^5.0.17",
     "jspdf": "^2.5.2",
-    "robotevents": "^6.0.3"
+    "robotevents": "^6.0.3",
+    "zod": "3.24.3"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",
@@ -45,6 +47,6 @@
     "rollup-plugin-terser": "^7.0.2",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3",
-    "wrangler": "^3.111.0"
+    "wrangler": "^4.13.0"
   }
 }

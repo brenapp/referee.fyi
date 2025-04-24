@@ -18,7 +18,7 @@ const router = AutoRouter<IRequest, [Env]>({
 router
 
   // External Integration API (just requires bearer token)
-  .all("/api/integration/v1/:sku/*", integrationRouter.fetch)
+  .all("/api/integration/v1/*", integrationRouter.fetch)
 
   // Meta Routes
   .get("/api/meta/location", metaRouter.fetch)

@@ -4,8 +4,8 @@ import { response } from "../utils/request";
 import { getInstance, getInvitation, getUser } from "../utils/data";
 import { importKey, KEY_PREFIX, verifyKeySignature } from "../utils/crypto";
 import {
-  Incident,
   Invitation,
+  Incident,
   ShareInstanceMeta,
   ShareResponse,
   User,
@@ -13,6 +13,21 @@ import {
 import { generateIncidentReportPDF } from "@referee-fyi/pdf-export";
 import { getRobotEventsClient } from "../utils/robotevents";
 import { getSystemKeyMetadata } from "../utils/systemKey";
+
+import {
+  contentJson,
+  fromIttyRouter,
+  InputValidationException,
+  NotFoundException,
+  OpenAPIRoute,
+} from "chanfana";
+import { z } from "zod";
+
+export type VerifyCredentialRequest = {
+  sku: string;
+  token: string;
+  instance?: string;
+};
 
 export type VerifyCredentialResponse =
   | {
@@ -28,22 +43,14 @@ export type VerifyCredentialResponse =
     };
 
 const verifySystemToken = async (
-  request: IRequest,
+  { sku, token, instance: instanceSecret }: VerifyCredentialRequest,
   env: Env
 ): Promise<VerifyCredentialResponse> => {
-  const sku = request.params.sku;
-  const token = request.query.token;
-  const instanceSecret = request.query.instance;
-
-  if (
-    typeof token !== "string" ||
-    typeof sku !== "string" ||
-    typeof instanceSecret !== "string"
-  ) {
+  if (!instanceSecret) {
     return {
       success: false,
       reason: "bad_request",
-      details: `Must specify token and instance.`,
+      details: "Missing instance secret.",
     };
   }
 
@@ -118,20 +125,9 @@ const verifySystemToken = async (
 };
 
 const verifyBearerToken = async (
-  request: IRequest,
+  { sku, token }: VerifyCredentialRequest,
   env: Env
 ): Promise<VerifyCredentialResponse> => {
-  const sku = request.params.sku;
-  const token = request.query.token;
-
-  if (typeof token !== "string" || typeof sku !== "string") {
-    return {
-      success: false,
-      reason: "bad_request",
-      details: `Must specify bearer token and sku`,
-    };
-  }
-
   /**
    * The format of the bearer token is a pipe delimited string:
    * 1. Public key of an admin user that is responsible for the integration
@@ -202,57 +198,208 @@ const verifyBearerToken = async (
   return { success: true, user, invitation, instance };
 };
 
-const verify = async (request: IRequest, env: Env) => {
+const verify = async (
+  request: VerifyCredentialRequest,
+  env: Env
+): Promise<VerifyCredentialResponse> => {
   const system = await verifySystemToken(request, env);
 
   if (system.success) {
-    request.user = system.user;
-    request.invitation = system.invitation;
-    request.instance = system.instance;
-    return;
+    return system;
   }
 
   const bearer = await verifyBearerToken(request, env);
   if (bearer.success) {
-    request.user = bearer.user;
-    request.invitation = bearer.invitation;
-    request.instance = bearer.instance;
-    return;
+    return bearer;
   }
 
   return bearer;
 };
 
-const integrationRouter = AutoRouter<IRequest, [Env]>({
-  base: "/api/integration/v1/:sku",
-  before: [verify],
-});
+const request = {
+  params: z.object({
+    sku: z.string(),
+  }),
+  query: z.object({
+    token: z.string(),
+    instance: z.string().optional(),
+  }),
+} as const;
 
-type VerifiedRequest = IRequest & {
-  user: User;
-  invitation: Invitation;
-  instance: ShareInstanceMeta;
-};
+export class VerifyEndpoint extends OpenAPIRoute<[IRequest, Env]> {
+  schema = {
+    tags: ["v1"],
+    summary: "Verifies the bearer token can be used in this context.",
+    request,
+    responses: {
+      "200": {
+        description: "Ok",
+        ...contentJson(
+          z.object({
+            success: z.boolean(),
+          })
+        ),
+      },
+      "403": {
+        description: "Forbidden",
+        ...contentJson(
+          z.object({
+            success: z.boolean(),
+            reason: z.enum(["bad_request", "incorrect_code"]),
+            details: z.string(),
+          })
+        ),
+      },
+      ...InputValidationException.schema(),
+      ...NotFoundException.schema(),
+    },
+  };
 
-// Integration API (just requires bearer token)
-integrationRouter
-  .get("/verify", async () => {
-    return response({ success: true, data: "Valid Bearer Token" });
-  })
-  .get("/incidents.json", async (request: VerifiedRequest, env: Env) => {
-    const id = env.INCIDENTS.idFromString(request.instance.secret);
+  async handle(request: IRequest, env: Env) {
+    const {
+      params: { sku },
+      query: { token, instance },
+    } = await this.getValidatedData<typeof this.schema>();
+
+    const result = await verify(
+      {
+        sku,
+        token,
+        instance,
+      },
+      env
+    );
+
+    return result;
+  }
+}
+
+class GetIncidentJSONEndpoint extends OpenAPIRoute<[IRequest, Env]> {
+  schema = {
+    tags: ["v1"],
+    summary: "Gets all entries in the shared instance.",
+    request,
+    responses: {
+      "200": {
+        description: "Ok",
+        ...contentJson(
+          z.object({
+            success: z.boolean(),
+            data: z.array(z.object({})),
+          })
+        ),
+      },
+      ...InputValidationException.schema(),
+      ...NotFoundException.schema(),
+    },
+  };
+
+  async handle(request: IRequest, env: Env) {
+    const {
+      params: { sku },
+      query: { token, instance },
+    } = await this.getValidatedData<typeof this.schema>();
+
+    const result = await verify(
+      {
+        sku,
+        token,
+        instance,
+      },
+      env
+    );
+
+    if (!result.success) {
+      return result;
+    }
+
+    const id = env.INCIDENTS.idFromString(result.instance.secret);
     const stub = env.INCIDENTS.get(id);
     return stub.handleJSON();
-  })
-  .get("/incidents.csv", async (request: VerifiedRequest, env: Env) => {
-    const id = env.INCIDENTS.idFromString(request.instance.secret);
+  }
+}
+
+class GetIncidentCSVEndpoint extends OpenAPIRoute<[IRequest, Env]> {
+  schema = {
+    tags: ["v1"],
+    summary: "Gets all entries in the shared instance.",
+    request,
+    response: {
+      200: {
+        description: "Ok",
+        content: {
+          "text/csv": {},
+        },
+      },
+      ...InputValidationException.schema(),
+      ...NotFoundException.schema(),
+    },
+  };
+
+  async handle(request: IRequest, env: Env) {
+    const {
+      params: { sku },
+      query: { token, instance },
+    } = await this.getValidatedData<typeof this.schema>();
+
+    const result = await verify(
+      {
+        sku,
+        token,
+        instance,
+      },
+      env
+    );
+
+    if (!result.success) {
+      return result;
+    }
+
+    const id = env.INCIDENTS.idFromString(result.instance.secret);
     const stub = env.INCIDENTS.get(id);
     return stub.handleCSV();
-  })
-  .get("/incidents.pdf", async (request: VerifiedRequest, env: Env) => {
+  }
+}
+
+class GetIncidentPDFEndpoint extends OpenAPIRoute<[IRequest, Env]> {
+  schema = {
+    tags: ["v1"],
+    summary: "Gets all entries in the shared instance.",
+    request,
+    response: {
+      200: {
+        description: "Ok",
+        content: {
+          "application/pdf": {},
+        },
+      },
+      ...InputValidationException.schema(),
+      ...NotFoundException.schema(),
+    },
+  };
+
+  async handle(request: IRequest, env: Env) {
+    const {
+      params: { sku },
+      query: { token, instance },
+    } = await this.getValidatedData<typeof this.schema>();
+
+    const result = await verify(
+      {
+        sku,
+        token,
+        instance,
+      },
+      env
+    );
+
+    if (!result.success) {
+      return result;
+    }
+
     const client = getRobotEventsClient(env);
 
-    const id = env.INCIDENTS.idFromString(request.instance.secret);
+    const id = env.INCIDENTS.idFromString(result.instance.secret);
     const stub = env.INCIDENTS.get(id);
 
     const incidentResponse = await stub.handleJSON();
@@ -280,7 +427,7 @@ integrationRouter
     };
 
     const output = await generateIncidentReportPDF({
-      sku: request.params.sku,
+      sku,
       client,
       incidents: body.data,
       users: invitations.map((invitation) => invitation.user),
@@ -292,6 +439,30 @@ integrationRouter
         "Content-Type": "application/pdf",
       },
     });
-  });
+  }
+}
+
+const integrationRouter = AutoRouter<IRequest, [Env]>({});
+
+const openapi = fromIttyRouter(integrationRouter, {
+  docs_url: "/api/integration/v1/docs",
+  redoc_url: "/api/integration/v1/redoc",
+  openapi_url: "/api/integration/v1/openapi.json",
+  openapiVersion: "3.1",
+  schema: {
+    info: {
+      title: "Referee FYI Integration API",
+      description:
+        "The integration API allows external integrations read-only access to shared instances. In order for your application to access the shared instance, you'll need to obtain the integration token from an active instance. This is available to Admins in the Manage Tab.",
+      version: "1.0.0",
+    },
+    tags: [{ name: "v1", description: "Stable" }],
+  },
+});
+
+openapi.get("/api/integration/v1/:sku/verify", VerifyEndpoint);
+openapi.get("/api/integration/v1/:sku/incidents.json", GetIncidentJSONEndpoint);
+openapi.get("/api/integration/v1/:sku/incidents.csv", GetIncidentCSVEndpoint);
+openapi.get("/api/integration/v1/:sku/incidents.pdf", GetIncidentPDFEndpoint);
 
 export { integrationRouter };

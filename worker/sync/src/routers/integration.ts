@@ -236,8 +236,29 @@ type VerifiedRequest = IRequest & {
 
 // Integration API (just requires bearer token)
 integrationRouter
-  .get("/verify", async () => {
-    return response({ success: true, data: "Valid Bearer Token" });
+  .get("/verify", async (request: VerifiedRequest) => {
+    return response({
+      success: true,
+      data: {
+        valid: true,
+        user: request.user,
+        invitation: request.invitation.id,
+      },
+    });
+  })
+  .get("/users", async (request: VerifiedRequest, env: Env) => {
+    const id = env.INCIDENTS.idFromString(request.instance.secret);
+    const stub = env.INCIDENTS.get(id);
+    const invitations = await stub.getInvitationList();
+    const active = await stub.getActiveUsers();
+
+    return response({
+      success: true,
+      data: {
+        invitations,
+        active,
+      },
+    });
   })
   .get("/incidents.json", async (request: VerifiedRequest, env: Env) => {
     const id = env.INCIDENTS.idFromString(request.instance.secret);

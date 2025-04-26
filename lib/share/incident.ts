@@ -1,42 +1,53 @@
+import { z } from "zod";
 import { WithLWWConsistency } from "@referee-fyi/consistency";
 
-export type IncidentOutcome =
-  | "Minor"
-  | "Major"
-  | "Disabled"
-  | "General"
-  | "Inspection";
+export const IncidentOutcomeSchema = z.enum([
+  "Minor",
+  "Major",
+  "Disabled",
+  "General",
+  "Inspection",
+]);
 
-export type IncidentMatchHeadToHead = {
-  type: "match";
-  division: number;
-  name: string;
-  id: number;
-};
+export type IncidentOutcome = z.infer<typeof IncidentOutcomeSchema>;
 
-export type IncidentMatchSkills = {
-  type: "skills";
-  skillsType: "driver" | "programming";
-  attempt: number;
-};
+export const IncidentMatchHeadToHeadSchema = z.object({
+  type: z.literal("match"),
+  division: z.number(),
+  name: z.string(),
+  id: z.number(),
+});
+export const IncidentMatchSkillsSchema = z.object({
+  type: z.literal("skills"),
+  skillsType: z.enum(["driver", "programming"]),
+  attempt: z.number(),
+});
 
-export type IncidentMatch = IncidentMatchHeadToHead | IncidentMatchSkills;
+export const IncidentMatchSchema = z.discriminatedUnion("type", [
+  IncidentMatchHeadToHeadSchema,
+  IncidentMatchSkillsSchema,
+]);
 
-export type BaseIncident = {
-  id: string;
+export type IncidentMatchHeadToHead = z.infer<
+  typeof IncidentMatchHeadToHeadSchema
+>;
 
-  time: Date;
+export type IncidentMatchSkills = z.infer<typeof IncidentMatchSkillsSchema>;
+export type IncidentMatch = z.infer<typeof IncidentMatchSchema>;
 
-  event: string; // SKU
+export const BaseIncidentSchema = z.object({
+  id: z.string(),
+  time: z.date(),
+  event: z.string(), // SKU
+  match: IncidentMatchSchema.optional(),
+  team: z.string(), // team number
+  outcome: IncidentOutcomeSchema,
+  rules: z.array(z.string()),
+  notes: z.string(),
+  assets: z.array(z.string()),
+});
 
-  match?: IncidentMatch;
-  team: string; // team number
-
-  outcome: IncidentOutcome;
-  rules: string[];
-  notes: string;
-  assets: string[];
-};
+export type BaseIncident = z.infer<typeof BaseIncidentSchema>;
 
 export const INCIDENT_IGNORE = ["id", "time", "event", "team"] as const;
 export type IncidentUnchangeableProperties = (typeof INCIDENT_IGNORE)[number];

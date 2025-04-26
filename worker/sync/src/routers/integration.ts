@@ -3,13 +3,7 @@ import { Env } from "../types";
 import { response } from "../utils/request";
 import { getInstance, getInvitation, getUser } from "../utils/data";
 import { importKey, KEY_PREFIX, verifyKeySignature } from "../utils/crypto";
-import {
-  Invitation,
-  Incident,
-  ShareInstanceMeta,
-  ShareResponse,
-  User,
-} from "@referee-fyi/share";
+import { Invitation, ShareInstanceMeta, User } from "@referee-fyi/share";
 import { generateIncidentReportPDF } from "@referee-fyi/pdf-export";
 import { getRobotEventsClient } from "../utils/robotevents";
 import { getSystemKeyMetadata } from "../utils/systemKey";
@@ -285,7 +279,16 @@ class GetIncidentJSONEndpoint extends OpenAPIRoute<[IRequest, Env]> {
         ...contentJson(
           z.object({
             success: z.boolean(),
-            data: z.array(z.object({})),
+            data: z.object({
+              id: z.string(),
+              outcome: z.enum([
+                "Minor",
+                "Major",
+                "Disabled",
+                "General",
+                "Inspection",
+              ]),
+            }),
           })
         ),
       },
@@ -402,20 +405,7 @@ class GetIncidentPDFEndpoint extends OpenAPIRoute<[IRequest, Env]> {
     const id = env.INCIDENTS.idFromString(result.instance.secret);
     const stub = env.INCIDENTS.get(id);
 
-    const incidentResponse = await stub.handleJSON();
-
-    const body = await (incidentResponse.json() as Promise<
-      ShareResponse<Incident[]>
-    >);
-
-    if (!body.success) {
-      return response({
-        success: false,
-        reason: "bad_request",
-        details: "Could not get incidents from the sharing server.",
-      });
-    }
-
+    const incidents = await stub.getAllIncidents();
     const invitations = await stub.getInvitationList();
 
     const formatters = {
@@ -429,7 +419,7 @@ class GetIncidentPDFEndpoint extends OpenAPIRoute<[IRequest, Env]> {
     const output = await generateIncidentReportPDF({
       sku,
       client,
-      incidents: body.data,
+      incidents,
       users: invitations.map((invitation) => invitation.user),
       formatters,
     });

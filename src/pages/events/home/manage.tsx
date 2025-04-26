@@ -648,6 +648,7 @@ const IntegrationInfo: React.FC<ManageTabProps> = ({ event }) => {
           carefully!
         </em>
       </p>
+      <ClickToCopy prefix="TOKEN" message={bearerToken} className="flex-1" />
       <ClickToCopy prefix="JSON" message={json.toString()} className="flex-1" />
       <ClickToCopy prefix="CSV" message={csv.toString()} className="flex-1" />
       <ClickToCopy prefix="PDF" message={pdf.toString()} className="flex-1" />

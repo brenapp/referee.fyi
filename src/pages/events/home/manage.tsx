@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { EventData } from "robotevents";
-import { Button, IconButton, LinkButton } from "~components/Button";
+import {
+  Button,
+  ExternalLinkButton,
+  IconButton,
+  LinkButton,
+} from "~components/Button";
 import {
   acceptEventInvitation,
   fetchInvitation,
@@ -15,6 +20,7 @@ import {
 } from "~utils/data/share";
 import {
   ArrowRightIcon,
+  ArrowUpRightIcon,
   FlagIcon,
   UserCircleIcon,
   UserPlusIcon,
@@ -23,6 +29,8 @@ import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import {
   useCreateInstance,
   useEventInvitation,
+  useIntegrationAPIIncidents,
+  useIntegrationAPIUsers,
   useIntegrationBearer,
   useShareProfile,
   useSystemKeyIntegrationBearer,
@@ -40,6 +48,7 @@ import { ClickToCopy } from "~components/ClickToCopy";
 import { twMerge } from "tailwind-merge";
 import { tryPersistStorage } from "~utils/data/keyval";
 import { UpdatePrompt } from "~components/UpdatePrompt";
+import { InvitationListItem } from "@referee-fyi/share";
 
 export type ManageDialogProps = {
   open: boolean;
@@ -398,6 +407,37 @@ export const ProfilePrompt: React.FC = () => {
   );
 };
 
+export type InstanceUserListItemProps = {
+  user: InvitationListItem;
+  active: boolean;
+};
+
+export const InstanceUserListItem: React.FC<InstanceUserListItemProps> = ({
+  user,
+  active,
+}) => {
+  return (
+    <div className="flex gap-2 items-center flex-1">
+      <UserCircleIcon height={24} />
+      <p>{user.user.name}</p>
+      {user.admin ? (
+        <span className="text-xs  bg-purple-600 px-2 py-0.5 rounded-md">
+          Admin
+        </span>
+      ) : null}
+      {active ? (
+        <span className="text-xs  bg-emerald-600 px-2 py-0.5 rounded-md">
+          Connected
+        </span>
+      ) : (
+        <span className="text-xs  bg-zinc-700 px-2 py-0.5 rounded-md">
+          Offline
+        </span>
+      )}
+    </div>
+  );
+};
+
 export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
   const { name, key } = useShareProfile();
 
@@ -546,26 +586,12 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
                 key={user.user.key}
                 className="py-2 px-4 rounded-md mt-2 flex"
               >
-                <div className="flex gap-2 items-center flex-1">
-                  <UserCircleIcon height={24} />
-                  <p>{user.user.name}</p>
-                  {user.admin ? (
-                    <span className="text-xs  bg-purple-600 px-2 py-0.5 rounded-md">
-                      Admin
-                    </span>
-                  ) : null}
-                  {connection.activeUsers.find(
+                <InstanceUserListItem
+                  user={user}
+                  active={connection.activeUsers.some(
                     (u) => u.key === user.user.key
-                  ) ? (
-                    <span className="text-xs  bg-emerald-600 px-2 py-0.5 rounded-md">
-                      Connected
-                    </span>
-                  ) : (
-                    <span className="text-xs  bg-zinc-700 px-2 py-0.5 rounded-md">
-                      Offline
-                    </span>
                   )}
-                </div>
+                />
                 {invitation?.admin && !user.admin ? (
                   <IconButton
                     icon={<TrashIcon height={20} />}
@@ -664,10 +690,8 @@ const SystemKeyIntegrationInfo: React.FC<SystemKeyIntegrationInfoProps> = ({
   event,
   instance,
 }) => {
-  const { data: bearerToken } = useSystemKeyIntegrationBearer(
-    event.sku,
-    instance
-  );
+  const { data: bearerToken, isPending: isPendingSystemKeyIntegrationBearer } =
+    useSystemKeyIntegrationBearer(event.sku, instance);
 
   const { json, csv, pdf } = useMemo(() => {
     if (!bearerToken) {
@@ -679,12 +703,80 @@ const SystemKeyIntegrationInfo: React.FC<SystemKeyIntegrationInfoProps> = ({
     });
   }, [bearerToken, event.sku, instance]);
 
+  const { data: incidents, isPending: isPendingIntegrationAPIIncidents } =
+    useIntegrationAPIIncidents(
+      event.sku,
+      {
+        token: bearerToken ?? "",
+        instance,
+      },
+      { enabled: !!bearerToken }
+    );
+
+  const { data: users, isPending: isPendingIntegrationAPIUsers } =
+    useIntegrationAPIUsers(
+      event.sku,
+      {
+        token: bearerToken ?? "",
+        instance,
+      },
+      { enabled: !!bearerToken }
+    );
+
+  const isPending =
+    isPendingSystemKeyIntegrationBearer ||
+    isPendingIntegrationAPIIncidents ||
+    isPendingIntegrationAPIUsers;
+
   return (
-    <div className="mt-4">
-      <ClickToCopy prefix="INSTANCE" message={instance} className="flex-1" />
-      <ClickToCopy prefix="JSON" message={json.toString()} className="flex-1" />
-      <ClickToCopy prefix="CSV" message={csv.toString()} className="flex-1" />
-      <ClickToCopy prefix="PDF" message={pdf.toString()} className="flex-1" />
+    <div className="mt-4 bg-zinc-900 p-4 rounded-md">
+      <ClickToCopy message={instance} className="flex-1 my-0" />
+      <nav className="flex gap-2 justify-evenly mt-4">
+        <p className="text-lg">
+          <FlagIcon height={20} className="inline mr-2" />
+          <span className="text-zinc-400">
+            {incidents?.length ?? 0} entries
+          </span>
+        </p>
+        <p className="text-lg">
+          <UserCircleIcon height={20} className="inline mr-2" />
+          <span className="text-zinc-400">{users?.active.length} active</span>
+        </p>
+      </nav>
+      <Spinner show={isPending} />
+      <ul className="mt-4">
+        {users?.invitations.map((user) => (
+          <li key={user.user.key} className="py-2 px-4 rounded-md mt-2 flex">
+            <InstanceUserListItem
+              user={user}
+              active={users.active.some((u) => u.key === user.user.key)}
+            />
+          </li>
+        ))}
+      </ul>
+      <div className="flex mt-4 gap-2">
+        <ExternalLinkButton
+          href={json.toString()}
+          className="flex-1 text-center flex items-center gap-4 justify-between"
+        >
+          JSON
+          <ArrowUpRightIcon height={16} className="text-emerald-400" />
+        </ExternalLinkButton>
+        <ExternalLinkButton
+          href={csv.toString()}
+          className="flex-1 text-center flex items-center gap-4 justify-between"
+        >
+          CSV
+          <ArrowUpRightIcon height={16} className="text-emerald-400" />
+        </ExternalLinkButton>
+        <ExternalLinkButton
+          href={pdf.toString()}
+          className="flex-1 text-center flex items-center gap-4 justify-between"
+        >
+          PDF
+          <ArrowUpRightIcon height={16} className="text-emerald-400" />
+        </ExternalLinkButton>
+      </div>
     </div>
   );
 };
@@ -712,7 +804,7 @@ const SystemKeyInfo: React.FC<ManageTabProps> = ({ event }) => {
 
   return (
     <section>
-      <h2 className="mt-4 font-bold">Instance List</h2>
+      <h2 className="mt-4 font-bold">Instance List ({instances.length})</h2>
       {instances.map((instance) => (
         <SystemKeyIntegrationInfo
           key={instance}

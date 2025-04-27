@@ -20,6 +20,7 @@ import type {
   APIGetAssetUploadURLResponseBody,
   ApiGetAssetPreviewURLResponseBody,
   ApiGetAssetOriginalURLResponseBody,
+  InvitationListItem,
 } from "@referee-fyi/share";
 import { Incident } from "./incident";
 import { queryClient } from "./query";
@@ -367,9 +368,14 @@ export async function getInstancesForEvent(
   return response.json();
 }
 
+export type IntegrationAPICredentials = {
+  token: string;
+  instance?: string;
+};
+
 export function getIntegrationAPIEndpoints(
   sku: string,
-  query: { token: string; instance?: string }
+  query: IntegrationAPICredentials
 ) {
   const json = new URL(
     `/api/integration/v1/${sku}/incidents.json`,
@@ -399,6 +405,74 @@ export function getIntegrationAPIEndpoints(
   }
 
   return { json, csv, pdf };
+}
+
+export function getIntegrationAPIUsersEndpoint(
+  sku: string,
+  query: IntegrationAPICredentials
+) {
+  const url = new URL(
+    `/api/integration/v1/${sku}/users`,
+    import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER
+  );
+
+  if (query.token) {
+    url.searchParams.set("token", query.token);
+  }
+
+  if (query.instance) {
+    url.searchParams.set("instance", query.instance);
+  }
+
+  return url;
+}
+
+export type IntegrationUsersResponse = {
+  invitations: InvitationListItem[];
+  active: User[];
+};
+
+export async function getIntegrationAPIIncidents(
+  sku: string,
+  query: IntegrationAPICredentials
+) {
+  const { json: url } = getIntegrationAPIEndpoints(sku, query);
+
+  const headers = new Headers();
+
+  const id = await getShareSessionID();
+  headers.set("X-Referee-FYI-Session", id);
+
+  const response = await fetch(url, { headers });
+  const data = (await response.json()) as ShareResponse<Incident[]>;
+
+  if (!data.success) {
+    return null;
+  }
+
+  return data.data;
+}
+
+export async function getIntegrationAPIUsers(
+  sku: string,
+  query: IntegrationAPICredentials
+) {
+  const url = getIntegrationAPIUsersEndpoint(sku, query);
+
+  const headers = new Headers();
+
+  const id = await getShareSessionID();
+  headers.set("X-Referee-FYI-Session", id);
+
+  const response = await fetch(url, { headers });
+  const data =
+    (await response.json()) as ShareResponse<IntegrationUsersResponse>;
+
+  if (!data.success) {
+    return null;
+  }
+
+  return data.data;
 }
 
 export async function getAssetUploadURL(

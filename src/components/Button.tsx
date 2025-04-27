@@ -76,3 +76,23 @@ export const LinkButton: React.FC<LinkButtonProps> = (props) => {
     />
   );
 };
+
+export type ExternalLinkButtonProps =
+  React.AnchorHTMLAttributes<HTMLAnchorElement>;
+
+export const ExternalLinkButton: React.FC<ExternalLinkButtonProps> = (
+  props
+) => {
+  return (
+    <a
+      target="_blank"
+      rel="noopener"
+      {...props}
+      className={twMerge(
+        "inline-block rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2",
+        "active:bg-zinc-600 disabled:bg-zinc-300 disabled:cursor-not-allowed",
+        props.className
+      )}
+    />
+  );
+};

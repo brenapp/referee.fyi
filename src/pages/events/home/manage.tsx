@@ -44,7 +44,7 @@ import { useEventIncidents } from "~utils/hooks/incident";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { queryClient } from "~utils/data/query";
 import { ReadyState, useShareConnection } from "~models/ShareConnection";
-import { ClickToCopy } from "~components/ClickToCopy";
+import { ClickToCopy, ClickToCopyIcon } from "~components/ClickToCopy";
 import { twMerge } from "tailwind-merge";
 import { tryPersistStorage } from "~utils/data/keyval";
 import { UpdatePrompt } from "~components/UpdatePrompt";
@@ -730,7 +730,12 @@ const SystemKeyIntegrationInfo: React.FC<SystemKeyIntegrationInfoProps> = ({
 
   return (
     <div className="mt-4 bg-zinc-900 p-4 rounded-md">
-      <ClickToCopy message={instance} className="flex-1 my-0" />
+      <h1 className="font-mono flex items-center gap-2 justify-center">
+        <span className="text-ellipsis overflow-hidden text-nowrap whitespace-nowrap flex-1">
+          {instance}
+        </span>
+        <ClickToCopyIcon value={instance} className="mt-0" />
+      </h1>
       <nav className="flex gap-2 justify-evenly mt-4">
         <p className="text-lg">
           <FlagIcon height={20} className="inline mr-2" />

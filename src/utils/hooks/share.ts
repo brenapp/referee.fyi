@@ -3,9 +3,15 @@ import {
   acceptEventInvitation,
   createInstance,
   getEventInvitation,
+  getIntegrationAPIIncidents,
+  getIntegrationAPIUsers,
+  IntegrationAPICredentials,
+  IntegrationUsersResponse,
 } from "~utils/data/share";
 import { exportPublicKey, signMessage } from "~utils/data/crypto";
 import { useShareConnection } from "~models/ShareConnection";
+import { HookQueryOptions } from "./robotevents";
+import { Incident } from "@referee-fyi/share";
 
 export function useShareProfile() {
   const { profile, updateProfile: persist } = useShareConnection([
@@ -76,5 +82,30 @@ export function useSystemKeyIntegrationBearer(sku: string, instance: string) {
       const keyHex = await exportPublicKey(true);
       return [keyHex, message].join("|");
     },
+  });
+}
+export function useIntegrationAPIIncidents(
+  sku: string,
+  credentials: IntegrationAPICredentials,
+  options?: HookQueryOptions<Incident[] | null>
+) {
+  return useQuery({
+    queryKey: ["@referee-fyi/useIntegrationAPIIncidents", sku, credentials],
+    queryFn: () => getIntegrationAPIIncidents(sku, credentials),
+    enabled: !!credentials,
+    ...options,
+  });
+}
+
+export function useIntegrationAPIUsers(
+  sku: string,
+  credentials: IntegrationAPICredentials,
+  options?: HookQueryOptions<IntegrationUsersResponse | null>
+) {
+  return useQuery({
+    queryKey: ["@referee-fyi/useIntegrationAPIUsers", sku, credentials],
+    queryFn: () => getIntegrationAPIUsers(sku, credentials),
+    enabled: !!credentials,
+    ...options,
   });
 }

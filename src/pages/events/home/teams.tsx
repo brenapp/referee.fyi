@@ -134,6 +134,19 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
                 <hr className="mt-4 border-zinc-600" />
                 <Button
                   mode="normal"
+                  className="mt-4 bg-blue-600"
+                  onClick={() =>
+                    openNewIncidentDialog({
+                      team: team.number,
+                      outcome: "General",
+                    })
+                  }
+                >
+                  <FlagIcon height={20} className="inline mr-2 " />
+                  General
+                </Button>
+                <Button
+                  mode="normal"
                   className="mt-4"
                   onClick={() =>
                     openNewIncidentDialog({

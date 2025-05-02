@@ -142,7 +142,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
                     })
                   }
                 >
-                  <FlagIcon height={20} className="inline mr-2 " />
+                  <FlagIcon height={20} className="inline mr-2" />
                   General
                 </Button>
                 <Button

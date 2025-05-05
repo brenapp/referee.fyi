@@ -49,6 +49,7 @@ import { twMerge } from "tailwind-merge";
 import { tryPersistStorage } from "~utils/data/keyval";
 import { UpdatePrompt } from "~components/UpdatePrompt";
 import { InvitationListItem } from "@referee-fyi/share";
+import { isWorldsBuild, WORLDS_EVENTS } from "~utils/data/state";
 
 export type ManageDialogProps = {
   open: boolean;
@@ -610,14 +611,22 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
             Create or join a sharing instance to synchronize the anomaly log
             between devices.
           </p>
-          <Button
-            mode="primary"
-            className="mt-2"
-            disabled={!name}
-            onClick={() => onClickBeginSharing()}
-          >
-            Begin Sharing
-          </Button>
+          {isWorldsBuild() && WORLDS_EVENTS.includes(event.sku) ? (
+            <p className="mt-2">
+              New instances cannot be created for this event. Please reach out
+              to your group area supervisor to get access to the existing Worlds
+              instances.
+            </p>
+          ) : (
+            <Button
+              mode="primary"
+              className="mt-2"
+              disabled={!name}
+              onClick={() => onClickBeginSharing()}
+            >
+              Begin Sharing
+            </Button>
+          )}
           <Button
             mode="normal"
             className="mt-2"

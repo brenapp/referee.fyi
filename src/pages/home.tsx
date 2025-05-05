@@ -129,7 +129,7 @@ export const HomePage: React.FC = () => {
 
   return (
     <>
-      <div>
+      <div className="overflow-y-auto">
         <nav className="flex items-center gap-4 mt-4">
           <div className="flex-1">
             <Button

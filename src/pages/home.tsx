@@ -5,7 +5,7 @@ import { Dialog, DialogHeader, DialogBody } from "~components/Dialog";
 import { Cog8ToothIcon, UserGroupIcon } from "@heroicons/react/20/solid";
 import { useEventSearch } from "~utils/hooks/robotevents";
 import { useRecentEvents } from "~utils/hooks/history";
-import { isWorldsBuild } from "~utils/data/state";
+import { isWorldsBuild, WORLDS_EVENTS } from "~utils/data/state";
 import { useQuery } from "@tanstack/react-query";
 import { getEventInvitation } from "~utils/data/share";
 import { ClickToCopy } from "~components/ClickToCopy";
@@ -97,14 +97,7 @@ const InstallPrompt: React.FC = () => {
 function useHomeEvents() {
   const { data: worldsEvents } = useEventSearch(
     {
-      "sku[]": [
-        "RE-V5RC-24-8909",
-        "RE-V5RC-24-8910",
-        "RE-VURC-24-8911",
-        "RE-V5RC-24-8912",
-        "RE-VIQRC-24-8913",
-        "RE-VIQRC-24-8914",
-      ],
+      "sku[]": WORLDS_EVENTS,
     },
     { enabled: isWorldsBuild() }
   );

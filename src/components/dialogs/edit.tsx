@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { MatchData } from "robotevents";
-import { Button } from "~components/Button";
+import { Button, IconButton } from "~components/Button";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { Radio, RulesMultiSelect, Select, TextArea } from "~components/Input";
 import { toast } from "~components/Toast";
@@ -17,6 +17,7 @@ import { useCurrentEvent } from "~utils/hooks/state";
 import { EditHistory } from "~components/EditHistory";
 import { LWWKeys } from "@referee-fyi/consistency";
 import { AssetPreview } from "~components/Assets";
+import { TrashIcon } from "@heroicons/react/20/solid";
 
 export type EditIncidentDialogProps = {
   open: boolean;
@@ -219,6 +220,15 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
     [update]
   );
 
+  const onRemoveAsset = useCallback(
+    (assetId: string) => {
+      update({
+        assets: incident?.assets?.filter((id) => id !== assetId),
+      });
+    },
+    [incident?.assets, update]
+  );
+
   const onClickDelete = useCallback(async () => {
     if (!incident) {
       return;
@@ -410,9 +420,16 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
         <section className="mt-4">
           <p>Images</p>
           <div className="grid grid-cols-4 gap-4 mt-2">
-            {incident?.assets?.map((asset) =>
-              asset ? <AssetPreview asset={asset} /> : null
-            )}
+            {incident?.assets.map((asset) => (
+              <div className="relative" key={asset}>
+                <IconButton
+                  className="absolute top-0 right-0 p-2 rounded-none rounded-bl-md rounded-tr-md bg-red-500"
+                  icon={<TrashIcon height={16} />}
+                  onClick={() => onRemoveAsset(asset)}
+                />
+                <AssetPreview key={asset} asset={asset} />
+              </div>
+            ))}
           </div>
         </section>
       </DialogBody>

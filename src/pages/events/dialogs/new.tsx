@@ -332,6 +332,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         setIncidentField("notes", "");
         setIncidentField("rules", []);
         setIncidentField("outcome", "Minor");
+        setIncidentField("assets", []);
         addRecentRules(incident.rules);
 
         toast({ type: "info", message: "Created Entry" });

@@ -32,7 +32,7 @@ export const EventTeamAssets: React.FC<EventTeamAssetsProps> = ({
 }) => {
   const assets = useEventAssetsForTeam(sku, team);
   return (
-    <div className="grid lg:grid-cols-6 grid-cols-2 md:grid-cols-3 mt-4 gap-2">
+    <div className="grid lg:grid-cols-6 grid-cols-2 md:grid-cols-3 mt-4 gap-2 overflow-y-auto">
       {assets?.map((asset) => (asset ? <AssetPreview asset={asset} /> : null))}
     </div>
   );
@@ -70,7 +70,7 @@ export const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({
         division={division}
       />
       <Spinner show={isLoading} />
-      <ul className="flex-1 overflow-auto">
+      <ul className="flex-1 overflow-y-auto">
         {matches?.map((match) => (
           <ClickableMatch
             match={match}

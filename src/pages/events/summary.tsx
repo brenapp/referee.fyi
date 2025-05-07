@@ -146,30 +146,32 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
             </Select>
           </label>
         ) : null}
-        <label>
-          <p className="mt-4">User Created/Modified</p>
-          <fieldset>
-            {invitations.map((inv) => (
-              <Checkbox
-                key={inv.user.key}
-                label={inv.user.name}
-                labelProps={{ className: "mt-2" }}
-                bind={{
-                  value: filters.contact.has(inv.user.key),
-                  onChange: (checked) => {
-                    const newContact = new Set(filters.contact);
-                    if (checked) {
-                      newContact.add(inv.user.key);
-                    } else {
-                      newContact.delete(inv.user.key);
-                    }
-                    setFiltersField("contact", newContact);
-                  },
-                }}
-              />
-            ))}
-          </fieldset>
-        </label>
+        {invitations.length > 0 ? (
+          <label>
+            <p className="mt-4">User Created/Modified</p>
+            <fieldset>
+              {invitations.map((inv) => (
+                <Checkbox
+                  key={inv.user.key}
+                  label={inv.user.name}
+                  labelProps={{ className: "mt-2" }}
+                  bind={{
+                    value: filters.contact.has(inv.user.key),
+                    onChange: (checked) => {
+                      const newContact = new Set(filters.contact);
+                      if (checked) {
+                        newContact.add(inv.user.key);
+                      } else {
+                        newContact.delete(inv.user.key);
+                      }
+                      setFiltersField("contact", newContact);
+                    },
+                  }}
+                />
+              ))}
+            </fieldset>
+          </label>
+        ) : null}
       </DialogBody>
       <Button mode="primary" onClick={onClickApply}>
         Apply

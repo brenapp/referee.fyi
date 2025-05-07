@@ -4,7 +4,7 @@ import { Button, IconButton } from "~components/Button";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { Radio, RulesMultiSelect, Select, TextArea } from "~components/Input";
 import { toast } from "~components/Toast";
-import { IncidentMatchSkills } from "@referee-fyi/share";
+import { IncidentMatchSkills, OUTCOMES } from "@referee-fyi/share";
 import { IncidentOutcome, Incident, matchToString } from "~utils/data/incident";
 import {
   useDeleteIncident,
@@ -202,6 +202,11 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
   }, [enrichRules, incident?.rules]);
 
   const [incidentRules, setIncidentRules] = useState(initialRichRules);
+  useEffect(() => {
+    if (initialRichRules) {
+      setIncidentRules(initialRichRules);
+    }
+  }, [initialRichRules]);
 
   const onChangeIncidentRules = useCallback(
     (rules: Rule[]) => {
@@ -371,10 +376,11 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             onChange={onChangeIncidentOutcome}
             className="max-w-full w-full"
           >
-            <option value="General">General</option>
-            <option value="Minor">Minor</option>
-            <option value="Major">Major</option>
-            <option value="Disabled">Disabled</option>
+            {OUTCOMES.map((outcome) => (
+              <option key={outcome} value={outcome}>
+                {outcome}
+              </option>
+            ))}
           </Select>
         </label>
         <EditHistory

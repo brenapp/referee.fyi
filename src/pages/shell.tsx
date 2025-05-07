@@ -31,7 +31,7 @@ import { useShareConnection } from "~models/ShareConnection";
 import { useMutation } from "@tanstack/react-query";
 import { runMigrations } from "../migrations";
 import { toast } from "~components/Toast";
-import { getShareProfile } from "~utils/data/share";
+import { getEventInvitation, getShareProfile } from "~utils/data/share";
 import { useGeolocation } from "~utils/hooks/meta";
 
 function isValidSKU(sku: string) {
@@ -369,6 +369,28 @@ const ConnectionManager: React.FC = () => {
     }
     update();
   }, [updateProfile]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    document.addEventListener("visibilitychange", async () => {
+      if (!event?.sku) {
+        return;
+      }
+
+      if (document.visibilityState !== "visible") {
+        return;
+      }
+
+      const invitation = await getEventInvitation(event.sku);
+      if (invitation) {
+        toast({ message: "Reconnecting...", type: "info" });
+        connect(invitation);
+      }
+    });
+
+    return () => controller.abort();
+  }, [connect, event?.sku]);
 
   return null;
 };

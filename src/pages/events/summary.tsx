@@ -26,6 +26,7 @@ export type Filters = {
   outcomes: Record<IncidentOutcome, boolean>;
   rules: Rule[];
   division?: number;
+  contact: Set<string>;
 };
 
 const DEFAULT_FILTERS: Filters = {
@@ -37,6 +38,7 @@ const DEFAULT_FILTERS: Filters = {
     Inspection: true,
   },
   rules: [],
+  contact: new Set(),
 };
 
 const OUTCOMES: IncidentOutcome[] = [
@@ -68,6 +70,8 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
     },
     []
   );
+
+  const { invitations } = useShareConnection(["invitations"]);
 
   const onClickApply = useCallback(() => {
     setOpen(false);
@@ -142,6 +146,30 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
             </Select>
           </label>
         ) : null}
+        <label>
+          <p className="mt-4">User Created/Modified</p>
+          <fieldset>
+            {invitations.map((inv) => (
+              <Checkbox
+                key={inv.user.key}
+                label={inv.user.name}
+                labelProps={{ className: "mt-2" }}
+                bind={{
+                  value: filters.contact.has(inv.user.key),
+                  onChange: (checked) => {
+                    const newContact = new Set(filters.contact);
+                    if (checked) {
+                      newContact.add(inv.user.key);
+                    } else {
+                      newContact.delete(inv.user.key);
+                    }
+                    setFiltersField("contact", newContact);
+                  },
+                }}
+              />
+            ))}
+          </fieldset>
+        </label>
       </DialogBody>
       <Button mode="primary" onClick={onClickApply}>
         Apply
@@ -242,11 +270,32 @@ export const EventSummaryPage: React.FC = () => {
         return false;
       }
 
+      const people = new Set<string>();
+      for (const register of Object.values(incident.consistency)) {
+        people.add(register.peer);
+        for (const item of register.history) {
+          people.add(item.peer);
+        }
+      }
+
+      if (filters.contact.size > 0) {
+        let hasMatch = false;
+        for (const person of people) {
+          if (filters.contact.has(person)) {
+            hasMatch = true;
+            break;
+          }
+        }
+        if (!hasMatch) {
+          return false;
+        }
+      }
+
+      // Division Filter
       if (typeof filters.division !== "number") {
         return true;
       }
 
-      // Division Filter
       if (!incident.match) {
         return false;
       }
@@ -254,7 +303,6 @@ export const EventSummaryPage: React.FC = () => {
       if (incident.match.type !== "match") {
         return false;
       }
-
       return incident.match.division === filters.division;
     });
 

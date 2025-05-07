@@ -202,6 +202,11 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
   }, [enrichRules, incident?.rules]);
 
   const [incidentRules, setIncidentRules] = useState(initialRichRules);
+  useEffect(() => {
+    if (initialRichRules) {
+      setIncidentRules(initialRichRules);
+    }
+  }, [initialRichRules]);
 
   const onChangeIncidentRules = useCallback(
     (rules: Rule[]) => {

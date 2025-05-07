@@ -19,7 +19,7 @@ import { twMerge } from "tailwind-merge";
 import { useMutation } from "@tanstack/react-query";
 import { ReadyState, useShareConnection } from "~models/ShareConnection";
 import { useShareProfile } from "~utils/hooks/share";
-import { IncidentOutcome } from "@referee-fyi/share";
+import { IncidentOutcome, OUTCOMES } from "@referee-fyi/share";
 import { VirtualizedList } from "~components/VirtualizedList";
 
 export type Filters = {
@@ -40,14 +40,6 @@ const DEFAULT_FILTERS: Filters = {
   rules: [],
   contact: new Set(),
 };
-
-const OUTCOMES: IncidentOutcome[] = [
-  "General",
-  "Minor",
-  "Major",
-  "Inspection",
-  "Disabled",
-];
 
 type FilterDialogProps = {
   open: boolean;

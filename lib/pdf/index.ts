@@ -181,7 +181,7 @@ export async function generateIncidentReportPDF({
 
     let team = incident.team;
     if (incident.flags.includes("judge")) {
-      team = `[F-Judge] ${team}`;
+      team = `[J] ${team}`;
     }
 
     data.push({

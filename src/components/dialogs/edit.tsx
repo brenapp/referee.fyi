@@ -2,9 +2,19 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { MatchData } from "robotevents";
 import { Button, IconButton } from "~components/Button";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
-import { Radio, RulesMultiSelect, Select, TextArea } from "~components/Input";
+import {
+  Checkbox,
+  Radio,
+  RulesMultiSelect,
+  Select,
+  TextArea,
+} from "~components/Input";
 import { toast } from "~components/Toast";
-import { IncidentMatchSkills, OUTCOMES } from "@referee-fyi/share";
+import {
+  IncidentFlag,
+  IncidentMatchSkills,
+  OUTCOMES,
+} from "@referee-fyi/share";
 import { IncidentOutcome, Incident, matchToString } from "~utils/data/incident";
 import {
   useDeleteIncident,
@@ -105,6 +115,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
     rules: false,
     notes: false,
     assets: false,
+    flags: false,
   });
 
   useEffect(() => {
@@ -115,6 +126,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
         rules: false,
         notes: false,
         assets: false,
+        flags: false,
       });
     }
   }, [open]);
@@ -223,6 +235,17 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
       update({ notes: e.target.value });
     },
     [update]
+  );
+
+  const onChangeFlag = useCallback(
+    (flag: IncidentFlag, value: boolean) => {
+      update({
+        flags: value
+          ? [...(incident?.flags ?? []), flag]
+          : incident?.flags.filter((f) => f !== flag),
+      });
+    },
+    [incident?.flags, update]
   );
 
   const onRemoveAsset = useCallback(
@@ -422,6 +445,24 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
           valueKey="notes"
           dirty={dirty.notes}
           render={(value) => value}
+        />
+        <label>
+          <p className="mt-4">Flag For Review</p>
+          <Checkbox
+            label="Judging"
+            bind={{
+              value: incident?.flags.includes("judge") ?? false,
+              onChange: (value) => onChangeFlag("judge", value),
+            }}
+          />
+        </label>
+        <EditHistory
+          value={incident}
+          valueKey="flags"
+          dirty={dirty.flags}
+          render={(value) => (
+            <span className="font-mono">{value.join(" ")}</span>
+          )}
         />
         <section className="mt-4">
           <p>Images</p>

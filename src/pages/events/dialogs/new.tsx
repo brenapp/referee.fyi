@@ -6,7 +6,13 @@ import {
   useEventMatchesForTeam,
 } from "~hooks/robotevents";
 import { Rule, useRulesForEvent } from "~utils/hooks/rules";
-import { Radio, RulesMultiSelect, Select, TextArea } from "~components/Input";
+import {
+  Checkbox,
+  Radio,
+  RulesMultiSelect,
+  Select,
+  TextArea,
+} from "~components/Input";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, IconButton } from "~components/Button";
 import { MatchContext } from "~components/Context";
@@ -29,7 +35,7 @@ import { toast } from "~components/Toast";
 import { Spinner } from "~components/Spinner";
 import { MatchData, programs } from "robotevents";
 import { queryClient } from "~utils/data/query";
-import { IncidentMatchSkills } from "@referee-fyi/share";
+import { IncidentFlag, IncidentMatchSkills } from "@referee-fyi/share";
 import { AssetPicker, LocalAssetPreview } from "~components/Assets";
 import { LocalAsset } from "~utils/data/assets";
 import { CameraIcon, TrashIcon } from "@heroicons/react/20/solid";
@@ -138,6 +144,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     notes: "",
     outcome: "Minor",
     assets: [],
+    flags: [],
     ...initial,
   });
 
@@ -292,13 +299,6 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     setIncidentField("rules", rules);
   }, []);
 
-  const onChangeIncidentNotes = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setIncidentField("notes", e.target.value);
-    },
-    []
-  );
-
   const onPickAsset = useCallback(
     (asset: LocalAsset) => {
       setIncidentField("assets", [...incident.assets, asset]);
@@ -314,6 +314,27 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       );
     },
     [incident.assets]
+  );
+
+  const onChangeIncidentNotes = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setIncidentField("notes", e.target.value);
+    },
+    []
+  );
+
+  const onChangeFlag = useCallback(
+    (flag: IncidentFlag, value: boolean) => {
+      if (value) {
+        setIncidentField("flags", [...incident.flags, flag]);
+      } else {
+        setIncidentField(
+          "flags",
+          incident.flags.filter((f) => f !== flag)
+        );
+      }
+    },
+    [incident.flags]
   );
 
   const { mutateAsync: saveAssets } = useSaveAssets(incident.assets);
@@ -333,6 +354,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         setIncidentField("rules", []);
         setIncidentField("outcome", "Minor");
         setIncidentField("assets", []);
+        setIncidentField("flags", []);
         addRecentRules(incident.rules);
 
         toast({ type: "info", message: "Created Entry" });
@@ -556,6 +578,16 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             className="w-full mt-2 h-32"
             value={incident.notes}
             onChange={onChangeIncidentNotes}
+          />
+        </label>
+        <label>
+          <p className="mt-4">Flag For Review</p>
+          <Checkbox
+            label="Judging"
+            bind={{
+              value: incident.flags.includes("judge"),
+              onChange: (value) => onChangeFlag("judge", value),
+            }}
           />
         </label>
       </DialogBody>

@@ -18,6 +18,7 @@ type IncidentRow = {
   rule: string;
   contact: string;
   notes: string;
+  flags: string;
 };
 
 export function teamComparison(a: string, b: string): number {
@@ -185,6 +186,7 @@ export async function generateIncidentReportPDF({
       rule: incident.outcome + " " + incident.rules.join(", "),
       contact: contact?.name ?? "",
       notes: incident.notes,
+      flags: incident.flags.join(", "),
     });
   }
 
@@ -222,6 +224,13 @@ export async function generateIncidentReportPDF({
       prompt: "Notes",
       align: "left",
       width: 180,
+      padding: 2,
+    },
+    {
+      name: "flags",
+      prompt: "Flags",
+      align: "left",
+      width: 120,
       padding: 2,
     },
   ];

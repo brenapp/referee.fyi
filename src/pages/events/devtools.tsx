@@ -119,6 +119,7 @@ export const EventDevTools: React.FC = () => {
               time: new Date(),
               notes,
               assets: [],
+              flags: [],
             },
             peer,
             id: generateIncidentId(),

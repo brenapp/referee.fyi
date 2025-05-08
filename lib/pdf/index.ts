@@ -198,7 +198,7 @@ export async function generateIncidentReportPDF({
       name: "team",
       prompt: "Team",
       align: "left",
-      width: 60,
+      width: 80,
       padding: 2,
     },
     {
@@ -219,7 +219,7 @@ export async function generateIncidentReportPDF({
       name: "contact",
       prompt: "Contact",
       align: "left",
-      width: 120,
+      width: 100,
       padding: 2,
     },
     {

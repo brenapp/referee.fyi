@@ -283,7 +283,8 @@ export class ShareInstance extends DurableObject {
   async handleCSV() {
     const incidents = await this.getAllIncidents();
 
-    let output = "Date,Time,ID,SKU,Division,Match,Team,Outcome,Rules,Notes\n";
+    let output =
+      "Date,Time,ID,SKU,Division,Match,Team,Outcome,Rules,Notes,Flags\n";
 
     output += incidents
       .map((incident) => {
@@ -303,6 +304,7 @@ export class ShareInstance extends DurableObject {
           incident.outcome,
           incident.rules.join(" "),
           notes,
+          incident.flags.join(" "),
         ].join(",");
       })
       .join("\n");

@@ -189,7 +189,7 @@ export async function generateIncidentReportPDF({
       match: incident.match?.type === "match" ? incident.match.name : "Skills",
       rule: incident.outcome + " " + incident.rules.join(", "),
       contact: contact?.name ?? "",
-      notes: incident.notes,
+      notes: incident.notes ?? "None",
     });
   }
 

@@ -427,6 +427,26 @@ export function getIntegrationAPIUsersEndpoint(
   return url;
 }
 
+export function getIntegrationAPIDeleteIncidentEndpoint(
+  sku: string,
+  query: IntegrationAPICredentials
+) {
+  const url = new URL(
+    `/api/integration/v1/${sku}/incident`,
+    import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER
+  );
+
+  if (query.token) {
+    url.searchParams.set("token", query.token);
+  }
+
+  if (query.instance) {
+    url.searchParams.set("instance", query.instance);
+  }
+
+  return url;
+}
+
 export type IntegrationUsersResponse = {
   invitations: InvitationListItem[];
   active: User[];
@@ -467,6 +487,31 @@ export async function getIntegrationAPIUsers(
   const response = await fetch(url, { headers });
   const data =
     (await response.json()) as ShareResponse<IntegrationUsersResponse>;
+
+  if (!data.success) {
+    return null;
+  }
+
+  return data.data;
+}
+
+export async function deleteIntegrationAPIIncident(
+  sku: string,
+  incident: string,
+  query: IntegrationAPICredentials
+) {
+  const url = getIntegrationAPIDeleteIncidentEndpoint(sku, query);
+  url.searchParams.set("id", incident);
+
+  const headers = new Headers();
+
+  const id = await getShareSessionID();
+  headers.set("X-Referee-FYI-Session", id);
+
+  const response = await fetch(url, { method: "DELETE", headers });
+  const data = (await response.json()) as ShareResponse<
+    Record<string, unknown>
+  >;
 
   if (!data.success) {
     return null;

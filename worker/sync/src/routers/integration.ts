@@ -14,6 +14,8 @@ import { generateIncidentReportPDF } from "@referee-fyi/pdf-export";
 import { getRobotEventsClient } from "../utils/robotevents";
 import { getSystemKeyMetadata } from "../utils/systemKey";
 
+export type VerificationGrantType = "bearer" | "system";
+
 export type VerifyCredentialResponse =
   | {
       success: true;
@@ -209,6 +211,7 @@ const verify = async (request: IRequest, env: Env) => {
     request.user = system.user;
     request.invitation = system.invitation;
     request.instance = system.instance;
+    request.grantType = "system";
     return;
   }
 
@@ -217,6 +220,7 @@ const verify = async (request: IRequest, env: Env) => {
     request.user = bearer.user;
     request.invitation = bearer.invitation;
     request.instance = bearer.instance;
+    request.grantType = "bearer";
     return;
   }
 
@@ -232,6 +236,7 @@ type VerifiedRequest = IRequest & {
   user: User;
   invitation: Invitation;
   instance: ShareInstanceMeta;
+  grantType: VerificationGrantType;
 };
 
 // Integration API (just requires bearer token)
@@ -244,6 +249,34 @@ integrationRouter
         user: request.user,
         invitation: request.invitation.id,
       },
+    });
+  })
+  .delete("/incident", async (request: VerifiedRequest, env: Env) => {
+    const id = env.INCIDENTS.idFromString(request.instance.secret);
+    const stub = env.INCIDENTS.get(id);
+
+    const incidentId = request.query.id;
+    if (typeof incidentId !== "string") {
+      return response({
+        success: false,
+        reason: "bad_request",
+        details: "Must specify incident id.",
+      });
+    }
+
+    if (request.grantType !== "system") {
+      return response({
+        success: false,
+        reason: "incorrect_code",
+        details: "You are not authorized to perform this action.",
+      });
+    }
+
+    await stub.deleteIncident(incidentId);
+
+    return response({
+      success: true,
+      data: {},
     });
   })
   .get("/users", async (request: VerifiedRequest, env: Env) => {

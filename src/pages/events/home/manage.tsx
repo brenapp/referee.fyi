@@ -29,6 +29,7 @@ import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import {
   useCreateInstance,
   useEventInvitation,
+  useIntegrationAPIDeleteIncident,
   useIntegrationAPIIncidents,
   useIntegrationAPIUsers,
   useIntegrationBearer,
@@ -50,6 +51,7 @@ import { tryPersistStorage } from "~utils/data/keyval";
 import { UpdatePrompt } from "~components/UpdatePrompt";
 import { InvitationListItem } from "@referee-fyi/share";
 import { isWorldsBuild, WORLDS_EVENTS } from "~utils/data/state";
+import { Incident } from "~components/Incident";
 
 export type ManageDialogProps = {
   open: boolean;
@@ -702,6 +704,14 @@ const SystemKeyIntegrationInfo: React.FC<SystemKeyIntegrationInfoProps> = ({
   const { data: bearerToken, isPending: isPendingSystemKeyIntegrationBearer } =
     useSystemKeyIntegrationBearer(event.sku, instance);
 
+  const credentials = {
+    token: bearerToken ?? "",
+    instance,
+  };
+
+  const { mutate: deleteIncident, isPending: isPendingDeleteIncident } =
+    useIntegrationAPIDeleteIncident(event.sku, credentials);
+
   const { json, csv, pdf } = useMemo(() => {
     if (!bearerToken) {
       return { json: "", csv: "", pdf: "" };
@@ -713,24 +723,12 @@ const SystemKeyIntegrationInfo: React.FC<SystemKeyIntegrationInfoProps> = ({
   }, [bearerToken, event.sku, instance]);
 
   const { data: incidents, isPending: isPendingIntegrationAPIIncidents } =
-    useIntegrationAPIIncidents(
-      event.sku,
-      {
-        token: bearerToken ?? "",
-        instance,
-      },
-      { enabled: !!bearerToken }
-    );
+    useIntegrationAPIIncidents(event.sku, credentials, {
+      enabled: !!bearerToken,
+    });
 
   const { data: users, isPending: isPendingIntegrationAPIUsers } =
-    useIntegrationAPIUsers(
-      event.sku,
-      {
-        token: bearerToken ?? "",
-        instance,
-      },
-      { enabled: !!bearerToken }
-    );
+    useIntegrationAPIUsers(event.sku, credentials, { enabled: !!bearerToken });
 
   const isPending =
     isPendingSystemKeyIntegrationBearer ||
@@ -791,6 +789,27 @@ const SystemKeyIntegrationInfo: React.FC<SystemKeyIntegrationInfoProps> = ({
           <ArrowUpRightIcon height={16} className="text-emerald-400" />
         </ExternalLinkButton>
       </div>
+      <details className="mt-4 p-2">
+        <summary>
+          <span className="ml-2">{incidents?.length} Incidents</span>
+        </summary>
+        <Spinner show={isPendingDeleteIncident} />
+        {incidents?.map((incident) => (
+          <div className="flex gap-4 items-center" key={incident.id}>
+            <Incident
+              key={incident.id}
+              incident={incident}
+              readonly
+              className="flex-1"
+            />
+            <IconButton
+              icon={<TrashIcon height={20} />}
+              className="bg-transparent"
+              onClick={() => deleteIncident(incident.id)}
+            />
+          </div>
+        ))}
+      </details>
     </div>
   );
 };

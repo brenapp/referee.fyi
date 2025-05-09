@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   acceptEventInvitation,
   createInstance,
+  deleteIntegrationAPIIncident,
   getEventInvitation,
   getIntegrationAPIIncidents,
   getIntegrationAPIUsers,
@@ -107,5 +108,20 @@ export function useIntegrationAPIUsers(
     queryFn: () => getIntegrationAPIUsers(sku, credentials),
     enabled: !!credentials,
     ...options,
+  });
+}
+
+export function useIntegrationAPIDeleteIncident(
+  sku: string,
+  credentials: IntegrationAPICredentials
+) {
+  return useMutation({
+    mutationKey: [
+      "@referee-fyi/useIntegrationAPIDeleteIncident",
+      sku,
+      credentials,
+    ],
+    mutationFn: (id: string) =>
+      deleteIntegrationAPIIncident(sku, id, credentials),
   });
 }

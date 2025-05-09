@@ -304,7 +304,7 @@ export class ShareInstance extends DurableObject {
           incident.outcome,
           incident.rules.join(" "),
           notes,
-          incident.flags.join(" "),
+          incident.flags?.join(" ") ?? "",
         ].join(",");
       })
       .join("\n");

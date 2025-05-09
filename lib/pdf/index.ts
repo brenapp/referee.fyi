@@ -180,7 +180,7 @@ export async function generateIncidentReportPDF({
     );
 
     let team = incident.team;
-    if (incident.flags.includes("judge")) {
+    if (incident.flags?.includes("judge")) {
       team = `[J] ${team}`;
     }
 

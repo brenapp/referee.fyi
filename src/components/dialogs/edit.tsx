@@ -242,7 +242,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
       update({
         flags: value
           ? [...(incident?.flags ?? []), flag]
-          : incident?.flags.filter((f) => f !== flag),
+          : incident?.flags?.filter((f) => f !== flag),
       });
     },
     [incident?.flags, update]
@@ -451,7 +451,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
           <Checkbox
             label="Judging"
             bind={{
-              value: incident?.flags.includes("judge") ?? false,
+              value: incident?.flags?.includes("judge") ?? false,
               onChange: (value) => onChangeFlag("judge", value),
             }}
           />
@@ -461,7 +461,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
           valueKey="flags"
           dirty={dirty.flags}
           render={(value) => (
-            <span className="font-mono">{value.join(" ")}</span>
+            <span className="font-mono">{value?.join(" ")}</span>
           )}
         />
         <section className="mt-4">

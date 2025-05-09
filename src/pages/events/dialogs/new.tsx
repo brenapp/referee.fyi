@@ -326,12 +326,9 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   const onChangeFlag = useCallback(
     (flag: IncidentFlag, value: boolean) => {
       if (value) {
-        setIncidentField("flags", [...incident.flags, flag]);
+        setIncidentField("flags", [...(incident.flags ?? []), flag]);
       } else {
-        setIncidentField(
-          "flags",
-          incident.flags.filter((f) => f !== flag)
-        );
+        setIncidentField("flags", incident.flags?.filter((f) => f !== flag));
       }
     },
     [incident.flags]
@@ -585,7 +582,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
           <Checkbox
             label="Judging"
             bind={{
-              value: incident.flags.includes("judge"),
+              value: incident.flags?.includes("judge") ?? false,
               onChange: (value) => onChangeFlag("judge", value),
             }}
           />

@@ -17,9 +17,7 @@ import { RichIncident } from "~utils/data/incident";
 import { EventNewIncidentDialog } from "../dialogs/new";
 import { MenuButton } from "~components/MenuButton";
 import { RulesSummary } from "~components/RulesSummary";
-import { isWorldsBuild, WORLDS_EVENTS } from "~utils/data/state";
-import { Warning } from "~components/Warning";
-import { useEventInvitation } from "~utils/hooks/share";
+import { DisconnectedWarning } from "~components/DisconnectedWarning";
 
 export type EventTagProps = {
   event: EventData;
@@ -34,12 +32,6 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
   } = useDivisionTeams(event, division);
   const { data: incidents } = useEventIncidents(event.sku);
   const [filter, setFilter] = useState("");
-
-  const { data: invitation } = useEventInvitation(event.sku);
-  const isSharing = useMemo(
-    () => !!invitation && invitation.accepted,
-    [invitation]
-  );
 
   const [newIncidentDialogOpen, setNewIncidentDialogOpen] = useState(false);
   const [newIncidentDialogInitial, setNewIncidentDialogInitial] = useState<
@@ -94,9 +86,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
 
   return (
     <section className="contents">
-      {isWorldsBuild() && !isSharing && WORLDS_EVENTS.includes(event.sku) ? (
-        <Warning message="Disconnected from Shared Instance." />
-      ) : null}
+      <DisconnectedWarning />
       <IconLabel icon={<MagnifyingGlassIcon height={24} />}>
         <Input
           placeholder="Search teams..."

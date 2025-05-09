@@ -8,9 +8,7 @@ import { ClickableMatch, MatchTime } from "~components/Match";
 import { Button } from "~components/Button";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { VirtualizedList } from "~components/VirtualizedList";
-import { isWorldsBuild, WORLDS_EVENTS } from "~utils/data/state";
-import { Warning } from "~components/Warning";
-import { useEventInvitation } from "~utils/hooks/share";
+import { DisconnectedWarning } from "~components/DisconnectedWarning";
 
 export type UpcomingMatchProps = {
   event: EventData;
@@ -59,12 +57,6 @@ export const EventMatchesTab: React.FC<MatchesTabProps> = ({ event }) => {
   const division = useCurrentDivision();
   const { data: matches, isLoading } = useEventMatches(event, division);
 
-  const { data: invitation } = useEventInvitation(event.sku);
-  const isSharing = useMemo(
-    () => !!invitation && invitation.accepted,
-    [invitation]
-  );
-
   const [open, setOpen] = useState(false);
   const [matchId, setMatchId] = useState<number>(0);
 
@@ -88,9 +80,7 @@ export const EventMatchesTab: React.FC<MatchesTabProps> = ({ event }) => {
       <UpcomingMatch event={event} onClickMatch={onClickMatch} />
       <section className="contents">
         <Spinner show={isLoading} />
-        {isWorldsBuild() && !isSharing && WORLDS_EVENTS.includes(event.sku) ? (
-          <Warning message="Disconnected from Shared Instance." />
-        ) : null}
+        <DisconnectedWarning />
         <VirtualizedList
           data={matches}
           options={{ estimateSize: () => 64 }}

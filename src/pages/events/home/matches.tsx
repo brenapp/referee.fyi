@@ -8,6 +8,7 @@ import { ClickableMatch, MatchTime } from "~components/Match";
 import { Button } from "~components/Button";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { VirtualizedList } from "~components/VirtualizedList";
+import { DisconnectedWarning } from "~components/DisconnectedWarning";
 
 export type UpcomingMatchProps = {
   event: EventData;
@@ -79,6 +80,7 @@ export const EventMatchesTab: React.FC<MatchesTabProps> = ({ event }) => {
       <UpcomingMatch event={event} onClickMatch={onClickMatch} />
       <section className="contents">
         <Spinner show={isLoading} />
+        <DisconnectedWarning />
         <VirtualizedList
           data={matches}
           options={{ estimateSize: () => 64 }}

@@ -17,6 +17,7 @@ import { RichIncident } from "~utils/data/incident";
 import { EventNewIncidentDialog } from "../dialogs/new";
 import { MenuButton } from "~components/MenuButton";
 import { RulesSummary } from "~components/RulesSummary";
+import { DisconnectedWarning } from "~components/DisconnectedWarning";
 
 export type EventTagProps = {
   event: EventData;
@@ -85,6 +86,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
 
   return (
     <section className="contents">
+      <DisconnectedWarning />
       <IconLabel icon={<MagnifyingGlassIcon height={24} />}>
         <Input
           placeholder="Search teams..."

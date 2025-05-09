@@ -328,7 +328,10 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       if (value) {
         setIncidentField("flags", [...(incident.flags ?? []), flag]);
       } else {
-        setIncidentField("flags", incident.flags?.filter((f) => f !== flag));
+        setIncidentField(
+          "flags",
+          incident.flags?.filter((f) => f !== flag) ?? []
+        );
       }
     },
     [incident.flags]

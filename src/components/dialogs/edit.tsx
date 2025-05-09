@@ -242,7 +242,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
       update({
         flags: value
           ? [...(incident?.flags ?? []), flag]
-          : incident?.flags?.filter((f) => f !== flag),
+          : incident?.flags?.filter((f) => f !== flag) ?? [],
       });
     },
     [incident?.flags, update]

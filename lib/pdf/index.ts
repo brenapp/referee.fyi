@@ -179,12 +179,17 @@ export async function generateIncidentReportPDF({
       (user) => user.key === incident.consistency.outcome.peer
     );
 
+    let team = incident.team;
+    if (incident.flags.includes("judge")) {
+      team = `[J] ${team}`;
+    }
+
     data.push({
-      team: incident.team,
+      team,
       match: incident.match?.type === "match" ? incident.match.name : "Skills",
       rule: incident.outcome + " " + incident.rules.join(", "),
       contact: contact?.name ?? "",
-      notes: incident.notes,
+      notes: incident.notes ?? "None",
     });
   }
 
@@ -193,7 +198,7 @@ export async function generateIncidentReportPDF({
       name: "team",
       prompt: "Team",
       align: "left",
-      width: 60,
+      width: 80,
       padding: 2,
     },
     {
@@ -214,7 +219,7 @@ export async function generateIncidentReportPDF({
       name: "contact",
       prompt: "Contact",
       align: "left",
-      width: 120,
+      width: 100,
       padding: 2,
     },
     {

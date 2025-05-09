@@ -25,6 +25,8 @@ export type IncidentMatchSkills = {
 
 export type IncidentMatch = IncidentMatchHeadToHead | IncidentMatchSkills;
 
+export type IncidentFlag = "judge";
+
 export type BaseIncident = {
   id: string;
 
@@ -39,6 +41,7 @@ export type BaseIncident = {
   rules: string[];
   notes: string;
   assets: string[];
+  flags: IncidentFlag[];
 };
 
 export const INCIDENT_IGNORE = ["id", "time", "event", "team"] as const;

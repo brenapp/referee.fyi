@@ -6,5 +6,6 @@ import "./2024_07_24_consistency";
 import "./2024_07_28_keys";
 import "./2025_01_12_clearSG6";
 import "./2025_02_27_addAssets";
+import "./2025_05_08_addFlags";
 
 export { runMigrations } from "./utils";

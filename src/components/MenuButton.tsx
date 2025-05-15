@@ -2,6 +2,30 @@ import { useCallback, useId, useState } from "react";
 import { Button, ButtonProps } from "./Button";
 import { Dialog } from "./Dialog";
 
+export type MenuProps = React.PropsWithChildren<{
+  id: string;
+  show: boolean;
+  setShow: React.Dispatch<React.SetStateAction<boolean>>;
+}>;
+
+export const Menu: React.FC<MenuProps> = ({ id, children, show, setShow }) => (
+  <Dialog
+    mode="modal"
+    id={id}
+    open={show}
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: 10 }}
+    transition={{ duration: 0.05 }}
+    className="fixed md:max-w-full w-screen max-w-[unset] bottom-0 left-0 right-0 p-4 rounded-t-md bg-zinc-900 text-zinc-100 z-50 rounded-b-none mb-0"
+    style={{ maxHeight: "unset", height: "max-content" }}
+    onClose={() => setShow(false)}
+    onClick={() => setShow(false)}
+  >
+    {children}
+  </Dialog>
+);
+
 export type MenuButtonProps = ButtonProps & {
   menu: React.ReactNode;
 };
@@ -19,21 +43,9 @@ export const MenuButton: React.FC<MenuButtonProps> = ({ menu, ...props }) => {
 
   return (
     <div className="relative">
-      <Dialog
-        mode="modal"
-        id={id}
-        open={show}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 10 }}
-        transition={{ duration: 0.05 }}
-        className="fixed md:max-w-full w-screen max-w-[unset] bottom-0 left-0 right-0 p-4 rounded-t-md bg-zinc-900 text-zinc-100 z-50 rounded-b-none mb-0"
-        style={{ maxHeight: "unset", height: "max-content" }}
-        onClose={() => setShow(false)}
-        onClick={() => setShow(false)}
-      >
+      <Menu id={id} show={show} setShow={setShow}>
         {menu}
-      </Dialog>
+      </Menu>
       <Button
         {...props}
         aria-haspopup="menu"

@@ -56,9 +56,11 @@ export const IncidentHighlights: React.FC<IncidentHighlightProps> = ({
         <span>{firstRule}</span>
       </span>
       {incident.rules.length >= 2 ? (
-        <span>+ {incident.rules.length - 1}</span>
+        <>
+          <span>+ {incident.rules.length - 1}</span>
+          {"•"}
+        </>
       ) : null}
-      {"•"}
       <span key={`${incident.id}-outcome`}>{incident.outcome}</span>
     </>
   );

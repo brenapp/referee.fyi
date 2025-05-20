@@ -75,6 +75,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   const onClick = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
+      e.preventDefault();
       setOpen(true);
     },
     [setOpen]

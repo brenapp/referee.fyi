@@ -296,6 +296,29 @@ export const RulesSelect: React.FC<RulesSelectProps> = ({
   );
 };
 
+export type RulesDisplayProps = React.PropsWithChildren<{
+  rule: Rule;
+}> &
+  React.HTMLProps<HTMLDivElement>;
+
+export const RulesDisplay: React.FC<RulesDisplayProps> = ({
+  rule,
+  ...props
+}) => (
+  <div
+    {...props}
+    className={twMerge("p-2 w-full bg-zinc-800 rounded-md", props.className)}
+  >
+    <div className="flex items-center gap-x-1">
+      <strong className="font-mono mr-2">{rule.rule}</strong>
+      {rule.icon && (
+        <img src={rule.icon} alt={`Icon`} className="max-h-6 w-auto" />
+      )}
+    </div>
+    <span>{rule.description}</span>
+  </div>
+);
+
 export type RulesMultiSelectProps = {
   game: Game;
   value: Rule[];
@@ -367,19 +390,7 @@ export const RulesMultiSelect: React.FC<RulesMultiSelectProps> = ({
               key={rule.rule}
               className="p-2 flex w-full items-center bg-zinc-800 rounded-md"
             >
-              <div className="flex-1 mr-1">
-                <div className="flex items-center gap-x-1">
-                  <strong className="font-mono mr-2">{rule.rule}</strong>
-                  {rule.icon && (
-                    <img
-                      src={rule.icon}
-                      alt={`Icon`}
-                      className="max-h-6 w-auto"
-                    />
-                  )}
-                </div>
-                <span>{rule.description}</span>
-              </div>
+              <RulesDisplay rule={rule} className="flex-1 mr-1 p-0" />
               <IconButton
                 className="bg-transparent"
                 icon={<TrashIcon height={24} />}

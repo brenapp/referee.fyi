@@ -8,13 +8,13 @@ import {
   type WebSocketSender,
   type WebSocketServerShareInfoMessage,
   type InvitationListItem,
-  type IncidentMatch,
   type MatchScratchpad,
   type ShareInstanceMeta as ShareInstanceMeta,
   type User,
   type InstanceIncidents,
   type InstanceScratchpads,
   INCIDENT_IGNORE,
+  incidentMatchNameToString,
 } from "@referee-fyi/share";
 import { getUser } from "../utils/data";
 import { Env, EventIncidentsInitData, RequestHasInvitation } from "../types";
@@ -27,21 +27,6 @@ export type SessionClient = {
   ip: string;
   active: boolean;
 };
-
-export function matchToString(match: IncidentMatch) {
-  switch (match.type) {
-    case "match": {
-      return match.name;
-    }
-    case "skills": {
-      const display: Record<typeof match.skillsType, string> = {
-        programming: "Auto",
-        driver: "Driver",
-      };
-      return `${display[match.skillsType]} Skills ${match.attempt}`;
-    }
-  }
-}
 
 const { preflight, corsify } = cors();
 export class ShareInstance extends DurableObject {
@@ -299,7 +284,7 @@ export class ShareInstance extends DurableObject {
           incident.id,
           incident.event,
           division,
-          incident.match ? matchToString(incident.match) : "",
+          incidentMatchNameToString(incident.match),
           incident.team,
           incident.outcome,
           incident.rules.join(" "),

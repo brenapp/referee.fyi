@@ -144,63 +144,67 @@ export const IncidentMenu: React.FC<IncidentMenuProps> = ({
 
   return (
     <div {...props}>
-      <div className="flex items-center gap-x-1 justify-between">
-        {contactName ? (
-          <span className="flex items-center gap-1">
-            <UserCircleIcon height={20} />
-            <span className="inline">{contactName}</span>
+      <div className="overflow-y-auto max-h-[60vh]">
+        <div className="flex items-center gap-x-1 justify-between">
+          {contactName ? (
+            <span className="flex items-center gap-1">
+              <UserCircleIcon height={20} />
+              <span className="inline">{contactName}</span>
+            </span>
+          ) : (
+            <span></span>
+          )}
+          <span className="text-zinc-400">
+            {date.toLocaleDateString(undefined, {
+              month: "2-digit",
+              day: "2-digit",
+              year: "2-digit",
+            })}
+            {" • "}
+            {date.toLocaleTimeString(undefined, {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </span>
-        ) : (
-          <span></span>
-        )}
-        <span className="text-zinc-400">
-          {date.toLocaleDateString(undefined, {
-            month: "2-digit",
-            day: "2-digit",
-            year: "2-digit",
-          })}
+        </div>
+        <h2 className="mt-2">
+          <span className="text-emerald-400 font-mono">{incident.team}</span>
           {" • "}
-          {date.toLocaleTimeString(undefined, {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
-        </span>
-      </div>
-      <h2 className="mt-2">
-        <span className="text-emerald-400 font-mono">{incident.team}</span>
-        {" • "}
-        <span>{team?.team_name}</span>
-      </h2>
-      <div className="py-2 flex gap-x-2">
-        <span
-          className={twMerge(
-            IncidentOutcomeBackgroundClasses[incident.outcome],
-            "p-1 rounded-md px-2"
-          )}
-        >
-          {incident.outcome}
-        </span>
-        <span className="p-1 rounded-md px-2 bg-zinc-300 text-zinc-900">
-          {incident.match ? matchToString(incident.match) : "Non-Match"}
-        </span>
-      </div>
-      <div>{incident.notes}</div>
-      <div className="grid grid-cols-4 gap-4 mt-2">
-        {incident.assets.map((asset) => (
-          <AssetPreview key={asset} asset={asset} />
-        ))}
-      </div>
-      <div className="mt-4">
-        {incident.rules
-          .map((rule) => rules?.rulesLookup?.[rule])
-          .map((rule) =>
-            rule ? <RulesDisplay key={rule.rule} rule={rule} /> : null
-          )}
-      </div>
-      <div className="mt-4">
-        {incident.flags?.includes("judge") ? (
-          <Warning message="Flagged for Judging" />
-        ) : null}
+          <span>{team?.team_name}</span>
+        </h2>
+        <div className="py-2 flex gap-x-2">
+          <span
+            className={twMerge(
+              IncidentOutcomeBackgroundClasses[incident.outcome],
+              "p-1 rounded-md px-2"
+            )}
+          >
+            {incident.outcome}
+          </span>
+          <span className="p-1 rounded-md px-2 bg-zinc-300 text-zinc-900">
+            {incident.match ? matchToString(incident.match) : "Non-Match"}
+          </span>
+        </div>
+        <div>{incident.notes}</div>
+        <div className="grid grid-cols-4 gap-4 mt-2">
+          {incident.assets.map((asset) => (
+            <AssetPreview key={asset} asset={asset} />
+          ))}
+        </div>
+        <div className="mt-4">
+          {incident.rules
+            .map((rule) => rules?.rulesLookup?.[rule])
+            .map((rule) =>
+              rule ? (
+                <RulesDisplay key={rule.rule} rule={rule} className="mt-4" />
+              ) : null
+            )}
+        </div>
+        <div className="mt-4">
+          {incident.flags?.includes("judge") ? (
+            <Warning message="Flagged for Judging" />
+          ) : null}
+        </div>
       </div>
       {readonly ? null : (
         <>

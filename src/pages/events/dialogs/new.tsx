@@ -38,7 +38,11 @@ import { queryClient } from "~utils/data/query";
 import { IncidentFlag, IncidentMatchSkills } from "@referee-fyi/share";
 import { AssetPicker, LocalAssetPreview } from "~components/Assets";
 import { LocalAsset } from "~utils/data/assets";
-import { CameraIcon, TrashIcon } from "@heroicons/react/20/solid";
+import {
+  CameraIcon,
+  TrashIcon,
+  ArrowUpTrayIcon,
+} from "@heroicons/react/20/solid";
 import { useSaveAssets } from "~utils/hooks/assets";
 
 export type EventNewIncidentDialogProps = {
@@ -560,17 +564,28 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
                 <LocalAssetPreview key={asset.id} asset={asset} />
               </div>
             ))}
-            <label className="aspect-square bg-zinc-700 rounded-md flex items-center justify-center active:bg-zinc-800 focus-within:bg-zinc-800 focus-within:ring-2 ring-zinc-200 cursor-pointer">
-              <CameraIcon className="w-8 h-8 text-zinc-50" />
-              <AssetPicker
-                capture="environment"
-                accept="image/*"
-                className="sr-only"
-                fields={{ type: "image" }}
-                onPick={onPickAsset}
-              />
-            </label>
           </section>
+          <label className="bg-zinc-700 rounded-md flex gap-2 items-center justify-center active:bg-zinc-800 focus-within:bg-zinc-800 focus-within:ring-2 ring-zinc-200 cursor-pointer px-3 py-2 mt-4">
+            <CameraIcon className="w-8 h-8 text-zinc-50" />
+            <span>Capture</span>
+            <AssetPicker
+              capture="environment"
+              accept="image/*"
+              className="sr-only"
+              fields={{ type: "image" }}
+              onPick={onPickAsset}
+            />
+          </label>
+          <label className="bg-zinc-700 rounded-md flex gap-2 items-center justify-center active:bg-zinc-800 focus-within:bg-zinc-800 focus-within:ring-2 ring-zinc-200 cursor-pointer px-3 py-2 mt-4">
+            <ArrowUpTrayIcon className="w-8 h-8 text-zinc-50" />
+            <span>Upload</span>
+            <AssetPicker
+              accept="image/*"
+              className="sr-only"
+              fields={{ type: "image" }}
+              onPick={onPickAsset}
+            />
+          </label>
         </div>
         <label>
           <p className="mt-4">Notes</p>

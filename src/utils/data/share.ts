@@ -530,7 +530,7 @@ export function usePeerUserName(peer?: string) {
   const { invitations } = useShareConnection(["invitations"]);
   return useMemo(
     () =>
-      peer == profile.key
+      peer === profile.key
         ? profile.name
         : invitations.find((v) => v.user.key === peer)?.user.name,
     [invitations, peer, profile.key, profile.name]

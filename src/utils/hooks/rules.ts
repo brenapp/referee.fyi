@@ -1,31 +1,13 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
-import { EventData, ProgramAbbr, Season, Year } from "robotevents";
+import { EventData, ProgramAbbr, Season } from "robotevents";
 import { HookQueryOptions, useSeason } from "./robotevents";
 import { GAME_FETCHERS } from "~utils/data/rules";
 
-export type Rule = {
-  rule: string;
-  description: string;
-  link: string;
-  icon?: string;
-};
+import type { Game as BaseGame, Rule, RuleGroup } from "@referee-fyi/rules";
+export type { Rule, RuleGroup };
 
-export type RuleGroup = {
-  name: string;
-  programs: ProgramAbbr[];
-  rules: Rule[];
-};
-
-export type Game = {
-  title: string;
-  season: Year;
-  programs: ProgramAbbr[];
-  ruleGroups: RuleGroup[];
-  rulesLookup?: Record<string, Rule>;
-};
-
-export type Rules = {
-  games: Game[];
+export type Game = BaseGame & {
+  rulesLookup: Record<string, Rule>;
 };
 
 function createRulesLookup(ruleGroups: RuleGroup[]): Record<string, Rule> {

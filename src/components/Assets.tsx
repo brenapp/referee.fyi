@@ -71,6 +71,16 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
   ...props
 }) => {
   const [open, setOpen] = useState(false);
+
+  const onClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      setOpen(true);
+    },
+    [setOpen]
+  );
+
   return (
     <>
       <Dialog
@@ -93,7 +103,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
       </Dialog>
       <img
         className="w-full h-full object-cover aspect-square z-10 rounded-md bg-zinc-700"
-        onClick={() => setOpen(true)}
+        onClick={onClick}
         src={previewUrl}
         {...props}
       />

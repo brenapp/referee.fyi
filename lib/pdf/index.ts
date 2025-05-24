@@ -1,5 +1,10 @@
 import { CellConfig, jsPDF } from "jspdf";
-import { Incident, IncidentMatch, User } from "@referee-fyi/share";
+import {
+  Incident,
+  IncidentMatch,
+  incidentMatchNameToString,
+  User,
+} from "@referee-fyi/share";
 import { RobotEventsClient } from "robotevents";
 
 export type GenerateIncidentReportPDFOptions = {
@@ -186,7 +191,7 @@ export async function generateIncidentReportPDF({
 
     data.push({
       team,
-      match: incident.match?.type === "match" ? incident.match.name : "Skills",
+      match: incidentMatchNameToString(incident.match),
       rule: incident.outcome + " " + incident.rules.join(", "),
       contact: contact?.name ?? "",
       notes: incident.notes ?? "None",

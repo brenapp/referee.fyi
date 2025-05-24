@@ -53,3 +53,20 @@ export type Incident = WithLWWConsistency<
 >;
 
 export type EditIncident = Omit<BaseIncident, IncidentUnchangeableProperties>;
+
+export function incidentMatchNameToString(match?: IncidentMatch) {
+  if (!match) return "Non-Match";
+
+  switch (match.type) {
+    case "match": {
+      return match.name;
+    }
+    case "skills": {
+      const display: Record<typeof match.skillsType, string> = {
+        programming: "Auto",
+        driver: "Driver",
+      };
+      return `${display[match.skillsType]} Skills ${match.attempt}`;
+    }
+  }
+}

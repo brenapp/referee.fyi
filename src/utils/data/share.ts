@@ -25,6 +25,9 @@ import type {
 import { Incident } from "./incident";
 import { queryClient } from "./query";
 import { exportPublicKey, getSignRequestHeaders } from "./crypto";
+import { useShareProfile } from "~utils/hooks/share";
+import { useShareConnection } from "~models/ShareConnection";
+import { useMemo } from "react";
 
 export const URL_BASE =
   import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER ?? "https://referee.fyi/api";
@@ -565,4 +568,16 @@ export async function getAssetOriginalURL(
   const response = await signedFetch(url, { method: "GET" });
 
   return response.json();
+}
+
+export function usePeerUserName(peer?: string) {
+  const profile = useShareProfile();
+  const { invitations } = useShareConnection(["invitations"]);
+  return useMemo(
+    () =>
+      peer === profile.key
+        ? profile.name
+        : invitations.find((v) => v.user.key === peer)?.user.name,
+    [invitations, peer, profile.key, profile.name]
+  );
 }

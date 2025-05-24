@@ -4,26 +4,13 @@ import {
   KeyRegister,
   LWWKeys,
 } from "@referee-fyi/consistency";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { useShareConnection } from "~models/ShareConnection";
 import { timeAgo } from "~utils/time";
 import { Button } from "./Button";
 import { Dialog, DialogBody, DialogHeader } from "./Dialog";
 import { UserCircleIcon, ClockIcon } from "@heroicons/react/20/solid";
-import { useShareProfile } from "~utils/hooks/share";
-
-function usePeerUserName(peer?: string) {
-  const profile = useShareProfile();
-  const { invitations } = useShareConnection(["invitations"]);
-  return useMemo(
-    () =>
-      peer == profile.key
-        ? profile.name
-        : invitations.find((v) => v.user.key === peer)?.user.name,
-    [invitations, peer, profile.key, profile.name]
-  );
-}
+import { usePeerUserName } from "~utils/data/share";
 
 export type EditHistoryItemProps<
   T extends Record<string, unknown>,

@@ -1,0 +1,16 @@
+{
+  "name": "@referee-fyi/rules",
+  "type": "module",
+  "version": "1.0.0",
+  "exports": "./main.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w"
+  },
+  "author": "",
+  "description": "",
+  "dependencies": {
+    "robotevents": "^6.0.3",
+    "zod": "^3.25"
+  }
+}

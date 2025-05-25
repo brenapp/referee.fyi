@@ -1,23 +1,74 @@
+import { Hono } from "hono";
+import { scheduled } from "./scheduled";
+import { resolver } from "hono-openapi/zod";
+import { sValidator } from "@hono/standard-validator";
+import { z } from "zod/v4";
+
+const app = new Hono();
+
+//#region POST /crawl/game
+
+app.post(
+  "/crawl/game",
+  describeRoute({
+    description: "Crawl game rules",
+    responses: {
+      200: {
+        description: "Successfully crawled game rules.",
+        content: {
+          "application/json": {
+            schema: resolver(
+              z.object({
+                success: z
+                  .boolean()
+                  .meta({
+                    description: "Indicates if the crawl was successful",
+                  }),
+                message: z
+                  .string()
+                  .meta({
+                    description: "A message providing additional information",
+                  }),
+              })
+            ),
+          },
+        },
+      },
+    },
+  }),
+  sValidator(
+    "query",
+    z.object({
+      url: z.url().meta({ description: "The URL of the game rules to crawl" }),
+    })
+  ),
+  (c) => {
+    const query = c.req.valid("query");
+    return c.json({
+      success: true,
+      message: `Crawled game rules from ${query.url}`,
+    });
+  }
+);
+
+//#endregion
+
+//#region GET /openapi
+app.get(
+  "/openapi.json",
+  openAPISpecs(app, {
+    documentation: {
+      info: {
+        title: "Rules Indexer",
+        version: "1.0.0",
+        description: "Rules",
+      },
+    },
+  })
+);
+//#endregion
+
 export default {
-	async fetch(req) {
-		const url = new URL(req.url);
-		url.pathname = '/__scheduled';
-		url.searchParams.append('cron', '* * * * *');
-		return new Response(`To test the scheduled handler, ensure you have used the "--test-scheduled" then try running "curl ${url.href}".`);
-	},
-
-	// The scheduled handler is invoked at the interval set in our wrangler.jsonc's
-	// [[triggers]] configuration.
-	async scheduled(event, env, ctx): Promise<void> {
-		// A Cron Trigger can make requests to other endpoints on the Internet,
-		// publish to a Queue, query a D1 Database, and much more.
-		//
-		// We'll keep it simple and make an API call to a Cloudflare API:
-		let resp = await fetch('https://api.cloudflare.com/client/v4/ips');
-		let wasSuccessful = resp.ok ? 'success' : 'fail';
-
-		// You could store this result in KV, write to a D1 Database, or publish to a Queue.
-		// In this template, we'll just log the result:
-		console.log(`trigger fired at ${event.cron}: ${wasSuccessful}`);
-	},
+  ...app,
+  scheduled,
 } satisfies ExportedHandler<Env>;

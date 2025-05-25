@@ -1,14 +1,14 @@
 import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { AppShell } from "./pages/shell";
+import { AppShell } from "./routes/shell";
 import { Spinner } from "~components/Spinner";
 
 import "./App.css";
 
-const HomePage = React.lazy(() => import("./pages/home"));
-const SettingsPage = React.lazy(() => import("./pages/settings"));
-const EventPage = React.lazy(() => import("./pages/events"));
-const PrivacyPage = React.lazy(() => import("./pages/privacy"));
+const HomePage = React.lazy(() => import("./routes/home"));
+const SettingsPage = React.lazy(() => import("./routes/settings"));
+const EventPage = React.lazy(() => import("./routes/events"));
+const PrivacyPage = React.lazy(() => import("./routes/privacy"));
 
 function App() {
   return (

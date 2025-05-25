@@ -6,6 +6,7 @@ import { VitePWA } from "vite-plugin-pwa";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { plugin as markdown, Mode } from "vite-plugin-markdown";
 import { exec } from "node:child_process";
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 
 // Generate version.json
 import { type Plugin } from "vite";
@@ -39,11 +40,13 @@ const generateVersionJson: Plugin = {
   },
 };
 
-console.log("markdown", markdown);
-
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    TanStackRouterVite({
+      target: "react",
+      autoCodeSplitting: true,
+    }),
     react(),
     vitePluginVersionMark({
       name: "Referee FYI",

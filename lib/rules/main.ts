@@ -9,7 +9,7 @@ export const ProgramAbbrSchema = z
   });
 export const YearSchema = z.enum(years).meta({
   id: "Year",
-  description: "The programs this game applies to.",
+  description: "The season year, e.g., 2025-2026.",
 });
 
 export const RuleSchema = z.object({

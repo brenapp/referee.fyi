@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   currentSeasons,
   useCurrentSeason,
@@ -33,6 +32,12 @@ import { runMigrations } from "../migrations";
 import { toast } from "~components/Toast";
 import { getEventInvitation, getShareProfile } from "~utils/data/share";
 import { useGeolocation } from "~utils/hooks/meta";
+import {
+  createRootRoute,
+  Outlet,
+  useLocation,
+  useNavigate,
+} from "@tanstack/react-router";
 
 function isValidSKU(sku: string) {
   return !!sku.match(
@@ -446,3 +451,7 @@ export const AppShell: React.FC = () => {
     </main>
   );
 };
+
+export const Route = createRootRoute({
+  component: AppShell,
+});

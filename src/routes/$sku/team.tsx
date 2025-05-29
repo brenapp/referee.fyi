@@ -1,4 +1,3 @@
-import { useParams } from "react-router-dom";
 import { useEventMatchesForTeam, useEventTeam } from "~hooks/robotevents";
 import { Spinner } from "~components/Spinner";
 import { useCallback, useMemo, useState } from "react";

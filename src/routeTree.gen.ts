@@ -14,20 +14,20 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as SettingsImport } from './routes/settings'
 import { Route as PrivacyImport } from './routes/privacy'
 import { Route as IndexImport } from './routes/index'
-import { Route as EventsIndexImport } from './routes/events/index'
-import { Route as EventsTeamImport } from './routes/events/team'
-import { Route as EventsSummaryImport } from './routes/events/summary'
-import { Route as EventsSkillsImport } from './routes/events/skills'
-import { Route as EventsDivisionImport } from './routes/events/division'
-import { Route as EventsDevtoolsImport } from './routes/events/devtools'
-import { Route as EventsDeletedImport } from './routes/events/deleted'
-import { Route as EventsHomeIndexImport } from './routes/events/home/index'
-import { Route as EventsHomeTeamsImport } from './routes/events/home/teams'
-import { Route as EventsHomeMatchesImport } from './routes/events/home/matches'
-import { Route as EventsHomeManageImport } from './routes/events/home/manage'
-import { Route as EventsDialogsTeamImport } from './routes/events/dialogs/team'
-import { Route as EventsDialogsNewImport } from './routes/events/dialogs/new'
-import { Route as EventsDialogsMatchImport } from './routes/events/dialogs/match'
+import { Route as SkuIndexImport } from './routes/$sku/index'
+import { Route as SkuTeamImport } from './routes/$sku/team'
+import { Route as SkuSummaryImport } from './routes/$sku/summary'
+import { Route as SkuSkillsImport } from './routes/$sku/skills'
+import { Route as SkuDivisionImport } from './routes/$sku/division'
+import { Route as SkuDevtoolsImport } from './routes/$sku/devtools'
+import { Route as SkuDeletedImport } from './routes/$sku/deleted'
+import { Route as SkuHomeIndexImport } from './routes/$sku/home/index'
+import { Route as SkuHomeTeamsImport } from './routes/$sku/home/teams'
+import { Route as SkuHomeMatchesImport } from './routes/$sku/home/matches'
+import { Route as SkuHomeManageImport } from './routes/$sku/home/manage'
+import { Route as SkuDialogsTeamImport } from './routes/$sku/dialogs/team'
+import { Route as SkuDialogsNewImport } from './routes/$sku/dialogs/new'
+import { Route as SkuDialogsMatchImport } from './routes/$sku/dialogs/match'
 
 // Create/Update Routes
 
@@ -49,87 +49,87 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const EventsIndexRoute = EventsIndexImport.update({
-  id: '/events/',
-  path: '/events/',
+const SkuIndexRoute = SkuIndexImport.update({
+  id: '/$sku/',
+  path: '/$sku/',
   getParentRoute: () => rootRoute,
 } as any)
 
-const EventsTeamRoute = EventsTeamImport.update({
-  id: '/events/team',
-  path: '/events/team',
+const SkuTeamRoute = SkuTeamImport.update({
+  id: '/$sku/team',
+  path: '/$sku/team',
   getParentRoute: () => rootRoute,
 } as any)
 
-const EventsSummaryRoute = EventsSummaryImport.update({
-  id: '/events/summary',
-  path: '/events/summary',
+const SkuSummaryRoute = SkuSummaryImport.update({
+  id: '/$sku/summary',
+  path: '/$sku/summary',
   getParentRoute: () => rootRoute,
 } as any)
 
-const EventsSkillsRoute = EventsSkillsImport.update({
-  id: '/events/skills',
-  path: '/events/skills',
+const SkuSkillsRoute = SkuSkillsImport.update({
+  id: '/$sku/skills',
+  path: '/$sku/skills',
   getParentRoute: () => rootRoute,
 } as any)
 
-const EventsDivisionRoute = EventsDivisionImport.update({
-  id: '/events/division',
-  path: '/events/division',
+const SkuDivisionRoute = SkuDivisionImport.update({
+  id: '/$sku/division',
+  path: '/$sku/division',
   getParentRoute: () => rootRoute,
 } as any)
 
-const EventsDevtoolsRoute = EventsDevtoolsImport.update({
-  id: '/events/devtools',
-  path: '/events/devtools',
+const SkuDevtoolsRoute = SkuDevtoolsImport.update({
+  id: '/$sku/devtools',
+  path: '/$sku/devtools',
   getParentRoute: () => rootRoute,
 } as any)
 
-const EventsDeletedRoute = EventsDeletedImport.update({
-  id: '/events/deleted',
-  path: '/events/deleted',
+const SkuDeletedRoute = SkuDeletedImport.update({
+  id: '/$sku/deleted',
+  path: '/$sku/deleted',
   getParentRoute: () => rootRoute,
 } as any)
 
-const EventsHomeIndexRoute = EventsHomeIndexImport.update({
-  id: '/events/home/',
-  path: '/events/home/',
+const SkuHomeIndexRoute = SkuHomeIndexImport.update({
+  id: '/$sku/home/',
+  path: '/$sku/home/',
   getParentRoute: () => rootRoute,
 } as any)
 
-const EventsHomeTeamsRoute = EventsHomeTeamsImport.update({
-  id: '/events/home/teams',
-  path: '/events/home/teams',
+const SkuHomeTeamsRoute = SkuHomeTeamsImport.update({
+  id: '/$sku/home/teams',
+  path: '/$sku/home/teams',
   getParentRoute: () => rootRoute,
 } as any)
 
-const EventsHomeMatchesRoute = EventsHomeMatchesImport.update({
-  id: '/events/home/matches',
-  path: '/events/home/matches',
+const SkuHomeMatchesRoute = SkuHomeMatchesImport.update({
+  id: '/$sku/home/matches',
+  path: '/$sku/home/matches',
   getParentRoute: () => rootRoute,
 } as any)
 
-const EventsHomeManageRoute = EventsHomeManageImport.update({
-  id: '/events/home/manage',
-  path: '/events/home/manage',
+const SkuHomeManageRoute = SkuHomeManageImport.update({
+  id: '/$sku/home/manage',
+  path: '/$sku/home/manage',
   getParentRoute: () => rootRoute,
 } as any)
 
-const EventsDialogsTeamRoute = EventsDialogsTeamImport.update({
-  id: '/events/dialogs/team',
-  path: '/events/dialogs/team',
+const SkuDialogsTeamRoute = SkuDialogsTeamImport.update({
+  id: '/$sku/dialogs/team',
+  path: '/$sku/dialogs/team',
   getParentRoute: () => rootRoute,
 } as any)
 
-const EventsDialogsNewRoute = EventsDialogsNewImport.update({
-  id: '/events/dialogs/new',
-  path: '/events/dialogs/new',
+const SkuDialogsNewRoute = SkuDialogsNewImport.update({
+  id: '/$sku/dialogs/new',
+  path: '/$sku/dialogs/new',
   getParentRoute: () => rootRoute,
 } as any)
 
-const EventsDialogsMatchRoute = EventsDialogsMatchImport.update({
-  id: '/events/dialogs/match',
-  path: '/events/dialogs/match',
+const SkuDialogsMatchRoute = SkuDialogsMatchImport.update({
+  id: '/$sku/dialogs/match',
+  path: '/$sku/dialogs/match',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -158,102 +158,102 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsImport
       parentRoute: typeof rootRoute
     }
-    '/events/deleted': {
-      id: '/events/deleted'
-      path: '/events/deleted'
-      fullPath: '/events/deleted'
-      preLoaderRoute: typeof EventsDeletedImport
+    '/$sku/deleted': {
+      id: '/$sku/deleted'
+      path: '/$sku/deleted'
+      fullPath: '/$sku/deleted'
+      preLoaderRoute: typeof SkuDeletedImport
       parentRoute: typeof rootRoute
     }
-    '/events/devtools': {
-      id: '/events/devtools'
-      path: '/events/devtools'
-      fullPath: '/events/devtools'
-      preLoaderRoute: typeof EventsDevtoolsImport
+    '/$sku/devtools': {
+      id: '/$sku/devtools'
+      path: '/$sku/devtools'
+      fullPath: '/$sku/devtools'
+      preLoaderRoute: typeof SkuDevtoolsImport
       parentRoute: typeof rootRoute
     }
-    '/events/division': {
-      id: '/events/division'
-      path: '/events/division'
-      fullPath: '/events/division'
-      preLoaderRoute: typeof EventsDivisionImport
+    '/$sku/division': {
+      id: '/$sku/division'
+      path: '/$sku/division'
+      fullPath: '/$sku/division'
+      preLoaderRoute: typeof SkuDivisionImport
       parentRoute: typeof rootRoute
     }
-    '/events/skills': {
-      id: '/events/skills'
-      path: '/events/skills'
-      fullPath: '/events/skills'
-      preLoaderRoute: typeof EventsSkillsImport
+    '/$sku/skills': {
+      id: '/$sku/skills'
+      path: '/$sku/skills'
+      fullPath: '/$sku/skills'
+      preLoaderRoute: typeof SkuSkillsImport
       parentRoute: typeof rootRoute
     }
-    '/events/summary': {
-      id: '/events/summary'
-      path: '/events/summary'
-      fullPath: '/events/summary'
-      preLoaderRoute: typeof EventsSummaryImport
+    '/$sku/summary': {
+      id: '/$sku/summary'
+      path: '/$sku/summary'
+      fullPath: '/$sku/summary'
+      preLoaderRoute: typeof SkuSummaryImport
       parentRoute: typeof rootRoute
     }
-    '/events/team': {
-      id: '/events/team'
-      path: '/events/team'
-      fullPath: '/events/team'
-      preLoaderRoute: typeof EventsTeamImport
+    '/$sku/team': {
+      id: '/$sku/team'
+      path: '/$sku/team'
+      fullPath: '/$sku/team'
+      preLoaderRoute: typeof SkuTeamImport
       parentRoute: typeof rootRoute
     }
-    '/events/': {
-      id: '/events/'
-      path: '/events'
-      fullPath: '/events'
-      preLoaderRoute: typeof EventsIndexImport
+    '/$sku/': {
+      id: '/$sku/'
+      path: '/$sku'
+      fullPath: '/$sku'
+      preLoaderRoute: typeof SkuIndexImport
       parentRoute: typeof rootRoute
     }
-    '/events/dialogs/match': {
-      id: '/events/dialogs/match'
-      path: '/events/dialogs/match'
-      fullPath: '/events/dialogs/match'
-      preLoaderRoute: typeof EventsDialogsMatchImport
+    '/$sku/dialogs/match': {
+      id: '/$sku/dialogs/match'
+      path: '/$sku/dialogs/match'
+      fullPath: '/$sku/dialogs/match'
+      preLoaderRoute: typeof SkuDialogsMatchImport
       parentRoute: typeof rootRoute
     }
-    '/events/dialogs/new': {
-      id: '/events/dialogs/new'
-      path: '/events/dialogs/new'
-      fullPath: '/events/dialogs/new'
-      preLoaderRoute: typeof EventsDialogsNewImport
+    '/$sku/dialogs/new': {
+      id: '/$sku/dialogs/new'
+      path: '/$sku/dialogs/new'
+      fullPath: '/$sku/dialogs/new'
+      preLoaderRoute: typeof SkuDialogsNewImport
       parentRoute: typeof rootRoute
     }
-    '/events/dialogs/team': {
-      id: '/events/dialogs/team'
-      path: '/events/dialogs/team'
-      fullPath: '/events/dialogs/team'
-      preLoaderRoute: typeof EventsDialogsTeamImport
+    '/$sku/dialogs/team': {
+      id: '/$sku/dialogs/team'
+      path: '/$sku/dialogs/team'
+      fullPath: '/$sku/dialogs/team'
+      preLoaderRoute: typeof SkuDialogsTeamImport
       parentRoute: typeof rootRoute
     }
-    '/events/home/manage': {
-      id: '/events/home/manage'
-      path: '/events/home/manage'
-      fullPath: '/events/home/manage'
-      preLoaderRoute: typeof EventsHomeManageImport
+    '/$sku/home/manage': {
+      id: '/$sku/home/manage'
+      path: '/$sku/home/manage'
+      fullPath: '/$sku/home/manage'
+      preLoaderRoute: typeof SkuHomeManageImport
       parentRoute: typeof rootRoute
     }
-    '/events/home/matches': {
-      id: '/events/home/matches'
-      path: '/events/home/matches'
-      fullPath: '/events/home/matches'
-      preLoaderRoute: typeof EventsHomeMatchesImport
+    '/$sku/home/matches': {
+      id: '/$sku/home/matches'
+      path: '/$sku/home/matches'
+      fullPath: '/$sku/home/matches'
+      preLoaderRoute: typeof SkuHomeMatchesImport
       parentRoute: typeof rootRoute
     }
-    '/events/home/teams': {
-      id: '/events/home/teams'
-      path: '/events/home/teams'
-      fullPath: '/events/home/teams'
-      preLoaderRoute: typeof EventsHomeTeamsImport
+    '/$sku/home/teams': {
+      id: '/$sku/home/teams'
+      path: '/$sku/home/teams'
+      fullPath: '/$sku/home/teams'
+      preLoaderRoute: typeof SkuHomeTeamsImport
       parentRoute: typeof rootRoute
     }
-    '/events/home/': {
-      id: '/events/home/'
-      path: '/events/home'
-      fullPath: '/events/home'
-      preLoaderRoute: typeof EventsHomeIndexImport
+    '/$sku/home/': {
+      id: '/$sku/home/'
+      path: '/$sku/home'
+      fullPath: '/$sku/home'
+      preLoaderRoute: typeof SkuHomeIndexImport
       parentRoute: typeof rootRoute
     }
   }
@@ -265,40 +265,40 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
-  '/events/deleted': typeof EventsDeletedRoute
-  '/events/devtools': typeof EventsDevtoolsRoute
-  '/events/division': typeof EventsDivisionRoute
-  '/events/skills': typeof EventsSkillsRoute
-  '/events/summary': typeof EventsSummaryRoute
-  '/events/team': typeof EventsTeamRoute
-  '/events': typeof EventsIndexRoute
-  '/events/dialogs/match': typeof EventsDialogsMatchRoute
-  '/events/dialogs/new': typeof EventsDialogsNewRoute
-  '/events/dialogs/team': typeof EventsDialogsTeamRoute
-  '/events/home/manage': typeof EventsHomeManageRoute
-  '/events/home/matches': typeof EventsHomeMatchesRoute
-  '/events/home/teams': typeof EventsHomeTeamsRoute
-  '/events/home': typeof EventsHomeIndexRoute
+  '/$sku/deleted': typeof SkuDeletedRoute
+  '/$sku/devtools': typeof SkuDevtoolsRoute
+  '/$sku/division': typeof SkuDivisionRoute
+  '/$sku/skills': typeof SkuSkillsRoute
+  '/$sku/summary': typeof SkuSummaryRoute
+  '/$sku/team': typeof SkuTeamRoute
+  '/$sku': typeof SkuIndexRoute
+  '/$sku/dialogs/match': typeof SkuDialogsMatchRoute
+  '/$sku/dialogs/new': typeof SkuDialogsNewRoute
+  '/$sku/dialogs/team': typeof SkuDialogsTeamRoute
+  '/$sku/home/manage': typeof SkuHomeManageRoute
+  '/$sku/home/matches': typeof SkuHomeMatchesRoute
+  '/$sku/home/teams': typeof SkuHomeTeamsRoute
+  '/$sku/home': typeof SkuHomeIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
-  '/events/deleted': typeof EventsDeletedRoute
-  '/events/devtools': typeof EventsDevtoolsRoute
-  '/events/division': typeof EventsDivisionRoute
-  '/events/skills': typeof EventsSkillsRoute
-  '/events/summary': typeof EventsSummaryRoute
-  '/events/team': typeof EventsTeamRoute
-  '/events': typeof EventsIndexRoute
-  '/events/dialogs/match': typeof EventsDialogsMatchRoute
-  '/events/dialogs/new': typeof EventsDialogsNewRoute
-  '/events/dialogs/team': typeof EventsDialogsTeamRoute
-  '/events/home/manage': typeof EventsHomeManageRoute
-  '/events/home/matches': typeof EventsHomeMatchesRoute
-  '/events/home/teams': typeof EventsHomeTeamsRoute
-  '/events/home': typeof EventsHomeIndexRoute
+  '/$sku/deleted': typeof SkuDeletedRoute
+  '/$sku/devtools': typeof SkuDevtoolsRoute
+  '/$sku/division': typeof SkuDivisionRoute
+  '/$sku/skills': typeof SkuSkillsRoute
+  '/$sku/summary': typeof SkuSummaryRoute
+  '/$sku/team': typeof SkuTeamRoute
+  '/$sku': typeof SkuIndexRoute
+  '/$sku/dialogs/match': typeof SkuDialogsMatchRoute
+  '/$sku/dialogs/new': typeof SkuDialogsNewRoute
+  '/$sku/dialogs/team': typeof SkuDialogsTeamRoute
+  '/$sku/home/manage': typeof SkuHomeManageRoute
+  '/$sku/home/matches': typeof SkuHomeMatchesRoute
+  '/$sku/home/teams': typeof SkuHomeTeamsRoute
+  '/$sku/home': typeof SkuHomeIndexRoute
 }
 
 export interface FileRoutesById {
@@ -306,20 +306,20 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
-  '/events/deleted': typeof EventsDeletedRoute
-  '/events/devtools': typeof EventsDevtoolsRoute
-  '/events/division': typeof EventsDivisionRoute
-  '/events/skills': typeof EventsSkillsRoute
-  '/events/summary': typeof EventsSummaryRoute
-  '/events/team': typeof EventsTeamRoute
-  '/events/': typeof EventsIndexRoute
-  '/events/dialogs/match': typeof EventsDialogsMatchRoute
-  '/events/dialogs/new': typeof EventsDialogsNewRoute
-  '/events/dialogs/team': typeof EventsDialogsTeamRoute
-  '/events/home/manage': typeof EventsHomeManageRoute
-  '/events/home/matches': typeof EventsHomeMatchesRoute
-  '/events/home/teams': typeof EventsHomeTeamsRoute
-  '/events/home/': typeof EventsHomeIndexRoute
+  '/$sku/deleted': typeof SkuDeletedRoute
+  '/$sku/devtools': typeof SkuDevtoolsRoute
+  '/$sku/division': typeof SkuDivisionRoute
+  '/$sku/skills': typeof SkuSkillsRoute
+  '/$sku/summary': typeof SkuSummaryRoute
+  '/$sku/team': typeof SkuTeamRoute
+  '/$sku/': typeof SkuIndexRoute
+  '/$sku/dialogs/match': typeof SkuDialogsMatchRoute
+  '/$sku/dialogs/new': typeof SkuDialogsNewRoute
+  '/$sku/dialogs/team': typeof SkuDialogsTeamRoute
+  '/$sku/home/manage': typeof SkuHomeManageRoute
+  '/$sku/home/matches': typeof SkuHomeMatchesRoute
+  '/$sku/home/teams': typeof SkuHomeTeamsRoute
+  '/$sku/home/': typeof SkuHomeIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -328,58 +328,58 @@ export interface FileRouteTypes {
     | '/'
     | '/privacy'
     | '/settings'
-    | '/events/deleted'
-    | '/events/devtools'
-    | '/events/division'
-    | '/events/skills'
-    | '/events/summary'
-    | '/events/team'
-    | '/events'
-    | '/events/dialogs/match'
-    | '/events/dialogs/new'
-    | '/events/dialogs/team'
-    | '/events/home/manage'
-    | '/events/home/matches'
-    | '/events/home/teams'
-    | '/events/home'
+    | '/$sku/deleted'
+    | '/$sku/devtools'
+    | '/$sku/division'
+    | '/$sku/skills'
+    | '/$sku/summary'
+    | '/$sku/team'
+    | '/$sku'
+    | '/$sku/dialogs/match'
+    | '/$sku/dialogs/new'
+    | '/$sku/dialogs/team'
+    | '/$sku/home/manage'
+    | '/$sku/home/matches'
+    | '/$sku/home/teams'
+    | '/$sku/home'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/privacy'
     | '/settings'
-    | '/events/deleted'
-    | '/events/devtools'
-    | '/events/division'
-    | '/events/skills'
-    | '/events/summary'
-    | '/events/team'
-    | '/events'
-    | '/events/dialogs/match'
-    | '/events/dialogs/new'
-    | '/events/dialogs/team'
-    | '/events/home/manage'
-    | '/events/home/matches'
-    | '/events/home/teams'
-    | '/events/home'
+    | '/$sku/deleted'
+    | '/$sku/devtools'
+    | '/$sku/division'
+    | '/$sku/skills'
+    | '/$sku/summary'
+    | '/$sku/team'
+    | '/$sku'
+    | '/$sku/dialogs/match'
+    | '/$sku/dialogs/new'
+    | '/$sku/dialogs/team'
+    | '/$sku/home/manage'
+    | '/$sku/home/matches'
+    | '/$sku/home/teams'
+    | '/$sku/home'
   id:
     | '__root__'
     | '/'
     | '/privacy'
     | '/settings'
-    | '/events/deleted'
-    | '/events/devtools'
-    | '/events/division'
-    | '/events/skills'
-    | '/events/summary'
-    | '/events/team'
-    | '/events/'
-    | '/events/dialogs/match'
-    | '/events/dialogs/new'
-    | '/events/dialogs/team'
-    | '/events/home/manage'
-    | '/events/home/matches'
-    | '/events/home/teams'
-    | '/events/home/'
+    | '/$sku/deleted'
+    | '/$sku/devtools'
+    | '/$sku/division'
+    | '/$sku/skills'
+    | '/$sku/summary'
+    | '/$sku/team'
+    | '/$sku/'
+    | '/$sku/dialogs/match'
+    | '/$sku/dialogs/new'
+    | '/$sku/dialogs/team'
+    | '/$sku/home/manage'
+    | '/$sku/home/matches'
+    | '/$sku/home/teams'
+    | '/$sku/home/'
   fileRoutesById: FileRoutesById
 }
 
@@ -387,40 +387,40 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PrivacyRoute: typeof PrivacyRoute
   SettingsRoute: typeof SettingsRoute
-  EventsDeletedRoute: typeof EventsDeletedRoute
-  EventsDevtoolsRoute: typeof EventsDevtoolsRoute
-  EventsDivisionRoute: typeof EventsDivisionRoute
-  EventsSkillsRoute: typeof EventsSkillsRoute
-  EventsSummaryRoute: typeof EventsSummaryRoute
-  EventsTeamRoute: typeof EventsTeamRoute
-  EventsIndexRoute: typeof EventsIndexRoute
-  EventsDialogsMatchRoute: typeof EventsDialogsMatchRoute
-  EventsDialogsNewRoute: typeof EventsDialogsNewRoute
-  EventsDialogsTeamRoute: typeof EventsDialogsTeamRoute
-  EventsHomeManageRoute: typeof EventsHomeManageRoute
-  EventsHomeMatchesRoute: typeof EventsHomeMatchesRoute
-  EventsHomeTeamsRoute: typeof EventsHomeTeamsRoute
-  EventsHomeIndexRoute: typeof EventsHomeIndexRoute
+  SkuDeletedRoute: typeof SkuDeletedRoute
+  SkuDevtoolsRoute: typeof SkuDevtoolsRoute
+  SkuDivisionRoute: typeof SkuDivisionRoute
+  SkuSkillsRoute: typeof SkuSkillsRoute
+  SkuSummaryRoute: typeof SkuSummaryRoute
+  SkuTeamRoute: typeof SkuTeamRoute
+  SkuIndexRoute: typeof SkuIndexRoute
+  SkuDialogsMatchRoute: typeof SkuDialogsMatchRoute
+  SkuDialogsNewRoute: typeof SkuDialogsNewRoute
+  SkuDialogsTeamRoute: typeof SkuDialogsTeamRoute
+  SkuHomeManageRoute: typeof SkuHomeManageRoute
+  SkuHomeMatchesRoute: typeof SkuHomeMatchesRoute
+  SkuHomeTeamsRoute: typeof SkuHomeTeamsRoute
+  SkuHomeIndexRoute: typeof SkuHomeIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PrivacyRoute: PrivacyRoute,
   SettingsRoute: SettingsRoute,
-  EventsDeletedRoute: EventsDeletedRoute,
-  EventsDevtoolsRoute: EventsDevtoolsRoute,
-  EventsDivisionRoute: EventsDivisionRoute,
-  EventsSkillsRoute: EventsSkillsRoute,
-  EventsSummaryRoute: EventsSummaryRoute,
-  EventsTeamRoute: EventsTeamRoute,
-  EventsIndexRoute: EventsIndexRoute,
-  EventsDialogsMatchRoute: EventsDialogsMatchRoute,
-  EventsDialogsNewRoute: EventsDialogsNewRoute,
-  EventsDialogsTeamRoute: EventsDialogsTeamRoute,
-  EventsHomeManageRoute: EventsHomeManageRoute,
-  EventsHomeMatchesRoute: EventsHomeMatchesRoute,
-  EventsHomeTeamsRoute: EventsHomeTeamsRoute,
-  EventsHomeIndexRoute: EventsHomeIndexRoute,
+  SkuDeletedRoute: SkuDeletedRoute,
+  SkuDevtoolsRoute: SkuDevtoolsRoute,
+  SkuDivisionRoute: SkuDivisionRoute,
+  SkuSkillsRoute: SkuSkillsRoute,
+  SkuSummaryRoute: SkuSummaryRoute,
+  SkuTeamRoute: SkuTeamRoute,
+  SkuIndexRoute: SkuIndexRoute,
+  SkuDialogsMatchRoute: SkuDialogsMatchRoute,
+  SkuDialogsNewRoute: SkuDialogsNewRoute,
+  SkuDialogsTeamRoute: SkuDialogsTeamRoute,
+  SkuHomeManageRoute: SkuHomeManageRoute,
+  SkuHomeMatchesRoute: SkuHomeMatchesRoute,
+  SkuHomeTeamsRoute: SkuHomeTeamsRoute,
+  SkuHomeIndexRoute: SkuHomeIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -436,20 +436,20 @@ export const routeTree = rootRoute
         "/",
         "/privacy",
         "/settings",
-        "/events/deleted",
-        "/events/devtools",
-        "/events/division",
-        "/events/skills",
-        "/events/summary",
-        "/events/team",
-        "/events/",
-        "/events/dialogs/match",
-        "/events/dialogs/new",
-        "/events/dialogs/team",
-        "/events/home/manage",
-        "/events/home/matches",
-        "/events/home/teams",
-        "/events/home/"
+        "/$sku/deleted",
+        "/$sku/devtools",
+        "/$sku/division",
+        "/$sku/skills",
+        "/$sku/summary",
+        "/$sku/team",
+        "/$sku/",
+        "/$sku/dialogs/match",
+        "/$sku/dialogs/new",
+        "/$sku/dialogs/team",
+        "/$sku/home/manage",
+        "/$sku/home/matches",
+        "/$sku/home/teams",
+        "/$sku/home/"
       ]
     },
     "/": {
@@ -461,47 +461,47 @@ export const routeTree = rootRoute
     "/settings": {
       "filePath": "settings.tsx"
     },
-    "/events/deleted": {
-      "filePath": "events/deleted.tsx"
+    "/$sku/deleted": {
+      "filePath": "$sku/deleted.tsx"
     },
-    "/events/devtools": {
-      "filePath": "events/devtools.tsx"
+    "/$sku/devtools": {
+      "filePath": "$sku/devtools.tsx"
     },
-    "/events/division": {
-      "filePath": "events/division.tsx"
+    "/$sku/division": {
+      "filePath": "$sku/division.tsx"
     },
-    "/events/skills": {
-      "filePath": "events/skills.tsx"
+    "/$sku/skills": {
+      "filePath": "$sku/skills.tsx"
     },
-    "/events/summary": {
-      "filePath": "events/summary.tsx"
+    "/$sku/summary": {
+      "filePath": "$sku/summary.tsx"
     },
-    "/events/team": {
-      "filePath": "events/team.tsx"
+    "/$sku/team": {
+      "filePath": "$sku/team.tsx"
     },
-    "/events/": {
-      "filePath": "events/index.tsx"
+    "/$sku/": {
+      "filePath": "$sku/index.tsx"
     },
-    "/events/dialogs/match": {
-      "filePath": "events/dialogs/match.tsx"
+    "/$sku/dialogs/match": {
+      "filePath": "$sku/dialogs/match.tsx"
     },
-    "/events/dialogs/new": {
-      "filePath": "events/dialogs/new.tsx"
+    "/$sku/dialogs/new": {
+      "filePath": "$sku/dialogs/new.tsx"
     },
-    "/events/dialogs/team": {
-      "filePath": "events/dialogs/team.tsx"
+    "/$sku/dialogs/team": {
+      "filePath": "$sku/dialogs/team.tsx"
     },
-    "/events/home/manage": {
-      "filePath": "events/home/manage.tsx"
+    "/$sku/home/manage": {
+      "filePath": "$sku/home/manage.tsx"
     },
-    "/events/home/matches": {
-      "filePath": "events/home/matches.tsx"
+    "/$sku/home/matches": {
+      "filePath": "$sku/home/matches.tsx"
     },
-    "/events/home/teams": {
-      "filePath": "events/home/teams.tsx"
+    "/$sku/home/teams": {
+      "filePath": "$sku/home/teams.tsx"
     },
-    "/events/home/": {
-      "filePath": "events/home/index.tsx"
+    "/$sku/home/": {
+      "filePath": "$sku/home/index.tsx"
     }
   }
 }

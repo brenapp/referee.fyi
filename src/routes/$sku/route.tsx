@@ -1,9 +1,9 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { queryClient } from "~utils/data/query";
 import { getUseEventQueryParams } from "~utils/hooks/robotevents";
 
 const RouteComponent: React.FC = () => {
-  return <div>Hello "/$sku"!</div>;
+  return <Outlet />;
 };
 
 export const Route = createFileRoute("/$sku")({

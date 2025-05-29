@@ -6,9 +6,13 @@ import { VitePWA } from "vite-plugin-pwa";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { plugin as markdown, Mode } from "vite-plugin-markdown";
 import { exec } from "node:child_process";
+import { z } from "zod/v4";
 
-// Generate version.json
+import { GameSchema } from "@referee-fyi/rules";
+
 import { type Plugin } from "vite";
+
+//#region Generate version.json
 
 const execCommand = (command: string) => {
   return new Promise<string>((resolve, reject) => {
@@ -38,8 +42,37 @@ const generateVersionJson: Plugin = {
     });
   },
 };
+//#endregion
 
-console.log("markdown", markdown);
+//#region JSON Schema Generation
+
+type SchemaGeneration = {
+  fileName: string;
+  schema: z.core.$ZodType;
+};
+
+const generateJsonSchema: (schemas: SchemaGeneration[]) => Plugin = (
+  schemas
+) => ({
+  name: "generate-json-schema",
+  apply: "build",
+  async buildStart() {
+    for (const generation of schemas) {
+      const output = z.toJSONSchema(generation.schema, {
+        cycles: "ref",
+        reused: "ref",
+      });
+
+      this.emitFile({
+        type: "asset",
+        fileName: generation.fileName,
+        source: JSON.stringify(output, null, 2),
+      });
+    }
+  },
+});
+
+//#endregion
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -51,6 +84,12 @@ export default defineConfig({
       version: `${process.env.CF_PAGES_COMMIT_SHA}`,
     }),
     generateVersionJson,
+    generateJsonSchema([
+      {
+        schema: GameSchema,
+        fileName: "rules/schema.json",
+      },
+    ]),
     tsconfigPaths({}),
     VitePWA({
       registerType: "autoUpdate",

@@ -17,6 +17,7 @@ import { Spinner } from "~components/Spinner";
 const router = createRouter({
   routeTree,
   defaultPendingComponent: () => <Spinner show />,
+  defaultViewTransition: true,
 });
 
 declare module "@tanstack/react-router" {

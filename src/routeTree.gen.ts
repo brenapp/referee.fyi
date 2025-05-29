@@ -13,7 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as SettingsImport } from './routes/settings'
 import { Route as PrivacyImport } from './routes/privacy'
-import { Route as HomeImport } from './routes/home'
+import { Route as IndexImport } from './routes/index'
 import { Route as EventsIndexImport } from './routes/events/index'
 import { Route as EventsTeamImport } from './routes/events/team'
 import { Route as EventsSummaryImport } from './routes/events/summary'
@@ -43,9 +43,9 @@ const PrivacyRoute = PrivacyImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const HomeRoute = HomeImport.update({
-  id: '/home',
-  path: '/home',
+const IndexRoute = IndexImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -137,11 +137,11 @@ const EventsDialogsMatchRoute = EventsDialogsMatchImport.update({
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/home': {
-      id: '/home'
-      path: '/home'
-      fullPath: '/home'
-      preLoaderRoute: typeof HomeImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
     '/privacy': {
@@ -262,7 +262,7 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
-  '/home': typeof HomeRoute
+  '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/events/deleted': typeof EventsDeletedRoute
@@ -282,7 +282,7 @@ export interface FileRoutesByFullPath {
 }
 
 export interface FileRoutesByTo {
-  '/home': typeof HomeRoute
+  '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/events/deleted': typeof EventsDeletedRoute
@@ -303,7 +303,7 @@ export interface FileRoutesByTo {
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/home': typeof HomeRoute
+  '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/events/deleted': typeof EventsDeletedRoute
@@ -325,7 +325,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/home'
+    | '/'
     | '/privacy'
     | '/settings'
     | '/events/deleted'
@@ -344,7 +344,7 @@ export interface FileRouteTypes {
     | '/events/home'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/home'
+    | '/'
     | '/privacy'
     | '/settings'
     | '/events/deleted'
@@ -363,7 +363,7 @@ export interface FileRouteTypes {
     | '/events/home'
   id:
     | '__root__'
-    | '/home'
+    | '/'
     | '/privacy'
     | '/settings'
     | '/events/deleted'
@@ -384,7 +384,7 @@ export interface FileRouteTypes {
 }
 
 export interface RootRouteChildren {
-  HomeRoute: typeof HomeRoute
+  IndexRoute: typeof IndexRoute
   PrivacyRoute: typeof PrivacyRoute
   SettingsRoute: typeof SettingsRoute
   EventsDeletedRoute: typeof EventsDeletedRoute
@@ -404,7 +404,7 @@ export interface RootRouteChildren {
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  HomeRoute: HomeRoute,
+  IndexRoute: IndexRoute,
   PrivacyRoute: PrivacyRoute,
   SettingsRoute: SettingsRoute,
   EventsDeletedRoute: EventsDeletedRoute,
@@ -433,7 +433,7 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/home",
+        "/",
         "/privacy",
         "/settings",
         "/events/deleted",
@@ -452,8 +452,8 @@ export const routeTree = rootRoute
         "/events/home/"
       ]
     },
-    "/home": {
-      "filePath": "home.tsx"
+    "/": {
+      "filePath": "index.tsx"
     },
     "/privacy": {
       "filePath": "privacy.tsx"

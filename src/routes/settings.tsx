@@ -1,4 +1,5 @@
 import { ArrowRightIcon, GlobeAmericasIcon } from "@heroicons/react/20/solid";
+import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
 import { Button, LinkButton } from "~components/Button";
 import { ClickToCopy } from "~components/ClickToCopy";
@@ -87,4 +88,6 @@ export const SettingsPage: React.FC = () => {
   );
 };
 
-export default SettingsPage;
+export const Route = createFileRoute("/settings")({
+  component: SettingsPage,
+});

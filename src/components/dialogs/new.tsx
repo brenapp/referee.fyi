@@ -16,7 +16,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button, IconButton } from "~components/Button";
 import { MatchContext } from "~components/Context";
-import { useCurrentDivision, useCurrentEvent, useSKU } from "~hooks/state";
+import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
 import {
   IncidentOutcome,
   RichIncident,
@@ -44,6 +44,7 @@ import {
   ArrowUpTrayIcon,
 } from "@heroicons/react/20/solid";
 import { useSaveAssets } from "~utils/hooks/assets";
+import { useParams } from "@tanstack/react-router";
 
 export type EventNewIncidentDialogProps = {
   open: boolean;
@@ -58,7 +59,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 }) => {
   const { mutateAsync: createIncident } = useNewIncident();
 
-  const sku = useSKU();
+  const { sku } = useParams({ strict: false });
   const { data: event, isLoading: isLoadingEvent } = useCurrentEvent();
   const division = useCurrentDivision();
 
@@ -388,7 +389,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         <label>
           <p className="mt-4">Match</p>
           <Select
-            value={incident.skills ? 0 : incident.match?.id ?? -1}
+            value={incident.skills ? 0 : (incident.match?.id ?? -1)}
             onChange={onChangeIncidentMatch}
             className="max-w-full w-full"
           >

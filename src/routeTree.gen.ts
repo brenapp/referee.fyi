@@ -15,19 +15,19 @@ import { Route as SettingsImport } from './routes/settings'
 import { Route as PrivacyImport } from './routes/privacy'
 import { Route as IndexImport } from './routes/index'
 import { Route as SkuIndexImport } from './routes/$sku/index'
-import { Route as SkuTeamImport } from './routes/$sku/team'
 import { Route as SkuSummaryImport } from './routes/$sku/summary'
 import { Route as SkuSkillsImport } from './routes/$sku/skills'
 import { Route as SkuDivisionImport } from './routes/$sku/division'
 import { Route as SkuDevtoolsImport } from './routes/$sku/devtools'
 import { Route as SkuDeletedImport } from './routes/$sku/deleted'
-import { Route as SkuHomeIndexImport } from './routes/$sku/home/index'
-import { Route as SkuHomeTeamsImport } from './routes/$sku/home/teams'
-import { Route as SkuHomeMatchesImport } from './routes/$sku/home/matches'
-import { Route as SkuHomeManageImport } from './routes/$sku/home/manage'
+import { Route as SkuTeamImport } from './routes/$sku/$team'
+import { Route as SkuDivisionIndexImport } from './routes/$sku/$division/index'
+import { Route as SkuDivisionTeamsImport } from './routes/$sku/$division/teams'
+import { Route as SkuDivisionMatchesImport } from './routes/$sku/$division/matches'
+import { Route as SkuDivisionManageImport } from './routes/$sku/$division/manage'
 
-// Create/Update Routes./components/dialogs/new
-./components/dialogs/match
+// Create/Update Routes
+
 const SettingsRoute = SettingsImport.update({
   id: '/settings',
   path: '/settings',
@@ -49,12 +49,6 @@ const IndexRoute = IndexImport.update({
 const SkuIndexRoute = SkuIndexImport.update({
   id: '/$sku/',
   path: '/$sku/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const SkuTeamRoute = SkuTeamImport.update({
-  id: '/$sku/team',
-  path: '/$sku/team',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -88,27 +82,33 @@ const SkuDeletedRoute = SkuDeletedImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const SkuHomeIndexRoute = SkuHomeIndexImport.update({
-  id: '/$sku/home/',
-  path: '/$sku/home/',
+const SkuTeamRoute = SkuTeamImport.update({
+  id: '/$sku/$team',
+  path: '/$sku/$team',
   getParentRoute: () => rootRoute,
 } as any)
 
-const SkuHomeTeamsRoute = SkuHomeTeamsImport.update({
-  id: '/$sku/home/teams',
-  path: '/$sku/home/teams',
+const SkuDivisionIndexRoute = SkuDivisionIndexImport.update({
+  id: '/$sku/$division/',
+  path: '/$sku/$division/',
   getParentRoute: () => rootRoute,
 } as any)
 
-const SkuHomeMatchesRoute = SkuHomeMatchesImport.update({
-  id: '/$sku/home/matches',
-  path: '/$sku/home/matches',
+const SkuDivisionTeamsRoute = SkuDivisionTeamsImport.update({
+  id: '/$sku/$division/teams',
+  path: '/$sku/$division/teams',
   getParentRoute: () => rootRoute,
 } as any)
 
-const SkuHomeManageRoute = SkuHomeManageImport.update({
-  id: '/$sku/home/manage',
-  path: '/$sku/home/manage',
+const SkuDivisionMatchesRoute = SkuDivisionMatchesImport.update({
+  id: '/$sku/$division/matches',
+  path: '/$sku/$division/matches',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const SkuDivisionManageRoute = SkuDivisionManageImport.update({
+  id: '/$sku/$division/manage',
+  path: '/$sku/$division/manage',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -135,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsImport
+      parentRoute: typeof rootRoute
+    }
+    '/$sku/$team': {
+      id: '/$sku/$team'
+      path: '/$sku/$team'
+      fullPath: '/$sku/$team'
+      preLoaderRoute: typeof SkuTeamImport
       parentRoute: typeof rootRoute
     }
     '/$sku/deleted': {
@@ -172,13 +179,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SkuSummaryImport
       parentRoute: typeof rootRoute
     }
-    '/$sku/team': {
-      id: '/$sku/team'
-      path: '/$sku/team'
-      fullPath: '/$sku/team'
-      preLoaderRoute: typeof SkuTeamImport
-      parentRoute: typeof rootRoute
-    }
     '/$sku/': {
       id: '/$sku/'
       path: '/$sku'
@@ -186,32 +186,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SkuIndexImport
       parentRoute: typeof rootRoute
     }
-    '/$sku/home/manage': {
-      id: '/$sku/home/manage'
-      path: '/$sku/home/manage'
-      fullPath: '/$sku/home/manage'
-      preLoaderRoute: typeof SkuHomeManageImport
+    '/$sku/$division/manage': {
+      id: '/$sku/$division/manage'
+      path: '/$sku/$division/manage'
+      fullPath: '/$sku/$division/manage'
+      preLoaderRoute: typeof SkuDivisionManageImport
       parentRoute: typeof rootRoute
     }
-    '/$sku/home/matches': {
-      id: '/$sku/home/matches'
-      path: '/$sku/home/matches'
-      fullPath: '/$sku/home/matches'
-      preLoaderRoute: typeof SkuHomeMatchesImport
+    '/$sku/$division/matches': {
+      id: '/$sku/$division/matches'
+      path: '/$sku/$division/matches'
+      fullPath: '/$sku/$division/matches'
+      preLoaderRoute: typeof SkuDivisionMatchesImport
       parentRoute: typeof rootRoute
     }
-    '/$sku/home/teams': {
-      id: '/$sku/home/teams'
-      path: '/$sku/home/teams'
-      fullPath: '/$sku/home/teams'
-      preLoaderRoute: typeof SkuHomeTeamsImport
+    '/$sku/$division/teams': {
+      id: '/$sku/$division/teams'
+      path: '/$sku/$division/teams'
+      fullPath: '/$sku/$division/teams'
+      preLoaderRoute: typeof SkuDivisionTeamsImport
       parentRoute: typeof rootRoute
     }
-    '/$sku/home/': {
-      id: '/$sku/home/'
-      path: '/$sku/home'
-      fullPath: '/$sku/home'
-      preLoaderRoute: typeof SkuHomeIndexImport
+    '/$sku/$division/': {
+      id: '/$sku/$division/'
+      path: '/$sku/$division'
+      fullPath: '/$sku/$division'
+      preLoaderRoute: typeof SkuDivisionIndexImport
       parentRoute: typeof rootRoute
     }
   }
@@ -223,34 +223,34 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
+  '/$sku/$team': typeof SkuTeamRoute
   '/$sku/deleted': typeof SkuDeletedRoute
   '/$sku/devtools': typeof SkuDevtoolsRoute
   '/$sku/division': typeof SkuDivisionRoute
   '/$sku/skills': typeof SkuSkillsRoute
   '/$sku/summary': typeof SkuSummaryRoute
-  '/$sku/team': typeof SkuTeamRoute
   '/$sku': typeof SkuIndexRoute
-  '/$sku/home/manage': typeof SkuHomeManageRoute
-  '/$sku/home/matches': typeof SkuHomeMatchesRoute
-  '/$sku/home/teams': typeof SkuHomeTeamsRoute
-  '/$sku/home': typeof SkuHomeIndexRoute
+  '/$sku/$division/manage': typeof SkuDivisionManageRoute
+  '/$sku/$division/matches': typeof SkuDivisionMatchesRoute
+  '/$sku/$division/teams': typeof SkuDivisionTeamsRoute
+  '/$sku/$division': typeof SkuDivisionIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
+  '/$sku/$team': typeof SkuTeamRoute
   '/$sku/deleted': typeof SkuDeletedRoute
   '/$sku/devtools': typeof SkuDevtoolsRoute
   '/$sku/division': typeof SkuDivisionRoute
   '/$sku/skills': typeof SkuSkillsRoute
   '/$sku/summary': typeof SkuSummaryRoute
-  '/$sku/team': typeof SkuTeamRoute
   '/$sku': typeof SkuIndexRoute
-  '/$sku/home/manage': typeof SkuHomeManageRoute
-  '/$sku/home/matches': typeof SkuHomeMatchesRoute
-  '/$sku/home/teams': typeof SkuHomeTeamsRoute
-  '/$sku/home': typeof SkuHomeIndexRoute
+  '/$sku/$division/manage': typeof SkuDivisionManageRoute
+  '/$sku/$division/matches': typeof SkuDivisionMatchesRoute
+  '/$sku/$division/teams': typeof SkuDivisionTeamsRoute
+  '/$sku/$division': typeof SkuDivisionIndexRoute
 }
 
 export interface FileRoutesById {
@@ -258,17 +258,17 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
+  '/$sku/$team': typeof SkuTeamRoute
   '/$sku/deleted': typeof SkuDeletedRoute
   '/$sku/devtools': typeof SkuDevtoolsRoute
   '/$sku/division': typeof SkuDivisionRoute
   '/$sku/skills': typeof SkuSkillsRoute
   '/$sku/summary': typeof SkuSummaryRoute
-  '/$sku/team': typeof SkuTeamRoute
   '/$sku/': typeof SkuIndexRoute
-  '/$sku/home/manage': typeof SkuHomeManageRoute
-  '/$sku/home/matches': typeof SkuHomeMatchesRoute
-  '/$sku/home/teams': typeof SkuHomeTeamsRoute
-  '/$sku/home/': typeof SkuHomeIndexRoute
+  '/$sku/$division/manage': typeof SkuDivisionManageRoute
+  '/$sku/$division/matches': typeof SkuDivisionMatchesRoute
+  '/$sku/$division/teams': typeof SkuDivisionTeamsRoute
+  '/$sku/$division/': typeof SkuDivisionIndexRoute
 }
 
 export interface FileRouteTypes {
@@ -277,49 +277,49 @@ export interface FileRouteTypes {
     | '/'
     | '/privacy'
     | '/settings'
+    | '/$sku/$team'
     | '/$sku/deleted'
     | '/$sku/devtools'
     | '/$sku/division'
     | '/$sku/skills'
     | '/$sku/summary'
-    | '/$sku/team'
     | '/$sku'
-    | '/$sku/home/manage'
-    | '/$sku/home/matches'
-    | '/$sku/home/teams'
-    | '/$sku/home'
+    | '/$sku/$division/manage'
+    | '/$sku/$division/matches'
+    | '/$sku/$division/teams'
+    | '/$sku/$division'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/privacy'
     | '/settings'
+    | '/$sku/$team'
     | '/$sku/deleted'
     | '/$sku/devtools'
     | '/$sku/division'
     | '/$sku/skills'
     | '/$sku/summary'
-    | '/$sku/team'
     | '/$sku'
-    | '/$sku/home/manage'
-    | '/$sku/home/matches'
-    | '/$sku/home/teams'
-    | '/$sku/home'
+    | '/$sku/$division/manage'
+    | '/$sku/$division/matches'
+    | '/$sku/$division/teams'
+    | '/$sku/$division'
   id:
     | '__root__'
     | '/'
     | '/privacy'
     | '/settings'
+    | '/$sku/$team'
     | '/$sku/deleted'
     | '/$sku/devtools'
     | '/$sku/division'
     | '/$sku/skills'
     | '/$sku/summary'
-    | '/$sku/team'
     | '/$sku/'
-    | '/$sku/home/manage'
-    | '/$sku/home/matches'
-    | '/$sku/home/teams'
-    | '/$sku/home/'
+    | '/$sku/$division/manage'
+    | '/$sku/$division/matches'
+    | '/$sku/$division/teams'
+    | '/$sku/$division/'
   fileRoutesById: FileRoutesById
 }
 
@@ -327,34 +327,34 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PrivacyRoute: typeof PrivacyRoute
   SettingsRoute: typeof SettingsRoute
+  SkuTeamRoute: typeof SkuTeamRoute
   SkuDeletedRoute: typeof SkuDeletedRoute
   SkuDevtoolsRoute: typeof SkuDevtoolsRoute
   SkuDivisionRoute: typeof SkuDivisionRoute
   SkuSkillsRoute: typeof SkuSkillsRoute
   SkuSummaryRoute: typeof SkuSummaryRoute
-  SkuTeamRoute: typeof SkuTeamRoute
   SkuIndexRoute: typeof SkuIndexRoute
-  SkuHomeManageRoute: typeof SkuHomeManageRoute
-  SkuHomeMatchesRoute: typeof SkuHomeMatchesRoute
-  SkuHomeTeamsRoute: typeof SkuHomeTeamsRoute
-  SkuHomeIndexRoute: typeof SkuHomeIndexRoute
+  SkuDivisionManageRoute: typeof SkuDivisionManageRoute
+  SkuDivisionMatchesRoute: typeof SkuDivisionMatchesRoute
+  SkuDivisionTeamsRoute: typeof SkuDivisionTeamsRoute
+  SkuDivisionIndexRoute: typeof SkuDivisionIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PrivacyRoute: PrivacyRoute,
   SettingsRoute: SettingsRoute,
+  SkuTeamRoute: SkuTeamRoute,
   SkuDeletedRoute: SkuDeletedRoute,
   SkuDevtoolsRoute: SkuDevtoolsRoute,
   SkuDivisionRoute: SkuDivisionRoute,
   SkuSkillsRoute: SkuSkillsRoute,
   SkuSummaryRoute: SkuSummaryRoute,
-  SkuTeamRoute: SkuTeamRoute,
   SkuIndexRoute: SkuIndexRoute,
-  SkuHomeManageRoute: SkuHomeManageRoute,
-  SkuHomeMatchesRoute: SkuHomeMatchesRoute,
-  SkuHomeTeamsRoute: SkuHomeTeamsRoute,
-  SkuHomeIndexRoute: SkuHomeIndexRoute,
+  SkuDivisionManageRoute: SkuDivisionManageRoute,
+  SkuDivisionMatchesRoute: SkuDivisionMatchesRoute,
+  SkuDivisionTeamsRoute: SkuDivisionTeamsRoute,
+  SkuDivisionIndexRoute: SkuDivisionIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -370,17 +370,17 @@ export const routeTree = rootRoute
         "/",
         "/privacy",
         "/settings",
+        "/$sku/$team",
         "/$sku/deleted",
         "/$sku/devtools",
         "/$sku/division",
         "/$sku/skills",
         "/$sku/summary",
-        "/$sku/team",
         "/$sku/",
-        "/$sku/home/manage",
-        "/$sku/home/matches",
-        "/$sku/home/teams",
-        "/$sku/home/"
+        "/$sku/$division/manage",
+        "/$sku/$division/matches",
+        "/$sku/$division/teams",
+        "/$sku/$division/"
       ]
     },
     "/": {
@@ -391,6 +391,9 @@ export const routeTree = rootRoute
     },
     "/settings": {
       "filePath": "settings.tsx"
+    },
+    "/$sku/$team": {
+      "filePath": "$sku/$team.tsx"
     },
     "/$sku/deleted": {
       "filePath": "$sku/deleted.tsx"
@@ -407,23 +410,20 @@ export const routeTree = rootRoute
     "/$sku/summary": {
       "filePath": "$sku/summary.tsx"
     },
-    "/$sku/team": {
-      "filePath": "$sku/team.tsx"
-    },
     "/$sku/": {
       "filePath": "$sku/index.tsx"
     },
-    "/$sku/home/manage": {
-      "filePath": "$sku/home/manage.tsx"
+    "/$sku/$division/manage": {
+      "filePath": "$sku/$division/manage.tsx"
     },
-    "/$sku/home/matches": {
-      "filePath": "$sku/home/matches.tsx"
+    "/$sku/$division/matches": {
+      "filePath": "$sku/$division/matches.tsx"
     },
-    "/$sku/home/teams": {
-      "filePath": "$sku/home/teams.tsx"
+    "/$sku/$division/teams": {
+      "filePath": "$sku/$division/teams.tsx"
     },
-    "/$sku/home/": {
-      "filePath": "$sku/home/index.tsx"
+    "/$sku/$division/": {
+      "filePath": "$sku/$division/index.tsx"
     }
   }
 }

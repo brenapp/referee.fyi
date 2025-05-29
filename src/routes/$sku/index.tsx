@@ -1,9 +1,9 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { EventDivisionPickerPage } from "./division";
-import { EventHome } from "./home";
+import { EventHome } from "./$division";
 import { EventSkillsPage } from "./skills";
 import { EventSummaryPage } from "./summary";
-import { EventTeamsPage } from "./team";
+import { EventTeamsPage } from "./$team";
 import { EventDevTools } from "./devtools";
 import { EventDeletedIncidentsPage } from "./deleted";
 

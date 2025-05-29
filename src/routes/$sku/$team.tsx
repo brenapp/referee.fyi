@@ -19,6 +19,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { useEventAssetsForTeam } from "~utils/hooks/assets";
 import { AssetPreview } from "~components/Assets";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 export type EventTeamAssetsProps = {
   team?: string;
@@ -109,7 +110,7 @@ export const EventTeamsIncidents: React.FC<EventTeamsTabProps> = ({
 };
 
 export const EventTeamsPage: React.FC = () => {
-  const { number } = useParams();
+  const { team: number } = useParams({ from: "/$sku/$team" });
   const { data: event } = useCurrentEvent();
   const { data: team } = useEventTeam(event, number ?? "");
 
@@ -184,4 +185,6 @@ export const EventTeamsPage: React.FC = () => {
   );
 };
 
-export default EventTeamsPage;
+export const Route = createFileRoute("/$sku/$team")({
+  component: EventTeamsPage,
+});

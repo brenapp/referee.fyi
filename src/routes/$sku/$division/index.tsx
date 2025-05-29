@@ -14,6 +14,7 @@ import { UserGroupIcon as TeamsIconSolid } from "@heroicons/react/24/solid";
 import { CloudIcon as ManageIconOutline } from "@heroicons/react/24/outline";
 import { CloudIcon as ManageIconSolid } from "@heroicons/react/24/solid";
 import { Tabs } from "~components/Tabs";
+import { createFileRoute } from "@tanstack/react-router";
 
 export const EventHome: React.FC = () => {
   const { data: event } = useCurrentEvent();
@@ -78,4 +79,6 @@ export const EventHome: React.FC = () => {
   ) : null;
 };
 
-export default EventHome;
+export const Route = createFileRoute("/$sku/$division/")({
+  component: EventHome,
+});

@@ -5,7 +5,7 @@ import { Button, LinkButton } from "~components/Button";
 import { CodeBracketIcon, FlagIcon, PlayIcon } from "@heroicons/react/20/solid";
 import { EventNewIncidentDialog } from "../../components/dialogs/new";
 import { Tabs } from "~components/Tabs";
-import { EventManageTab } from "./home/manage";
+import { EventManageTab } from "./$division/manage";
 import { Spinner } from "~components/Spinner";
 import { EventData } from "robotevents";
 import { useEventSkills, useEventTeams } from "~utils/hooks/robotevents";

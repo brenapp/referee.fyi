@@ -20,8 +20,8 @@ import { Route as SkuSummaryImport } from './routes/$sku/summary'
 import { Route as SkuSkillsImport } from './routes/$sku/skills'
 import { Route as SkuDevtoolsImport } from './routes/$sku/devtools'
 import { Route as SkuDeletedImport } from './routes/$sku/deleted'
-import { Route as SkuTeamImport } from './routes/$sku/$team'
 import { Route as SkuDivisionIndexImport } from './routes/$sku/$division/index'
+import { Route as SkuTeamTeamImport } from './routes/$sku/team/$team'
 
 // Create/Update Routes
 
@@ -79,15 +79,15 @@ const SkuDeletedRoute = SkuDeletedImport.update({
   getParentRoute: () => SkuRouteRoute,
 } as any)
 
-const SkuTeamRoute = SkuTeamImport.update({
-  id: '/$team',
-  path: '/$team',
-  getParentRoute: () => SkuRouteRoute,
-} as any)
-
 const SkuDivisionIndexRoute = SkuDivisionIndexImport.update({
   id: '/$division/',
   path: '/$division/',
+  getParentRoute: () => SkuRouteRoute,
+} as any)
+
+const SkuTeamTeamRoute = SkuTeamTeamImport.update({
+  id: '/team/$team',
+  path: '/team/$team',
   getParentRoute: () => SkuRouteRoute,
 } as any)
 
@@ -122,13 +122,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsImport
       parentRoute: typeof rootRoute
-    }
-    '/$sku/$team': {
-      id: '/$sku/$team'
-      path: '/$team'
-      fullPath: '/$sku/$team'
-      preLoaderRoute: typeof SkuTeamImport
-      parentRoute: typeof SkuRouteImport
     }
     '/$sku/deleted': {
       id: '/$sku/deleted'
@@ -165,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SkuIndexImport
       parentRoute: typeof SkuRouteImport
     }
+    '/$sku/team/$team': {
+      id: '/$sku/team/$team'
+      path: '/team/$team'
+      fullPath: '/$sku/team/$team'
+      preLoaderRoute: typeof SkuTeamTeamImport
+      parentRoute: typeof SkuRouteImport
+    }
     '/$sku/$division/': {
       id: '/$sku/$division/'
       path: '/$division'
@@ -178,22 +178,22 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface SkuRouteRouteChildren {
-  SkuTeamRoute: typeof SkuTeamRoute
   SkuDeletedRoute: typeof SkuDeletedRoute
   SkuDevtoolsRoute: typeof SkuDevtoolsRoute
   SkuSkillsRoute: typeof SkuSkillsRoute
   SkuSummaryRoute: typeof SkuSummaryRoute
   SkuIndexRoute: typeof SkuIndexRoute
+  SkuTeamTeamRoute: typeof SkuTeamTeamRoute
   SkuDivisionIndexRoute: typeof SkuDivisionIndexRoute
 }
 
 const SkuRouteRouteChildren: SkuRouteRouteChildren = {
-  SkuTeamRoute: SkuTeamRoute,
   SkuDeletedRoute: SkuDeletedRoute,
   SkuDevtoolsRoute: SkuDevtoolsRoute,
   SkuSkillsRoute: SkuSkillsRoute,
   SkuSummaryRoute: SkuSummaryRoute,
   SkuIndexRoute: SkuIndexRoute,
+  SkuTeamTeamRoute: SkuTeamTeamRoute,
   SkuDivisionIndexRoute: SkuDivisionIndexRoute,
 }
 
@@ -206,12 +206,12 @@ export interface FileRoutesByFullPath {
   '/$sku': typeof SkuRouteRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
-  '/$sku/$team': typeof SkuTeamRoute
   '/$sku/deleted': typeof SkuDeletedRoute
   '/$sku/devtools': typeof SkuDevtoolsRoute
   '/$sku/skills': typeof SkuSkillsRoute
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku/': typeof SkuIndexRoute
+  '/$sku/team/$team': typeof SkuTeamTeamRoute
   '/$sku/$division': typeof SkuDivisionIndexRoute
 }
 
@@ -219,12 +219,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
-  '/$sku/$team': typeof SkuTeamRoute
   '/$sku/deleted': typeof SkuDeletedRoute
   '/$sku/devtools': typeof SkuDevtoolsRoute
   '/$sku/skills': typeof SkuSkillsRoute
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku': typeof SkuIndexRoute
+  '/$sku/team/$team': typeof SkuTeamTeamRoute
   '/$sku/$division': typeof SkuDivisionIndexRoute
 }
 
@@ -234,12 +234,12 @@ export interface FileRoutesById {
   '/$sku': typeof SkuRouteRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
-  '/$sku/$team': typeof SkuTeamRoute
   '/$sku/deleted': typeof SkuDeletedRoute
   '/$sku/devtools': typeof SkuDevtoolsRoute
   '/$sku/skills': typeof SkuSkillsRoute
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku/': typeof SkuIndexRoute
+  '/$sku/team/$team': typeof SkuTeamTeamRoute
   '/$sku/$division/': typeof SkuDivisionIndexRoute
 }
 
@@ -250,24 +250,24 @@ export interface FileRouteTypes {
     | '/$sku'
     | '/privacy'
     | '/settings'
-    | '/$sku/$team'
     | '/$sku/deleted'
     | '/$sku/devtools'
     | '/$sku/skills'
     | '/$sku/summary'
     | '/$sku/'
+    | '/$sku/team/$team'
     | '/$sku/$division'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/privacy'
     | '/settings'
-    | '/$sku/$team'
     | '/$sku/deleted'
     | '/$sku/devtools'
     | '/$sku/skills'
     | '/$sku/summary'
     | '/$sku'
+    | '/$sku/team/$team'
     | '/$sku/$division'
   id:
     | '__root__'
@@ -275,12 +275,12 @@ export interface FileRouteTypes {
     | '/$sku'
     | '/privacy'
     | '/settings'
-    | '/$sku/$team'
     | '/$sku/deleted'
     | '/$sku/devtools'
     | '/$sku/skills'
     | '/$sku/summary'
     | '/$sku/'
+    | '/$sku/team/$team'
     | '/$sku/$division/'
   fileRoutesById: FileRoutesById
 }
@@ -321,12 +321,12 @@ export const routeTree = rootRoute
     "/$sku": {
       "filePath": "$sku/route.tsx",
       "children": [
-        "/$sku/$team",
         "/$sku/deleted",
         "/$sku/devtools",
         "/$sku/skills",
         "/$sku/summary",
         "/$sku/",
+        "/$sku/team/$team",
         "/$sku/$division/"
       ]
     },
@@ -335,10 +335,6 @@ export const routeTree = rootRoute
     },
     "/settings": {
       "filePath": "settings.tsx"
-    },
-    "/$sku/$team": {
-      "filePath": "$sku/$team.tsx",
-      "parent": "/$sku"
     },
     "/$sku/deleted": {
       "filePath": "$sku/deleted.tsx",
@@ -358,6 +354,10 @@ export const routeTree = rootRoute
     },
     "/$sku/": {
       "filePath": "$sku/index.tsx",
+      "parent": "/$sku"
+    },
+    "/$sku/team/$team": {
+      "filePath": "$sku/team/$team.tsx",
       "parent": "/$sku"
     },
     "/$sku/$division/": {

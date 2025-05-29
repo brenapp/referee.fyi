@@ -138,7 +138,7 @@ const EventPicker: React.FC = () => {
 
   const onClick = () => {
     if (showDiv) {
-      navigate(`/${event?.sku}`);
+      navigate({ to: "/$sku", path: { sku: event?.sku } });
     } else {
       setOpen(true);
     }

@@ -14,7 +14,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Button, LinkButton } from "~components/Button";
 import { RichIncident } from "~utils/data/incident";
-import { EventNewIncidentDialog } from "../../../components/dialogs/new";
+import { EventNewIncidentDialog } from "../../../../components/dialogs/new";
 import { MenuButton } from "~components/MenuButton";
 import { RulesSummary } from "~components/RulesSummary";
 import { DisconnectedWarning } from "~components/DisconnectedWarning";

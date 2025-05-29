@@ -1,9 +1,9 @@
 import { useCurrentEvent } from "~hooks/state";
 import { useEffect } from "react";
 import { useAddEventVisited } from "~utils/hooks/history";
-import { EventMatchesTab } from "./matches";
-import { EventTeamsTab } from "./teams";
-import { EventManageTab } from "./manage";
+import { EventMatchesTab } from "./-tabs/matches";
+import { EventTeamsTab } from "./-tabs/teams";
+import { EventManageTab } from "./-tabs/manage";
 
 import { ClipboardDocumentListIcon as MatchesIconOutline } from "@heroicons/react/24/outline";
 import { ClipboardDocumentListIcon as MatchesIconSolid } from "@heroicons/react/24/solid";

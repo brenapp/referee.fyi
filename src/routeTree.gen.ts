@@ -18,6 +18,7 @@ import { Route as IndexImport } from './routes/index'
 import { Route as SkuIndexImport } from './routes/$sku/index'
 import { Route as SkuSummaryImport } from './routes/$sku/summary'
 import { Route as SkuSkillsImport } from './routes/$sku/skills'
+import { Route as SkuDevtoolsImport } from './routes/$sku/devtools'
 import { Route as SkuDeletedImport } from './routes/$sku/deleted'
 import { Route as SkuTeamImport } from './routes/$sku/$team'
 import { Route as SkuDivisionIndexImport } from './routes/$sku/$division/index'
@@ -63,6 +64,12 @@ const SkuSummaryRoute = SkuSummaryImport.update({
 const SkuSkillsRoute = SkuSkillsImport.update({
   id: '/skills',
   path: '/skills',
+  getParentRoute: () => SkuRouteRoute,
+} as any)
+
+const SkuDevtoolsRoute = SkuDevtoolsImport.update({
+  id: '/devtools',
+  path: '/devtools',
   getParentRoute: () => SkuRouteRoute,
 } as any)
 
@@ -130,6 +137,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SkuDeletedImport
       parentRoute: typeof SkuRouteImport
     }
+    '/$sku/devtools': {
+      id: '/$sku/devtools'
+      path: '/devtools'
+      fullPath: '/$sku/devtools'
+      preLoaderRoute: typeof SkuDevtoolsImport
+      parentRoute: typeof SkuRouteImport
+    }
     '/$sku/skills': {
       id: '/$sku/skills'
       path: '/skills'
@@ -166,6 +180,7 @@ declare module '@tanstack/react-router' {
 interface SkuRouteRouteChildren {
   SkuTeamRoute: typeof SkuTeamRoute
   SkuDeletedRoute: typeof SkuDeletedRoute
+  SkuDevtoolsRoute: typeof SkuDevtoolsRoute
   SkuSkillsRoute: typeof SkuSkillsRoute
   SkuSummaryRoute: typeof SkuSummaryRoute
   SkuIndexRoute: typeof SkuIndexRoute
@@ -175,6 +190,7 @@ interface SkuRouteRouteChildren {
 const SkuRouteRouteChildren: SkuRouteRouteChildren = {
   SkuTeamRoute: SkuTeamRoute,
   SkuDeletedRoute: SkuDeletedRoute,
+  SkuDevtoolsRoute: SkuDevtoolsRoute,
   SkuSkillsRoute: SkuSkillsRoute,
   SkuSummaryRoute: SkuSummaryRoute,
   SkuIndexRoute: SkuIndexRoute,
@@ -192,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/$sku/$team': typeof SkuTeamRoute
   '/$sku/deleted': typeof SkuDeletedRoute
+  '/$sku/devtools': typeof SkuDevtoolsRoute
   '/$sku/skills': typeof SkuSkillsRoute
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku/': typeof SkuIndexRoute
@@ -204,6 +221,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/$sku/$team': typeof SkuTeamRoute
   '/$sku/deleted': typeof SkuDeletedRoute
+  '/$sku/devtools': typeof SkuDevtoolsRoute
   '/$sku/skills': typeof SkuSkillsRoute
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku': typeof SkuIndexRoute
@@ -218,6 +236,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/$sku/$team': typeof SkuTeamRoute
   '/$sku/deleted': typeof SkuDeletedRoute
+  '/$sku/devtools': typeof SkuDevtoolsRoute
   '/$sku/skills': typeof SkuSkillsRoute
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku/': typeof SkuIndexRoute
@@ -233,6 +252,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/$sku/$team'
     | '/$sku/deleted'
+    | '/$sku/devtools'
     | '/$sku/skills'
     | '/$sku/summary'
     | '/$sku/'
@@ -244,6 +264,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/$sku/$team'
     | '/$sku/deleted'
+    | '/$sku/devtools'
     | '/$sku/skills'
     | '/$sku/summary'
     | '/$sku'
@@ -256,6 +277,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/$sku/$team'
     | '/$sku/deleted'
+    | '/$sku/devtools'
     | '/$sku/skills'
     | '/$sku/summary'
     | '/$sku/'
@@ -301,6 +323,7 @@ export const routeTree = rootRoute
       "children": [
         "/$sku/$team",
         "/$sku/deleted",
+        "/$sku/devtools",
         "/$sku/skills",
         "/$sku/summary",
         "/$sku/",
@@ -319,6 +342,10 @@ export const routeTree = rootRoute
     },
     "/$sku/deleted": {
       "filePath": "$sku/deleted.tsx",
+      "parent": "/$sku"
+    },
+    "/$sku/devtools": {
+      "filePath": "$sku/devtools.tsx",
       "parent": "/$sku"
     },
     "/$sku/skills": {

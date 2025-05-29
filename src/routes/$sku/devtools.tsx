@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { ReactNode, useCallback, useRef, useState } from "react";
 import { ProgramCode } from "robotevents";
 import { Button } from "~components/Button";
@@ -269,8 +269,13 @@ export const EventDevTools: React.FC = () => {
   );
 };
 
-export const Route = import.meta.env.DEV
-  ? createFileRoute("/$sku/devtools")({
-      component: EventDevTools,
-    })
-  : null;
+export const Route = createFileRoute("/$sku/devtools")({
+  component: EventDevTools,
+  beforeLoad: () => {
+    if (!import.meta.env.DEV) {
+      throw redirect({
+        to: "/",
+      });
+    }
+  },
+});

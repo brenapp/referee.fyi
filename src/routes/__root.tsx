@@ -37,6 +37,7 @@ import {
   Outlet,
   useLocation,
   useNavigate,
+  useRouter,
 } from "@tanstack/react-router";
 
 function isValidSKU(sku: string) {
@@ -424,6 +425,7 @@ const MigrationManager: React.FC = () => {
 export const AppShell: React.FC = () => {
   const { isLoading } = useCurrentEvent();
   const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <main
@@ -438,7 +440,11 @@ export const AppShell: React.FC = () => {
       <MigrationManager />
       <nav className="h-16 flex gap-4 max-w-full">
         <IconButton
-          onClick={() => navigate(-1)}
+          onClick={() =>
+            router.history.canGoBack()
+              ? router.history.back()
+              : navigate({ to: "/" })
+          }
           icon={<ChevronLeftIcon height={24} />}
           className="aspect-auto bg-transparent"
           aria-label="Back"

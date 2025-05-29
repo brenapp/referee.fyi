@@ -1,5 +1,5 @@
+import { Navigate } from "@tanstack/react-router";
 import React from "react";
-import { Navigate } from "react-router-dom";
 import { LinkButton } from "~components/Button";
 import { Spinner } from "~components/Spinner";
 import { useCurrentEvent } from "~hooks/state";
@@ -11,7 +11,13 @@ export const EventDivisionPickerPage: React.FC = () => {
   });
 
   if (event?.divisions?.length === 1) {
-    return <Navigate to={`/${event.sku}/${event.divisions[0].id}`} replace />;
+    return (
+      <Navigate
+        to="/$sku/$division"
+        params={{ sku: event.sku, division: event.divisions[0].id!.toString() }}
+        replace
+      />
+    );
   }
 
   if (!event) {

@@ -7,7 +7,7 @@ import { Tabs } from "~components/Tabs";
 import { EventData } from "robotevents";
 import { TeamData } from "robotevents";
 import { ClickableMatch } from "~components/Match";
-import { EventMatchDialog } from "../../components/dialogs/match";
+import { EventMatchDialog } from "~components/dialogs/match";
 import { MatchData } from "robotevents";
 import { Incident } from "~components/Incident";
 import { VirtualizedList } from "~components/VirtualizedList";

@@ -3,6 +3,7 @@ import { useEventDeletedIncidents } from "~utils/hooks/incident";
 import { useCurrentEvent } from "~utils/hooks/state";
 import { Spinner } from "~components/Spinner";
 import { VirtualizedList } from "~components/VirtualizedList";
+import { createFileRoute } from "@tanstack/react-router";
 
 export const EventDeletedIncidentsPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
@@ -29,3 +30,7 @@ export const EventDeletedIncidentsPage: React.FC = () => {
     </section>
   );
 };
+
+export const Route = createFileRoute("/$sku/deleted")({
+  component: EventDeletedIncidentsPage,
+});

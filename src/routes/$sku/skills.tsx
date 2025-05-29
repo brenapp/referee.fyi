@@ -27,6 +27,7 @@ import { MenuButton } from "~components/MenuButton";
 import { RichIncident } from "~utils/data/incident";
 import { useEventIncidents } from "~utils/hooks/incident";
 import { RulesSummary } from "~components/RulesSummary";
+import { createFileRoute } from "@tanstack/react-router";
 
 type TeamSkillsTabProps = {
   event: EventData;
@@ -300,4 +301,6 @@ export const EventSkillsPage: React.FC = () => {
   );
 };
 
-export default EventSkillsPage;
+export const Route = createFileRoute("/$sku/skills")({
+  component: EventSkillsPage,
+});

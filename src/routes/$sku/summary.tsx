@@ -21,6 +21,7 @@ import { ReadyState, useShareConnection } from "~models/ShareConnection";
 import { useShareProfile } from "~utils/hooks/share";
 import { IncidentOutcome, OUTCOMES } from "@referee-fyi/share";
 import { VirtualizedList } from "~components/VirtualizedList";
+import { createFileRoute } from "@tanstack/react-router";
 
 export type Filters = {
   outcomes: Record<IncidentOutcome, boolean>;
@@ -398,4 +399,6 @@ export const EventSummaryPage: React.FC = () => {
   );
 };
 
-export default EventSummaryPage;
+export const Route = createFileRoute("/$sku/summary")({
+  component: EventSummaryPage,
+});

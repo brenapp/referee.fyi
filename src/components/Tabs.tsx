@@ -128,7 +128,7 @@ export const Tabs: React.FC<TabsProps> = ({
       <div
         role="tabpanel"
         id={`tabpanel-${tabs[activeTab].id}`}
-        aria-labelledby={`tab-${tabs[activeTab].id}}`}
+        aria-labelledby={`tab-${tabs[activeTab].id}`}
         {...parts?.tabpanel}
         className={twMerge("contents", parts?.tabpanel?.className)}
       >

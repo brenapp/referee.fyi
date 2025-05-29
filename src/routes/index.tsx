@@ -151,7 +151,8 @@ export const HomePage: React.FC = () => {
         <section className="max-w-full mb-4">
           {events?.map((event) => (
             <LinkButton
-              to={`/${event.sku}`}
+              to={"/$sku"}
+              params={{ sku: event.sku }}
               className="w-full max-w-full mt-4 relative"
               key={event.sku}
             >

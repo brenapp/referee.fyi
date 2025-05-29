@@ -1,11 +1,17 @@
 import { twMerge } from "tailwind-merge";
-import { useCallback, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useCallback, useId, useState } from "react";
 import { ComponentParts } from "./parts";
+import { useLocation, useRouter } from "@tanstack/react-router";
 
 export type TabsNavigationState = {
   tab?: number;
 };
+
+declare module "@tanstack/react-router" {
+  interface HistoryState {
+    tabHistory?: Record<string, TabsNavigationState>;
+  }
+}
 
 export type TabContent = {
   type: "content";
@@ -38,21 +44,28 @@ export const Tabs: React.FC<TabsProps> = ({
   parts,
   ...props
 }) => {
+  const id = useId();
+  const router = useRouter();
   const location = useLocation();
-  const navigate = useNavigate();
 
   const contentTabs = tabs.filter((tab) => tab.type === "content");
   const buttonTabs = tabs.filter((tab) => tab.type === "action");
 
-  const [activeTab, setActiveTab] = useState<number>(location?.state?.tab ?? 0);
+  const [activeTab, setActiveTab] = useState<number>(
+    location?.state?.tabHistory?.[id]?.tab ?? 0
+  );
 
   const onClickTab = useCallback(
     (index: number) => {
-      const state: TabsNavigationState = { tab: index };
-      navigate(location, { replace: true, state });
+      router.navigate({
+        state: (state) => ({
+          ...state,
+          tabHistory: { ...state.tabHistory, [id]: { tab: index } },
+        }),
+      });
       setActiveTab(index);
     },
-    [location, navigate]
+    [id, router]
   );
 
   return (

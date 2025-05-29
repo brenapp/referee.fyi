@@ -649,7 +649,8 @@ const EventSummaryLink: React.FC<ManageTabProps> = ({ event }) => {
       <h2 className="font-bold">Event Summary</h2>
       <p>See a summary of all entries at the event.</p>
       <LinkButton
-        to={`/${event.sku}/summary`}
+        to="/$sku/summary"
+        params={{ sku: event.sku }}
         className="w-full mt-2 flex items-center"
       >
         <span className="flex-1">Event Summary</span>

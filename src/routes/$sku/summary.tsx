@@ -387,7 +387,8 @@ export const EventSummaryPage: React.FC = () => {
         </VirtualizedList>
         <section className="mt-4">
           <LinkButton
-            to={`/${event.sku}/deleted`}
+            to="/$sku/deleted"
+            params={{ sku: event.sku }}
             className="w-full flex items-center"
           >
             <span className="flex-1">Deleted Incidents</span>

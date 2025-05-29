@@ -6,12 +6,12 @@ import { useMatch, useParams } from "@tanstack/react-router";
 export function useCurrentEvent(
   options?: HookQueryOptions<EventData | null | undefined>
 ) {
-  const { sku } = useParams();
+  const { sku } = useParams({ strict: false });
   return useEvent(sku ?? "", options);
 }
 
 export function useCurrentDivision(def?: number) {
-  const match = useMatch("/:sku/:division");
+  const match = useMatch({ from: "/$sku/$division/" });
 
   if (!match) {
     return def;

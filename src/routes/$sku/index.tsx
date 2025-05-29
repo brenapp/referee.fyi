@@ -1,43 +1,62 @@
-import { Navigate, Route, Routes } from "react-router-dom";
-import { EventDivisionPickerPage } from "./division";
-import { EventHome } from "./$division";
-import { EventSkillsPage } from "./skills";
-import { EventSummaryPage } from "./summary";
-import { EventTeamsPage } from "./$team";
-import { EventDevTools } from "./devtools";
-import { EventDeletedIncidentsPage } from "./deleted";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
+import React from "react";
+import { LinkButton } from "~components/Button";
+import { Spinner } from "~components/Spinner";
+import { useCurrentEvent } from "~hooks/state";
 
-import { useCurrentEvent } from "~utils/hooks/state";
+export const EventDivisionPickerPage: React.FC = () => {
+  const { data: event } = useCurrentEvent({
+    networkMode: "always",
+    refetchOnMount: "always",
+  });
 
-const EventPage: React.FC = () => {
-  const {
-    data: currentEvent,
-    isPending: isLoadingCurrentEvent,
-    isError: isErrorCurrentEvent,
-  } = useCurrentEvent();
+  if (event?.divisions?.length === 1) {
+    return (
+      <Navigate
+        to="/$sku/$division"
+        params={{ sku: event.sku, division: event.divisions[0].id!.toString() }}
+        replace
+      />
+    );
+  }
 
-  const invalidSKU =
-    !isLoadingCurrentEvent && (isErrorCurrentEvent || !currentEvent);
-
-  if (invalidSKU) {
-    return <Navigate to="/" replace />;
+  if (!event) {
+    return <Spinner show />;
   }
 
   return (
-    <Routes>
-      <Route path="/">
-        <Route index path="/" element={<EventDivisionPickerPage />} />
-        <Route path="/skills/" element={<EventSkillsPage />} />
-        <Route path="/summary/" element={<EventSummaryPage />} />
-        <Route path="/deleted/" element={<EventDeletedIncidentsPage />} />
-        <Route path="/team/:number" element={<EventTeamsPage />} />
-        {import.meta.env.DEV ? (
-          <Route path="/devtools" element={<EventDevTools />} />
-        ) : null}
-        <Route path="/:division" element={<EventHome />} />
-      </Route>
-    </Routes>
+    <section className="mt-4 flex flex-col gap-4 overflow-auto max-h-screen">
+      <ol className="contents">
+        {event.divisions
+          ?.sort((a, b) => a.order! - b.order!)
+          .map((division) => (
+            <li key={division.id}>
+              <LinkButton
+                className={"w-full"}
+                to={"/$sku/$division"}
+                params={{
+                  sku: event.sku,
+                  division: division.id!.toString(),
+                }}
+              >
+                {division.name}
+              </LinkButton>
+            </li>
+          ))}
+        <li>
+          <LinkButton
+            className={"w-full"}
+            to={"/$sku/skills"}
+            params={{ sku: event.sku }}
+          >
+            Skills
+          </LinkButton>
+        </li>
+      </ol>
+    </section>
   );
 };
 
-export default EventPage;
+export const Route = createFileRoute("/$sku/")({
+  component: EventDivisionPickerPage,
+});

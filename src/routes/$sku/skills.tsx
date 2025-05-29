@@ -149,7 +149,8 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
                       }
                     />
                     <LinkButton
-                      to={`/${event.sku}/team/${team.number}`}
+                      to={"/$sku/$team"}
+                      params={{ sku: event.sku, team: team.number }}
                       className="w-full mt-4 flex items-center"
                     >
                       <span className="flex-1">Details</span>

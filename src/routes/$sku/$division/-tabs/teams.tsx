@@ -127,7 +127,8 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
                   filter={(i) => i.team == team.number}
                 />
                 <LinkButton
-                  to={`/${event.sku}/team/${team.number}`}
+                  to="/$sku/$team"
+                  params={{ sku: event.sku, team: team.number }}
                   className="w-full mt-4 flex items-center"
                 >
                   <span className="flex-1">Details</span>

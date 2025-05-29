@@ -137,8 +137,8 @@ const EventPicker: React.FC = () => {
     (event?.divisions?.length ?? 0) > 1;
 
   const onClick = () => {
-    if (showDiv) {
-      navigate({ to: "/$sku", path: { sku: event?.sku } });
+    if (showDiv && event) {
+      navigate({ to: "/$sku", params: { sku: event.sku } });
     } else {
       setOpen(true);
     }
@@ -180,7 +180,8 @@ const EventPicker: React.FC = () => {
                   </p>
                 </div>
                 <LinkButton
-                  to={`/${eventFromSKU.sku}`}
+                  to={"/$sku"}
+                  params={{ sku: eventFromSKU.sku }}
                   onClick={() => setOpen(false)}
                   className="mt-4 bg-emerald-600 w-full text-center"
                 >
@@ -201,7 +202,8 @@ const EventPicker: React.FC = () => {
                     aria-label={`${event.name} at ${event.location.venue}. ${event.sku}`}
                   >
                     <LinkButton
-                      to={`/${event.sku}`}
+                      to={"/$sku"}
+                      params={{ sku: event.sku }}
                       onClick={() => {
                         setOpen(false);
                       }}
@@ -232,7 +234,8 @@ const EventPicker: React.FC = () => {
                   aria-label={`${event.name} at ${event.location.venue}. ${event.sku}`}
                 >
                   <LinkButton
-                    to={`/${event.sku}`}
+                    to={"/$sku"}
+                    params={{ sku: event.sku }}
                     onClick={() => {
                       setOpen(false);
                     }}

@@ -110,7 +110,7 @@ export const EventTeamsIncidents: React.FC<EventTeamsTabProps> = ({
 };
 
 export const EventTeamsPage: React.FC = () => {
-  const { team: number } = useParams({ from: "/$sku/$team" });
+  const { team: number } = useParams({ from: "/$sku/team/$team" });
   const { data: event } = useCurrentEvent();
   const { data: team } = useEventTeam(event, number ?? "");
 
@@ -185,6 +185,6 @@ export const EventTeamsPage: React.FC = () => {
   );
 };
 
-export const Route = createFileRoute("/$sku/$team")({
+export const Route = createFileRoute("/$sku/team/$team")({
   component: EventTeamsPage,
 });

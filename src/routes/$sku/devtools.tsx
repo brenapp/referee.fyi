@@ -269,6 +269,8 @@ export const EventDevTools: React.FC = () => {
   );
 };
 
-export const Route = createFileRoute("/$sku/devtools")({
-  component: EventDevTools,
-});
+export const Route = import.meta.env.DEV
+  ? createFileRoute("/$sku/devtools")({
+      component: EventDevTools,
+    })
+  : null;

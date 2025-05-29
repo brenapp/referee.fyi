@@ -41,11 +41,12 @@ const generateVersionJson: Plugin = {
 };
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     TanStackRouterVite({
       target: "react",
       autoCodeSplitting: true,
+      routeFileIgnorePattern: command === "build" ? "devtools.tsx" : undefined,
     }),
     react(),
     vitePluginVersionMark({
@@ -171,4 +172,4 @@ export default defineConfig({
   build: {
     sourcemap: true,
   },
-});
+}));

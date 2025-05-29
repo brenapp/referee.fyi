@@ -1,7 +1,7 @@
 import { HookQueryOptions, useEvent } from "./robotevents";
 import { EventData } from "robotevents";
 import { useQuery } from "@tanstack/react-query";
-import { useMatch, useParams } from "@tanstack/react-router";
+import { useParams } from "@tanstack/react-router";
 
 export function useCurrentEvent(
   options?: HookQueryOptions<EventData | null | undefined>
@@ -11,17 +11,13 @@ export function useCurrentEvent(
 }
 
 export function useCurrentDivision(def?: number) {
-  const match = useMatch({ from: "/$sku/$division/" });
+  const { division: divisionParam } = useParams({ strict: false });
 
-  if (!match) {
+  if (!divisionParam) {
     return def;
   }
 
-  if (!match.params.division) {
-    return def;
-  }
-
-  const division = Number.parseInt(match.params.division);
+  const division = Number.parseInt(divisionParam);
   if (Number.isNaN(division)) {
     return def;
   }

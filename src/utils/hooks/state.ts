@@ -1,12 +1,7 @@
-import { useMatch, useParams } from "react-router-dom";
 import { HookQueryOptions, useEvent } from "./robotevents";
 import { EventData } from "robotevents";
 import { useQuery } from "@tanstack/react-query";
-
-export function useSKU() {
-  const { sku } = useParams();
-  return sku;
-}
+import { useMatch, useParams } from "@tanstack/react-router";
 
 export function useCurrentEvent(
   options?: HookQueryOptions<EventData | null | undefined>

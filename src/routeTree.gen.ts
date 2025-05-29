@@ -25,12 +25,9 @@ import { Route as SkuHomeIndexImport } from './routes/$sku/home/index'
 import { Route as SkuHomeTeamsImport } from './routes/$sku/home/teams'
 import { Route as SkuHomeMatchesImport } from './routes/$sku/home/matches'
 import { Route as SkuHomeManageImport } from './routes/$sku/home/manage'
-import { Route as SkuDialogsTeamImport } from './routes/$sku/dialogs/team'
-import { Route as SkuDialogsNewImport } from './routes/$sku/dialogs/new'
-import { Route as SkuDialogsMatchImport } from './routes/$sku/dialogs/match'
 
-// Create/Update Routes
-
+// Create/Update Routes./components/dialogs/new
+./components/dialogs/match
 const SettingsRoute = SettingsImport.update({
   id: '/settings',
   path: '/settings',
@@ -115,24 +112,6 @@ const SkuHomeManageRoute = SkuHomeManageImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const SkuDialogsTeamRoute = SkuDialogsTeamImport.update({
-  id: '/$sku/dialogs/team',
-  path: '/$sku/dialogs/team',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const SkuDialogsNewRoute = SkuDialogsNewImport.update({
-  id: '/$sku/dialogs/new',
-  path: '/$sku/dialogs/new',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const SkuDialogsMatchRoute = SkuDialogsMatchImport.update({
-  id: '/$sku/dialogs/match',
-  path: '/$sku/dialogs/match',
-  getParentRoute: () => rootRoute,
-} as any)
-
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -207,27 +186,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SkuIndexImport
       parentRoute: typeof rootRoute
     }
-    '/$sku/dialogs/match': {
-      id: '/$sku/dialogs/match'
-      path: '/$sku/dialogs/match'
-      fullPath: '/$sku/dialogs/match'
-      preLoaderRoute: typeof SkuDialogsMatchImport
-      parentRoute: typeof rootRoute
-    }
-    '/$sku/dialogs/new': {
-      id: '/$sku/dialogs/new'
-      path: '/$sku/dialogs/new'
-      fullPath: '/$sku/dialogs/new'
-      preLoaderRoute: typeof SkuDialogsNewImport
-      parentRoute: typeof rootRoute
-    }
-    '/$sku/dialogs/team': {
-      id: '/$sku/dialogs/team'
-      path: '/$sku/dialogs/team'
-      fullPath: '/$sku/dialogs/team'
-      preLoaderRoute: typeof SkuDialogsTeamImport
-      parentRoute: typeof rootRoute
-    }
     '/$sku/home/manage': {
       id: '/$sku/home/manage'
       path: '/$sku/home/manage'
@@ -272,9 +230,6 @@ export interface FileRoutesByFullPath {
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku/team': typeof SkuTeamRoute
   '/$sku': typeof SkuIndexRoute
-  '/$sku/dialogs/match': typeof SkuDialogsMatchRoute
-  '/$sku/dialogs/new': typeof SkuDialogsNewRoute
-  '/$sku/dialogs/team': typeof SkuDialogsTeamRoute
   '/$sku/home/manage': typeof SkuHomeManageRoute
   '/$sku/home/matches': typeof SkuHomeMatchesRoute
   '/$sku/home/teams': typeof SkuHomeTeamsRoute
@@ -292,9 +247,6 @@ export interface FileRoutesByTo {
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku/team': typeof SkuTeamRoute
   '/$sku': typeof SkuIndexRoute
-  '/$sku/dialogs/match': typeof SkuDialogsMatchRoute
-  '/$sku/dialogs/new': typeof SkuDialogsNewRoute
-  '/$sku/dialogs/team': typeof SkuDialogsTeamRoute
   '/$sku/home/manage': typeof SkuHomeManageRoute
   '/$sku/home/matches': typeof SkuHomeMatchesRoute
   '/$sku/home/teams': typeof SkuHomeTeamsRoute
@@ -313,9 +265,6 @@ export interface FileRoutesById {
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku/team': typeof SkuTeamRoute
   '/$sku/': typeof SkuIndexRoute
-  '/$sku/dialogs/match': typeof SkuDialogsMatchRoute
-  '/$sku/dialogs/new': typeof SkuDialogsNewRoute
-  '/$sku/dialogs/team': typeof SkuDialogsTeamRoute
   '/$sku/home/manage': typeof SkuHomeManageRoute
   '/$sku/home/matches': typeof SkuHomeMatchesRoute
   '/$sku/home/teams': typeof SkuHomeTeamsRoute
@@ -335,9 +284,6 @@ export interface FileRouteTypes {
     | '/$sku/summary'
     | '/$sku/team'
     | '/$sku'
-    | '/$sku/dialogs/match'
-    | '/$sku/dialogs/new'
-    | '/$sku/dialogs/team'
     | '/$sku/home/manage'
     | '/$sku/home/matches'
     | '/$sku/home/teams'
@@ -354,9 +300,6 @@ export interface FileRouteTypes {
     | '/$sku/summary'
     | '/$sku/team'
     | '/$sku'
-    | '/$sku/dialogs/match'
-    | '/$sku/dialogs/new'
-    | '/$sku/dialogs/team'
     | '/$sku/home/manage'
     | '/$sku/home/matches'
     | '/$sku/home/teams'
@@ -373,9 +316,6 @@ export interface FileRouteTypes {
     | '/$sku/summary'
     | '/$sku/team'
     | '/$sku/'
-    | '/$sku/dialogs/match'
-    | '/$sku/dialogs/new'
-    | '/$sku/dialogs/team'
     | '/$sku/home/manage'
     | '/$sku/home/matches'
     | '/$sku/home/teams'
@@ -394,9 +334,6 @@ export interface RootRouteChildren {
   SkuSummaryRoute: typeof SkuSummaryRoute
   SkuTeamRoute: typeof SkuTeamRoute
   SkuIndexRoute: typeof SkuIndexRoute
-  SkuDialogsMatchRoute: typeof SkuDialogsMatchRoute
-  SkuDialogsNewRoute: typeof SkuDialogsNewRoute
-  SkuDialogsTeamRoute: typeof SkuDialogsTeamRoute
   SkuHomeManageRoute: typeof SkuHomeManageRoute
   SkuHomeMatchesRoute: typeof SkuHomeMatchesRoute
   SkuHomeTeamsRoute: typeof SkuHomeTeamsRoute
@@ -414,9 +351,6 @@ const rootRouteChildren: RootRouteChildren = {
   SkuSummaryRoute: SkuSummaryRoute,
   SkuTeamRoute: SkuTeamRoute,
   SkuIndexRoute: SkuIndexRoute,
-  SkuDialogsMatchRoute: SkuDialogsMatchRoute,
-  SkuDialogsNewRoute: SkuDialogsNewRoute,
-  SkuDialogsTeamRoute: SkuDialogsTeamRoute,
   SkuHomeManageRoute: SkuHomeManageRoute,
   SkuHomeMatchesRoute: SkuHomeMatchesRoute,
   SkuHomeTeamsRoute: SkuHomeTeamsRoute,
@@ -443,9 +377,6 @@ export const routeTree = rootRoute
         "/$sku/summary",
         "/$sku/team",
         "/$sku/",
-        "/$sku/dialogs/match",
-        "/$sku/dialogs/new",
-        "/$sku/dialogs/team",
         "/$sku/home/manage",
         "/$sku/home/matches",
         "/$sku/home/teams",
@@ -481,15 +412,6 @@ export const routeTree = rootRoute
     },
     "/$sku/": {
       "filePath": "$sku/index.tsx"
-    },
-    "/$sku/dialogs/match": {
-      "filePath": "$sku/dialogs/match.tsx"
-    },
-    "/$sku/dialogs/new": {
-      "filePath": "$sku/dialogs/new.tsx"
-    },
-    "/$sku/dialogs/team": {
-      "filePath": "$sku/dialogs/team.tsx"
     },
     "/$sku/home/manage": {
       "filePath": "$sku/home/manage.tsx"

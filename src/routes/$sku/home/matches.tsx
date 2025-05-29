@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { EventData } from "robotevents";
 import { useEventMatches } from "~utils/hooks/robotevents";
 import { useCurrentDivision } from "~utils/hooks/state";
-import { EventMatchDialog } from "../dialogs/match";
+import { EventMatchDialog } from "~components/dialogs/match";
 import { Spinner } from "~components/Spinner";
 import { ClickableMatch, MatchTime } from "~components/Match";
 import { Button } from "~components/Button";

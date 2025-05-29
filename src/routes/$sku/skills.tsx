@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAddEventVisited } from "~utils/hooks/history";
 import { Button, LinkButton } from "~components/Button";
 import { CodeBracketIcon, FlagIcon, PlayIcon } from "@heroicons/react/20/solid";
-import { EventNewIncidentDialog } from "./dialogs/new";
+import { EventNewIncidentDialog } from "../../components/dialogs/new";
 import { Tabs } from "~components/Tabs";
 import { EventManageTab } from "./home/manage";
 import { Spinner } from "~components/Spinner";

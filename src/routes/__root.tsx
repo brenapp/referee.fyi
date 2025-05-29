@@ -37,6 +37,7 @@ import {
   Outlet,
   useLocation,
   useNavigate,
+  useParams,
   useRouter,
 } from "@tanstack/react-router";
 
@@ -80,8 +81,13 @@ const EventPicker: React.FC = () => {
       placeholderData: (prev) => prev,
     }
   );
-  const { data: event } = useCurrentEvent();
+
+  const { sku: skuParam } = useParams({ strict: false });
+
+  const { data: event, isPending: isPendingCurrentEvent } = useCurrentEvent();
   const division = useCurrentDivision();
+
+  const sku = event?.sku ?? (skuParam && isValidSKU(skuParam) ? skuParam : "");
 
   const results = useMemo(() => {
     if (!query) {
@@ -275,9 +281,18 @@ const EventPicker: React.FC = () => {
           style={{ gridTemplateColumns: "1fr 1.25rem" }}
         >
           <div className="flex-1 overflow-hidden whitespace-nowrap text-ellipsis">
-            <p>{event ? event.name : "Select Event"}</p>
+            <p
+              style={{
+                visibility: sku && isPendingCurrentEvent ? "hidden" : "visible",
+              }}
+            >
+              {event?.name ??
+                (sku && isPendingCurrentEvent
+                  ? "Loading Event..."
+                  : "Select Event")}
+            </p>
             <p className="text-sm text-emerald-400">
-              {showDiv ? <span>{selectedDiv?.name}</span> : event?.sku}
+              {showDiv ? <span>{selectedDiv?.name}</span> : sku}
             </p>
           </div>
           <ChevronDownIcon className="w-5 h-5" />

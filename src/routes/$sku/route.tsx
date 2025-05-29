@@ -19,4 +19,5 @@ export const Route = createFileRoute("/$sku")({
     return { event };
   },
   component: RouteComponent,
+  pendingMs: 100,
 });

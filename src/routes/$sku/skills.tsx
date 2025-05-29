@@ -264,6 +264,7 @@ export const EventSkillsPage: React.FC = () => {
   return (
     <section className="mt-4 flex flex-col">
       <Tabs
+        id={["/$sku/skills", "EventSkillsPage"]}
         className="flex-1"
         parts={{
           tablist: {

@@ -1,7 +1,8 @@
 import { twMerge } from "tailwind-merge";
-import { useCallback, useId, useState } from "react";
+import { useCallback, useState } from "react";
 import { ComponentParts } from "./parts";
 import { useLocation, useRouter } from "@tanstack/react-router";
+import type { Register } from "@tanstack/react-router";
 
 export type TabsNavigationState = {
   tab?: number;
@@ -9,7 +10,15 @@ export type TabsNavigationState = {
 
 declare module "@tanstack/react-router" {
   interface HistoryState {
-    tabHistory?: Record<string, TabsNavigationState>;
+    /**
+     * If present, this indicates the history state came from a tab navigation.
+     **/
+    tabActive?: string;
+
+    /**
+     * The current tab state for each tab component.
+     **/
+    tabState?: Record<string, TabsNavigationState>;
   }
 }
 
@@ -35,16 +44,23 @@ export type TabParts = ComponentParts<{
   tabpanel: React.HTMLProps<HTMLDivElement>;
 }>;
 
-export type TabsProps = Omit<React.HTMLProps<HTMLDivElement>, "children"> & {
+type Route = keyof Register["router"]["routesByPath"];
+
+export type TabsProps = Omit<
+  React.HTMLProps<HTMLDivElement>,
+  "children" | "id"
+> & {
+  id: [Route, string];
   children: Tab[];
 } & TabParts;
 
 export const Tabs: React.FC<TabsProps> = ({
   children: tabs,
+  id: idParts,
   parts,
   ...props
 }) => {
-  const id = useId();
+  const id = idParts.join("-");
   const router = useRouter();
   const location = useLocation();
 
@@ -52,7 +68,7 @@ export const Tabs: React.FC<TabsProps> = ({
   const buttonTabs = tabs.filter((tab) => tab.type === "action");
 
   const [activeTab, setActiveTab] = useState<number>(
-    location?.state?.tabHistory?.[id]?.tab ?? 0
+    location?.state?.tabState?.[id]?.tab ?? 0
   );
 
   const onClickTab = useCallback(
@@ -60,8 +76,10 @@ export const Tabs: React.FC<TabsProps> = ({
       router.navigate({
         state: (state) => ({
           ...state,
-          tabHistory: { ...state.tabHistory, [id]: { tab: index } },
+          tabActive: id,
+          tabState: { ...state.tabState, [id]: { tab: index } },
         }),
+        replace: true,
       });
       setActiveTab(index);
     },

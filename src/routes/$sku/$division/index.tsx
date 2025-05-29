@@ -29,6 +29,7 @@ export const EventHome: React.FC = () => {
   return event ? (
     <section className="mt-4 flex flex-col">
       <Tabs
+        id={["/$sku/$division", "EventHome"]}
         className="flex-1"
         parts={{
           tablist: {

@@ -16,7 +16,5 @@
   "devDependencies": {
     "vitest": "^2.0.3"
   },
-  "dependencies": {
-    "core-js": "^3.37.1"
-  }
+  "dependencies": {}
 }

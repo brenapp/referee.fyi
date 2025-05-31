@@ -34,7 +34,6 @@
     "@tanstack/react-virtual": "^3.10.7",
     "@types/uuid": "^9.0.7",
     "@use-gesture/react": "^10.3.0",
-    "core-js": "^3.42.0",
     "csv": "^6.3.5",
     "heroicons": "^2.0.18",
     "idb-keyval": "^6.2.1",

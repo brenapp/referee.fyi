@@ -79,7 +79,7 @@ export async function reportIssue(
       {
         data: frontmatter,
         attachments: [{ filename: `referee-fyi-dump-${date}.txt`, data: dump }],
-        includeReplay: true,
+        includeReplay: false,
         originalException: metadata.error?.error,
       }
     );

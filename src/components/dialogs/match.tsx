@@ -27,7 +27,7 @@ import { MatchTime } from "~components/Match";
 import { TeamIsolationDialog } from "./team";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import { MatchScratchpad } from "~components/scratchpad/Scratchpad";
-import { animate, motion, PanInfo, useMotionValue } from "framer-motion";
+import { animate, motion, PanInfo, useMotionValue } from "motion/react";
 import useResizeObserver from "use-resize-observer";
 import { RulesSummary } from "~components/RulesSummary";
 

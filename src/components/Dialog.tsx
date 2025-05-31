@@ -2,7 +2,7 @@ import { twMerge } from "tailwind-merge";
 import { IconButton } from "./Button";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 import React, { useEffect, useRef } from "react";
-import { HTMLMotionProps, motion } from "framer-motion";
+import { HTMLMotionProps, motion } from "motion/react";
 
 export type DialogMode = "modal" | "nonmodal";
 

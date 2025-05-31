@@ -18,7 +18,6 @@ import { Checkbox, RulesMultiSelect, Select } from "~components/Input";
 import { twMerge } from "tailwind-merge";
 import { useMutation } from "@tanstack/react-query";
 import { ReadyState, useShareConnection } from "~models/ShareConnection";
-import { useShareProfile } from "~utils/hooks/share";
 import { IncidentOutcome, OUTCOMES } from "@referee-fyi/share";
 import { VirtualizedList } from "~components/VirtualizedList";
 import { createFileRoute } from "@tanstack/react-router";
@@ -201,7 +200,9 @@ export const ForceSyncButton: React.FC = () => {
 };
 
 export const ExportButton: React.FC = () => {
-  const { name, key } = useShareProfile();
+  const {
+    profile: { name, key },
+  } = useShareConnection(["profile"]);
 
   const { data: event } = useCurrentEvent();
   const { data: incidents, isLoading } = useEventIncidents(event?.sku);

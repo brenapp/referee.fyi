@@ -1,19 +1,28 @@
 import { ArrowRightIcon, GlobeAmericasIcon } from "@heroicons/react/20/solid";
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button, LinkButton } from "~components/Button";
 import { ClickToCopy } from "~components/ClickToCopy";
 import { ReportIssueDialog } from "~components/dialogs/report";
 import { Input } from "~components/Input";
 import { toast } from "~components/Toast";
 import { Info } from "~components/Warning";
+import { useShareConnection } from "~models/ShareConnection";
 import { isWorldsBuild } from "~utils/data/state";
-import { useShareProfile } from "~utils/hooks/share";
 import { clearCache } from "~utils/sentry";
 
 export const SettingsPage: React.FC = () => {
-  const { name, key: publicKey, isSystemKey, persist } = useShareProfile();
-  const [localName, setLocalName] = useState(name);
+  const { updateProfile, profile } = useShareConnection([
+    "updateProfile",
+    "profile",
+  ]);
+  const [localName, setLocalName] = useState(profile?.name ?? "");
+
+  useEffect(() => {
+    if (profile?.name) {
+      setLocalName(profile.name);
+    }
+  }, [profile?.name]);
 
   const [reportIssueDialogOpen, setReportIssueDialogOpen] = useState(false);
 
@@ -41,14 +50,14 @@ export const SettingsPage: React.FC = () => {
           className="w-full mt-2"
           value={localName}
           onChange={(e) => setLocalName(e.currentTarget.value)}
-          onBlur={() => persist({ name: localName })}
+          onBlur={() => updateProfile({ name: localName })}
         />
       </section>
       <section className="mt-4">
         <h2 className="font-bold">Public Key</h2>
-        <ClickToCopy message={publicKey ?? ""} />
+        <ClickToCopy message={profile?.key ?? ""} />
       </section>
-      {isSystemKey ? (
+      {profile.isSystemKey ? (
         <Info message="System Key Enabled" className="mt-4" />
       ) : null}
       <section className="mt-4">

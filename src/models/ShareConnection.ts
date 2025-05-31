@@ -111,7 +111,9 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
 
   profile: { name: "", key: "", isSystemKey: false },
   updateProfile: async (updates) => {
-    const profile = { ...get().profile, ...updates };
+    const current = await getShareProfile();
+
+    const profile = { ...get().profile, ...current, ...updates };
     const user = await registerUser(profile);
 
     profile.isSystemKey = user.success && user.data.isSystemKey;

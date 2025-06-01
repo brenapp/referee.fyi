@@ -1,0 +1,9 @@
+{
+    "$schema": "node_modules/wrangler/config-schema.json",
+    "name": "referee-fyi",
+    "compatibility_date": "2025-05-31",
+    "assets": {
+        "directory": "dist",
+        "not_found_handling": "single-page-application"
+    }
+}

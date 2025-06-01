@@ -4,8 +4,8 @@
   "version": "0.6.0",
   "type": "module",
   "scripts": {
-    "frontend:dev": "vite --host --port 3000",
-    "frontend:build": "tsc && vite build",
+    "client:dev": "vite --host --port 3000",
+    "client:build": "tsc && vite build",
     "lib:dev": "concurrently \"npm --prefix lib/share run dev\" \"npm --prefix lib/consistency run dev\" \"npm --prefix lib/pdf  run dev\"",
     "lib:build": "concurrently \"npm --prefix lib/share run build\" \"npm --prefix lib/consistency run build\" \"npm --prefix lib/pdf run build\"",
     "worker:dev": "npm --prefix worker/sync run dev",
@@ -13,8 +13,8 @@
     "worker:build": "npm run lib:build && npm --prefix worker/sync run build",
     "worker:deploy": "npm run lib:build && npm --prefix worker/sync run deploy",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
-    "pages:build": "npm run lib:build && npm run frontend:build",
-    "dev": "concurrently \"npm run frontend:dev\" \"npm run lib:dev\""
+    "frontend:build": "npm run lib:build && npm run client:build",
+    "dev": "concurrently \"npm run client:dev\" \"npm run lib:dev\""
   },
   "workspaces": [
     "lib/*",
@@ -82,11 +82,11 @@
     "typescript": "^5.5.3",
     "vite": "^5.0.5",
     "vite-plugin-markdown": "^2.2.0",
-    "vite-plugin-node-polyfills": "^0.16.0",
-    "vite-plugin-pwa": "^0.17.2",
-    "vite-plugin-version-mark": "^0.0.10",
+    "vite-plugin-node-polyfills": "0.23.0",
+    "vite-plugin-pwa": "^1.0.0",
+    "vite-plugin-version-mark": "^0.1.4",
     "vite-tsconfig-paths": "^4.2.1",
-    "wrangler": "^3.90.0"
+    "wrangler": "^4.18.0"
   },
   "overrides": {
     "vite-plugin-node-polyfills": {

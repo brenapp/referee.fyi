@@ -7,6 +7,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { plugin as markdown, Mode } from "vite-plugin-markdown";
 import { exec } from "node:child_process";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
+import { cloudflare } from "@cloudflare/vite-plugin";
 
 // Generate version.json
 import { type Plugin } from "vite";
@@ -166,6 +167,7 @@ export default defineConfig(() => ({
     markdown({
       mode: [Mode.REACT],
     }),
+    cloudflare(),
   ],
 
   base: "/",

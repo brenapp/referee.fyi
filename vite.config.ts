@@ -155,6 +155,7 @@ export default defineConfig(() => ({
     sentryVitePlugin({
       org: "referee-fyi",
       project: "referee-fyi",
+      authToken: process.env.SENTRY_AUTH_TOKEN,
       bundleSizeOptimizations: {
         excludeDebugStatements: true,
         excludeReplayIframe: true,

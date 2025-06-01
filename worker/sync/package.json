@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Sync Service for Referee FYI",
   "scripts": {
-    "dev": "wrangler dev --ip 0.0.0.0 --env staging",
+    "dev": "wrangler dev --ip 0.0.0.0 --env staging --config ./wrangler.jsonc",
     "dev:remote": "wrangler dev --remote --env staging",
     "dev:secure": "sudo wrangler dev --ip 0.0.0.0 --env staging --local-protocol https --https-key-path ../../.certs/privkey.pem --https-cert-path ../../.certs/cert.pem",
     "build": "wrangler deploy --env staging --dry-run",
@@ -45,6 +45,6 @@
     "rollup-plugin-terser": "^7.0.2",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3",
-    "wrangler": "^3.111.0"
+    "wrangler": "^4.18.0"
   }
 }

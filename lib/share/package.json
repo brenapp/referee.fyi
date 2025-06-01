@@ -4,7 +4,7 @@
   "private": true,
   "version": "1.0.0",
   "description": "Share Instance Objects",
-  "exports": "./index.js",
+  "exports": "./dist/index.js",
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w",

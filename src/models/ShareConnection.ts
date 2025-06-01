@@ -407,8 +407,6 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
         store.uploadAsset(incident.event, asset); // ignoring the response here - we do not want to await this
       }
     }
-
-    return store.send({ type: "add_incident", incident });
   },
 
   editIncident: async (incident: Incident) => {
@@ -419,8 +417,6 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
       await editServerIncident(incident);
       return;
     }
-
-    return get().send({ type: "update_incident", incident });
   },
 
   deleteIncident: async (id: string) => {
@@ -431,8 +427,6 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
       await deleteServerIncident(id, invitation.sku);
       return;
     }
-
-    return get().send({ type: "remove_incident", id });
   },
 
   updateScratchpad: async (id: string, scratchpad: MatchScratchpad) => {

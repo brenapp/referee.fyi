@@ -500,29 +500,15 @@ export class ShareInstance extends DurableObject {
 
         switch (data.type) {
           case "add_incident": {
-            const incident = data.incident;
-            await this.addIncident(incident);
-            this.broadcast(
-              { type: "add_incident", incident },
-              { type: "client", name: client.user.name, id: client.user.key }
-            );
+            // Should be done through the REST API
             break;
           }
           case "update_incident": {
-            const incident = data.incident;
-            await this.editIncident(incident);
-            this.broadcast(
-              { type: "update_incident", incident },
-              { type: "client", name: client.user.name, id: client.user.key }
-            );
+            // Should be done through the REST API
             break;
           }
           case "remove_incident": {
-            await this.deleteIncident(data.id);
-            this.broadcast(
-              { type: "remove_incident", id: data.id },
-              { type: "client", name: client.user.name, id: client.user.key }
-            );
+            // Should be done through the REST API
             break;
           }
           case "scratchpad_update": {

@@ -1,6 +1,6 @@
 import { test, expect } from "vitest";
-import { ConsistentMap, mergeMap } from "./map.js";
-import { initLWW, updateLWW, WithLWWConsistency } from "./lww.js";
+import { ConsistentMap, mergeMap } from "../src/map.js";
+import { initLWW, updateLWW, WithLWWConsistency } from "../src/lww.js";
 
 type BaseIncident = {
   id: string;

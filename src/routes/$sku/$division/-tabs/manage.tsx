@@ -50,6 +50,7 @@ import { UpdatePrompt } from "~components/UpdatePrompt";
 import { InvitationListItem } from "@referee-fyi/share";
 import { isWorldsBuild, WORLDS_EVENTS } from "~utils/data/state";
 import { Incident } from "~components/Incident";
+import { useLatestAppVersion } from "~utils/hooks/state";
 
 export type ManageDialogProps = {
   open: boolean;
@@ -64,6 +65,8 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
 }) => {
   const [inviteCode, setInviteCode] = useState("");
   const [admin, setAdmin] = useState(false);
+
+  const { data: latestAppVersion } = useLatestAppVersion();
 
   const {
     data: response,
@@ -132,17 +135,30 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
             <p>{user.name}</p>
             <ClickToCopy message={user.key} />
             {userVersion !== __REFEREE_FYI_VERSION__ ? (
-              <Warning
-                message="User is on a different version"
-                className="mt-4"
-              >
-                <p>
-                  Your app version (<code>{__REFEREE_FYI_VERSION__}</code>) does
-                  not match this user's app version (
-                  <code>{userVersion ?? "Unknown"}</code>
-                  ). This can lead to instability.
-                </p>
-              </Warning>
+              <>
+                <Warning
+                  message="User is on a different version"
+                  className="mt-4"
+                >
+                  <p>
+                    Your app version (<code>{__REFEREE_FYI_VERSION__}</code>)
+                    does not match this user's app version (
+                    <code>{userVersion ?? "Unknown"}</code>
+                    ).
+                  </p>
+                </Warning>
+                {latestAppVersion ? (
+                  <Info
+                    className="mt-4"
+                    message={
+                      <p>
+                        The latest version of Referee FYI is{" "}
+                        <code>{latestAppVersion}</code>
+                      </p>
+                    }
+                  />
+                ) : null}
+              </>
             ) : null}
             <Checkbox
               label="Invite as Admin"

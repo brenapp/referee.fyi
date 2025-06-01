@@ -25,7 +25,6 @@ import type {
 import { Incident } from "./incident";
 import { queryClient } from "./query";
 import { exportPublicKey, getSignRequestHeaders } from "./crypto";
-import { useShareProfile } from "~utils/hooks/share";
 import { useShareConnection } from "~models/ShareConnection";
 import { useMemo } from "react";
 
@@ -571,13 +570,15 @@ export async function getAssetOriginalURL(
 }
 
 export function usePeerUserName(peer?: string) {
-  const profile = useShareProfile();
-  const { invitations } = useShareConnection(["invitations"]);
+  const { profile, invitations } = useShareConnection([
+    "invitations",
+    "profile",
+  ]);
   return useMemo(
     () =>
-      peer === profile.key
-        ? profile.name
+      peer === profile?.key
+        ? profile?.name
         : invitations.find((v) => v.user.key === peer)?.user.name,
-    [invitations, peer, profile.key, profile.name]
+    [invitations, peer, profile?.key, profile?.name]
   );
 }

@@ -1,5 +1,5 @@
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import React from "react";
-import { Navigate } from "react-router-dom";
 import { LinkButton } from "~components/Button";
 import { Spinner } from "~components/Spinner";
 import { useCurrentEvent } from "~hooks/state";
@@ -11,7 +11,13 @@ export const EventDivisionPickerPage: React.FC = () => {
   });
 
   if (event?.divisions?.length === 1) {
-    return <Navigate to={`/${event.sku}/${event.divisions[0].id}`} replace />;
+    return (
+      <Navigate
+        to="/$sku/$division"
+        params={{ sku: event.sku, division: event.divisions[0].id!.toString() }}
+        replace
+      />
+    );
   }
 
   if (!event) {
@@ -27,14 +33,22 @@ export const EventDivisionPickerPage: React.FC = () => {
             <li key={division.id}>
               <LinkButton
                 className={"w-full"}
-                to={`/${event.sku}/${division.id}`}
+                to={"/$sku/$division"}
+                params={{
+                  sku: event.sku,
+                  division: division.id!.toString(),
+                }}
               >
                 {division.name}
               </LinkButton>
             </li>
           ))}
         <li>
-          <LinkButton className={"w-full"} to={`/${event.sku}/skills`}>
+          <LinkButton
+            className={"w-full"}
+            to={"/$sku/skills"}
+            params={{ sku: event.sku }}
+          >
             Skills
           </LinkButton>
         </li>
@@ -42,3 +56,7 @@ export const EventDivisionPickerPage: React.FC = () => {
     </section>
   );
 };
+
+export const Route = createFileRoute("/$sku/")({
+  component: EventDivisionPickerPage,
+});

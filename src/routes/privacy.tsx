@@ -1,3 +1,4 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { ReactComponent as PrivacyPolicy } from "../../documents/privacy.md";
 
 import "./markdown.css";
@@ -10,4 +11,6 @@ export const PrivacyPage: React.FC = () => {
   );
 };
 
-export default PrivacyPage;
+export const Route = createFileRoute("/privacy")({
+  component: PrivacyPage,
+});

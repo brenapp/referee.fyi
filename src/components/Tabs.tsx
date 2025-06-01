@@ -1,11 +1,26 @@
 import { twMerge } from "tailwind-merge";
 import { useCallback, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { ComponentParts } from "./parts";
+import { useLocation, useRouter } from "@tanstack/react-router";
+import type { Register } from "@tanstack/react-router";
 
 export type TabsNavigationState = {
   tab?: number;
 };
+
+declare module "@tanstack/react-router" {
+  interface HistoryState {
+    /**
+     * If present, this indicates the history state came from a tab navigation.
+     **/
+    tabActive?: string;
+
+    /**
+     * The current tab state for each tab component.
+     **/
+    tabState?: Record<string, TabsNavigationState>;
+  }
+}
 
 export type TabContent = {
   type: "content";
@@ -29,30 +44,46 @@ export type TabParts = ComponentParts<{
   tabpanel: React.HTMLProps<HTMLDivElement>;
 }>;
 
-export type TabsProps = Omit<React.HTMLProps<HTMLDivElement>, "children"> & {
+type Route = keyof Register["router"]["routesByPath"];
+
+export type TabsProps = Omit<
+  React.HTMLProps<HTMLDivElement>,
+  "children" | "id"
+> & {
+  id: [Route, string];
   children: Tab[];
 } & TabParts;
 
 export const Tabs: React.FC<TabsProps> = ({
   children: tabs,
+  id: idParts,
   parts,
   ...props
 }) => {
+  const id = idParts.join("-");
+  const router = useRouter();
   const location = useLocation();
-  const navigate = useNavigate();
 
   const contentTabs = tabs.filter((tab) => tab.type === "content");
   const buttonTabs = tabs.filter((tab) => tab.type === "action");
 
-  const [activeTab, setActiveTab] = useState<number>(location?.state?.tab ?? 0);
+  const [activeTab, setActiveTab] = useState<number>(
+    location?.state?.tabState?.[id]?.tab ?? 0
+  );
 
   const onClickTab = useCallback(
     (index: number) => {
-      const state: TabsNavigationState = { tab: index };
-      navigate(location, { replace: true, state });
+      router.navigate({
+        state: (state) => ({
+          ...state,
+          tabActive: id,
+          tabState: { ...state.tabState, [id]: { tab: index } },
+        }),
+        replace: true,
+      });
       setActiveTab(index);
     },
-    [location, navigate]
+    [id, router]
   );
 
   return (
@@ -97,7 +128,7 @@ export const Tabs: React.FC<TabsProps> = ({
       <div
         role="tabpanel"
         id={`tabpanel-${tabs[activeTab].id}`}
-        aria-labelledby={`tab-${tabs[activeTab].id}}`}
+        aria-labelledby={`tab-${tabs[activeTab].id}`}
         {...parts?.tabpanel}
         className={twMerge("contents", parts?.tabpanel?.className)}
       >

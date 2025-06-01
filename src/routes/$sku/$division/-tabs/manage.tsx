@@ -15,7 +15,6 @@ import {
   getRequestCodeUserKey,
   inviteUser,
   putRequestCode,
-  registerUser,
   removeInvitation,
 } from "~utils/data/share";
 import {
@@ -33,7 +32,6 @@ import {
   useIntegrationAPIIncidents,
   useIntegrationAPIUsers,
   useIntegrationBearer,
-  useShareProfile,
   useSystemKeyIntegrationBearer,
 } from "~utils/hooks/share";
 import { Checkbox, Input } from "~components/Input";
@@ -194,15 +192,31 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
   }, [requestCode]);
 
   // Register user when they open
-  const { name, persist } = useShareProfile();
-  const [localName, setLocalName] = useState(name);
+  const { profile, updateProfile } = useShareConnection([
+    "updateProfile",
+    "profile",
+  ]);
+
+  const [localName, setLocalName] = useState("");
+  const name = profile?.name;
+
+  useEffect(() => {
+    if (!profile) {
+      return;
+    }
+    if (profile.name) {
+      setLocalName(profile.name);
+    } else {
+      setLocalName("");
+    }
+  }, [profile]);
 
   useEffect(() => {
     if (!name || !open) {
       return;
     }
-    registerUser({ name });
-  }, [name, open]);
+    updateProfile({ name });
+  }, [profile, open, name, updateProfile]);
 
   // Invitation
   const { data: invitation } = useQuery({
@@ -215,11 +229,7 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
 
   const { mutate: setNameContinue, isPending: isPendingSetNameContinue } =
     useMutation({
-      mutationFn: async () => {
-        const profile = { name: localName };
-        await persist(profile);
-        await registerUser(profile);
-      },
+      mutationFn: () => updateProfile({ name: localName }),
     });
 
   const onAcceptInvitation = useCallback(async () => {
@@ -239,7 +249,7 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
     <Dialog open={open} onClose={onClose} mode="modal">
       <DialogHeader onClose={onClose} title="Join Request" />
       <DialogBody className="px-2">
-        {!name ? (
+        {!profile ? (
           <>
             <p>
               Enter your name to continue. This name will be visible to other
@@ -263,7 +273,7 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
             <Spinner show={isPendingSetNameContinue} />
           </>
         ) : null}
-        {name ? (
+        {profile ? (
           <>
             <p className="mb-4">
               To join an existing instance, you will need an admin to invite
@@ -367,20 +377,22 @@ export const LeaveDialog: React.FC<ManageDialogProps> = ({
 };
 
 export const ProfilePrompt: React.FC = () => {
-  const { name, persist } = useShareProfile();
+  const {
+    profile: { name },
+    updateProfile,
+  } = useShareConnection(["profile", "updateProfile"]);
 
-  // Local
-  const [localName, setLocalName] = useState(name);
+  const [localName, setLocalName] = useState("");
+  useEffect(() => {
+    if (name) {
+      setLocalName(name);
+    }
+  }, [name]);
 
   // Save
-  const { mutateAsync: register } = useMutation({ mutationFn: registerUser });
   const { mutate: setNameContinue, isPending: isPendingSetNameContinue } =
     useMutation({
-      mutationFn: async () => {
-        const profile = { name: localName };
-        await persist(profile);
-        await register(profile);
-      },
+      mutationFn: () => updateProfile({ name: localName }),
     });
 
   return (
@@ -442,8 +454,6 @@ export const InstanceUserListItem: React.FC<InstanceUserListItemProps> = ({
 };
 
 export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
-  const { name, key } = useShareProfile();
-
   // Dialogs
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [joinCodeDialogOpen, setJoinCodeDialogOpen] = useState(false);
@@ -452,6 +462,8 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
   // Instance State
   const { data: invitation } = useEventInvitation(event.sku);
   const connection = useShareConnection([
+    "profile",
+    "updateProfile",
     "invitations",
     "activeUsers",
     "readyState",
@@ -466,13 +478,13 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
     }
 
     const instanceInList = connection.invitations.some(
-      (inv) => inv.user.key === key
+      (inv) => inv.user.key === connection.profile?.key
     );
 
     if (!instanceInList) {
       forceEventInvitationSync(event.sku);
     }
-  }, [invitation, connection.invitations, key, event.sku]);
+  }, [invitation, connection.invitations, event.sku, connection.profile?.key]);
 
   const { data: entries } = useEventIncidents(event.sku);
   const isSharing = useMemo(
@@ -498,7 +510,7 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
   } = useMutation({
     mutationFn: async () => {
       await tryPersistStorage();
-      await registerUser({ name });
+      await connection.updateProfile(connection.profile);
       const response = await createInstance();
 
       if (response.success) {
@@ -513,7 +525,7 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
     },
   });
 
-  if (!name) {
+  if (!connection.profile.name) {
     return (
       <section>
         <h2 className="font-bold">Sharing</h2>
@@ -548,7 +560,7 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
       />
 
       <h2 className="font-bold">Sharing</h2>
-      <p>Share Name: {name} </p>
+      <p>Share Name: {connection.profile.name} </p>
       {isSharing ? (
         <div className="mt-2">
           {invitation?.admin ? (
@@ -623,7 +635,7 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
             <Button
               mode="primary"
               className="mt-2"
-              disabled={!name}
+              disabled={!connection.profile.name}
               onClick={() => onClickBeginSharing()}
             >
               Begin Sharing
@@ -649,7 +661,8 @@ const EventSummaryLink: React.FC<ManageTabProps> = ({ event }) => {
       <h2 className="font-bold">Event Summary</h2>
       <p>See a summary of all entries at the event.</p>
       <LinkButton
-        to={`/${event.sku}/summary`}
+        to="/$sku/summary"
+        params={{ sku: event.sku }}
         className="w-full mt-2 flex items-center"
       >
         <span className="flex-1">Event Summary</span>
@@ -815,7 +828,9 @@ const SystemKeyIntegrationInfo: React.FC<SystemKeyIntegrationInfoProps> = ({
 };
 
 const SystemKeyInfo: React.FC<ManageTabProps> = ({ event }) => {
-  const { isSystemKey } = useShareProfile();
+  const {
+    profile: { isSystemKey },
+  } = useShareConnection(["profile"]);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["@referee-fyi", "get_instance_list", event.sku],

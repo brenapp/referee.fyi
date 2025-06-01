@@ -1,9 +1,6 @@
 import { MergeFunction, mergeLWW, WithLWWConsistency } from "./lww.js";
 import { mergeGrowSet } from "./gset.js";
 
-// July 2024 - Samsung Internet does not support Set.prototype.intersection or Set.prototype.difference
-import "core-js/actual/set";
-
 type ConsistentMapElement = WithLWWConsistency<
   Record<string, unknown> & { id: string },
   never

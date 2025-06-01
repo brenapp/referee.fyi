@@ -3,9 +3,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAddEventVisited } from "~utils/hooks/history";
 import { Button, LinkButton } from "~components/Button";
 import { CodeBracketIcon, FlagIcon, PlayIcon } from "@heroicons/react/20/solid";
-import { EventNewIncidentDialog } from "./dialogs/new";
+import { EventNewIncidentDialog } from "~components/dialogs/new";
 import { Tabs } from "~components/Tabs";
-import { EventManageTab } from "./home/manage";
+import { EventManageTab } from "./$division/-tabs/manage";
 import { Spinner } from "~components/Spinner";
 import { EventData } from "robotevents";
 import { useEventSkills, useEventTeams } from "~utils/hooks/robotevents";
@@ -27,6 +27,7 @@ import { MenuButton } from "~components/MenuButton";
 import { RichIncident } from "~utils/data/incident";
 import { useEventIncidents } from "~utils/hooks/incident";
 import { RulesSummary } from "~components/RulesSummary";
+import { createFileRoute } from "@tanstack/react-router";
 
 type TeamSkillsTabProps = {
   event: EventData;
@@ -148,7 +149,8 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
                       }
                     />
                     <LinkButton
-                      to={`/${event.sku}/team/${team.number}`}
+                      to={"/$sku/team/$team"}
+                      params={{ sku: event.sku, team: team.number }}
                       className="w-full mt-4 flex items-center"
                     >
                       <span className="flex-1">Details</span>
@@ -262,6 +264,7 @@ export const EventSkillsPage: React.FC = () => {
   return (
     <section className="mt-4 flex flex-col">
       <Tabs
+        id={["/$sku/skills", "EventSkillsPage"]}
         className="flex-1"
         parts={{
           tablist: {
@@ -300,4 +303,6 @@ export const EventSkillsPage: React.FC = () => {
   );
 };
 
-export default EventSkillsPage;
+export const Route = createFileRoute("/$sku/skills")({
+  component: EventSkillsPage,
+});

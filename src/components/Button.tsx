@@ -1,5 +1,5 @@
+import { Link, LinkProps } from "@tanstack/react-router";
 import { twMerge } from "tailwind-merge";
-import { Link, LinkProps } from "react-router-dom";
 
 export type ButtonMode =
   | "normal"
@@ -62,6 +62,7 @@ export const Button: React.FC<ButtonProps> = ({
 };
 
 export type LinkButtonProps = LinkProps &
+  React.AnchorHTMLAttributes<HTMLAnchorElement> &
   React.RefAttributes<HTMLAnchorElement>;
 
 export const LinkButton: React.FC<LinkButtonProps> = (props) => {

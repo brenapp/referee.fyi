@@ -14,7 +14,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Button, LinkButton } from "~components/Button";
 import { RichIncident } from "~utils/data/incident";
-import { EventNewIncidentDialog } from "../dialogs/new";
+import { EventNewIncidentDialog } from "~components/dialogs/new";
 import { MenuButton } from "~components/MenuButton";
 import { RulesSummary } from "~components/RulesSummary";
 import { DisconnectedWarning } from "~components/DisconnectedWarning";
@@ -127,7 +127,8 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
                   filter={(i) => i.team == team.number}
                 />
                 <LinkButton
-                  to={`/${event.sku}/team/${team.number}`}
+                  to={"/$sku/team/$team"}
+                  params={{ sku: event.sku, team: team.number }}
                   className="w-full mt-4 flex items-center"
                 >
                   <span className="flex-1">Details</span>

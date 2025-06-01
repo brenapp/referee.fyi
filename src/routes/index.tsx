@@ -20,6 +20,8 @@ import "./markdown.css";
 // TODO: We probably should rely on a different signal to determine if we should display the update notes.
 import { version } from "../../package.json";
 
+import { createFileRoute } from "@tanstack/react-router";
+
 const UserWelcome: React.FC = () => {
   return (
     <section className="mt-4 bg-zinc-900 p-4 rounded-md">
@@ -149,7 +151,8 @@ export const HomePage: React.FC = () => {
         <section className="max-w-full mb-4">
           {events?.map((event) => (
             <LinkButton
-              to={`/${event.sku}`}
+              to={"/$sku"}
+              params={{ sku: event.sku }}
               className="w-full max-w-full mt-4 relative"
               key={event.sku}
             >
@@ -188,4 +191,6 @@ export const HomePage: React.FC = () => {
   );
 };
 
-export default HomePage;
+export const Route = createFileRoute("/")({
+  component: HomePage,
+});

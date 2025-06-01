@@ -1,9 +1,9 @@
 import { useCurrentEvent } from "~hooks/state";
 import { useEffect } from "react";
 import { useAddEventVisited } from "~utils/hooks/history";
-import { EventMatchesTab } from "./matches";
-import { EventTeamsTab } from "./teams";
-import { EventManageTab } from "./manage";
+import { EventMatchesTab } from "./-tabs/matches";
+import { EventTeamsTab } from "./-tabs/teams";
+import { EventManageTab } from "./-tabs/manage";
 
 import { ClipboardDocumentListIcon as MatchesIconOutline } from "@heroicons/react/24/outline";
 import { ClipboardDocumentListIcon as MatchesIconSolid } from "@heroicons/react/24/solid";
@@ -14,6 +14,7 @@ import { UserGroupIcon as TeamsIconSolid } from "@heroicons/react/24/solid";
 import { CloudIcon as ManageIconOutline } from "@heroicons/react/24/outline";
 import { CloudIcon as ManageIconSolid } from "@heroicons/react/24/solid";
 import { Tabs } from "~components/Tabs";
+import { createFileRoute } from "@tanstack/react-router";
 
 export const EventHome: React.FC = () => {
   const { data: event } = useCurrentEvent();
@@ -28,6 +29,7 @@ export const EventHome: React.FC = () => {
   return event ? (
     <section className="mt-4 flex flex-col">
       <Tabs
+        id={["/$sku/$division", "EventHome"]}
         className="flex-1"
         parts={{
           tablist: {
@@ -78,4 +80,6 @@ export const EventHome: React.FC = () => {
   ) : null;
 };
 
-export default EventHome;
+export const Route = createFileRoute("/$sku/$division/")({
+  component: EventHome,
+});

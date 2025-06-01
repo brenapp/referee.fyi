@@ -14,12 +14,6 @@ import {
 } from "@referee-fyi/share";
 import { initLWW, isKeyLWW, updateLWW } from "@referee-fyi/consistency";
 import { getShareProfile } from "./share";
-
-// July 2024 - Samsung Internet does not support Set.prototype.intersection or Set.prototype.difference
-import "core-js/actual/set";
-
-// September 2024 - Older versions of Safari do not support Object.groupBy
-import "core-js/actual/object/group-by";
 import { LocalAsset } from "./assets";
 
 export type { IncidentOutcome, Incident };

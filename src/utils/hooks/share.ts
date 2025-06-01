@@ -10,17 +10,8 @@ import {
   IntegrationUsersResponse,
 } from "~utils/data/share";
 import { exportPublicKey, signMessage } from "~utils/data/crypto";
-import { useShareConnection } from "~models/ShareConnection";
 import { HookQueryOptions } from "./robotevents";
 import { Incident } from "@referee-fyi/share";
-
-export function useShareProfile() {
-  const { profile, updateProfile: persist } = useShareConnection([
-    "profile",
-    "updateProfile",
-  ]);
-  return { ...profile, persist };
-}
 
 export type UseCreateShareOptions = {
   sku: string;

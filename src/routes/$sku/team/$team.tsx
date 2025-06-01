@@ -1,4 +1,3 @@
-import { useParams } from "react-router-dom";
 import { useEventMatchesForTeam, useEventTeam } from "~hooks/robotevents";
 import { Spinner } from "~components/Spinner";
 import { useCallback, useMemo, useState } from "react";
@@ -8,7 +7,7 @@ import { Tabs } from "~components/Tabs";
 import { EventData } from "robotevents";
 import { TeamData } from "robotevents";
 import { ClickableMatch } from "~components/Match";
-import { EventMatchDialog } from "./dialogs/match";
+import { EventMatchDialog } from "~components/dialogs/match";
 import { MatchData } from "robotevents";
 import { Incident } from "~components/Incident";
 import { VirtualizedList } from "~components/VirtualizedList";
@@ -20,6 +19,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { useEventAssetsForTeam } from "~utils/hooks/assets";
 import { AssetPreview } from "~components/Assets";
+import { createFileRoute, useParams } from "@tanstack/react-router";
 
 export type EventTeamAssetsProps = {
   team?: string;
@@ -110,7 +110,7 @@ export const EventTeamsIncidents: React.FC<EventTeamsTabProps> = ({
 };
 
 export const EventTeamsPage: React.FC = () => {
-  const { number } = useParams();
+  const { team: number } = useParams({ from: "/$sku/team/$team" });
   const { data: event } = useCurrentEvent();
   const { data: team } = useEventTeam(event, number ?? "");
 
@@ -136,6 +136,7 @@ export const EventTeamsPage: React.FC = () => {
         <p className="italic">{teamLocation}</p>
       </header>
       <Tabs
+        id={["/$sku/team/$team", "EventTeamsPage"]}
         parts={{
           tablist: {
             className: "absolute bottom-0 right-0 left-0 z-10 p-0 bg-zinc-900",
@@ -185,4 +186,6 @@ export const EventTeamsPage: React.FC = () => {
   );
 };
 
-export default EventTeamsPage;
+export const Route = createFileRoute("/$sku/team/$team")({
+  component: EventTeamsPage,
+});

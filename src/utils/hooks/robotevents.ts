@@ -51,11 +51,11 @@ const matchPersister = createPersister<
     Array.isArray(data) ? data.map((m) => new Match(m)) : new Match(data),
 });
 
-export function useEvent(
+export function getUseEventQueryParams(
   sku: string | null | undefined,
   options?: HookQueryOptions<EventData | null | undefined>
-): UseQueryResult<EventData | null | undefined> {
-  return useQuery({
+): UseQueryOptions<EventData | null | undefined> {
+  return {
     queryKey: ["event", sku],
     queryFn: async ({ signal }) => {
       if (!sku) {
@@ -73,7 +73,14 @@ export function useEvent(
     },
     staleTime: Infinity,
     ...options,
-  });
+  };
+}
+
+export function useEvent(
+  sku: string | null | undefined,
+  options?: HookQueryOptions<EventData | null | undefined>
+): UseQueryResult<EventData | null | undefined> {
+  return useQuery(getUseEventQueryParams(sku, options));
 }
 
 export function useEventSearch(

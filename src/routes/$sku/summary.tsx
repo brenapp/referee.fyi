@@ -18,9 +18,9 @@ import { Checkbox, RulesMultiSelect, Select } from "~components/Input";
 import { twMerge } from "tailwind-merge";
 import { useMutation } from "@tanstack/react-query";
 import { ReadyState, useShareConnection } from "~models/ShareConnection";
-import { useShareProfile } from "~utils/hooks/share";
 import { IncidentOutcome, OUTCOMES } from "@referee-fyi/share";
 import { VirtualizedList } from "~components/VirtualizedList";
+import { createFileRoute } from "@tanstack/react-router";
 
 export type Filters = {
   outcomes: Record<IncidentOutcome, boolean>;
@@ -200,7 +200,9 @@ export const ForceSyncButton: React.FC = () => {
 };
 
 export const ExportButton: React.FC = () => {
-  const { name, key } = useShareProfile();
+  const {
+    profile: { name, key },
+  } = useShareConnection(["profile"]);
 
   const { data: event } = useCurrentEvent();
   const { data: incidents, isLoading } = useEventIncidents(event?.sku);
@@ -386,7 +388,8 @@ export const EventSummaryPage: React.FC = () => {
         </VirtualizedList>
         <section className="mt-4">
           <LinkButton
-            to={`/${event.sku}/deleted`}
+            to="/$sku/deleted"
+            params={{ sku: event.sku }}
             className="w-full flex items-center"
           >
             <span className="flex-1">Deleted Incidents</span>
@@ -398,4 +401,6 @@ export const EventSummaryPage: React.FC = () => {
   );
 };
 
-export default EventSummaryPage;
+export const Route = createFileRoute("/$sku/summary")({
+  component: EventSummaryPage,
+});

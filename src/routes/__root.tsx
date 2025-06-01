@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   currentSeasons,
   useCurrentSeason,
@@ -33,6 +32,14 @@ import { runMigrations } from "../migrations";
 import { toast } from "~components/Toast";
 import { getEventInvitation, getShareProfile } from "~utils/data/share";
 import { useGeolocation } from "~utils/hooks/meta";
+import {
+  createRootRoute,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams,
+  useRouter,
+} from "@tanstack/react-router";
 
 function isValidSKU(sku: string) {
   return !!sku.match(
@@ -74,8 +81,13 @@ const EventPicker: React.FC = () => {
       placeholderData: (prev) => prev,
     }
   );
-  const { data: event } = useCurrentEvent();
+
+  const { sku: skuParam } = useParams({ strict: false });
+
+  const { data: event, isPending: isPendingCurrentEvent } = useCurrentEvent();
   const division = useCurrentDivision();
+
+  const sku = event?.sku ?? (skuParam && isValidSKU(skuParam) ? skuParam : "");
 
   const results = useMemo(() => {
     if (!query) {
@@ -131,8 +143,8 @@ const EventPicker: React.FC = () => {
     (event?.divisions?.length ?? 0) > 1;
 
   const onClick = () => {
-    if (showDiv) {
-      navigate(`/${event?.sku}`);
+    if (showDiv && event) {
+      navigate({ to: "/$sku", params: { sku: event.sku } });
     } else {
       setOpen(true);
     }
@@ -174,7 +186,8 @@ const EventPicker: React.FC = () => {
                   </p>
                 </div>
                 <LinkButton
-                  to={`/${eventFromSKU.sku}`}
+                  to={"/$sku"}
+                  params={{ sku: eventFromSKU.sku }}
                   onClick={() => setOpen(false)}
                   className="mt-4 bg-emerald-600 w-full text-center"
                 >
@@ -195,7 +208,8 @@ const EventPicker: React.FC = () => {
                     aria-label={`${event.name} at ${event.location.venue}. ${event.sku}`}
                   >
                     <LinkButton
-                      to={`/${event.sku}`}
+                      to={"/$sku"}
+                      params={{ sku: event.sku }}
                       onClick={() => {
                         setOpen(false);
                       }}
@@ -226,7 +240,8 @@ const EventPicker: React.FC = () => {
                   aria-label={`${event.name} at ${event.location.venue}. ${event.sku}`}
                 >
                   <LinkButton
-                    to={`/${event.sku}`}
+                    to={"/$sku"}
+                    params={{ sku: event.sku }}
                     onClick={() => {
                       setOpen(false);
                     }}
@@ -266,9 +281,18 @@ const EventPicker: React.FC = () => {
           style={{ gridTemplateColumns: "1fr 1.25rem" }}
         >
           <div className="flex-1 overflow-hidden whitespace-nowrap text-ellipsis">
-            <p>{event ? event.name : "Select Event"}</p>
+            <p
+              style={{
+                visibility: sku && isPendingCurrentEvent ? "hidden" : "visible",
+              }}
+            >
+              {event?.name ??
+                (sku && isPendingCurrentEvent
+                  ? "Loading Event..."
+                  : "Select Event")}
+            </p>
             <p className="text-sm text-emerald-400">
-              {showDiv ? <span>{selectedDiv?.name}</span> : event?.sku}
+              {showDiv ? <span>{selectedDiv?.name}</span> : sku}
             </p>
           </div>
           <ChevronDownIcon className="w-5 h-5" />
@@ -419,6 +443,7 @@ const MigrationManager: React.FC = () => {
 export const AppShell: React.FC = () => {
   const { isLoading } = useCurrentEvent();
   const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <main
@@ -433,7 +458,11 @@ export const AppShell: React.FC = () => {
       <MigrationManager />
       <nav className="h-16 flex gap-4 max-w-full">
         <IconButton
-          onClick={() => navigate(-1)}
+          onClick={() =>
+            router.history.canGoBack()
+              ? router.history.back()
+              : navigate({ to: "/" })
+          }
           icon={<ChevronLeftIcon height={24} />}
           className="aspect-auto bg-transparent"
           aria-label="Back"
@@ -446,3 +475,7 @@ export const AppShell: React.FC = () => {
     </main>
   );
 };
+
+export const Route = createRootRoute({
+  component: AppShell,
+});

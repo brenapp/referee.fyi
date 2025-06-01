@@ -7,7 +7,6 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { plugin as markdown, Mode } from "vite-plugin-markdown";
 import { exec } from "node:child_process";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
-import { cloudflare } from "@cloudflare/vite-plugin";
 
 // Generate version.json
 import { type Plugin } from "vite";
@@ -42,7 +41,7 @@ const generateVersionJson: Plugin = {
 };
 
 // https://vitejs.dev/config/
-export default defineConfig(() => ({
+export default defineConfig({
   plugins: [
     TanStackRouterVite({
       target: "react",
@@ -167,11 +166,16 @@ export default defineConfig(() => ({
     markdown({
       mode: [Mode.REACT],
     }),
-    cloudflare(),
   ],
 
   base: "/",
   build: {
     sourcemap: true,
   },
-}));
+  server: {
+    port: 3000,
+    strictPort: true,
+    host: true,
+    allowedHosts: ["mac.bren.haus"],
+  },
+});

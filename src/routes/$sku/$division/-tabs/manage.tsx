@@ -829,8 +829,8 @@ const SystemKeyIntegrationInfo: React.FC<SystemKeyIntegrationInfoProps> = ({
 
 const SystemKeyInfo: React.FC<ManageTabProps> = ({ event }) => {
   const {
-    profile: { isSystemKey },
-  } = useShareConnection(["profile"]);
+    userMetadata: { isSystemKey },
+  } = useShareConnection(["userMetadata"]);
 
   const { data: response, isLoading } = useQuery({
     queryKey: ["@referee-fyi", "get_instance_list", event.sku],

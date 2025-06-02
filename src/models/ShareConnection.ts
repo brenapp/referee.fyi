@@ -70,7 +70,8 @@ export type UserMetadata = Omit<APIRegisterUserResponseBody, "user">;
 
 export type ShareConnectionData = {
   readyState: ReadyState;
-  profile: User & UserMetadata;
+  profile: User;
+  userMetadata: UserMetadata;
   websocket: WebSocket | null;
   invitation: UserInvitation | null;
   activeUsers: User[];
@@ -109,21 +110,26 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
 
   asset_uploads: {},
 
-  profile: { name: "", key: "", isSystemKey: false },
+  profile: { name: "", key: "" },
+  userMetadata: { isSystemKey: false },
   updateProfile: async (updates) => {
     const current = await getShareProfile();
 
     const profile = { ...get().profile, ...current, ...updates };
-    const user = await registerUser(profile);
-
-    profile.isSystemKey = user.success && user.data.isSystemKey;
-
     set({ profile });
     saveShareProfile(profile);
+
+    const user = await registerUser(profile);
+
+    const userMetadata: UserMetadata = user.success
+      ? user.data
+      : { isSystemKey: false };
+
+    set({ userMetadata });
     setUser({
       id: profile.key,
       username: profile.name,
-      isSystemKey: profile.isSystemKey,
+      userMetadata,
     });
 
     return user;

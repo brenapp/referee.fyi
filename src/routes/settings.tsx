@@ -12,9 +12,10 @@ import { isWorldsBuild } from "~utils/data/state";
 import { clearCache } from "~utils/sentry";
 
 export const SettingsPage: React.FC = () => {
-  const { updateProfile, profile } = useShareConnection([
+  const { updateProfile, profile, userMetadata } = useShareConnection([
     "updateProfile",
     "profile",
+    "userMetadata",
   ]);
   const [localName, setLocalName] = useState(profile?.name ?? "");
 
@@ -57,7 +58,7 @@ export const SettingsPage: React.FC = () => {
         <h2 className="font-bold">Public Key</h2>
         <ClickToCopy message={profile?.key ?? ""} />
       </section>
-      {profile.isSystemKey ? (
+      {userMetadata.isSystemKey ? (
         <Info message="System Key Enabled" className="mt-4" />
       ) : null}
       <section className="mt-4">

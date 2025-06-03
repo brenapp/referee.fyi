@@ -77,7 +77,7 @@ export type ShareConnectionData = {
   activeUsers: User[];
   invitations: InvitationListItem[];
   reconnectTimer: NodeJS.Timeout | null;
-  asset_uploads: Record<string, Promise<ShareResponse<null>>>;
+  assetUploads: Record<string, Promise<ShareResponse<null>>>;
 };
 
 export type ShareConnectionActions = {
@@ -108,7 +108,7 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
   activeUsers: [],
   invitations: [],
 
-  asset_uploads: {},
+  assetUploads: {},
 
   profile: { name: "", key: "" },
   userMetadata: { isSystemKey: false },

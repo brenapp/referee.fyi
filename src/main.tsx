@@ -8,13 +8,13 @@ import { registerSW } from "virtual:pwa-register";
 import { initHistoryStore } from "~utils/hooks/history";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { ErrorBoundary } from "~components/ErrorBoundary";
+import { Spinner } from "~components/Spinner";
 import { client as sentry } from "~utils/sentry";
 
 import "~utils/sentry";
 import "./index.css";
 
 import { routeTree } from "./routeTree.gen";
-import { Spinner } from "~components/Spinner";
 
 const router = createRouter({
   routeTree,

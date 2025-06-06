@@ -1,12 +1,14 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { tanstackRouterBrowserTracingIntegration } from "@sentry/react";
 import { initIncidentStore } from "~utils/data/incident";
 import { queryClient } from "~utils/data/query";
 import { registerSW } from "virtual:pwa-register";
 import { initHistoryStore } from "~utils/hooks/history";
-import { QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { ErrorBoundary } from "~components/ErrorBoundary";
+import { client as sentry } from "~utils/sentry";
 
 import "~utils/sentry";
 import "./index.css";
@@ -18,6 +20,7 @@ const router = createRouter({
   routeTree,
   defaultPendingComponent: () => <Spinner show />,
 });
+sentry?.addIntegration(tanstackRouterBrowserTracingIntegration(router));
 
 declare module "@tanstack/react-router" {
   interface Register {

@@ -7,7 +7,7 @@ import { ReportIssueDialog } from "./dialogs/report";
 import { useCallback } from "react";
 import { clearCache } from "~utils/sentry";
 
-const ErrorReportIssueDialog: FallbackRender = (props) => {
+export const ErrorReportIssueDialog: FallbackRender = (props) => {
   const setOpen = useCallback(
     (value: boolean) => {
       if (value) return;

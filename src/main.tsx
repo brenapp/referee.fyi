@@ -1,13 +1,19 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { tanstackRouterBrowserTracingIntegration } from "@sentry/react";
+import {
+  captureException,
+  tanstackRouterBrowserTracingIntegration,
+} from "@sentry/react";
 import { initIncidentStore } from "~utils/data/incident";
 import { queryClient } from "~utils/data/query";
 import { registerSW } from "virtual:pwa-register";
 import { initHistoryStore } from "~utils/hooks/history";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
-import { ErrorBoundary } from "~components/ErrorBoundary";
+import {
+  ErrorBoundary,
+  ErrorReportIssueDialog,
+} from "~components/ErrorBoundary";
 import { Spinner } from "~components/Spinner";
 import { client as sentry } from "~utils/sentry";
 
@@ -19,6 +25,18 @@ import { routeTree } from "./routeTree.gen";
 const router = createRouter({
   routeTree,
   defaultPendingComponent: () => <Spinner show />,
+  defaultErrorComponent: ({ error, reset, info }) => {
+    const eventId = captureException(error, { extra: { info } });
+    console.log({ error, info, eventId });
+    return (
+      <ErrorReportIssueDialog
+        error={error}
+        resetError={reset}
+        eventId={eventId}
+        componentStack={info?.componentStack ?? ""}
+      />
+    );
+  },
 });
 sentry?.addIntegration(tanstackRouterBrowserTracingIntegration(router));
 

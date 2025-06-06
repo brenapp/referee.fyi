@@ -27,7 +27,6 @@ const router = createRouter({
   defaultPendingComponent: () => <Spinner show />,
   defaultErrorComponent: ({ error, reset, info }) => {
     const eventId = captureException(error, { extra: { info } });
-    console.log({ error, info, eventId });
     return (
       <ErrorReportIssueDialog
         error={error}

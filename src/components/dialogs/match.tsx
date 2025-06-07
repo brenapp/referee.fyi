@@ -27,7 +27,8 @@ import { MatchTime } from "~components/Match";
 import { TeamIsolationDialog } from "./team";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import { MatchScratchpad } from "~components/scratchpad/Scratchpad";
-import { animate, motion, PanInfo, useMotionValue } from "motion/react";
+import { animate, PanInfo, useMotionValue } from "motion/react";
+import * as m from "motion/react-m";
 import useResizeObserver from "use-resize-observer";
 import { RulesSummary } from "~components/RulesSummary";
 
@@ -316,7 +317,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
             parts={{ alliance: { className: "w-full" } }}
           />
         ) : null}
-        <motion.div
+        <m.div
           ref={containerRef}
           style={{
             position: "relative",
@@ -335,7 +336,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                   }
                 : {};
             return (
-              <motion.div
+              <m.div
                 {...hiddenProps}
                 key={matchIndex + i}
                 style={{
@@ -353,10 +354,10 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
                 onDragEnd={onDragEnd}
               >
                 <EventMatchView key={matchIndex + i} match={match} />
-              </motion.div>
+              </m.div>
             );
           })}
-        </motion.div>
+        </m.div>
       </DialogBody>
     </Dialog>
   );

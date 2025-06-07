@@ -48,6 +48,9 @@ export default defineConfig(() => ({
       autoCodeSplitting: true,
     }),
     react(),
+    markdown({
+      mode: [Mode.REACT],
+    }),
     vitePluginVersionMark({
       name: "Referee FYI",
       ifGitSHA: true,
@@ -161,9 +164,6 @@ export default defineConfig(() => ({
         excludeReplayShadowDom: true,
         excludeReplayWorker: true,
       },
-    }),
-    markdown({
-      mode: [Mode.REACT],
     }),
   ],
 

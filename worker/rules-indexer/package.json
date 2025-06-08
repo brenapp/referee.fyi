@@ -9,10 +9,12 @@
 		"cf-typegen": "wrangler types"
 	},
 	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20250607.0",
 		"typescript": "^5.5.2",
 		"wrangler": "^4.19.1"
 	},
 	"dependencies": {
+		"@cloudflare/unenv-preset": "^2.3.2",
 		"@hono/standard-validator": "^0.1.2",
 		"@hono/zod-openapi": "^0.19.6",
 		"@referee-fyi/rules": "^1.0.0",

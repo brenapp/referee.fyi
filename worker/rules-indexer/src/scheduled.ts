@@ -1,5 +1,5 @@
 import { GameSchema } from "@referee-fyi/rules";
-import { RulesIndexMetadata } from "./types";
+import puppeteer from "@cloudflare/puppeteer";
 import { ProgramAbbr, Year } from "robotevents";
 
 // const GAMES = [
@@ -13,7 +13,6 @@ function normalizeRule(rule: string): string {
 
 export type GameRuleToIndex = {
   path: `${ProgramAbbr}_${Year}/rule_${string}`;
-  meta: RulesIndexMetadata;
   rule: string;
   url: string;
 };
@@ -29,19 +28,11 @@ export async function getGameRulesToIndex(url: string) {
 
   for (const group of result.data.ruleGroups) {
     for (const rule of group.rules) {
-      const metadata: RulesIndexMetadata = {
-        programs: group.programs,
-        year: result.data.season,
-        rule,
-        group: group.name,
-      };
-
       for (const program of group.programs) {
         rules.push({
           path: `${program}_${result.data.season}/rule_${normalizeRule(
             rule.rule
           )}`,
-          meta: metadata,
           rule: rule.rule,
           url: rule.link,
         });
@@ -52,21 +43,16 @@ export async function getGameRulesToIndex(url: string) {
   return { success: true, rules } as const;
 }
 
-export async function scheduled(
-  event: ScheduledController,
-  env: Env,
-  ctx: ExecutionContext
-) {
-  console.log("Scheduled event triggered:", event.cron, env, ctx);
-
-  const rules = await getGameRulesToIndex(
-    "https://referee.fyi/rules/V5RC/2024-2025.json"
-  );
+export async function indexGameRules(env: Env, url: string) {
+  const rules = await getGameRulesToIndex(url);
 
   if (!rules.success) {
     console.error("Failed to fetch game rules:", rules.error);
     return;
   }
+
+  // @ts-expect-error fetch nonsense from Cloudflare Workers Runtime
+  const browser = await puppeteer.launch(env.BROWSER);
 
   const cache: Record<string, string> = {};
 
@@ -76,7 +62,14 @@ export async function scheduled(
     if (cache[rule.url]) {
       html = cache[rule.url];
     } else {
-      html = await fetch(rule.url).then((res) => res.text());
+      const page = await browser.newPage();
+      await page.goto(rule.url, { waitUntil: "networkidle0" });
+      html = await page.content();
+      await page.close();
+
+      if (!html) {
+        continue;
+      }
     }
     cache[rule.url] = html;
 
@@ -90,4 +83,24 @@ export async function scheduled(
     });
     console.log("put", put, rule.path);
   }
+}
+
+export async function scheduled(
+  event: ScheduledController,
+  env: Env,
+  ctx: ExecutionContext
+) {
+  console.log("Scheduled event triggered:", event.cron, env, ctx);
+
+  const result = indexGameRules(
+    env,
+    "https://referee.fyi/rules/V5RC/2024-2025.json"
+  );
+
+  if (!result) {
+    console.error("Failed to index game rules");
+    return;
+  }
+
+  console.log("Game rules indexed successfully:", result);
 }

@@ -21,6 +21,7 @@
     "worker/*"
   ],
   "dependencies": {
+    "@cloudflare/puppeteer": "^1.0.2",
     "@heroicons/react": "^2.1.5",
     "@referee-fyi/consistency": "^1.0.0",
     "@referee-fyi/rules": "^1.0.0",

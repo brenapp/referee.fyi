@@ -22,5 +22,11 @@
 			"binding": "RULES_BUCKET",
 			"bucket_name": "referee-fyi-game-rules",
 		}
-	]
+	],
+	"browser": {
+		"binding": "BROWSER"
+	},
+	"compatibility_flags": [
+		"nodejs_compat_v2"
+	],
 }

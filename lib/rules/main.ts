@@ -22,8 +22,9 @@ export const RuleSchema = z.object({
   link: z.url().meta({
     description: "A link to an HTML page with the rule text.",
   }),
-  icon: z.url().optional().meta({
-    description: "An optional icon URL for the rule.",
+  icon: z.string().startsWith("/").optional().meta({
+    description:
+      "An optional icon path for the rule. The base URL is https://referee.fyi",
   }),
 });
 

@@ -46,7 +46,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1",
-    "robotevents": "^6.0.3",
+    "robotevents": "^6.0.4",
     "sort-by": "^1.2.0",
     "tailwind-merge": "^2.0.0",
     "use-resize-observer": "^9.1.0",
@@ -54,9 +54,9 @@
     "zustand": "^4.5.2"
   },
   "devDependencies": {
-    "@referee-fyi/rules": "^1.0.0",
     "@babel/preset-react": "^7.26.3",
     "@cloudflare/workers-types": "^4.20231121.0",
+    "@referee-fyi/rules": "^1.0.0",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.5",

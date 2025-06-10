@@ -24,7 +24,7 @@ export async function getGameRulesToIndex(url: string) {
         rules.push({
           path: `${program}_${result.data.season}/rule_${normalizeRule(
             rule.rule
-          )}`,
+          )}.html`,
           rule: rule.rule,
           url: rule.link,
         });

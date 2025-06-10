@@ -6,10 +6,12 @@
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev --test-scheduled",
 		"start": "wrangler dev --test-scheduled",
-		"cf-typegen": "wrangler types"
+		"cf-typegen": "wrangler types",
+		"qnaplus-typegen": "npx openapi-typescript https://api.qnapl.us/openapi -o ./src/generated/qnaplus.d.ts"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20250607.0",
+		"openapi-typescript": "^7.8.0",
 		"typescript": "^5.5.2",
 		"wrangler": "^4.19.1"
 	},

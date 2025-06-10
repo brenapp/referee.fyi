@@ -64,7 +64,7 @@ export async function indexGameRules(env: Env, url: string) {
     }
     cache[rule.url] = html;
 
-    await env.RULES_BUCKET.put(rule.path, html, {
+    await env.rules.put(rule.path, html, {
       httpMetadata: {
         contentType: "text/html",
         cacheControl: "max-age=31536000, immutable",

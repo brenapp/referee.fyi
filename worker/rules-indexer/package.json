@@ -23,6 +23,7 @@
 		"@referee-fyi/rules": "^1.0.0",
 		"hono": "^4.7.10",
 		"hono-openapi": "^0.4.8",
+		"openapi-fetch": "^0.14.0",
 		"zod": "3.25",
 		"zod-openapi": "^4.2.4"
 	}

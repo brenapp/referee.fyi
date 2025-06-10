@@ -15,18 +15,24 @@
 		"mode": "smart"
 	},
 	"ai": {
-		"binding": "AI"
+		"binding": "ai"
 	},
 	"r2_buckets": [
 		{
-			"binding": "RULES_BUCKET",
+			"binding": "rules",
 			"bucket_name": "referee-fyi-game-rules",
 		}
 	],
 	"browser": {
-		"binding": "BROWSER"
+		"binding": "browser"
 	},
 	"compatibility_flags": [
 		"nodejs_compat_v2"
 	],
+	"kv_namespaces": [
+		{
+			"binding": "qnaplus",
+			"id": "6afc92c2ed874a9cb7a1557681f19ea5"
+		}
+	]
 }

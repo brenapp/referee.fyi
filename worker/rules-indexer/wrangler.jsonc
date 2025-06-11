@@ -6,10 +6,14 @@
 	"observability": {
 		"enabled": true
 	},
-	"triggers": {
-		"crons": [
-			"*/30 * * * *"
-		]
+	"env": {
+		"production": {
+			"triggers": {
+				"crons": [
+					"*/30 * * * *"
+				]
+			}
+		}
 	},
 	"placement": {
 		"mode": "smart"

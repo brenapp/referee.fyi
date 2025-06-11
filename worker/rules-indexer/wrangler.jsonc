@@ -25,6 +25,7 @@
 		{
 			"binding": "rules",
 			"bucket_name": "referee-fyi-game-rules",
+			"preview_bucket_name": "referee-fyi-game-rules"
 		}
 	],
 	"browser": {
@@ -36,7 +37,8 @@
 	"kv_namespaces": [
 		{
 			"binding": "qnaplus",
-			"id": "6afc92c2ed874a9cb7a1557681f19ea5"
+			"id": "6afc92c2ed874a9cb7a1557681f19ea5",
+			"preview_id": "6afc92c2ed874a9cb7a1557681f19ea5"
 		}
 	]
 }

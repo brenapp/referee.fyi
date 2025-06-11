@@ -82,9 +82,23 @@ async function indexQuestion(env: Env, question: Question) {
     const path = `${program}_${year}/qna_${question.id}.md`;
     await env.rules.put(path, content, {
       customMetadata: {
-        question: JSON.stringify(content),
+        id: question.id,
+        program: program,
+        title: question.title,
+        author: question.author,
+        askedTimestampMs: new Date(question.askedTimestampMs).toISOString(),
+        answeredTimestampMs: question.answeredTimestampMs
+          ? new Date(question.answeredTimestampMs).toISOString()
+          : "",
+        tags: question.tags.join(", "),
+        url: question.url,
       },
     });
+
+    await env.qnaplus.put(
+      `qna_${question.id}`,
+      JSON.stringify(question, null, 2)
+    );
   }
 }
 
@@ -103,11 +117,11 @@ export async function fetchUpdatedQNAs(env: Env) {
     return;
   }
 
-  if (result.data?.version) {
-    await setCurrentQNAPlusVersion(env, result.data.version);
-  }
-
   for (const question of result.data.questions ?? []) {
     await indexQuestion(env, question);
+  }
+
+  if (result.data?.version) {
+    await setCurrentQNAPlusVersion(env, result.data.version);
   }
 }

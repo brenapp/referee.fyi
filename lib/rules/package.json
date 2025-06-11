@@ -2,7 +2,7 @@
   "name": "@referee-fyi/rules",
   "type": "module",
   "version": "1.0.0",
-  "exports": "./main.js",
+  "main": "main.js",
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w"

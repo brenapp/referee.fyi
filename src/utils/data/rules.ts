@@ -1,4 +1,4 @@
-import { programs, seasons } from "robotevents";
+import { ProgramAbbr, Year } from "robotevents";
 import { Game } from "~utils/hooks/rules";
 
 import HighStakes from "/rules/V5RC/2024-2025.json?url";
@@ -26,17 +26,19 @@ export const FullVolumeRules: () => Promise<Game> = async () =>
   fetch(FullVolume).then((res) => res.json());
 
 // Supported games
-export const GAME_FETCHERS: Record<number, () => Promise<Game>> = {
+export const GAME_FETCHERS: Partial<
+  Record<`${ProgramAbbr}_${Year}`, () => Promise<Game>>
+> = {
   // 2024-2025
-  [seasons[programs.V5RC]["2024-2025"]]: HighStakesRules,
-  [seasons[programs.VURC]["2024-2025"]]: HighStakesRules,
-  [seasons[programs.VAIRC]["2024-2025"]]: HighStakesRules,
-  [seasons[programs.VIQRC]["2024-2025"]]: RapidRelayRules,
-  [seasons[programs.ADC]["2024-2025"]]: MissionGravityRules,
+  ["V5RC_2024-2025"]: HighStakesRules,
+  ["VURC_2024-2025"]: HighStakesRules,
+  ["VAIRC_2024-2025"]: HighStakesRules,
+  ["VIQRC_2024-2025"]: RapidRelayRules,
+  ["ADC_2024-2025"]: MissionGravityRules,
 
   // 2023-2024
-  [seasons[programs.V5RC]["2023-2024"]]: OverUnderRules,
-  [seasons[programs.VURC]["2023-2024"]]: OverUnderRules,
-  [seasons[programs.VAIRC]["2023-2024"]]: OverUnderRules,
-  [seasons[programs.VIQRC]["2023-2024"]]: FullVolumeRules,
+  ["V5RC_2023-2024"]: OverUnderRules,
+  ["VURC_2023-2024"]: OverUnderRules,
+  ["VAIRC_2023-2024"]: OverUnderRules,
+  ["VIQRC_2023-2024"]: FullVolumeRules,
 };

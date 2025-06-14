@@ -44,18 +44,23 @@ const RuleGroup: React.FC<RuleGroupProps> = ({ ruleGroup, query }) => {
 
 export const RulebookPage: React.FC = () => {
   const [query, setQuery] = useState("");
-  const { rules } = Route.useLoaderData();
+  const { rules, program } = Route.useLoaderData();
+
+  const groups = rules.ruleGroups.filter((group) =>
+    group.programs.includes(program)
+  );
+
   return (
     <main className="mt-4 flex flex-col gap-4 max-h-screen">
       <section className="overflow-auto flex-1">
         <h1 className="font-bold text-lg">
           {rules.title} •{" "}
           <span className="font-normal font-mono text-sm text-emerald-400">
-            {rules.programs.join("/")} {rules.season}
+            {program} {rules.season}
           </span>
         </h1>
         <div className="mt-4">
-          {rules.ruleGroups.map((group) => (
+          {groups.map((group) => (
             <RuleGroup key={group.name} ruleGroup={group} query={query} />
           ))}
         </div>

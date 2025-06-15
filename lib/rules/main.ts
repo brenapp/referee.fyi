@@ -44,10 +44,26 @@ export const RuleGroupSchema = z.object({
 
 export type RuleGroup = z.infer<typeof RuleGroupSchema>;
 
+export const CanonicalLinksSchema = z.object({
+  manual: z.url().meta({
+    description:
+      "A permanent, canonical link to the game manual. This should be the official manual.",
+  }),
+  qna: z.url().meta({
+    description:
+      "A permanent, canonical link to the official Q&A for this game.",
+  }),
+});
+
+export type CanonicalLinks = z.infer<typeof CanonicalLinksSchema>;
+
 export const GameSchema = z
   .object({
     title: z.string().meta({ description: "The game name." }),
     season: YearSchema.meta({ description: "The season year (ex. 2025-2026)" }),
+    links: CanonicalLinksSchema.meta({
+      description: "A set of canonical links for the game.",
+    }),
     programs: z.array(ProgramAbbrSchema),
     ruleGroups: z.array(RuleGroupSchema).meta({
       description: "The rule groups for this game.",

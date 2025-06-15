@@ -2,11 +2,19 @@
   "$schema": "https://referee.fyi/rules/schema.json",
   "title": "Rapid Relay",
   "season": "2024-2025",
-  "programs": ["VIQRC"],
+  "programs": [
+    "VIQRC"
+  ],
+  "links": {
+    "manual": "https://link.vex.com/docs/24-25/viqrc-rapid-relay/GameManual",
+    "qna": "https://www.robotevents.com/VIQRC/2024-2025/QA"
+  },
   "ruleGroups": [
     {
       "name": "Specific Game Rules",
-      "programs": ["VIQRC"],
+      "programs": [
+        "VIQRC"
+      ],
       "rules": [
         {
           "rule": "<SG1>",
@@ -42,7 +50,9 @@
     },
     {
       "name": "General Rules",
-      "programs": ["VIQRC"],
+      "programs": [
+        "VIQRC"
+      ],
       "rules": [
         {
           "rule": "<G1>",
@@ -103,7 +113,9 @@
     },
     {
       "name": "Safety Rules",
-      "programs": ["VIQRC"],
+      "programs": [
+        "VIQRC"
+      ],
       "rules": [
         {
           "rule": "<S1>",
@@ -119,7 +131,9 @@
     },
     {
       "name": "Robot Rules",
-      "programs": ["VIQRC"],
+      "programs": [
+        "VIQRC"
+      ],
       "rules": [
         {
           "rule": "<R1>",
@@ -210,7 +224,9 @@
     },
     {
       "name": "Scoring Rules",
-      "programs": ["VIQRC"],
+      "programs": [
+        "VIQRC"
+      ],
       "rules": [
         {
           "rule": "<SC1>",
@@ -251,7 +267,9 @@
     },
     {
       "name": "Tournament Rules",
-      "programs": ["VIQRC"],
+      "programs": [
+        "VIQRC"
+      ],
       "rules": [
         {
           "rule": "<T1>",
@@ -352,7 +370,9 @@
     },
     {
       "name": "Robot Skills Challenge Rules",
-      "programs": ["VIQRC"],
+      "programs": [
+        "VIQRC"
+      ],
       "rules": [
         {
           "rule": "<RSC1>",

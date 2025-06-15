@@ -2,11 +2,23 @@
   "$schema": "https://referee.fyi/rules/schema.json",
   "title": "High Stakes",
   "season": "2024-2025",
-  "programs": ["V5RC", "VURC", "VAIRC"],
+  "links": {
+    "manual": "http://link.vex.com/docs/24-25/v5rc-high-stakes/GameManual",
+    "qna": "https://www.robotevents.com/V5RC/2024-2025/QA"
+  },
+  "programs": [
+    "V5RC",
+    "VURC",
+    "VAIRC"
+  ],
   "ruleGroups": [
     {
       "name": "Specific Game Rules",
-      "programs": ["V5RC", "VURC", "VAIRC"],
+      "programs": [
+        "V5RC",
+        "VURC",
+        "VAIRC"
+      ],
       "rules": [
         {
           "rule": "<SG1>",
@@ -74,7 +86,10 @@
     },
     {
       "name": "VURC General Rules",
-      "programs": ["VURC", "VAIRC"],
+      "programs": [
+        "VURC",
+        "VAIRC"
+      ],
       "rules": [
         {
           "rule": "<VUG1>",
@@ -95,7 +110,11 @@
     },
     {
       "name": "General Rules",
-      "programs": ["V5RC", "VURC", "VAIRC"],
+      "programs": [
+        "V5RC",
+        "VURC",
+        "VAIRC"
+      ],
       "rules": [
         {
           "rule": "<G1>",
@@ -186,7 +205,11 @@
     },
     {
       "name": "Safety Rules",
-      "programs": ["V5RC", "VURC", "VAIRC"],
+      "programs": [
+        "V5RC",
+        "VURC",
+        "VAIRC"
+      ],
       "rules": [
         {
           "rule": "<S1>",
@@ -212,7 +235,10 @@
     },
     {
       "name": "VURC Robot Rules",
-      "programs": ["VURC", "VAIRC"],
+      "programs": [
+        "VURC",
+        "VAIRC"
+      ],
       "rules": [
         {
           "rule": "<VUR1>",
@@ -288,7 +314,11 @@
     },
     {
       "name": "Robot Rules",
-      "programs": ["V5RC", "VURC", "VAIRC"],
+      "programs": [
+        "V5RC",
+        "VURC",
+        "VAIRC"
+      ],
       "rules": [
         {
           "rule": "<R1>",
@@ -434,7 +464,11 @@
     },
     {
       "name": "Scoring Rules",
-      "programs": ["V5RC", "VURC", "VAIRC"],
+      "programs": [
+        "V5RC",
+        "VURC",
+        "VAIRC"
+      ],
       "rules": [
         {
           "rule": "<SC1>",
@@ -485,7 +519,10 @@
     },
     {
       "name": "VURC Robot Skills Challenge Rules",
-      "programs": ["VURC", "VAIRC"],
+      "programs": [
+        "VURC",
+        "VAIRC"
+      ],
       "rules": [
         {
           "rule": "<VURS1>",
@@ -511,7 +548,11 @@
     },
     {
       "name": "Robot Skills Challenge Rules",
-      "programs": ["V5RC", "VURC", "VAIRC"],
+      "programs": [
+        "V5RC",
+        "VURC",
+        "VAIRC"
+      ],
       "rules": [
         {
           "rule": "<RSC1>",
@@ -557,7 +598,10 @@
     },
     {
       "name": "VURC Tournament Rules",
-      "programs": ["VURC", "VAIRC"],
+      "programs": [
+        "VURC",
+        "VAIRC"
+      ],
       "rules": [
         {
           "rule": "<VUT1>",
@@ -598,7 +642,11 @@
     },
     {
       "name": "Tournament Rules",
-      "programs": ["V5RC", "VURC", "VAIRC"],
+      "programs": [
+        "V5RC",
+        "VURC",
+        "VAIRC"
+      ],
       "rules": [
         {
           "rule": "<T1>",

@@ -83,11 +83,11 @@ export function useEvent(
   return useQuery(getUseEventQueryParams(sku, options));
 }
 
-export function useEventSearch(
+export function getUseEventSearchQueryParams(
   query: operations["event_getEvents"]["parameters"]["query"],
   options?: HookQueryOptions<EventData[] | null | undefined>
-) {
-  return useQuery({
+): UseQueryOptions<EventData[] | null | undefined> {
+  return {
     queryKey: ["events_by_level", query],
     queryFn: async ({ signal }) => {
       const response = await client.events.search(query, { signal });
@@ -101,15 +101,22 @@ export function useEventSearch(
     },
     staleTime: Infinity,
     ...options,
-  });
+  };
 }
 
-export function useTeam(
+export function useEventSearch(
+  query: operations["event_getEvents"]["parameters"]["query"],
+  options?: HookQueryOptions<EventData[] | null | undefined>
+) {
+  return useQuery(getUseEventSearchQueryParams(query, options));
+}
+
+export function getUseTeamQueryParams(
   number: string | null | undefined,
   program?: ProgramCode | null,
   options?: HookQueryOptions<TeamData | null | undefined>
-): UseQueryResult<TeamData | null | undefined> {
-  return useQuery({
+): UseQueryOptions<TeamData | null | undefined> {
+  return {
     queryKey: ["team", number, program],
     queryFn: async ({ signal }) => {
       if (!number || !program) {
@@ -129,15 +136,23 @@ export function useTeam(
     },
     staleTime: 1000 * 60 * 60 * 4,
     ...options,
-  });
+  };
 }
 
-export function useEventTeams<Select = TeamData[]>(
+export function useTeam(
+  number: string | null | undefined,
+  program?: ProgramCode | null,
+  options?: HookQueryOptions<TeamData | null | undefined>
+): UseQueryResult<TeamData | null | undefined> {
+  return useQuery(getUseTeamQueryParams(number, program, options));
+}
+
+export function getUseEventTeamsQueryParams<Select = TeamData[]>(
   eventData: EventData | null | undefined,
   options?: operations["event_getTeams"]["parameters"]["query"],
   queryOptions?: HookQueryOptions<TeamData[], DefaultError, Select>
-): UseQueryResult<Select> {
-  return useQuery({
+): UseQueryOptions<TeamData[], DefaultError, Select> {
+  return {
     queryKey: ["teams", eventData?.sku, options],
     queryFn: async ({ signal }) => {
       if (!eventData) {
@@ -155,7 +170,17 @@ export function useEventTeams<Select = TeamData[]>(
     },
     staleTime: 1000 * 60 * 60,
     ...queryOptions,
-  });
+  };
+}
+
+export function useEventTeams<Select = TeamData[]>(
+  eventData: EventData | null | undefined,
+  options?: operations["event_getTeams"]["parameters"]["query"],
+  queryOptions?: HookQueryOptions<TeamData[], DefaultError, Select>
+): UseQueryResult<Select> {
+  return useQuery(
+    getUseEventTeamsQueryParams(eventData, options, queryOptions)
+  );
 }
 
 type UseDivisionTeamsResult = {
@@ -163,18 +188,16 @@ type UseDivisionTeamsResult = {
   divisionOnly: boolean;
 };
 
-export function useDivisionTeams(
+export function getUseDivisionTeamsQueryParams(
   eventData: EventData | null | undefined,
   division: number | null | undefined,
+  teams: TeamData[] | undefined,
+  matches: Match[] | undefined,
+  isTeamsSuccess: boolean,
+  isMatchesSuccess: boolean,
   options?: HookQueryOptions<UseDivisionTeamsResult>
-): UseQueryResult<UseDivisionTeamsResult> {
-  const { data: teams, isSuccess: isTeamsSuccess } = useEventTeams(eventData);
-  const { data: matches, isSuccess: isMatchesSuccess } = useEventMatches(
-    eventData,
-    division
-  );
-
-  return useQuery<UseDivisionTeamsResult>({
+): UseQueryOptions<UseDivisionTeamsResult> {
+  return {
     queryKey: ["division_teams", eventData?.sku, division],
     queryFn: async () => {
       if (!eventData || !division) {
@@ -221,7 +244,31 @@ export function useDivisionTeams(
     staleTime: 1000 * 60 * 60,
     enabled: isTeamsSuccess && isMatchesSuccess,
     ...options,
-  });
+  };
+}
+
+export function useDivisionTeams(
+  eventData: EventData | null | undefined,
+  division: number | null | undefined,
+  options?: HookQueryOptions<UseDivisionTeamsResult>
+): UseQueryResult<UseDivisionTeamsResult> {
+  const { data: teams, isSuccess: isTeamsSuccess } = useEventTeams(eventData);
+  const { data: matches, isSuccess: isMatchesSuccess } = useEventMatches(
+    eventData,
+    division
+  );
+
+  return useQuery<UseDivisionTeamsResult>(
+    getUseDivisionTeamsQueryParams(
+      eventData,
+      division,
+      teams,
+      matches,
+      isTeamsSuccess,
+      isMatchesSuccess,
+      options
+    )
+  );
 }
 
 const roundUnknown = 0;
@@ -261,13 +308,13 @@ export function logicalMatchComparison(a: MatchData, b: MatchData) {
   return 0;
 }
 
-export function useEventMatches<T = Match[]>(
+export function getUseEventMatchesQueryParams<T = Match[]>(
   eventData: EventData | null | undefined,
   division: number | null | undefined,
   query?: operations["event_getDivisionMatches"]["parameters"]["query"],
   options?: HookQueryOptions<Match[], Error, T>
-): UseQueryResult<T> {
-  return useQuery({
+): UseQueryOptions<Match[], Error, T> {
+  return {
     queryKey: ["matches", eventData?.sku, division, query],
     queryFn: async () => {
       if (!eventData || !division) {
@@ -286,16 +333,27 @@ export function useEventMatches<T = Match[]>(
     staleTime: 1000 * 60,
     persister: matchPersister,
     ...options,
-  });
+  };
 }
 
-export function useEventMatchesForTeam(
+export function useEventMatches<T = Match[]>(
+  eventData: EventData | null | undefined,
+  division: number | null | undefined,
+  query?: operations["event_getDivisionMatches"]["parameters"]["query"],
+  options?: HookQueryOptions<Match[], Error, T>
+): UseQueryResult<T> {
+  return useQuery(
+    getUseEventMatchesQueryParams(eventData, division, query, options)
+  );
+}
+
+export function getUseEventMatchesForTeamQueryParams(
   event: EventData | null | undefined,
   teamData: TeamData | null | undefined,
   color?: Color,
   options?: HookQueryOptions<Match[]>
-) {
-  return useQuery({
+): UseQueryOptions<Match[]> {
+  return {
     queryKey: ["team_matches", event?.sku, teamData?.number],
     queryFn: async () => {
       if (!event || !teamData) {
@@ -321,7 +379,18 @@ export function useEventMatchesForTeam(
     staleTime: 1000 * 60,
     persister: matchPersister,
     ...options,
-  });
+  };
+}
+
+export function useEventMatchesForTeam(
+  event: EventData | null | undefined,
+  teamData: TeamData | null | undefined,
+  color?: Color,
+  options?: HookQueryOptions<Match[]>
+) {
+  return useQuery(
+    getUseEventMatchesForTeamQueryParams(event, teamData, color, options)
+  );
 }
 
 export function useMatchTeams(
@@ -367,10 +436,10 @@ export const currentSeasons = (
   [programs.V5RC, programs.VIQRC, programs.VURC, programs.ADC] as const
 ).map((program) => client.seasons[program][CURRENT_YEAR]) as number[];
 
-export function useEventsToday(
+export function getUseEventsTodayQueryParams(
   options?: HookQueryOptions<EventData[]>
-): UseQueryResult<EventData[]> {
-  return useQuery({
+): UseQueryOptions<EventData[]> {
+  return {
     queryKey: ["events_today"],
     queryFn: async () => {
       const today = new Date();
@@ -396,15 +465,21 @@ export function useEventsToday(
         .sort((a, b) => a.name.localeCompare(b.name));
     },
     ...options,
-  });
+  };
 }
 
-export function useEventSkills(
+export function useEventsToday(
+  options?: HookQueryOptions<EventData[]>
+): UseQueryResult<EventData[]> {
+  return useQuery(getUseEventsTodayQueryParams(options));
+}
+
+export function getUseEventSkillsQueryParams(
   data: EventData | null | undefined,
   options?: operations["event_getSkills"]["parameters"]["query"],
   queryOptions?: HookQueryOptions<Skill[]>
-) {
-  return useQuery({
+): UseQueryOptions<Skill[]> {
+  return {
     queryKey: ["skills", data?.sku, options],
     queryFn: async () => {
       if (!data) {
@@ -421,14 +496,22 @@ export function useEventSkills(
       return runs.data;
     },
     ...queryOptions,
-  });
+  };
 }
 
-export function useSeason(
+export function useEventSkills(
+  data: EventData | null | undefined,
+  options?: operations["event_getSkills"]["parameters"]["query"],
+  queryOptions?: HookQueryOptions<Skill[]>
+) {
+  return useQuery(getUseEventSkillsQueryParams(data, options, queryOptions));
+}
+
+export function getUseSeasonQueryParams(
   id?: number,
   queryOptions?: HookQueryOptions<Season | null>
-) {
-  return useQuery({
+): UseQueryOptions<Season | null> {
+  return {
     queryKey: ["season", id],
     queryFn: async () => {
       if (!id) {
@@ -443,7 +526,14 @@ export function useSeason(
     },
     staleTime: Infinity,
     ...queryOptions,
-  });
+  };
+}
+
+export function useSeason(
+  id?: number,
+  queryOptions?: HookQueryOptions<Season | null>
+) {
+  return useQuery(getUseSeasonQueryParams(id, queryOptions));
 }
 
 export function useCurrentSeason(program?: ProgramCode | null) {

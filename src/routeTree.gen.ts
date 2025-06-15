@@ -21,6 +21,7 @@ import { Route as SkuSkillsImport } from './routes/$sku/skills'
 import { Route as SkuDevtoolsImport } from './routes/$sku/devtools'
 import { Route as SkuDeletedImport } from './routes/$sku/deleted'
 import { Route as SkuDivisionIndexImport } from './routes/$sku/$division/index'
+import { Route as RulesProgramYearImport } from './routes/rules/$program/$year'
 import { Route as SkuTeamTeamImport } from './routes/$sku/team/$team'
 
 // Create/Update Routes
@@ -83,6 +84,12 @@ const SkuDivisionIndexRoute = SkuDivisionIndexImport.update({
   id: '/$division/',
   path: '/$division/',
   getParentRoute: () => SkuRouteRoute,
+} as any)
+
+const RulesProgramYearRoute = RulesProgramYearImport.update({
+  id: '/rules/$program/$year',
+  path: '/rules/$program/$year',
+  getParentRoute: () => rootRoute,
 } as any)
 
 const SkuTeamTeamRoute = SkuTeamTeamImport.update({
@@ -165,6 +172,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SkuTeamTeamImport
       parentRoute: typeof SkuRouteImport
     }
+    '/rules/$program/$year': {
+      id: '/rules/$program/$year'
+      path: '/rules/$program/$year'
+      fullPath: '/rules/$program/$year'
+      preLoaderRoute: typeof RulesProgramYearImport
+      parentRoute: typeof rootRoute
+    }
     '/$sku/$division/': {
       id: '/$sku/$division/'
       path: '/$division'
@@ -212,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku/': typeof SkuIndexRoute
   '/$sku/team/$team': typeof SkuTeamTeamRoute
+  '/rules/$program/$year': typeof RulesProgramYearRoute
   '/$sku/$division': typeof SkuDivisionIndexRoute
 }
 
@@ -225,6 +240,7 @@ export interface FileRoutesByTo {
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku': typeof SkuIndexRoute
   '/$sku/team/$team': typeof SkuTeamTeamRoute
+  '/rules/$program/$year': typeof RulesProgramYearRoute
   '/$sku/$division': typeof SkuDivisionIndexRoute
 }
 
@@ -240,6 +256,7 @@ export interface FileRoutesById {
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku/': typeof SkuIndexRoute
   '/$sku/team/$team': typeof SkuTeamTeamRoute
+  '/rules/$program/$year': typeof RulesProgramYearRoute
   '/$sku/$division/': typeof SkuDivisionIndexRoute
 }
 
@@ -256,6 +273,7 @@ export interface FileRouteTypes {
     | '/$sku/summary'
     | '/$sku/'
     | '/$sku/team/$team'
+    | '/rules/$program/$year'
     | '/$sku/$division'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -268,6 +286,7 @@ export interface FileRouteTypes {
     | '/$sku/summary'
     | '/$sku'
     | '/$sku/team/$team'
+    | '/rules/$program/$year'
     | '/$sku/$division'
   id:
     | '__root__'
@@ -281,6 +300,7 @@ export interface FileRouteTypes {
     | '/$sku/summary'
     | '/$sku/'
     | '/$sku/team/$team'
+    | '/rules/$program/$year'
     | '/$sku/$division/'
   fileRoutesById: FileRoutesById
 }
@@ -290,6 +310,7 @@ export interface RootRouteChildren {
   SkuRouteRoute: typeof SkuRouteRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   SettingsRoute: typeof SettingsRoute
+  RulesProgramYearRoute: typeof RulesProgramYearRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
@@ -297,6 +318,7 @@ const rootRouteChildren: RootRouteChildren = {
   SkuRouteRoute: SkuRouteRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   SettingsRoute: SettingsRoute,
+  RulesProgramYearRoute: RulesProgramYearRoute,
 }
 
 export const routeTree = rootRoute
@@ -312,7 +334,8 @@ export const routeTree = rootRoute
         "/",
         "/$sku",
         "/privacy",
-        "/settings"
+        "/settings",
+        "/rules/$program/$year"
       ]
     },
     "/": {
@@ -359,6 +382,9 @@ export const routeTree = rootRoute
     "/$sku/team/$team": {
       "filePath": "$sku/team/$team.tsx",
       "parent": "/$sku"
+    },
+    "/rules/$program/$year": {
+      "filePath": "rules/$program/$year.tsx"
     },
     "/$sku/$division/": {
       "filePath": "$sku/$division/index.tsx",

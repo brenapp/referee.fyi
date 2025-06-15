@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   currentSeasons,
-  useCurrentSeason,
   useEvent,
   useEventSearch,
-  useSeason,
 } from "~utils/hooks/robotevents";
 import { Button, IconButton, LinkButton } from "~components/Button";
 import {
@@ -23,7 +21,7 @@ import {
 } from "~components/Dialog";
 import { ProgramCode } from "robotevents";
 import { Input, RulesSelect } from "~components/Input";
-import { Rule, useRulesForSeason } from "~utils/hooks/rules";
+import { Rule, useRulesForEvent } from "~utils/hooks/rules";
 import { Toaster } from "react-hot-toast";
 import { useEventInvitation } from "~utils/hooks/share";
 import { useShareConnection } from "~models/ShareConnection";
@@ -304,13 +302,10 @@ const EventPicker: React.FC = () => {
 
 const Rules: React.FC = () => {
   const { data: event } = useCurrentEvent();
+  const { data: rules } = useRulesForEvent(event);
 
   const [open, setOpen] = useState(false);
   const program = useMemo(() => event?.program.id as ProgramCode, [event]);
-
-  const { data: currentSeasonForProgram } = useCurrentSeason(program);
-  const { data: season } = useSeason(event?.season.id);
-  const { data: rules } = useRulesForSeason(season ?? currentSeasonForProgram);
 
   const [rule, setRule] = useState<Rule | null>(null);
 

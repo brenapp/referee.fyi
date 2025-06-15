@@ -15,7 +15,9 @@ type RuleGroupProps = {
 const RuleGroup: React.FC<RuleGroupProps> = ({ ruleGroup, query }) => {
   const rules = ruleGroup.rules.filter((rule) => {
     return query
-      ? rule.description.toLowerCase().includes(query.toLowerCase())
+      ? rule.description.toLowerCase().includes(query.toLowerCase()) ||
+          rule.rule.toLowerCase().includes(query.toLowerCase()) ||
+          ruleGroup.name.toLowerCase().includes(query.toLowerCase())
       : true;
   });
 

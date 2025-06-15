@@ -2,9 +2,13 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { YearSchema, ProgramAbbrSchema, Game } from "@referee-fyi/rules";
 import { queryClient } from "~utils/data/query";
 import { getUseRulesForSeasonQueryParams } from "~utils/hooks/rules";
-import { LinkButton } from "~components/Button";
+import { ExternalLinkButton, LinkButton } from "~components/Button";
 import { IconLabel, Input } from "~components/Input";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import {
+  MagnifyingGlassIcon,
+  BookOpenIcon,
+  ChatBubbleLeftRightIcon,
+} from "@heroicons/react/24/solid";
 import { useState } from "react";
 
 type RuleGroupProps = {
@@ -61,6 +65,22 @@ export const RulebookPage: React.FC = () => {
             {program} {rules.season}
           </span>
         </h1>
+        <nav className="mt-2">
+          <ExternalLinkButton
+            href={rules.links.manual}
+            className="mr-4 inline-flex gap-4 items-center"
+          >
+            <BookOpenIcon height={20} />
+            Official Manual
+          </ExternalLinkButton>
+          <ExternalLinkButton
+            href={rules.links.qna}
+            className="mr-4 inline-flex gap-4 items-center"
+          >
+            <ChatBubbleLeftRightIcon height={20} />
+            Official Q&A
+          </ExternalLinkButton>
+        </nav>
         <div className="mt-4">
           {groups.map((group) => (
             <RuleGroup key={group.name} ruleGroup={group} query={query} />

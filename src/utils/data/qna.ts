@@ -1,5 +1,5 @@
 import createClient from "openapi-fetch";
-import { Question, type paths } from "@referee-fyi/rules/qnaplus";
+import { paths, Question } from "@referee-fyi/rules/worker";
 
 import { get, set } from "./keyval";
 import { ProgramAbbr, Year } from "robotevents";
@@ -7,7 +7,7 @@ import { getMany } from "idb-keyval";
 import { captureException } from "@sentry/react";
 
 export const client = createClient<paths>({
-  baseUrl: "https://api.qnapl.us",
+  baseUrl: import.meta.env.VITE_REFEREE_FYI_RULES_SERVER,
 });
 
 export async function getQNAPlusVersion() {
@@ -63,7 +63,7 @@ export async function updateQNAs() {
   const version = await getQNAPlusVersion();
 
   try {
-    const response = await client.GET("/internal/update", {
+    const response = await client.GET("/api/updateQuestions", {
       params: { query: { version } },
     });
 

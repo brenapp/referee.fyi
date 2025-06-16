@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w",
-    "qnaplus-typegen": "npx openapi-typescript https://api.qnapl.us/openapi -o ./generated/qnaplus.d.ts"
+    "qnaplus-typegen": "npx openapi-typescript https://api.qnapl.us/openapi -o ./generated/qnaplus.d.ts",
+    "rules-typegen": "npx openapi-typescript http://localhost:8787/openapi -o ./generated/rules.d.ts"
   },
   "author": "",
   "description": "",

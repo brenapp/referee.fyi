@@ -25,12 +25,12 @@ export async function getQuestion(id: string) {
 export async function indexQuestion(question: Question) {
   const all = (await get<Set<string>>("qna_all_idx")) ?? new Set<string>();
   const program =
-    (await get<string[]>(
+    (await get<Set<string>>(
       `qna_program_${question.program}_${question.season}_idx`
-    )) ?? [];
+    )) ?? new Set<string>();
 
   all.add(question.id);
-  program.push(question.id);
+  program.add(question.id);
 
   await set("qna_all_idx", all);
   await set(`qna_program_${question.program}_${question.season}_idx`, program);
@@ -41,8 +41,9 @@ export async function getQuestionsByProgram(
   season: Year
 ): Promise<Question[]> {
   const ids =
-    (await get<string[]>(`qna_program_${program}_${season}_idx`)) ?? [];
-  const questions = await getMany<Question>(ids.map((id) => `qna_${id}`));
+    (await get<Set<string>>(`qna_program_${program}_${season}_idx`)) ??
+    new Set<string>();
+  const questions = await getMany<Question>([...ids].map((id) => `qna_${id}`));
   return questions.filter((q): q is Question => q !== null);
 }
 

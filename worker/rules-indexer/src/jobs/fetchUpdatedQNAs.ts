@@ -1,6 +1,6 @@
-import createClient from "openapi-fetch";
-import type { Question, paths } from "@referee-fyi/rules/qnaplus";
+import type { Question } from "@referee-fyi/rules/qnaplus";
 import type { ProgramAbbr, Year } from "robotevents";
+import { client } from "../qnaplus";
 
 const programs: Partial<Record<ProgramAbbr, ProgramAbbr[]>> = {
   V5RC: ["V5RC", "VURC", "VAIRC"],
@@ -40,9 +40,6 @@ export async function setCurrentQNAPlusVersion(
   );
 }
 
-const client = createClient<paths>({
-  baseUrl: "https://api.qnapl.us",
-});
 function getQuestionContent(question: Question): string {
   return `
 ---

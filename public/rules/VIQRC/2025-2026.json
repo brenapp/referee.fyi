@@ -2,6 +2,10 @@
     "$schema": "https://referee.fyi/rules/schema.json",
     "title": "Mix & Match",
     "season": "2025-2026",
+    "links": {
+        "manual": "https://link.vex.com/docs/25-26/docs/25-26/viqrc-mixandmatch-manual",
+        "qna": "https://www.robotevents.com/VIQRC/2025-2026/QA"
+    },
     "programs": [
         "VIQRC"
     ],

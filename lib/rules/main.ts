@@ -75,4 +75,11 @@ export const GameSchema = z
     description: "Describes the shape of Referee FYI game descriptions.",
   });
 
+export const affiliatedPrograms: Partial<Record<ProgramAbbr, ProgramAbbr[]>> = {
+  V5RC: ["V5RC", "VURC", "VAIRC"],
+  VURC: ["VURC", "VAIRC"],
+  VAIRC: ["VAIRC"],
+  VIQRC: ["VIQRC"],
+};
+
 export type Game = z.infer<typeof GameSchema>;

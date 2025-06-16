@@ -1,13 +1,7 @@
 import type { Question } from "@referee-fyi/rules/qnaplus";
 import type { ProgramAbbr, Year } from "robotevents";
 import { client } from "../qnaplus";
-
-const programs: Partial<Record<ProgramAbbr, ProgramAbbr[]>> = {
-  V5RC: ["V5RC", "VURC", "VAIRC"],
-  VURC: ["VURC", "VAIRC"],
-  VAIRC: ["VAIRC"],
-  VIQRC: ["VIQRC"],
-};
+import { affiliatedPrograms } from "@referee-fyi/rules";
 
 export type CurrentVersion = {
   version: string;
@@ -66,7 +60,7 @@ ${question.answer ?? "Not answered yet."}
 async function indexQuestion(env: Env, question: Question) {
   const program = question.program as ProgramAbbr;
   const year = question.season as Year;
-  const programsToIndex = programs[program] ?? [program];
+  const programsToIndex = affiliatedPrograms[program] ?? [program];
 
   const content = getQuestionContent(question);
   for (const program of programsToIndex) {

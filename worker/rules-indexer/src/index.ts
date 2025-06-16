@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { z } from "zod";
 import { describeRoute, openAPISpecs } from "hono-openapi";
 import { resolver, validator } from "hono-openapi/zod";
@@ -6,6 +7,8 @@ import { scheduled } from "./scheduled";
 import { client } from "./qnaplus";
 
 const app = new Hono<{ Bindings: Env }>();
+
+app.use("/api/*", cors());
 
 app.get(
   "/api/search",

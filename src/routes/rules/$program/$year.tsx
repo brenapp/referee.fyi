@@ -1,5 +1,5 @@
 import { Await, createFileRoute, redirect } from "@tanstack/react-router";
-import { YearSchema, ProgramAbbrSchema, Game } from "@referee-fyi/rules";
+import { Game } from "@referee-fyi/rules";
 import { queryClient } from "~utils/data/query";
 import { getUseRulesForSeasonQueryParams } from "~utils/hooks/rules";
 import { ExternalLinkButton, LinkButton } from "~components/Button";
@@ -11,8 +11,9 @@ import {
 } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { getUpdatedQuestionsForProgram } from "~utils/data/qna";
-import { Question } from "@referee-fyi/rules/qnaplus";
 import { Spinner } from "~components/Spinner";
+import type { Question } from "@referee-fyi/rules/worker";
+import { ProgramAbbr, programs, Year, years } from "robotevents";
 
 type RuleGroupProps = {
   ruleGroup: Game["ruleGroups"][number];
@@ -164,18 +165,26 @@ export const RulebookPage: React.FC = () => {
   );
 };
 
+function parseParams(program: string, year: string) {
+  return {
+    program: Object.keys(programs).includes(program)
+      ? (program as ProgramAbbr)
+      : null,
+    year: years.includes(year as Year) ? (year as Year) : null,
+  };
+}
+
 export const Route = createFileRoute("/rules/$program/$year")({
   component: RulebookPage,
   loader: async ({ params }) => {
-    const program = ProgramAbbrSchema.safeParse(params.program);
-    const year = YearSchema.safeParse(params.year);
+    const { program, year } = parseParams(params.program, params.year);
 
-    if (!program.success || !year.success) {
+    if (!program || !year) {
       throw redirect({ to: "/", from: "/rules/$program/$year" });
     }
 
     const rules = await queryClient.ensureQueryData(
-      getUseRulesForSeasonQueryParams(program.data, year.data)
+      getUseRulesForSeasonQueryParams(program, year)
     );
 
     if (!rules) {
@@ -183,10 +192,10 @@ export const Route = createFileRoute("/rules/$program/$year")({
     }
 
     return {
-      program: program.data,
-      year: year.data,
+      program: program,
+      year: year,
       rules,
-      questions: getUpdatedQuestionsForProgram(program.data, year.data),
+      questions: getUpdatedQuestionsForProgram(program, year),
     };
   },
 });

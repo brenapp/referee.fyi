@@ -5,6 +5,7 @@ import { get, set } from "./keyval";
 import { ProgramAbbr, Year } from "robotevents";
 import { getMany } from "idb-keyval";
 import { captureException } from "@sentry/react";
+import { relatedPrograms } from "@referee-fyi/rules";
 
 export const client = createClient<paths>({
   baseUrl: import.meta.env.VITE_REFEREE_FYI_RULES_SERVER,
@@ -101,5 +102,8 @@ export async function getUpdatedQuestionsForProgram(
     });
   }
 
-  return getQuestionsByProgram(program, season);
+  const programs = relatedPrograms[program] ?? [program];
+  return Promise.all(
+    programs.map((p) => getQuestionsByProgram(p, season))
+  ).then((results) => results.flat());
 }

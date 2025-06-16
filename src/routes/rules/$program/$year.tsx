@@ -57,12 +57,12 @@ export type QuestionItemProps = {
 
 export const QuestionItem: React.FC<QuestionItemProps> = ({ question }) => {
   return (
-    <LinkButton className="w-full mt-2">
+    <ExternalLinkButton href={question.url} className="w-full mt-2">
       <strong className="text-sm font-mono text-emerald-400">
         {question.id}
       </strong>
       <p className="font-normal">{question.title}</p>
-    </LinkButton>
+    </ExternalLinkButton>
   );
 };
 

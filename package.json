@@ -92,6 +92,9 @@
     "wrangler": "^4.19.1",
     "zod": "^3.25"
   },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.43.0"
+  },
   "overrides": {
     "vite-plugin-node-polyfills": {
       "vite": "^5.0.1"

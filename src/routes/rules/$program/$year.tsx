@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { Await, createFileRoute, redirect } from "@tanstack/react-router";
 import { YearSchema, ProgramAbbrSchema, Game } from "@referee-fyi/rules";
 import { queryClient } from "~utils/data/query";
 import { getUseRulesForSeasonQueryParams } from "~utils/hooks/rules";
@@ -10,6 +10,9 @@ import {
   ChatBubbleLeftRightIcon,
 } from "@heroicons/react/24/solid";
 import { useState } from "react";
+import { getUpdatedQuestionsForProgram } from "~utils/data/qna";
+import { useQuestionsForProgram } from "~utils/hooks/qna";
+import { Question } from "@referee-fyi/rules/qnaplus";
 
 type RuleGroupProps = {
   ruleGroup: Game["ruleGroups"][number];
@@ -48,6 +51,74 @@ const RuleGroup: React.FC<RuleGroupProps> = ({ ruleGroup, query }) => {
   );
 };
 
+export type QuestionItemProps = {
+  question: Question;
+};
+
+export const QuestionItem: React.FC<QuestionItemProps> = ({ question }) => {
+  return (
+    <LinkButton className="w-full mt-2">
+      <strong className="text-sm font-mono text-emerald-400">
+        {question.id}
+      </strong>
+      <p className="font-normal">{question.title}</p>
+    </LinkButton>
+  );
+};
+
+export type QuestionListProps = {
+  questions: Question[];
+  query?: string;
+};
+
+export const QuestionList: React.FC<QuestionListProps> = ({
+  questions,
+  query,
+}) => {
+  const filtered = query
+    ? questions.filter(
+        (q) =>
+          q.title.toLowerCase().includes(query.toLowerCase()) ||
+          q.id.toLowerCase().includes(query.toLowerCase())
+      )
+    : questions;
+
+  if (filtered.length === 0) {
+    return null;
+  }
+
+  return (
+    <section>
+      <h2 className="font-bold">Q&amp;A</h2>
+      <ol>
+        {filtered.map((question) => (
+          <li key={question.id} className="mb-2">
+            <QuestionItem question={question} />
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+};
+
+export type QuestionGroupProps = {
+  query: string;
+};
+
+export const QuestionGroup: React.FC<QuestionGroupProps> = ({ query }) => {
+  const { questions, year, program } = Route.useLoaderData();
+  const { data: questionsFallback } = useQuestionsForProgram(program, year);
+
+  return (
+    <Await
+      promise={questions}
+      fallback={<QuestionList questions={questionsFallback ?? []} />}
+    >
+      {(questions) => <QuestionList questions={questions} query={query} />}
+    </Await>
+  );
+};
+
 export const RulebookPage: React.FC = () => {
   const [query, setQuery] = useState("");
   const { rules, program } = Route.useLoaderData();
@@ -81,6 +152,7 @@ export const RulebookPage: React.FC = () => {
             <RuleGroup key={group.name} ruleGroup={group} query={query} />
           ))}
         </div>
+        <QuestionGroup query={query} />
       </section>
       <nav>
         <IconLabel icon={<MagnifyingGlassIcon height={24} />}>
@@ -118,6 +190,7 @@ export const Route = createFileRoute("/rules/$program/$year")({
       program: program.data,
       year: year.data,
       rules,
+      questions: getUpdatedQuestionsForProgram(program.data, year.data),
     };
   },
 });

@@ -1,5 +1,5 @@
 import createClient from "openapi-fetch";
-import { paths } from "@referee-fyi/rules/generated/qnaplus";
+import type { Question, paths } from "@referee-fyi/rules/qnaplus";
 import type { ProgramAbbr, Year } from "robotevents";
 
 const programs: Partial<Record<ProgramAbbr, ProgramAbbr[]>> = {
@@ -43,12 +43,6 @@ export async function setCurrentQNAPlusVersion(
 const client = createClient<paths>({
   baseUrl: "https://api.qnapl.us",
 });
-
-export type Question = Exclude<
-  paths["/internal/update"]["get"]["responses"]["200"]["content"]["application/json"]["questions"],
-  undefined
->[number];
-
 function getQuestionContent(question: Question): string {
   return `
 ---

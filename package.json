@@ -42,6 +42,7 @@
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.1",
     "motion": "^12.15.0",
+    "openapi-fetch": "^0.14.0",
     "qr-creator": "^1.0.0",
     "qr-image": "^3.2.0",
     "react": "^18.2.0",

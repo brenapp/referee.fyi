@@ -59,12 +59,7 @@ export const RulebookPage: React.FC = () => {
   return (
     <main className="mt-4 flex flex-col gap-4 max-h-screen">
       <section className="overflow-auto flex-1">
-        <h1 className="font-bold text-lg">
-          {rules.title} •{" "}
-          <span className="font-normal font-mono text-sm text-emerald-400">
-            {program} {rules.season}
-          </span>
-        </h1>
+        <h1 className="font-bold text-lg">{rules.title} Rules Reference</h1>
         <nav className="mt-2">
           <ExternalLinkButton
             href={rules.links.manual}

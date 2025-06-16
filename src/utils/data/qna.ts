@@ -92,6 +92,14 @@ export async function getUpdatedQuestionsForProgram(
   program: ProgramAbbr,
   season: Year
 ): Promise<Question[]> {
-  await updateQNAs();
+  try {
+    await updateQNAs();
+  } catch (error) {
+    captureException(error, {
+      extra: { program, season },
+      tags: { action: "getUpdatedQuestionsForProgram" },
+    });
+  }
+
   return getQuestionsByProgram(program, season);
 }

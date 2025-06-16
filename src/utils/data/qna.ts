@@ -1,5 +1,5 @@
 import createClient from "openapi-fetch";
-import type { paths } from "@referee-fyi/rules/generated/qnaplus";
+import { Question, type paths } from "@referee-fyi/rules/qnaplus";
 
 import { get, set } from "./keyval";
 
@@ -13,6 +13,14 @@ export async function getQNAPlusVersion() {
 
 export async function setQNAPlusVersion(version: string) {
   return set("qnaplus_version", version);
+}
+
+export async function getQuestion(id: string) {
+  return get<Question>(`qna_${id}`);
+}
+
+export async function setQuestion(question: Question) {
+  return set(`qna_${question.id}`, question);
 }
 
 export async function updateQNAs() {

@@ -1,5 +1,5 @@
 import createClient from "openapi-fetch";
-import type { paths } from "../generated/qnaplus";
+import { paths } from "@referee-fyi/rules/generated/qnaplus";
 import type { ProgramAbbr, Year } from "robotevents";
 
 const programs: Partial<Record<ProgramAbbr, ProgramAbbr[]>> = {

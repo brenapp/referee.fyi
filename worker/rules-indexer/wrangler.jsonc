@@ -12,9 +12,22 @@
 				"crons": [
 					"*/30 * * * *"
 				]
-			}
+			},
+			"routes": [
+				{
+					"pattern": "rules.referee.fyi",
+					"custom_domain": true
+				}
+			]
 		},
-		"staging": {}
+		"staging": {
+			"routes": [
+				{
+					"pattern": "staging.rules.referee.fyi",
+					"custom_domain": true
+				}
+			]
+		}
 	},
 	"placement": {
 		"mode": "smart"

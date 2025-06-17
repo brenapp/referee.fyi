@@ -2,7 +2,7 @@ import { Await, createFileRoute, redirect } from "@tanstack/react-router";
 import { Game } from "@referee-fyi/rules";
 import { queryClient } from "~utils/data/query";
 import { getUseRulesForSeasonQueryParams } from "~utils/hooks/rules";
-import { ExternalLinkButton, LinkButton } from "~components/Button";
+import { ExternalLinkButton } from "~components/Button";
 import { IconLabel, Input } from "~components/Input";
 import {
   MagnifyingGlassIcon,
@@ -39,12 +39,12 @@ const RuleGroup: React.FC<RuleGroupProps> = ({ ruleGroup, query }) => {
       <ol>
         {rules.map((rule) => (
           <li key={rule.rule} className="mb-2">
-            <LinkButton from="/rules/$program/$year" className="w-full mt-2">
+            <ExternalLinkButton href={rule.link} className="w-full mt-2">
               <strong className="text-sm font-mono text-emerald-400">
                 {rule.rule}
               </strong>
               <p className="font-normal">{rule.description}</p>
-            </LinkButton>
+            </ExternalLinkButton>
           </li>
         ))}
       </ol>

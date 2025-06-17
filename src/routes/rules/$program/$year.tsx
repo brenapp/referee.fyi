@@ -11,9 +11,9 @@ import {
 } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { getUpdatedQuestionsForProgram } from "~utils/data/qna";
-import { Spinner } from "~components/Spinner";
 import type { Question } from "@referee-fyi/rules/worker";
 import { ProgramAbbr, programs, Year, years } from "robotevents";
+import { useQuestionsForProgram } from "~utils/hooks/qna";
 
 type RuleGroupProps = {
   ruleGroup: Game["ruleGroups"][number];
@@ -107,10 +107,20 @@ export type QuestionGroupProps = {
 };
 
 export const QuestionGroup: React.FC<QuestionGroupProps> = ({ query }) => {
-  const { questions } = Route.useLoaderData();
+  const { questions, year, program } = Route.useLoaderData();
+  const { data: questionsFallback } = useQuestionsForProgram(
+    program,
+    year,
+    true
+  );
 
   return (
-    <Await promise={questions} fallback={<Spinner show />}>
+    <Await
+      promise={questions}
+      fallback={
+        <QuestionList questions={questionsFallback ?? []} query={query} />
+      }
+    >
       {(questions) => <QuestionList questions={questions} query={query} />}
     </Await>
   );

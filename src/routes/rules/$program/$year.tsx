@@ -127,7 +127,14 @@ export const RulebookPage: React.FC = () => {
   return (
     <main className="mt-4 flex flex-col gap-4 max-h-screen">
       <section className="overflow-auto flex-1">
-        <h1 className="font-bold text-lg">{rules.title} Rules Reference</h1>
+        <nav className="sticky top-0 z-10 bg-zinc-800 py-2">
+          <h1 className="font-bold text-lg">
+            <span className="">{rules.title} Rules Reference</span>
+            <span className="text-sm text-zinc-500 font-mono font-normal ml-2">
+              {program} {rules.season}
+            </span>
+          </h1>
+        </nav>
         <nav className="mt-2">
           <ExternalLinkButton
             href={rules.links.manual}

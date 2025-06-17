@@ -316,6 +316,7 @@ const Rules: React.FC = () => {
       to="/rules/$program/$year"
       params={{ program, year }}
       aria-label="Rules Reference"
+      className="flex items-center justify-center aspect-square"
     >
       <BookOpenIcon height={24} />
     </LinkButton>

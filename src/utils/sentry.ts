@@ -4,9 +4,10 @@ import {
   setUser,
   setMeasurement,
 } from "@sentry/react";
-import type { MeasurementUnit } from "@sentry/types";
+import type { MeasurementUnit, User } from "@sentry/types";
 import { queryClient } from "./data/query";
 import { getShareProfile } from "./data/share";
+import { getGeolocation } from "./data/meta";
 
 export async function clearCache() {
   // Invalidate All Queries
@@ -41,10 +42,16 @@ export const client = init({
 window.addEventListener("load", async () => {
   // Initialize user
   const profile = await getShareProfile();
+  const geo = await getGeolocation();
   if (profile) {
-    setUser({
+    setTracingProfile({
       id: profile.key,
       username: profile.name,
+      geo: {
+        city: geo?.city,
+        region: geo?.region,
+        country_code: geo?.country,
+      },
     });
   }
 });
@@ -65,4 +72,12 @@ export function measure(name: string, executor: () => void) {
   const duration = end - start;
   reportMeasurement(name, duration, "millisecond");
   return duration;
+}
+
+let currentUser: User = {};
+
+export async function setTracingProfile(user: User) {
+  const updated = { ...currentUser, user };
+  currentUser = updated;
+  setUser(currentUser);
 }

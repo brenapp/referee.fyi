@@ -48,8 +48,7 @@ import {
   setManyMatchScratchpad,
   setMatchScratchpad,
 } from "~utils/data/scratchpad";
-import { setUser } from "@sentry/react";
-import { reportMeasurement } from "~utils/sentry";
+import { reportMeasurement, setTracingProfile } from "~utils/sentry";
 import {
   AssetUploadStatus,
   getLocalAsset,
@@ -126,7 +125,7 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
       : { isSystemKey: false };
 
     set({ userMetadata });
-    setUser({
+    setTracingProfile({
       id: profile.key,
       username: profile.name,
       userMetadata,

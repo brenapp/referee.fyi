@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   currentSeasons,
-  useCurrentSeason,
   useEvent,
   useEventSearch,
   useSeason,
@@ -10,20 +9,13 @@ import { Button, IconButton, LinkButton } from "~components/Button";
 import {
   BookOpenIcon,
   ChevronDownIcon,
-  XMarkIcon,
   ChevronLeftIcon,
 } from "@heroicons/react/24/outline";
 import { Spinner } from "~components/Spinner";
 import { useCurrentDivision, useCurrentEvent } from "~utils/hooks/state";
-import {
-  Dialog,
-  DialogBody,
-  DialogCustomHeader,
-  DialogHeader,
-} from "~components/Dialog";
-import { ProgramCode } from "robotevents";
-import { Input, RulesSelect } from "~components/Input";
-import { Rule, useRulesForSeason } from "~utils/hooks/rules";
+import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
+import { ProgramAbbr, Year } from "robotevents";
+import { Input } from "~components/Input";
 import { Toaster } from "react-hot-toast";
 import { useEventInvitation } from "~utils/hooks/share";
 import { useShareConnection } from "~models/ShareConnection";
@@ -304,63 +296,30 @@ const EventPicker: React.FC = () => {
 
 const Rules: React.FC = () => {
   const { data: event } = useCurrentEvent();
-
-  const [open, setOpen] = useState(false);
-  const program = useMemo(() => event?.program.id as ProgramCode, [event]);
-
-  const { data: currentSeasonForProgram } = useCurrentSeason(program);
   const { data: season } = useSeason(event?.season.id);
-  const { data: rules } = useRulesForSeason(season ?? currentSeasonForProgram);
 
-  const [rule, setRule] = useState<Rule | null>(null);
+  const program = useMemo(() => event?.program.code as ProgramAbbr, [event]);
+  const year = useMemo(
+    () =>
+      (season
+        ? [season.years_start, season.years_end].join("-")
+        : null) as Year | null,
+    [season]
+  );
 
-  const onClose = useCallback(() => {
-    setRule(null);
-    setOpen(false);
-  }, []);
-
-  if (!program || !event) {
+  if (!program || !event || !year) {
     return null;
   }
 
   return (
-    <>
-      <Dialog
-        open={open}
-        mode="modal"
-        onClose={onClose}
-        aria-label="Rules Reference"
-      >
-        <DialogCustomHeader>
-          <IconButton
-            icon={<XMarkIcon height={24} />}
-            onClick={onClose}
-            className="bg-transparent"
-            autoFocus
-          />
-          <RulesSelect
-            game={rules}
-            rule={rule}
-            setRule={setRule}
-            className="w-full"
-          />
-        </DialogCustomHeader>
-        <DialogBody className="px-2 flex gap-5 flex-col">
-          <section className="bg-white flex-1 rounded-md">
-            <iframe
-              key={program}
-              src={rule?.link ?? "about:blank"}
-              className="w-full h-full"
-            ></iframe>
-          </section>
-        </DialogBody>
-      </Dialog>
-      <IconButton
-        onClick={() => setOpen(true)}
-        icon={<BookOpenIcon height={24} />}
-        aria-label="Rules Reference"
-      />
-    </>
+    <LinkButton
+      to="/rules/$program/$year"
+      params={{ program, year }}
+      aria-label="Rules Reference"
+      className="flex items-center justify-center aspect-square"
+    >
+      <BookOpenIcon height={24} />
+    </LinkButton>
   );
 };
 

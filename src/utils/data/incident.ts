@@ -7,7 +7,6 @@ import {
   IncidentMatchSkills,
   IncidentOutcome,
   Incident,
-  WebSocketSender,
   EditIncident,
   INCIDENT_IGNORE,
   BaseIncident,
@@ -51,21 +50,6 @@ export function packIncident(incident: RichIncident): NewIncident {
     rules: incident.rules.map((rule) => rule.rule),
     assets: incident.assets.map((asset) => asset.id),
   };
-}
-
-export function userString(user?: WebSocketSender) {
-  if (!user) {
-    return null;
-  }
-
-  switch (user.type) {
-    case "server": {
-      return "Server";
-    }
-    case "client": {
-      return user.name;
-    }
-  }
 }
 
 export function generateIncidentId(): string {

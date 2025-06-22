@@ -1,7 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { ReactNode, useCallback, useRef, useState } from "react";
-import { ProgramCode } from "robotevents";
 import { Button } from "~components/Button";
 import { Input, Select } from "~components/Input";
 import { Spinner } from "~components/Spinner";
@@ -17,12 +16,8 @@ import {
   newManyIncidents,
 } from "~utils/data/incident";
 import { getShareProfile } from "~utils/data/share";
-import {
-  useCurrentSeason,
-  useDivisionTeams,
-  useEventMatches,
-} from "~utils/hooks/robotevents";
-import { useRulesForSeason } from "~utils/hooks/rules";
+import { useDivisionTeams, useEventMatches } from "~utils/hooks/robotevents";
+import { useRulesForEvent } from "~utils/hooks/rules";
 import { useCurrentEvent } from "~utils/hooks/state";
 
 export const EventDevTools: React.FC = () => {
@@ -70,8 +65,7 @@ export const EventDevTools: React.FC = () => {
     generateIssuesDivision
   );
 
-  const { data: season } = useCurrentSeason(event?.program.id as ProgramCode);
-  const { data: game } = useRulesForSeason(season);
+  const { data: game } = useRulesForEvent(event);
   const rules = game?.ruleGroups.flatMap((group) => group.rules);
 
   const { mutate: generateIncidents, isPending: isGeneratePending } =

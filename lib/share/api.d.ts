@@ -2,6 +2,7 @@ import { ConsistentMap } from "@referee-fyi/consistency";
 import type { Incident } from "./incident.ts";
 import type { MatchScratchpad } from "./index.ts";
 import type { Invitation } from "./server.js";
+import type { Iso3166Alpha2Code } from "@cloudflare/workers-types";
 
 export type User = {
   key: string;
@@ -106,6 +107,7 @@ export type ApiGetMetaLocationResponseBody = {
     colo: string;
     region: string;
     country: string;
+    country_code: Iso3166Alpha2Code;
     postcode: string;
     continent: string;
   } | null;

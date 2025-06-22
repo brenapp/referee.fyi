@@ -1,0 +1,792 @@
+{
+    "$schema": "https://referee.fyi/rules/schema.json",
+    "title": "Push Back",
+    "season": "2025-2026",
+    "programs": [
+        "V5RC",
+        "VURC",
+        "VAIRC"
+    ],
+    "links": {
+        "manual": "https://link.vex.com/docs/25-26/v5rc-pushback-manual",
+        "qna": "https://www.robotevents.com/V5RC/2025-2026/QA"
+    },
+    "ruleGroups": [
+        {
+            "name": "Scoring Rules",
+            "programs": [
+                "V5RC",
+                "VURC",
+                "VAIRC"
+            ],
+            "rules": [
+                {
+                    "rule": "<SC1>",
+                    "description": "All Scoring statuses are evaluated after the Match ends",
+                    "link": ""
+                },
+                {
+                    "rule": "<SC2>",
+                    "description": "Scored Block criteria",
+                    "link": ""
+                },
+                {
+                    "rule": "<SC3>",
+                    "description": "Controlled criteria",
+                    "link": ""
+                },
+                {
+                    "rule": "<SC4>",
+                    "description": "Parked Robot criteria",
+                    "link": ""
+                },
+                {
+                    "rule": "<SC5>",
+                    "description": "Scoring of the Autonomous Bonus is immediately after the Autonomous Period ends",
+                    "link": ""
+                },
+                {
+                    "rule": "<SC6>",
+                    "description": "Autonomous Win Point",
+                    "link": ""
+                }
+            ]
+        },
+        {
+            "name": "Safety Rules",
+            "programs": [
+                "V5RC",
+                "VURC",
+                "VAIRC"
+            ],
+            "rules": [
+                {
+                    "rule": "<S1>",
+                    "description": "Be safe out there",
+                    "link": ""
+                },
+                {
+                    "rule": "<S2>",
+                    "description": "Students must be accompanied by an Adult",
+                    "link": ""
+                },
+                {
+                    "rule": "<S3>",
+                    "description": "Stay inside the Field",
+                    "link": ""
+                },
+                {
+                    "rule": "<S4>",
+                    "description": "Wear safety glasses",
+                    "link": ""
+                },
+                {
+                    "rule": "<S5>",
+                    "description": "Each Student Team member must have a completed participant release form on file",
+                    "link": ""
+                }
+            ]
+        },
+        {
+            "name": "General Rules",
+            "programs": [
+                "V5RC",
+                "VURC",
+                "VAIRC"
+            ],
+            "rules": [
+                {
+                    "rule": "<G1>",
+                    "description": "Treat everyone with respect",
+                    "link": ""
+                },
+                {
+                    "rule": "<G2>",
+                    "description": "V5RC is a Student-centered program",
+                    "link": ""
+                },
+                {
+                    "rule": "<G3>",
+                    "description": "Use common sense",
+                    "link": ""
+                },
+                {
+                    "rule": "<G4>",
+                    "description": "Students can only belong to one Team, and the Robot must represent the Team's skill level",
+                    "link": ""
+                }
+            ]
+        },
+        {
+            "name": "General Game Rules",
+            "programs": [
+                "V5RC",
+                "VURC",
+                "VAIRC"
+            ],
+            "rules": [
+                {
+                    "rule": "<GG1>",
+                    "description": "Only Drive Team Members, and only in the Alliance Station",
+                    "link": ""
+                },
+                {
+                    "rule": "<GG2>",
+                    "description": "A Team's Robot should attend every Match",
+                    "link": ""
+                },
+                {
+                    "rule": "<GG3>",
+                    "description": "Robots on the Field must be ready to play",
+                    "link": ""
+                },
+                {
+                    "rule": "<GG4>",
+                    "description": "Hands out of the Field",
+                    "link": ""
+                },
+                {
+                    "rule": "<GG5>",
+                    "description": "Match replays are allowed, but rare",
+                    "link": ""
+                },
+                {
+                    "rule": "<GG6>",
+                    "description": "Disqualifications",
+                    "link": ""
+                },
+                {
+                    "rule": "<GG7>",
+                    "description": "Time Outs",
+                    "link": ""
+                },
+                {
+                    "rule": "<GG8>",
+                    "description": "Keep your Robot together",
+                    "link": ""
+                },
+                {
+                    "rule": "<GG9>",
+                    "description": "Don't clamp your Robot to the Field",
+                    "link": ""
+                },
+                {
+                    "rule": "<GG10>",
+                    "description": "The red Alliance places last",
+                    "link": ""
+                },
+                {
+                    "rule": "<GG11>",
+                    "description": "Controllers must stay connected to the Field",
+                    "link": ""
+                },
+                {
+                    "rule": "<GG12>",
+                    "description": "Autonomous means “no humans”",
+                    "link": ""
+                },
+                {
+                    "rule": "<GG13>",
+                    "description": "All rules still apply in the Autonomous Period",
+                    "link": ""
+                },
+                {
+                    "rule": "<GG14>",
+                    "description": "Don't destroy other Robots",
+                    "link": ""
+                },
+                {
+                    "rule": "<GG15>",
+                    "description": "Offensive Robots get the “benefit of the doubt”",
+                    "link": ""
+                },
+                {
+                    "rule": "<GG16>",
+                    "description": "You can't force an opponent into a penalty",
+                    "link": ""
+                },
+                {
+                    "rule": "<GG17>",
+                    "description": "No Holding for more than a 5-count",
+                    "link": ""
+                },
+                {
+                    "rule": "<GG18>",
+                    "description": "Use Blocks to play the game",
+                    "link": ""
+                }
+            ]
+        },
+        {
+            "name": "Specific Game Rules",
+            "programs": [
+                "V5RC",
+                "VURC",
+                "VAIRC"
+            ],
+            "rules": [
+                {
+                    "rule": "<SG1>",
+                    "description": "Starting a Match",
+                    "link": ""
+                },
+                {
+                    "rule": "<SG2>",
+                    "description": "Horizontal expansion is limited",
+                    "link": ""
+                },
+                {
+                    "rule": "<SG3>",
+                    "description": "Vertical expansion is limited",
+                    "link": ""
+                },
+                {
+                    "rule": "<SG4>",
+                    "description": "Keep Blocks in the Field",
+                    "link": ""
+                },
+                {
+                    "rule": "<SG5>",
+                    "description": "Each Robot gets one Block as a Preload",
+                    "link": ""
+                },
+                {
+                    "rule": "<SG6>",
+                    "description": "A Robot may carry, push, or plow an unlimited number of Blocks",
+                    "link": ""
+                },
+                {
+                    "rule": "<SG7>",
+                    "description": "Don't cross the Autonomous Line, and don't interfere with your opponents' actions",
+                    "link": ""
+                },
+                {
+                    "rule": "<SG8>",
+                    "description": "Engage with the Autonomous Line at your own risk",
+                    "link": ""
+                },
+                {
+                    "rule": "<SG9>",
+                    "description": "Match Loads may be introduced during the Match under certain conditions",
+                    "link": ""
+                },
+                {
+                    "rule": "<SG10>",
+                    "description": "Don't reach inside enclosed sections of Goals",
+                    "link": ""
+                },
+                {
+                    "rule": "<SG11>",
+                    "description": "Park Zones are protected during the endgame",
+                    "link": ""
+                }
+            ]
+        },
+        {
+            "name": "Robot Rules",
+            "programs": [
+                "V5RC",
+                "VURC",
+                "VAIRC"
+            ],
+            "rules": [
+                {
+                    "rule": "<R1>",
+                    "description": "One Robot per Team",
+                    "link": ""
+                },
+                {
+                    "rule": "<R2>",
+                    "description": "Robots must represent the Team's skill level",
+                    "link": ""
+                },
+                {
+                    "rule": "<R3>",
+                    "description": "Robots must pass inspection",
+                    "link": ""
+                },
+                {
+                    "rule": "<R4>",
+                    "description": "There is a difference between accidentally and willfully violating a Robot rule",
+                    "link": ""
+                },
+                {
+                    "rule": "<R5>",
+                    "description": "Robots must fit within an 18” x 18” x 18” volume",
+                    "link": ""
+                },
+                {
+                    "rule": "<R6>",
+                    "description": "Officially registered Team numbers must be displayed on Robot license plates",
+                    "link": ""
+                },
+                {
+                    "rule": "<R7>",
+                    "description": "Let go of Blocks after the Match",
+                    "link": ""
+                },
+                {
+                    "rule": "<R8>",
+                    "description": "Robots have one Brain",
+                    "link": ""
+                },
+                {
+                    "rule": "<R9>",
+                    "description": "Keep the power button accessible",
+                    "link": ""
+                },
+                {
+                    "rule": "<R10>",
+                    "description": "Firmware",
+                    "link": ""
+                },
+                {
+                    "rule": "<R11>",
+                    "description": "Use a “Competition Template” for programming",
+                    "link": ""
+                },
+                {
+                    "rule": "<R12>",
+                    "description": "Motors are limited",
+                    "link": ""
+                },
+                {
+                    "rule": "<R13>",
+                    "description": "Electrical power comes from VEX batteries only",
+                    "link": ""
+                },
+                {
+                    "rule": "<R14>",
+                    "description": "Robots use VEXnet",
+                    "link": ""
+                },
+                {
+                    "rule": "<R15>",
+                    "description": "Give the radio some space",
+                    "link": ""
+                },
+                {
+                    "rule": "<R16>",
+                    "description": "One or two Controllers per Robot",
+                    "link": ""
+                },
+                {
+                    "rule": "<R17>",
+                    "description": "Robots are built from the VEX V5 system",
+                    "link": ""
+                },
+                {
+                    "rule": "<R18>",
+                    "description": "New VEX parts are legal",
+                    "link": ""
+                },
+                {
+                    "rule": "<R19>",
+                    "description": "Prohibited Items",
+                    "link": ""
+                },
+                {
+                    "rule": "<R20>",
+                    "description": "Certain non-VEX components are allowed",
+                    "link": ""
+                },
+                {
+                    "rule": "<R21>",
+                    "description": "Custom V5 Smart Cables are allowed",
+                    "link": ""
+                },
+                {
+                    "rule": "<R22>",
+                    "description": "A limited amount of tape is allowed",
+                    "link": ""
+                },
+                {
+                    "rule": "<R23>",
+                    "description": "Certain non-VEX fasteners are allowed",
+                    "link": ""
+                },
+                {
+                    "rule": "<R24>",
+                    "description": "Decorations are allowed",
+                    "link": ""
+                },
+                {
+                    "rule": "<R25>",
+                    "description": "A limited amount of custom plastic is allowed",
+                    "link": ""
+                },
+                {
+                    "rule": "<R26>",
+                    "description": "Pneumatics are limited",
+                    "link": ""
+                },
+                {
+                    "rule": "<R27>",
+                    "description": "Most modifications to non-electrical components are allowed",
+                    "link": ""
+                },
+                {
+                    "rule": "<R28>",
+                    "description": "No modifications to electronic or pneumatic components are allowed",
+                    "link": ""
+                }
+            ]
+        },
+        {
+            "name": "Robot Skills Challenge Rules",
+            "programs": [
+                "V5RC",
+                "VURC",
+                "VAIRC"
+            ],
+            "rules": [
+                {
+                    "rule": "<RSC1>",
+                    "description": "Standard rules apply in most cases",
+                    "link": ""
+                },
+                {
+                    "rule": "<RSC2>",
+                    "description": "Scoring Robot Skills Matches",
+                    "link": ""
+                },
+                {
+                    "rule": "<RSC3>",
+                    "description": "Robot and Field setup for Robot Skills Matches",
+                    "link": ""
+                },
+                {
+                    "rule": "<RSC4>",
+                    "description": "Skills Stop Time",
+                    "link": ""
+                }
+            ]
+        },
+        {
+            "name": "Tournament Rules",
+            "programs": [
+                "V5RC",
+                "VURC",
+                "VAIRC"
+            ],
+            "rules": [
+                {
+                    "rule": "<T1>",
+                    "description": "Head Referees have final authority on all gameplay and Robot ruling decisions",
+                    "link": ""
+                },
+                {
+                    "rule": "<T2>",
+                    "description": "Head Referees must be qualified",
+                    "link": ""
+                },
+                {
+                    "rule": "<T3>",
+                    "description": "Drive Team Members are permitted to immediately appeal a Head Referee's ruling",
+                    "link": ""
+                },
+                {
+                    "rule": "<T4>",
+                    "description": "The Event Partner has ultimate authority regarding all non-gameplay decisions",
+                    "link": ""
+                },
+                {
+                    "rule": "<T5>",
+                    "description": "Be prepared for minor Field variance",
+                    "link": ""
+                },
+                {
+                    "rule": "<T6>",
+                    "description": "Fields may be repaired at the Event Partner's discretion",
+                    "link": ""
+                },
+                {
+                    "rule": "<T7>",
+                    "description": "Fields at an event must be consistent with each other",
+                    "link": ""
+                },
+                {
+                    "rule": "<T8>",
+                    "description": "There are three types of field control that may be used",
+                    "link": ""
+                },
+                {
+                    "rule": "<T9>",
+                    "description": "There are two types of Field Perimeter that may be used",
+                    "link": ""
+                },
+                {
+                    "rule": "<T10>",
+                    "description": "Qualification Matches follow the Match Schedule",
+                    "link": ""
+                },
+                {
+                    "rule": "<T11>",
+                    "description": "Each Team will have at least six Qualification Matches",
+                    "link": ""
+                },
+                {
+                    "rule": "<T12>",
+                    "description": "Qualification Matches contribute to a Team's ranking for Alliance Selection",
+                    "link": ""
+                },
+                {
+                    "rule": "<T13>",
+                    "description": "Qualification Match tiebreakers",
+                    "link": ""
+                },
+                {
+                    "rule": "<T14>",
+                    "description": "Small tournaments have fewer Alliances",
+                    "link": ""
+                },
+                {
+                    "rule": "<T15>",
+                    "description": "Send a Student representative to Alliance Selection",
+                    "link": ""
+                },
+                {
+                    "rule": "<T16>",
+                    "description": "Each Team may only be invited once to join one Alliance",
+                    "link": ""
+                },
+                {
+                    "rule": "<T17>",
+                    "description": "Elimination Matches follow the Elimination Bracket",
+                    "link": ""
+                },
+                {
+                    "rule": "<T18>",
+                    "description": "Elimination Matches are a blend of “Best of 1” and “Best of 3”",
+                    "link": ""
+                },
+                {
+                    "rule": "<T19>",
+                    "description": "Ties in Elimination Matches lead to limited rematches",
+                    "link": ""
+                },
+                {
+                    "rule": "<T20>",
+                    "description": "Skills Match Schedule",
+                    "link": ""
+                },
+                {
+                    "rule": "<T21>",
+                    "description": "Skills Challenge Fields do not require the same modifications as the Head-to-Head Fields",
+                    "link": ""
+                },
+                {
+                    "rule": "<T22>",
+                    "description": "Skills rankings at events",
+                    "link": ""
+                },
+                {
+                    "rule": "<T23>",
+                    "description": "Skills rankings globally",
+                    "link": ""
+                },
+                {
+                    "rule": "<T24>",
+                    "description": "Robot Skills at league events",
+                    "link": ""
+                }
+            ]
+        },
+        {
+            "name": "VEX U Robotics Competition Game Rules",
+            "programs": [
+                "VURC",
+                "VAIRC"
+            ],
+            "rules": [
+                {
+                    "rule": "<VUG1>",
+                    "description": "Different Robot placement than rule <GG10>",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUG2>",
+                    "description": "Different expansion",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUG3>",
+                    "description": "Different availability of Loaders",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUG4>",
+                    "description": "Different Autonomous Win Point criteria",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUG5>",
+                    "description": "Don't cross the Autonomous Line, and don't interfere with your opponents' actions",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUG6>",
+                    "description": "Engage with the Autonomous Line and Neutral Zone at your own risk",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUG7>",
+                    "description": "Some electronic devices may be in motion or moving at the beginning of the Match.",
+                    "link": ""
+                }
+            ]
+        },
+        {
+            "name": "VEX U Robotics Competition Robot Rules",
+            "programs": [
+                "VURC",
+                "VAIRC"
+            ],
+            "rules": [
+                {
+                    "rule": "<VUR1>",
+                    "description": "Teams may use two (2) Robots",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUR2>",
+                    "description": "Teams may use any official VEX Robotics products, other than the listed exceptions",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUR3>",
+                    "description": "Fabricated Parts",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUR4>",
+                    "description": "Raw Stock",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUR5>",
+                    "description": "The following material types are not considered Raw Stock",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUR6>",
+                    "description": "Fabricated Parts may not be made from Raw Stock which poses a safety or damage risk",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUR7>",
+                    "description": "Fabricated Parts must be made by Team members",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUR8>",
+                    "description": "Springs",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUR9>",
+                    "description": "Fasteners",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUR10>",
+                    "description": "One (1) V5 Robot Brain and up to two (2) V5 Robot Radios",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUR11>",
+                    "description": "No motor restrictions",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUR12>",
+                    "description": "No Sensor and other Additional Electronics restrictions",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUR13>",
+                    "description": "Commercially available Electromechanical Assemblies are not legal",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUR14>",
+                    "description": "Unlimited amount of the following commercially available pneumatic components",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUR15>",
+                    "description": "Teams may use commercially available bearings on their Robot",
+                    "link": ""
+                }
+            ]
+        },
+        {
+            "name": "VEX U Robotics Competition Tournament Rules",
+            "programs": [
+                "VURC",
+                "VAIRC"
+            ],
+            "rules": [
+                {
+                    "rule": "<VUT1>",
+                    "description": "VURC Matches are played 1-Team vs. 1-Team",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUT2>",
+                    "description": "Qualification Matches are conducted in a revised 1v1 format",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUT3>",
+                    "description": "Elimination Matches will be conducted without an Alliance Selection",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUT4>",
+                    "description": "The Autonomous Period at the beginning of each Head-to-Head Match will be 30 seconds",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUT5>",
+                    "description": "The Driver Controlled Period is shortened to 90 seconds",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUT6>",
+                    "description": "VEX U Student eligibility",
+                    "link": ""
+                },
+                {
+                    "rule": "<VUT7>",
+                    "description": "VURC tournaments have fewer Teams in Eliminations",
+                    "link": ""
+                }
+            ]
+        },
+        {
+            "name": "VEX U Robotics Competition Robot Skills Rules",
+            "programs": [
+                "VURC",
+                "VAIRC"
+            ],
+            "rules": [
+                {
+                    "rule": "<VURS1>",
+                    "description": "VURC Robot Skills Matches use the same Field layout as VURC Head-to-Head Matches",
+                    "link": ""
+                },
+                {
+                    "rule": "<VURS2>",
+                    "description": "Both Robots must start the Robot Skills Match in starting positions for the red Alliance",
+                    "link": ""
+                },
+                {
+                    "rule": "<VURS3>",
+                    "description": "Teams are permitted to use both Robots in VEX U Robot Skills Matches",
+                    "link": ""
+                }
+            ]
+        }
+    ]
+}

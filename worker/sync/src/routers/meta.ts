@@ -46,6 +46,7 @@ metaRouter.get("/api/meta/location", async (request: IRequest) => {
         city: request.cf.city,
         region: request.cf.region,
         country: translateCountry(request.cf.country as string),
+        country_code: request.cf.country,
         continent: request.cf.continent,
         colo: request.cf.colo,
         postcode: request.cf.postalCode,

@@ -1,31 +1,13 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
-import { EventData, ProgramAbbr, Season, Year } from "robotevents";
+import { EventData, ProgramAbbr, Year } from "robotevents";
 import { HookQueryOptions, useSeason } from "./robotevents";
 import { GAME_FETCHERS } from "~utils/data/rules";
 
-export type Rule = {
-  rule: string;
-  description: string;
-  link: string;
-  icon?: string;
-};
+import type { Game as BaseGame, Rule, RuleGroup } from "@referee-fyi/rules";
+export type { Rule, RuleGroup };
 
-export type RuleGroup = {
-  name: string;
-  programs: ProgramAbbr[];
-  rules: Rule[];
-};
-
-export type Game = {
-  title: string;
-  season: Year;
-  programs: ProgramAbbr[];
-  ruleGroups: RuleGroup[];
-  rulesLookup?: Record<string, Rule>;
-};
-
-export type Rules = {
-  games: Game[];
+export type Game = BaseGame & {
+  rulesLookup: Record<string, Rule>;
 };
 
 function createRulesLookup(ruleGroups: RuleGroup[]): Record<string, Rule> {
@@ -38,20 +20,26 @@ function createRulesLookup(ruleGroups: RuleGroup[]): Record<string, Rule> {
   return lookup;
 }
 
-export function useRulesForSeason(
-  season?: Season | null,
+export function getUseRulesForSeasonQueryParams(
+  program?: ProgramAbbr | null,
+  year?: Year | null,
   options?: HookQueryOptions<Game | null>
-): UseQueryResult<Game | null> {
-  return useQuery({
-    queryKey: ["@referee-fyi/useRulesForSeason", season?.id],
+) {
+  return {
+    queryKey: ["@referee-fyi/useRulesForSeason", program, year],
     queryFn: async () => {
-      if (!season || !season.id) {
+      if (!program || !year) {
         return null;
       }
 
-      const game = (await GAME_FETCHERS[season.id]?.()) ?? null;
+      const game = (await GAME_FETCHERS[`${program}_${year}`]?.()) ?? null;
+
+      if (!game) {
+        return null;
+      }
+
       const ruleGroups = game.ruleGroups.filter((group) =>
-        group.programs.includes(season.program?.code as ProgramAbbr)
+        group.programs.includes(program)
       );
 
       const rulesLookup = createRulesLookup(ruleGroups);
@@ -63,12 +51,23 @@ export function useRulesForSeason(
       };
     },
     ...options,
-  });
+  };
+}
+
+export function useRulesForSeason(
+  program?: ProgramAbbr | null,
+  year?: Year | null,
+  options?: HookQueryOptions<Game | null>
+): UseQueryResult<Game | null> {
+  return useQuery(getUseRulesForSeasonQueryParams(program, year, options));
 }
 
 export function useRulesForEvent(
   event?: EventData | null
 ): UseQueryResult<Game | null> {
   const { data: season } = useSeason(event?.season.id);
-  return useRulesForSeason(season);
+  const year = (
+    season ? `${season.years_start}_${season.years_end}` : null
+  ) as Year | null;
+  return useRulesForSeason(season?.program?.code as ProgramAbbr | null, year);
 }

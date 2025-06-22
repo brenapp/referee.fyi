@@ -7,7 +7,7 @@ import {
 import { ProgramAbbr, Year } from "robotevents";
 import { getQuestionsByProgram } from "~utils/data/qna";
 import { HookQueryOptions } from "./robotevents";
-import { relatedPrograms } from "@referee-fyi/rules";
+import { relatedPrograms } from "@referee-fyi/rules/programs";
 
 export function getUseQuestionsForProgramQueryParams(
   program: ProgramAbbr,

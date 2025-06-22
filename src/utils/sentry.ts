@@ -1,9 +1,4 @@
-import {
-  init,
-  browserTracingIntegration,
-  setUser,
-  setMeasurement,
-} from "@sentry/react";
+import { init, setUser, setMeasurement } from "@sentry/react";
 import type { MeasurementUnit, User } from "@sentry/types";
 import { queryClient } from "./data/query";
 import { getShareProfile } from "./data/share";
@@ -32,7 +27,7 @@ const enabled =
 export const client = enabled
   ? init({
       dsn: "https://0aecdc6c41674e7cf3b4a39ec939ed9c@o4507708571910144.ingest.us.sentry.io/4507708573286400",
-      integrations: [browserTracingIntegration()],
+      integrations: [],
       attachStacktrace: true,
       environment: import.meta.env.MODE,
       enabled,

@@ -5,7 +5,7 @@ import { get, set } from "./keyval";
 import { ProgramAbbr, Year } from "robotevents";
 import { getMany } from "idb-keyval";
 import { captureException } from "@sentry/react";
-import { relatedPrograms } from "@referee-fyi/rules";
+import { relatedPrograms } from "@referee-fyi/rules/programs";
 
 export const client = createClient<paths>({
   baseUrl: import.meta.env.VITE_REFEREE_FYI_RULES_SERVER,

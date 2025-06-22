@@ -2,7 +2,20 @@
   "name": "@referee-fyi/rules",
   "type": "module",
   "version": "1.0.0",
-  "main": "main.js",
+  "exports": {
+    ".": {
+      "default": "./main.js"
+    },
+    "./worker": {
+      "types": "./worker.d.ts"
+    },
+    "./qnaplus": {
+      "types": "./qnaplus.d.ts"
+    },
+    "./programs": {
+      "default": "./programs.js"
+    }
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w",

@@ -71,7 +71,7 @@ export async function reportIssue(
     sentryId = await sendFeedback(
       {
         name: profile.name,
-        message: metadata.comment ?? "No comment provided",
+        message: metadata.comment || "No comment provided",
         email: metadata.email,
         url: window.location.toString(),
         associatedEventId: metadata.error?.eventId,

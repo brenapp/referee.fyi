@@ -10,7 +10,7 @@ import {
   ShareResponse,
   User,
 } from "@referee-fyi/share";
-import { generateIncidentReportPDF } from "@referee-fyi/pdf-export";
+import { generateIncidentReportPDF } from "@referee-fyi/pdf";
 import { getRobotEventsClient } from "../utils/robotevents";
 import { getSystemKeyMetadata } from "../utils/systemKey";
 

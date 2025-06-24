@@ -13,13 +13,13 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w",
-    "test": "vitest"
+    "test": "nx vite:test"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "^24.0.3",
     "vitest": "3.2.4"
-  },
-  "dependencies": {}
+  }
 }

@@ -8,6 +8,7 @@ import { plugin as markdown, Mode } from "vite-plugin-markdown";
 import { exec } from "node:child_process";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import { z } from "zod/v4";
+import Sonda from "sonda/vite";
 
 import { GameSchema } from "@referee-fyi/rules";
 
@@ -195,6 +196,9 @@ export default defineConfig(() => ({
         // All /api/* routes should always go to the server
         navigateFallbackDenylist: [/^\/api/],
       },
+    }),
+    Sonda({
+      open: false,
     }),
     sentryVitePlugin({
       org: "referee-fyi",

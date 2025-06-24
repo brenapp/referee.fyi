@@ -10,15 +10,12 @@
   },
   "scripts": {
     "build": "tsc",
-    "dev": "tsc -w",
-    "test": "vitest"
+    "dev": "tsc -w"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "vitest": "^2.0.3"
-  },
+  "devDependencies": {},
   "dependencies": {
     "@referee-fyi/consistency": "^1.0.0"
   }

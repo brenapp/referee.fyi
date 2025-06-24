@@ -4,7 +4,12 @@
   "private": true,
   "version": "1.0.0",
   "description": "Strong eventual-consistency guarantees using CRDTs",
-  "exports": "./index.js",
+  "exports": [
+    {
+      "default": "./dist/index.js",
+      "types": "./src/index.ts"
+    }
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w",
@@ -14,7 +19,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "vitest": "^2.0.3"
+    "vitest": "3.2.4"
   },
   "dependencies": {}
 }

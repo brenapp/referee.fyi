@@ -4,16 +4,18 @@
   "version": "1.0.0",
   "exports": {
     ".": {
-      "default": "./main.js"
+      "default": "./dist/main.js",
+      "types": "./src/main.ts"
     },
     "./worker": {
-      "types": "./worker.d.ts"
+      "types": "./types/worker.d.ts"
     },
     "./qnaplus": {
-      "types": "./qnaplus.d.ts"
+      "types": "./types/qnaplus.d.ts"
     },
     "./programs": {
-      "default": "./programs.js"
+      "default": "./dist/programs.js",
+      "types": "./src/programs.ts"
     }
   },
   "scripts": {

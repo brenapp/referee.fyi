@@ -4,17 +4,14 @@
   "version": "0.6.0",
   "type": "module",
   "scripts": {
-    "frontend:dev": "nx serve --host --port 3000",
-    "frontend:build": "tsc && nx build",
+    "dev": "nx serve --host --port 3000",
+    "build": "tsc && nx build",
     "lib:dev": "concurrently \"npm --prefix lib/share run dev\" \"npm --prefix lib/consistency run dev\" \"npm --prefix lib/pdf  run dev\" \"npm --prefix lib/rules run dev\"",
-    "lib:build": "npm --prefix lib/rules run build && npm --prefix lib/consistency run build && npm --prefix lib/share run build && npm --prefix lib/pdf run build",
     "worker:dev": "npm --prefix worker/sync run dev",
     "worker:dev:secure": "npm --prefix worker/sync run dev:secure",
     "worker:build": "npm run lib:build && npm --prefix worker/sync run build",
     "worker:deploy": "npm run lib:build && npm --prefix worker/sync run deploy",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
-    "pages:build": "npm run lib:build && npm run frontend:build",
-    "dev": "concurrently \"npm run frontend:dev\" \"npm run lib:dev\""
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix"
   },
   "workspaces": [
     "lib/*",

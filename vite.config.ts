@@ -216,4 +216,7 @@ export default defineConfig(() => ({
   build: {
     sourcemap: true,
   },
+  server: {
+    allowedHosts: ["localhost", "mac.bren.haus"],
+  },
 }));

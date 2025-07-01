@@ -156,6 +156,7 @@ const EventPicker: React.FC = () => {
           <section>
             <h2 className="text-lg font-bold text-white mx-2">Search</h2>
             <Input
+              id="search"
               type="text"
               placeholder="SKU or Event Name"
               className="font-mono px-4 py-4 rounded-md invalid:bg-red-500 w-full mt-2"

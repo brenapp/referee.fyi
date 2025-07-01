@@ -433,7 +433,7 @@ export function useEventTeam(
 }
 
 export const currentSeasons = (
-  [programs.V5RC, programs.VIQRC, programs.VURC] as const
+  [programs.V5RC, programs.VIQRC, programs.VURC /*, programs.ADC */] as const
 ).map((program) => client.seasons[program][CURRENT_YEAR]) as number[];
 
 export function getUseEventsTodayQueryParams(

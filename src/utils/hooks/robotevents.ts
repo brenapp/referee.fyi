@@ -29,7 +29,7 @@ const client = Client({
   },
 });
 
-const CURRENT_YEAR = "2024-2025" as const;
+const CURRENT_YEAR = "2025-2026" as const;
 
 export type HookQueryOptions<
   TQueryFnData = unknown,
@@ -433,7 +433,7 @@ export function useEventTeam(
 }
 
 export const currentSeasons = (
-  [programs.V5RC, programs.VIQRC, programs.VURC, programs.ADC] as const
+  [programs.V5RC, programs.VIQRC, programs.VURC /*, programs.ADC */] as const
 ).map((program) => client.seasons[program][CURRENT_YEAR]) as number[];
 
 export function getUseEventsTodayQueryParams(

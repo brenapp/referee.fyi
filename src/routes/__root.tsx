@@ -65,7 +65,6 @@ const EventPicker: React.FC = () => {
   const { data: events, isPending: isLoadingEvents } = useEventSearch(
     {
       "season[]": currentSeasons,
-      "eventTypes[]": ["tournament"],
       start: start.current,
       end: end.toISOString(),
     },

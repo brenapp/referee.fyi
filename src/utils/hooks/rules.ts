@@ -67,7 +67,7 @@ export function useRulesForEvent(
 ): UseQueryResult<Game | null> {
   const { data: season } = useSeason(event?.season.id);
   const year = (
-    season ? `${season.years_start}_${season.years_end}` : null
+    season ? `${season.years_start}-${season.years_end}` : null
   ) as Year | null;
   return useRulesForSeason(season?.program?.code as ProgramAbbr | null, year);
 }

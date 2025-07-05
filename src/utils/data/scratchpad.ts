@@ -3,10 +3,10 @@ import {
   BaseMatchScratchpad,
   EditScratchpad,
   MatchScratchpad,
-  SupportedGame,
   SCRATCHPAD_IGNORE,
-  HighStakesMatchScratchpad,
-  RapidRelayMatchScratchpad,
+  DefaultV5RCMatchScratchpad,
+  DefaultVIQRCMatchScratchpad,
+  ScratchpadKind,
 } from "@referee-fyi/share";
 import { getShareProfile } from "./share";
 import { MatchData, programs } from "robotevents";
@@ -94,23 +94,44 @@ export async function editScratchpad<T extends MatchScratchpad>(
   return updated;
 }
 
-export function getGameForSeason(seasonId: number): SupportedGame | null {
+export function getScratchpadKindForSeason(
+  seasonId: number
+): ScratchpadKind | null {
   switch (seasonId) {
-    case seasons[programs.V5RC]["2024-2025"]: {
-      return "High Stakes";
+    case seasons[programs.V5RC]["2025-2026"]: {
+      return "DefaultV5RC";
     }
-    case seasons[programs.V5RC]["2023-2024"]: {
-      return "High Stakes";
+    case seasons[programs.VURC]["2025-2026"]: {
+      return "DefaultV5RC";
+    }
+    case seasons[programs.VAIRC]["2025-2026"]: {
+      return "DefaultV5RC";
+    }
+
+    case seasons[programs.V5RC]["2024-2025"]: {
+      return "DefaultV5RC";
     }
     case seasons[programs.VURC]["2024-2025"]: {
-      return "High Stakes";
+      return "DefaultV5RC";
     }
     case seasons[programs.VAIRC]["2024-2025"]: {
-      return "High Stakes";
+      return "DefaultV5RC";
     }
+
+    case seasons[programs.V5RC]["2023-2024"]: {
+      return "DefaultV5RC";
+    }
+    case seasons[programs.VURC]["2023-2024"]: {
+      return "DefaultV5RC";
+    }
+    case seasons[programs.VAIRC]["2023-2024"]: {
+      return "DefaultV5RC";
+    }
+
     case seasons[programs.VIQRC]["2024-2025"]: {
-      return "Rapid Relay";
+      return "DefaultVIQRC";
     }
+
     default: {
       return null;
     }
@@ -118,9 +139,9 @@ export function getGameForSeason(seasonId: number): SupportedGame | null {
 }
 
 export function getDefaultScratchpad(
+  kind: ScratchpadKind,
   match: MatchData,
-  peer: string,
-  game: SupportedGame
+  peer: string
 ): MatchScratchpad {
   const base: BaseMatchScratchpad = {
     id: getScratchpadID(match),
@@ -131,29 +152,27 @@ export function getDefaultScratchpad(
       name: match.name,
       id: match.id,
     },
-    game,
     notes: "",
   };
 
-  switch (game) {
-    case "High Stakes": {
-      return initLWW<HighStakesMatchScratchpad>({
+  switch (kind) {
+    case "DefaultV5RC": {
+      return initLWW<DefaultV5RCMatchScratchpad>({
         peer,
         ignore: SCRATCHPAD_IGNORE,
         value: {
           ...base,
-          game: "High Stakes",
           auto: "none",
           awp: { blue: false, red: false },
           timeout_used: { blue: false, red: false },
         },
       });
     }
-    case "Rapid Relay": {
-      return initLWW<RapidRelayMatchScratchpad>({
+    case "DefaultVIQRC": {
+      return initLWW<DefaultVIQRCMatchScratchpad>({
         peer,
         ignore: SCRATCHPAD_IGNORE,
-        value: { ...base, game: "Rapid Relay" },
+        value: base,
       });
     }
   }

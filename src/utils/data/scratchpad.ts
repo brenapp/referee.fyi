@@ -164,7 +164,7 @@ export function getDefaultScratchpad(
           ...base,
           auto: "none",
           awp: { blue: false, red: false },
-          timeout_used: { blue: false, red: false },
+          timeout: { blue: false, red: false },
         },
       });
     }

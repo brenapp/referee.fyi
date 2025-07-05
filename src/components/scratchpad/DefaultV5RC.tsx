@@ -217,10 +217,10 @@ export const AllianceTimeoutUsedScratchpad: React.FC<
 
   const [currentMatchTimeouts, setCurrentMatchTimeouts] = useScratchpadState<
     DefaultV5RCMatchScratchpad,
-    "timeout_used"
+    "timeout"
   >({
     match,
-    key: "timeout_used",
+    key: "timeout",
     fallback: { blue: false, red: false },
   });
 
@@ -239,7 +239,7 @@ export const AllianceTimeoutUsedScratchpad: React.FC<
         (match) => match.name === scratchpad.match.name
       );
 
-      if (scratchpad.timeout_used.red) {
+      if (scratchpad.timeout.red) {
         const teams = match
           ?.alliance("red")
           .teams.map((t) => t.team!.name)
@@ -252,7 +252,7 @@ export const AllianceTimeoutUsedScratchpad: React.FC<
         }
       }
 
-      if (scratchpad.timeout_used.blue) {
+      if (scratchpad.timeout.blue) {
         const teams = match
           ?.alliance("blue")
           .teams.map((t) => t.team!.name)
@@ -347,7 +347,7 @@ export const AllianceTimeoutUsedScratchpad: React.FC<
       </fieldset>
       <EditHistory
         value={data}
-        valueKey="timeout_used"
+        valueKey="timeout"
         className="mt-4"
         render={(value) =>
           `${value.red ? "Red Used Timeout" : ""} ${

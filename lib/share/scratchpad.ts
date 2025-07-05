@@ -15,7 +15,7 @@ export type ScratchpadUnchangeableProperties =
 export type DefaultV5RCMatchScratchpadProperties = {
   awp: Record<Color, boolean>;
   auto: Color | "tie" | "none";
-  timeout_used: Record<Color, boolean>;
+  timeout: Record<Color, boolean>;
 };
 
 export type BaseDefaultV5RCMatchScratchpad = BaseMatchScratchpad &

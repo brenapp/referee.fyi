@@ -2,59 +2,49 @@ import type { Color } from "robotevents";
 import { WithLWWConsistency } from "@referee-fyi/consistency";
 import { IncidentMatchHeadToHead } from "./incident.js";
 
-export type SupportedGame = "High Stakes" | "Rapid Relay";
-
-export type ScratchpadForGame = {
-  "High Stakes": BaseHighStakesMatchScratchpad;
-  "Rapid Relay": BaseRapidRelayMatchScratchpad;
-};
-
 export type BaseMatchScratchpad = {
   id: string;
-  game: SupportedGame;
   event: string;
   match: IncidentMatchHeadToHead;
   notes: string;
 };
-export const SCRATCHPAD_IGNORE = [
-  "game",
-  "event",
-  "match",
-  "notes",
-  "id",
-] as const;
+export const SCRATCHPAD_IGNORE = ["event", "match", "notes", "id"] as const;
 export type ScratchpadUnchangeableProperties =
   (typeof SCRATCHPAD_IGNORE)[number];
 
-export type HighStakesMatchScratchpadProperties = {
-  game: "High Stakes";
+export type DefaultV5RCMatchScratchpadProperties = {
   awp: Record<Color, boolean>;
   auto: Color | "tie" | "none";
-  timeout_used: Record<Color, boolean>;
+  timeout: Record<Color, boolean>;
 };
 
-export type BaseHighStakesMatchScratchpad = BaseMatchScratchpad &
-  HighStakesMatchScratchpadProperties;
+export type BaseDefaultV5RCMatchScratchpad = BaseMatchScratchpad &
+  DefaultV5RCMatchScratchpadProperties;
 
-export type HighStakesMatchScratchpad = WithLWWConsistency<
-  BaseHighStakesMatchScratchpad,
+export type DefaultV5RCMatchScratchpad = WithLWWConsistency<
+  BaseDefaultV5RCMatchScratchpad,
   ScratchpadUnchangeableProperties
 >;
 
-export type RapidRelayMatchScratchpadProperties = {
-  game: "Rapid Relay";
-};
-export type BaseRapidRelayMatchScratchpad = BaseMatchScratchpad &
-  RapidRelayMatchScratchpadProperties;
+export type DefaultVIQRCMatchScratchpadProperties = BaseMatchScratchpad;
+export type BaseDefaultVIQRCMatchScratchpad = BaseMatchScratchpad &
+  DefaultVIQRCMatchScratchpadProperties;
 
-export type RapidRelayMatchScratchpad = WithLWWConsistency<
-  BaseRapidRelayMatchScratchpad,
+export type DefaultVIQRCMatchScratchpad = WithLWWConsistency<
+  BaseDefaultVIQRCMatchScratchpad,
   ScratchpadUnchangeableProperties
 >;
 
 export type MatchScratchpad =
-  | HighStakesMatchScratchpad
-  | RapidRelayMatchScratchpad;
+  | DefaultV5RCMatchScratchpad
+  | DefaultVIQRCMatchScratchpad;
+
+export type Scratchpads = {
+  DefaultV5RC: DefaultV5RCMatchScratchpad;
+  DefaultVIQRC: DefaultVIQRCMatchScratchpad;
+};
+
+export type ScratchpadKind = keyof Scratchpads;
 
 export type EditScratchpad<T extends MatchScratchpad> = Omit<
   T,

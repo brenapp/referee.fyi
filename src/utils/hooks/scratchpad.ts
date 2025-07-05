@@ -8,7 +8,7 @@ import {
 import {
   editScratchpad,
   getDefaultScratchpad,
-  getGameForSeason,
+  getScratchpadKindForSeason,
   getMatchScratchpad,
   getScratchpadID,
   setMatchScratchpad,
@@ -75,13 +75,13 @@ export function useDefaultScratchpad<T extends MatchScratchpad>(
         return null;
       }
 
-      const game = getGameForSeason(event.season.id);
-      if (!game) {
+      const kind = getScratchpadKindForSeason(event.season.id);
+      if (!kind) {
         return null;
       }
 
       const { key: peer } = await getShareProfile();
-      return getDefaultScratchpad(match, peer, game) as T;
+      return getDefaultScratchpad(kind, match, peer) as T;
     },
     enabled: isSuccessEvent,
   });
@@ -100,8 +100,8 @@ export function useUpdateMatchScratchpad<T extends MatchScratchpad>(
         return null;
       }
 
-      const game = getGameForSeason(event.season.id);
-      if (!game) {
+      const kind = getScratchpadKindForSeason(event.season.id);
+      if (!kind) {
         return null;
       }
 
@@ -109,7 +109,7 @@ export function useUpdateMatchScratchpad<T extends MatchScratchpad>(
       const current = await getMatchScratchpad(id);
       if (!current) {
         const { key: peer } = await getShareProfile();
-        const def = getDefaultScratchpad(match, peer, game);
+        const def = getDefaultScratchpad(kind, match, peer);
         await setMatchScratchpad(id, def);
       }
 

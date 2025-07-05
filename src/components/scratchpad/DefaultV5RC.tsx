@@ -8,7 +8,7 @@ import { MatchData, rounds } from "robotevents";
 import { Checkbox, Radio } from "~components/Input";
 import {
   EditScratchpad,
-  HighStakesMatchScratchpad,
+  DefaultV5RCMatchScratchpad,
   IncidentMatchHeadToHead,
   MatchScratchpad,
 } from "@referee-fyi/share";
@@ -68,21 +68,22 @@ export type HighStakesScratchpadProps = {
   match: MatchData;
 };
 
-export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
+export const DefaultV5RCScratchpad: React.FC<HighStakesScratchpadProps> = ({
   match,
 }) => {
-  const { data } = useMatchScratchpad<HighStakesMatchScratchpad>(match);
+  const { data } = useMatchScratchpad<DefaultV5RCMatchScratchpad>(match);
 
   // Bindings
-  const [auto, setAuto] = useScratchpadState<HighStakesMatchScratchpad, "auto">(
-    {
-      match,
-      key: "auto",
-      fallback: "none",
-    }
-  );
+  const [auto, setAuto] = useScratchpadState<
+    DefaultV5RCMatchScratchpad,
+    "auto"
+  >({
+    match,
+    key: "auto",
+    fallback: "none",
+  });
 
-  const [awp, setAWP] = useScratchpadState<HighStakesMatchScratchpad, "awp">({
+  const [awp, setAWP] = useScratchpadState<DefaultV5RCMatchScratchpad, "awp">({
     match,
     key: "awp",
     fallback: { red: false, blue: false },
@@ -201,7 +202,7 @@ export const HighStakesScratchpad: React.FC<HighStakesScratchpadProps> = ({
 export const AllianceTimeoutUsedScratchpad: React.FC<
   HighStakesScratchpadProps
 > = ({ match }) => {
-  const { data } = useMatchScratchpad<HighStakesMatchScratchpad>(match);
+  const { data } = useMatchScratchpad<DefaultV5RCMatchScratchpad>(match);
   const { data: event } = useCurrentEvent();
   const division = useCurrentDivision();
   1;
@@ -215,16 +216,16 @@ export const AllianceTimeoutUsedScratchpad: React.FC<
   });
 
   const [currentMatchTimeouts, setCurrentMatchTimeouts] = useScratchpadState<
-    HighStakesMatchScratchpad,
-    "timeout_used"
+    DefaultV5RCMatchScratchpad,
+    "timeout"
   >({
     match,
-    key: "timeout_used",
+    key: "timeout",
     fallback: { blue: false, red: false },
   });
 
   const { data: matchScratchpads } =
-    useMatchScratchpads<HighStakesMatchScratchpad>(eliminationMatches);
+    useMatchScratchpads<DefaultV5RCMatchScratchpad>(eliminationMatches);
 
   const allianceTimeouts = useMemo(() => {
     const timeouts: Record<string, IncidentMatchHeadToHead[]> = {};
@@ -238,7 +239,7 @@ export const AllianceTimeoutUsedScratchpad: React.FC<
         (match) => match.name === scratchpad.match.name
       );
 
-      if (scratchpad.timeout_used.red) {
+      if (scratchpad.timeout.red) {
         const teams = match
           ?.alliance("red")
           .teams.map((t) => t.team!.name)
@@ -251,7 +252,7 @@ export const AllianceTimeoutUsedScratchpad: React.FC<
         }
       }
 
-      if (scratchpad.timeout_used.blue) {
+      if (scratchpad.timeout.blue) {
         const teams = match
           ?.alliance("blue")
           .teams.map((t) => t.team!.name)
@@ -293,8 +294,6 @@ export const AllianceTimeoutUsedScratchpad: React.FC<
     () => allianceTimeouts[blueTeams ?? ""],
     [allianceTimeouts, blueTeams]
   );
-
-  console.log(allianceTimeouts);
 
   return (
     <section
@@ -348,7 +347,7 @@ export const AllianceTimeoutUsedScratchpad: React.FC<
       </fieldset>
       <EditHistory
         value={data}
-        valueKey="timeout_used"
+        valueKey="timeout"
         className="mt-4"
         render={(value) =>
           `${value.red ? "Red Used Timeout" : ""} ${

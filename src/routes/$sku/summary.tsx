@@ -27,7 +27,7 @@ export type Filters = {
   rules: Rule[];
   division?: number;
   contact: Set<string>;
-  flag?: Record<Partial<IncidentFlag>, boolean>;
+  flag?: Partial<Record<IncidentFlag, boolean>>;
 };
 
 const DEFAULT_FILTERS: Filters = {

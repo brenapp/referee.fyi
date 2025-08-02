@@ -25,7 +25,9 @@ export type IncidentMatchSkills = {
 
 export type IncidentMatch = IncidentMatchHeadToHead | IncidentMatchSkills;
 
-export type IncidentFlag = "judge";
+export const FLAGS = ["judge"] as const;
+
+export type IncidentFlag = (typeof FLAGS)[number];
 
 export type BaseIncident = {
   id: string;

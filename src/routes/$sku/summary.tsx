@@ -18,7 +18,7 @@ import { Checkbox, RulesMultiSelect, Select } from "~components/Input";
 import { twMerge } from "tailwind-merge";
 import { useMutation } from "@tanstack/react-query";
 import { ReadyState, useShareConnection } from "~models/ShareConnection";
-import { IncidentOutcome, OUTCOMES } from "@referee-fyi/share";
+import { IncidentFlag, IncidentOutcome, OUTCOMES } from "@referee-fyi/share";
 import { VirtualizedList } from "~components/VirtualizedList";
 import { createFileRoute } from "@tanstack/react-router";
 
@@ -27,6 +27,7 @@ export type Filters = {
   rules: Rule[];
   division?: number;
   contact: Set<string>;
+  flag: Record<IncidentFlag, boolean>;
 };
 
 const DEFAULT_FILTERS: Filters = {
@@ -39,6 +40,9 @@ const DEFAULT_FILTERS: Filters = {
   },
   rules: [],
   contact: new Set(),
+  flag: {
+    judge: false,
+  },
 };
 
 type FilterDialogProps = {
@@ -138,6 +142,19 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
             </Select>
           </label>
         ) : null}
+        <label>
+          <p className="mt-4">Flags</p>
+          <Checkbox
+            label={"Judging"}
+            checked={filters.flag?.judge ?? false}
+            onChange={(e) =>
+              setFiltersField("flag", {
+                ...filters.flag,
+                judge: e.currentTarget.checked,
+              })
+            }
+          />
+        </label>
         {invitations.length > 0 ? (
           <label>
             <p className="mt-4">User Created/Modified</p>
@@ -285,6 +302,10 @@ export const EventSummaryPage: React.FC = () => {
         if (!hasMatch) {
           return false;
         }
+      }
+
+      if (filters.flag?.judge && !incident.flags.includes("judge")) {
+        return false;
       }
 
       // Division Filter

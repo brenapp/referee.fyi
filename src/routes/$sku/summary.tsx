@@ -27,7 +27,7 @@ export type Filters = {
   rules: Rule[];
   division?: number;
   contact: Set<string>;
-  flag?: Partial<Record<IncidentFlag, boolean>>;
+  flag: Record<IncidentFlag, boolean>;
 };
 
 const DEFAULT_FILTERS: Filters = {
@@ -40,6 +40,9 @@ const DEFAULT_FILTERS: Filters = {
   },
   rules: [],
   contact: new Set(),
+  flag: {
+    judge: false,
+  },
 };
 
 type FilterDialogProps = {

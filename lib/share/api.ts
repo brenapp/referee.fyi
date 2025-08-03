@@ -156,9 +156,17 @@ export type WebSocketPeerMessage =
   | WebSocketUpdateScratchpadMessage
   | WebSocketBroadcastMessage;
 
-export type InvitationListItem = Pick<Invitation, "admin"> & {
-  user: User;
-};
+export const InvitationListItemSchema = z
+  .object({
+    admin: z.boolean(),
+    user: UserSchema,
+  })
+  .meta({
+    id: "InvitationListItem",
+    description: "Represents a user who has access to a shared instance.",
+  });
+
+export type InvitationListItem = z.infer<typeof InvitationListItemSchema>;
 
 export type InstanceIncidents = ConsistentMap<Incident>;
 export type InstanceScratchpads = ConsistentMap<MatchScratchpad>;

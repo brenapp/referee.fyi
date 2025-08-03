@@ -12,7 +12,7 @@ export const QuerySchema = VerifyIntegrationTokenQuerySchema.extend({
   id: z.string(),
 });
 
-export const DeleteIncidentSuccessResponseSchema = z
+export const SuccessResponseSchema = z
   .object({
     success: z.literal(true),
     data: z.object({}),
@@ -38,7 +38,7 @@ export const deleteRoute = createRoute({
       description: "Successful verification",
       content: {
         "application/json": {
-          schema: DeleteIncidentSuccessResponseSchema,
+          schema: SuccessResponseSchema,
         },
       },
     },
@@ -80,7 +80,7 @@ app.openapi(deleteRoute, async (c) => {
     {
       success: true,
       data: {},
-    } as const satisfies z.infer<typeof DeleteIncidentSuccessResponseSchema>,
+    } as const satisfies z.infer<typeof SuccessResponseSchema>,
     200
   );
 });

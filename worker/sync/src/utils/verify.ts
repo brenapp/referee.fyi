@@ -233,7 +233,7 @@ export const VerifyIntegrationTokenParamsSchema = z.object({
 
 export const VerifyIntegrationTokenQuerySchema = z.object({
   token: z.string(),
-  instance: z.string(),
+  instance: z.string().optional(),
 });
 
 export const verifySystemToken = createMiddleware<{

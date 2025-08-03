@@ -1,14 +1,14 @@
 import z from "zod/v4";
-import { app, ErrorResponses, ErrorResponseSchema } from "../../../router";
+import { app, ErrorResponses, ErrorResponseSchema } from "../../../../router";
 import {
   verifyIntegrationToken,
+  VerifyIntegrationTokenParamsSchema,
   VerifyIntegrationTokenQuerySchema,
-} from "../../../utils/verify";
+} from "../../../../utils/verify";
 import { createRoute } from "@hono/zod-openapi";
 
-export const QuerySchema = z
-  .object({})
-  .extend(VerifyIntegrationTokenQuerySchema);
+export const ParamsSchema = VerifyIntegrationTokenParamsSchema;
+export const QuerySchema = VerifyIntegrationTokenQuerySchema;
 
 export const SuccessResponseSchema = z
   .object({
@@ -25,12 +25,13 @@ export const SuccessResponseSchema = z
 
 export const route = createRoute({
   method: "get",
-  path: "/api/integration/v1/verify",
+  path: "/api/integration/v1/{sku}/verify",
   tags: ["Integration"],
   summary: "Verify Integration Token",
   description: "Verifies the integration token and returns user information.",
   middlewares: [verifyIntegrationToken],
   request: {
+    params: ParamsSchema,
     query: QuerySchema,
   },
   responses: {

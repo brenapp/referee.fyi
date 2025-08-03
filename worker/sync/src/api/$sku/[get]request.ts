@@ -27,7 +27,7 @@ export const SuccessResponseSchema = z.object({
 
 export const route = createRoute({
   method: "get",
-  path: "/api/:sku/request",
+  path: "/api/{sku}/request",
   tags: ["Key Exchange"],
   summary: "Obtains another user's public key.",
   middleware: [verifySignature, verifyUser],

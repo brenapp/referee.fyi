@@ -18,15 +18,16 @@ export const DeleteIncidentSuccessResponseSchema = z
     data: z.object({}),
   })
   .meta({
-    id: "DeleteIncidentResponse",
+    id: "DeleteIntegrationV1IncidentResponse",
   });
 
 export const deleteRoute = createRoute({
   method: "delete",
   path: "/api/integration/v1/{sku}/incident",
   tags: ["Integration"],
-  summary: "Verify Integration Token",
-  description: "Verifies the integration token and returns user information.",
+  summary: "Delete an incident in a shared instance",
+  description:
+    "Deletes an incident in a shared instance. Requires a system token.",
   middlewares: [verifyIntegrationToken],
   request: {
     params: ParamsSchema,

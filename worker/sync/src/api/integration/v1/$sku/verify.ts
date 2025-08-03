@@ -18,7 +18,7 @@ export const SuccessResponseSchema = z
     }),
   })
   .meta({
-    id: "GetIntegrationVerifyResponse",
+    id: "GetIntegrationV1VerifyResponse",
     description:
       "Indicates that the integration token is valid and the user is authenticated.",
   });

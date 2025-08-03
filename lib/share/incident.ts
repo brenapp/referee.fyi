@@ -1,3 +1,4 @@
+import { z } from "zod/v4";
 import { WithLWWConsistency } from "@referee-fyi/consistency";
 
 export const OUTCOMES = [
@@ -8,46 +9,74 @@ export const OUTCOMES = [
   "Disabled",
 ] as const;
 
-export type IncidentOutcome = (typeof OUTCOMES)[number];
+export const IncidentOutcomeSchema = z.enum(OUTCOMES).meta({
+  id: "IncidentOutcome",
+  description: "The referee determined outcome of the incident.",
+});
 
-export type IncidentMatchHeadToHead = {
-  type: "match";
-  division: number;
-  name: string;
-  id: number;
-};
+export type IncidentOutcome = z.infer<typeof IncidentOutcomeSchema>;
 
-export type IncidentMatchSkills = {
-  type: "skills";
-  skillsType: "driver" | "programming";
-  attempt: number;
-};
+export const IncidentMatchHeadToHeadSchema = z.object({
+  type: z.literal("match"),
+  division: z.number(),
+  name: z.string(),
+  id: z.number(),
+});
 
-export type IncidentMatch = IncidentMatchHeadToHead | IncidentMatchSkills;
+export type IncidentMatchHeadToHead = z.infer<
+  typeof IncidentMatchHeadToHeadSchema
+>;
+
+export const IncidentMatchSkillsSchema = z.object({
+  type: z.literal("skills"),
+  skillsType: z.enum(["driver", "programming"]),
+  attempt: z.number(),
+});
+export type IncidentMatchSkills = z.infer<typeof IncidentMatchSkillsSchema>;
+
+export const IncidentMatchSchema = z.discriminatedUnion("type", [
+  IncidentMatchHeadToHeadSchema,
+  IncidentMatchSkillsSchema,
+]);
+export type IncidentMatch = z.infer<typeof IncidentMatchSchema>;
 
 export const FLAGS = ["judge"] as const;
+export const IncidentFlagSchema = z.enum(FLAGS).meta({
+  id: "IncidentFlag",
+  description: "Flags that can be applied to an incident.",
+});
+export type IncidentFlag = z.infer<typeof IncidentFlagSchema>;
 
-export type IncidentFlag = (typeof FLAGS)[number];
-
-export type BaseIncident = {
-  id: string;
-
-  time: Date;
-
-  event: string; // SKU
-
-  match?: IncidentMatch;
-  team: string; // team number
-
-  outcome: IncidentOutcome;
-  rules: string[];
-  notes: string;
-  assets: string[];
-  flags: IncidentFlag[];
-};
+export const BaseIncidentSchema = z
+  .object({
+    id: z.string(),
+    time: z.date(),
+    event: z.string().meta({ description: "Event Code" }),
+    match: IncidentMatchSchema.optional(),
+    team: z.string().meta({ description: "Team Number" }),
+    outcome: IncidentOutcomeSchema,
+    rules: z
+      .array(z.string())
+      .meta({ description: "Cited rules in the violation, in the form <SG1>" }),
+    notes: z.string(),
+    assets: z.array(z.string()).meta({
+      description: "Asset IDs associated with the incident.",
+    }),
+    flags: z.array(IncidentFlagSchema),
+  })
+  .meta({
+    id: "BaseIncident",
+    description: "A violation for a team at an event.",
+  });
+export type BaseIncident = z.infer<typeof BaseIncidentSchema>;
 
 export const INCIDENT_IGNORE = ["id", "time", "event", "team"] as const;
-export type IncidentUnchangeableProperties = (typeof INCIDENT_IGNORE)[number];
+export const IncidentIgnoreSchema = z.enum(INCIDENT_IGNORE).meta({
+  id: "IncidentIgnore",
+});
+export type IncidentUnchangeableProperties = z.infer<
+  typeof IncidentIgnoreSchema
+>;
 
 export type Incident = WithLWWConsistency<
   BaseIncident,

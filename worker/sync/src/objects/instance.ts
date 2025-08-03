@@ -1,4 +1,3 @@
-import { AutoRouter, cors, createResponse } from "itty-router";
 import {
   type Incident,
   type WebSocketMessage,
@@ -26,12 +25,12 @@ export type SessionClient = {
   active: boolean;
 };
 
-const { preflight, corsify } = cors();
+export type ShareInstanceInitData = {
+  instance: string;
+  sku: string;
+};
+
 export class ShareInstance extends DurableObject {
-  router = AutoRouter<RequestHasInvitation, [Env]>({
-    before: [preflight],
-    finally: [corsify],
-  });
   clients: Record<string, SessionClient> = {};
   state: DurableObjectState;
 
@@ -41,22 +40,6 @@ export class ShareInstance extends DurableObject {
     super(state, env);
     this.state = state;
     this.env = env;
-
-    this.router
-      .get("/join", (r) => this.handleWebsocket(r))
-      .get("/get", () => this.handleGet())
-      .get("/csv", () => this.handleCSV())
-      .get("/json", () => this.handleJSON())
-      .put("/incident", (r) => this.handleAddIncident(r))
-      .patch("/incident", (r) => this.handleEditIncident(r))
-      .delete("/incident", (r) => this.handleDeleteIncident(r))
-      .all("*", () =>
-        response({
-          success: false,
-          reason: "bad_request",
-          details: "durable object unknown action",
-        })
-      );
   }
 
   // Storage
@@ -240,15 +223,7 @@ export class ShareInstance extends DurableObject {
       .map((client) => client.user);
   }
 
-  async handle(request: RequestHasInvitation) {
-    return this.router.fetch(request);
-  }
-
-  async fetch(request: Request) {
-    return this.router.fetch(request);
-  }
-
-  async init(data: EventIncidentsInitData) {
+  async init(data: ShareInstanceInitData): Promise<void> {
     await this.setInstanceSecret(data.instance);
     await this.setSKU(data.sku);
   }
@@ -260,8 +235,6 @@ export class ShareInstance extends DurableObject {
       data,
     });
   }
-
-  csv = createResponse("text/csv");
 
   async handleCSV() {
     const incidents = await this.getAllIncidents();

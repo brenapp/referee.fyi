@@ -34,10 +34,14 @@ export const AutoRagSearchResponseSchema = z
     description: "The search response",
   });
 
-export const SuccessfulResponseSchema = z.object({
-  success: z.literal(true),
-  data: AutoRagSearchResponseSchema,
-});
+export const SuccessfulResponseSchema = z
+  .object({
+    success: z.literal(true),
+    data: AutoRagSearchResponseSchema,
+  })
+  .meta({
+    id: "SearchSuccessResponse",
+  });
 
 const route = createRoute({
   tags: ["rules"],

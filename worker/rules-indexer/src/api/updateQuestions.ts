@@ -42,10 +42,14 @@ export const QuestionsResponseSchema = z
     description: "Response schema for questions update",
   });
 
-export const SuccessfulResponseSchema = z.object({
-  success: z.literal(true),
-  data: QuestionsResponseSchema,
-});
+export const SuccessfulResponseSchema = z
+  .object({
+    success: z.literal(true),
+    data: QuestionsResponseSchema,
+  })
+  .meta({
+    id: "UpdateQuestionsSuccessResponse",
+  });
 
 export const route = createRoute({
   method: "get",

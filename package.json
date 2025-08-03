@@ -38,6 +38,7 @@
     "@use-gesture/react": "^10.3.0",
     "csv": "^6.3.5",
     "heroicons": "^2.0.18",
+    "hono": "^4.8.12",
     "idb-keyval": "^6.2.1",
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.1",

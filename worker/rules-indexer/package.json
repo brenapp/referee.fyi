@@ -22,7 +22,7 @@
 		"@hono/swagger-ui": "^0.5.2",
 		"@hono/zod-openapi": "1.0.2",
 		"@referee-fyi/rules": "^1.0.0",
-		"hono": "^4.7.10",
+		"hono": "^4.8.12",
 		"openapi-fetch": "^0.14.0",
 		"zod": "^4.0.14"
 	}

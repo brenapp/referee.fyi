@@ -1,4 +1,4 @@
-import { indexGameRules } from "./jobs/indexGameRules";
+import { indexGameRules } from "./jobs/indexGameRules.js";
 
 export async function scheduled(
   event: ScheduledController,

@@ -2,6 +2,7 @@
 	"name": "@referee-fyi/rules-indexer",
 	"version": "0.0.0",
 	"private": true,
+	"type": "module",
 	"scripts": {
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev --test-scheduled",
@@ -18,13 +19,11 @@
 		"@cloudflare/puppeteer": "^1.0.2",
 		"@cloudflare/unenv-preset": "^2.3.2",
 		"@hono/standard-validator": "^0.1.2",
-		"@hono/zod-openapi": "^0.19.6",
-		"@hono/zod-validator": "^0.4.3",
+		"@hono/swagger-ui": "^0.5.2",
+		"@hono/zod-openapi": "1.0.2",
 		"@referee-fyi/rules": "^1.0.0",
 		"hono": "^4.7.10",
-		"hono-openapi": "^0.4.8",
 		"openapi-fetch": "^0.14.0",
-		"zod": "3.25",
-		"zod-openapi": "^4.2.4"
+		"zod": "^4.0.14"
 	}
 }

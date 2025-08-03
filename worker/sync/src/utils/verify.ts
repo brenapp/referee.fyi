@@ -4,6 +4,7 @@ import { Invitation, ShareInstanceMeta, User } from "@referee-fyi/share";
 import { createMiddleware } from "hono/factory";
 import { ErrorResponseSchema, Variables } from "../router";
 import z from "zod/v4";
+import { getSystemKeyMetadata } from "./systemKey";
 
 export const VerifySignatureHeadersSchema = z.object({
   "X-Referee-Signature": z.string().optional(),
@@ -224,4 +225,258 @@ export const verifyInvitation = createMiddleware<{
 
   c.set("verifyInvitation", { invitation, instance });
   await next();
+});
+
+export const VerifyIntegrationTokenParamsSchema = z.object({
+  sku: z.string(),
+});
+
+export const VerifyIntegrationTokenQuerySchema = z.object({
+  token: z.string(),
+  instance: z.string(),
+});
+
+export const verifySystemToken = createMiddleware<{
+  Variables: Variables;
+  Bindings: Env;
+}>(async (c, next) => {
+  const sku = c.req.param("sku");
+  const token = c.req.query("token");
+  const instanceSecret = c.req.query("instance");
+
+  // Skip to bearer token
+  if (
+    typeof token !== "string" ||
+    typeof sku !== "string" ||
+    typeof instanceSecret !== "string"
+  ) {
+    return await next();
+  }
+
+  /**
+   * The format of the system token is a pipe delimited string:
+   * 1. Public key of the system token
+   * 2. Signed Message: <INSTANCE SECRET><SKU>
+   **/
+  const [publicKeyRaw, signedMessage] = token.split("|");
+
+  // Verify Key
+  const key = await importKey(publicKeyRaw);
+
+  if (!key) {
+    return c.json(
+      {
+        success: false,
+        error: "Invalid Bearer Token: can't obtain user key.",
+        code: "VerifyIntegrationTokenInvalidSignature",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      401
+    );
+  }
+
+  const keyHex = publicKeyRaw.slice(KEY_PREFIX.length);
+  const metadata = await getSystemKeyMetadata(c.env, keyHex);
+  if (!metadata) {
+    return c.json(
+      {
+        success: false,
+        error: "Key is not a system key.",
+        code: "VerifyIntegrationTokenInvalidSignature",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      401
+    );
+  }
+
+  const message = instanceSecret + sku;
+  const valid = await verifyKeySignature(key, signedMessage, message);
+  if (!valid) {
+    return c.json(
+      {
+        success: false,
+        error: "Invalid Bearer Token: signature verification failed.",
+        code: "VerifyIntegrationTokenInvalidSignature",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      401
+    );
+  }
+
+  const instance = await getInstance(c.env, instanceSecret, sku);
+  if (!instance) {
+    return c.json(
+      {
+        success: false,
+        error: "Instance not found.",
+        code: "VerifyIntegrationTokenInvalidInstance",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      404
+    );
+  }
+
+  const user = await getUser(c.env, keyHex);
+  if (!user) {
+    return c.json(
+      {
+        success: false,
+        error: "User not found.",
+        code: "VerifyIntegrationTokenInvalidUser",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      404
+    );
+  }
+
+  const invitation: Invitation = {
+    accepted: true,
+    admin: true,
+    from: keyHex,
+    id: "system:" + crypto.randomUUID(),
+    sku,
+    instance_secret: instanceSecret,
+    user: keyHex,
+  };
+
+  c.set("verifyIntegrationToken", {
+    grantType: "system",
+    user,
+    invitation,
+    instance,
+  });
+  await next();
+});
+
+export const verifyBearerToken = createMiddleware<{
+  Variables: Variables;
+  Bindings: Env;
+}>(async (c, next) => {
+  const sku = c.req.param("sku");
+  const token = c.req.query("token");
+
+  if (typeof token !== "string" || typeof sku !== "string") {
+    return c.json(
+      {
+        success: false,
+        error: "Token and SKU parameters are required.",
+        code: "VerifyIntegrationTokenValuesNotPresent",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      400
+    );
+  }
+
+  /**
+   * The format of the bearer token is a pipe delimited string:
+   * 1. Public key of an admin user that is responsible for the integration
+   * 2. Signed Message: <Invitation ID><SKU>
+   **/
+  const [publicKeyRaw, signedMessage] = token.split("|");
+
+  // Verify Key
+  const key = await importKey(publicKeyRaw);
+  if (!key) {
+    return c.json(
+      {
+        success: false,
+        error: "Invalid Bearer Token: can't obtain user key.",
+        code: "VerifyIntegrationTokenInvalidSignature",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      401
+    );
+  }
+
+  const keyHex = publicKeyRaw.slice(KEY_PREFIX.length);
+  const invitation = await getInvitation(c.env, keyHex, sku);
+
+  if (!invitation) {
+    return c.json(
+      {
+        success: false,
+        error: "Invalid Bearer Token: User does not have active invitation.",
+        code: "VerifyIntegrationTokenInvalidInvitation",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      401
+    );
+  }
+
+  if (!invitation.admin) {
+    return c.json(
+      {
+        success: false,
+        error: "Invalid Bearer Token: User does not have admin permissions.",
+        code: "VerifyIntegrationTokenInvalidUser",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      401
+    );
+  }
+
+  const message = invitation.id + sku;
+  const valid = await verifyKeySignature(key, signedMessage, message);
+
+  if (!valid) {
+    return c.json(
+      {
+        success: false,
+        error: "Invalid Bearer Token: Invalid signature.",
+        code: "VerifyIntegrationTokenInvalidSignature",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      401
+    );
+  }
+
+  const instance = await getInstance(c.env, invitation.instance_secret, sku);
+
+  if (!instance) {
+    return c.json(
+      {
+        success: false,
+        error: "Unknown Share Instance.",
+        code: "VerifyIntegrationTokenInvalidInstance",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      400
+    );
+  }
+
+  const user = await getUser(c.env, keyHex);
+  if (!user) {
+    return c.json(
+      {
+        success: false,
+        error: "Unknown User.",
+        code: "VerifyIntegrationTokenInvalidUser",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      400
+    );
+  }
+
+  c.set("verifyIntegrationToken", {
+    grantType: "bearer",
+    user,
+    invitation,
+    instance,
+  });
+
+  await next();
+});
+
+export const verifyIntegrationToken = createMiddleware<{
+  Variables: Variables;
+  Bindings: Env;
+}>(async (c, next) => {
+  const sku = c.req.param("sku");
+  const token = c.req.query("token");
+  const instanceSecret = c.req.query("instance");
+
+  if (typeof sku !== "string" || typeof token !== "string") {
+    return c.json(
+      {
+        success: false,
+        error: "SKU and token parameters are required.",
+        code: "VerifyIntegrationTokenValuesNotPresent",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      400
+    );
+  }
+
+  if (typeof instanceSecret !== "string") {
+    return await verifySystemToken(c, next);
+  }
+
+  return await verifyBearerToken(c, next);
 });

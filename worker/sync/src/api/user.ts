@@ -2,7 +2,7 @@ import { createRoute } from "@hono/zod-openapi";
 import { app, ErrorResponses, ErrorResponseSchema } from "../router";
 import { z } from "zod/v4";
 import { verifySignature, VerifySignatureHeadersSchema } from "../utils/verify";
-import { User } from "@referee-fyi/share";
+import { User, UserSchema } from "@referee-fyi/share";
 import { setUser } from "../utils/data";
 import { isSystemKey } from "../utils/systemKey";
 
@@ -14,10 +14,7 @@ export const SuccessResponseSchema = z
   .object({
     success: z.literal(true),
     data: z.object({
-      user: z.object({
-        key: z.string(),
-        name: z.string(),
-      }),
+      user: UserSchema,
       isSystemKey: z.boolean(),
     }),
   })

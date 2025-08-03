@@ -1,5 +1,5 @@
 export * from "./incident.js";
 export * from "./scratchpad.js";
-export type * from "./api.d.ts";
+export * from "./api.js";
 export * from "./server.js";
 export * from "./asset.js";

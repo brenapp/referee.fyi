@@ -1,13 +1,21 @@
 import { ConsistentMap } from "@referee-fyi/consistency";
-import type { Incident } from "./incident.ts";
-import type { MatchScratchpad } from "./index.ts";
+import type { Incident } from "./incident.js";
+import type { MatchScratchpad } from "./index.js";
 import type { Invitation } from "./server.js";
 import type { Iso3166Alpha2Code } from "@cloudflare/workers-types";
+import { z } from "zod/v4";
 
-export type User = {
-  key: string;
-  name: string;
-};
+export const UserSchema = z
+  .object({
+    key: z.string(),
+    name: z.string(),
+  })
+  .meta({
+    id: "User",
+    description: "A registered user",
+  });
+
+export type User = z.infer<typeof UserSchema>;
 
 export type ShareResponseSuccess<T> = {
   success: true;

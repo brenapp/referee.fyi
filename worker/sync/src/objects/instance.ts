@@ -1,5 +1,4 @@
 import { AutoRouter, cors, createResponse } from "itty-router";
-import { response } from "../utils/request";
 import {
   type Incident,
   type WebSocketMessage,
@@ -17,7 +16,6 @@ import {
   incidentMatchNameToString,
 } from "@referee-fyi/share";
 import { getUser } from "../utils/data";
-import { Env, EventIncidentsInitData, RequestHasInvitation } from "../types";
 import { mergeLWW } from "@referee-fyi/consistency";
 import { DurableObject } from "cloudflare:workers";
 

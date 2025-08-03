@@ -17,6 +17,12 @@ export type Variables = {
     invitation: Invitation;
     instance: ShareInstanceMeta;
   };
+  verifyIntegrationToken?: {
+    grantType: "bearer" | "system";
+    user: User;
+    invitation: Invitation;
+    instance: ShareInstanceMeta;
+  };
 };
 
 export const app = new OpenAPIHono<{ Bindings: Env; Variables: Variables }>();
@@ -30,6 +36,11 @@ export const ErrorCode = z.enum([
   "VerifyInvitationNotFound",
   "VerifyInvitationNotAccepted",
   "VerifyInvitationInstanceNotFound",
+  "VerifyIntegrationTokenValuesNotPresent",
+  "VerifyIntegrationTokenInvalidSignature",
+  "VerifyIntegrationTokenInvalidInstance",
+  "VerifyIntegrationTokenInvalidUser",
+  "VerifyIntegrationTokenInvalidInvitation",
 ]);
 
 export const ErrorResponseSchema = z

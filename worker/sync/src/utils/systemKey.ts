@@ -1,5 +1,3 @@
-import { Env } from "../types";
-
 export type SystemKeyMetadata = {
   name: string;
 };

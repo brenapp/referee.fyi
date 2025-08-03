@@ -5,6 +5,18 @@ import { createMiddleware } from "hono/factory";
 import { ErrorResponseSchema, Variables } from "../router";
 import z from "zod/v4";
 
+export const VerifySignatureHeadersSchema = z.object({
+  "X-Referee-Signature": z.string().optional(),
+  "X-Referee-Public-Key": z.string().optional(),
+  "X-Referee-Date": z.string().optional(),
+});
+
+export const VerifySignatureQuerySchema = z.object({
+  signature: z.string().optional(),
+  publickey: z.string().optional(),
+  signature_date: z.string().optional(),
+});
+
 export const verifySignature = createMiddleware<{
   Variables: Variables;
 }>(async (c, next) => {

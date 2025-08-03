@@ -1,7 +1,7 @@
 import { createRoute } from "@hono/zod-openapi";
 import { app, ErrorResponses, ErrorResponseSchema } from "../router";
 import { z } from "zod/v4";
-import { verifySignature } from "../utils/verify";
+import { verifySignature, VerifySignatureHeadersSchema } from "../utils/verify";
 import { User } from "@referee-fyi/share";
 import { setUser } from "../utils/data";
 import { isSystemKey } from "../utils/systemKey";
@@ -33,6 +33,7 @@ export const route = createRoute({
   middleware: [verifySignature],
   request: {
     query: QuerySchema,
+    headers: VerifySignatureHeadersSchema,
   },
   responses: {
     200: {

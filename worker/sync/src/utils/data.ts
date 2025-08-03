@@ -1,6 +1,5 @@
 import {
   AssetMeta,
-  AssetType,
   Invitation,
   ShareInstanceMeta,
   User,

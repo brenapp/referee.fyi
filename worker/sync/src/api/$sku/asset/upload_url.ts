@@ -1,0 +1,148 @@
+import { Cloudflare } from "cloudflare";
+import { app, ErrorResponseSchema, ErrorResponses } from "../../../router";
+import { createRoute } from "@hono/zod-openapi";
+import { z } from "zod/v4";
+import {
+  verifyInvitation,
+  verifySignature,
+  VerifySignatureHeadersSchema,
+  verifyUser,
+} from "../../../utils/verify";
+import { ImageAssetMeta } from "@referee-fyi/share";
+import { getAssetMeta, setAssetMeta } from "../../../utils/data";
+
+export const ParamsSchema = z.object({
+  sku: z.string(),
+});
+export const QuerySchema = z.object({
+  type: z.enum(["image"]),
+  id: z.string(),
+});
+
+export const SuccessResponseSchema = z
+  .object({
+    success: z.literal(true),
+    data: z.object({
+      uploadURL: z.string(),
+    }),
+  })
+  .meta({
+    id: "GetAssetUploadURLResponse",
+  });
+
+export const route = createRoute({
+  method: "get",
+  path: "/api/{sku}/asset/upload_url",
+  tags: ["Assets"],
+  summary: "Gets an upload URL for an asset.",
+  middleware: [verifySignature, verifyUser, verifyInvitation],
+  request: {
+    headers: VerifySignatureHeadersSchema,
+    params: ParamsSchema,
+    query: QuerySchema,
+  },
+  responses: {
+    200: {
+      description: "Public key retrieved successfully",
+      content: {
+        "application/json": {
+          schema: SuccessResponseSchema,
+        },
+      },
+    },
+    500: {
+      description: "Internal server error",
+      content: {
+        "application/json": {
+          schema: ErrorResponseSchema,
+        },
+      },
+    },
+    ...ErrorResponses,
+  },
+});
+
+app.openapi(route, async (c) => {
+  const { sku } = c.req.valid("param");
+  const { type, id } = c.req.valid("query");
+
+  if (type !== "image") {
+    return c.json(
+      {
+        success: false,
+        code: "GetAssetUploadURLInvalidAssetType",
+        error: "Unsupported asset type",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      400
+    );
+  }
+
+  const verifyInvitation = c.get("verifyInvitation");
+  if (!verifyInvitation) {
+    return c.json(
+      {
+        success: false,
+        error: "Invitation verification failed.",
+        code: "VerifyInvitationNotFound",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      401
+    );
+  }
+
+  // We will allow the owner to overwrite the asset, but not others.
+  const current = await getAssetMeta(c.env, id);
+  if (current && current.owner !== verifyInvitation.invitation.user) {
+    return c.json(
+      {
+        success: false,
+        code: "GetAssetUploadURLAssetAlreadyExists",
+        error: "Asset already exists",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      400
+    );
+  }
+
+  const imageMeta: Omit<ImageAssetMeta, "images_id"> = {
+    id,
+    type: "image",
+    owner: verifyInvitation.invitation.user,
+    sku,
+  };
+
+  const client = new Cloudflare({
+    apiEmail: c.env.CLOUDFLARE_EMAIL,
+    apiToken: c.env.CLOUDFLARE_API_KEY,
+  });
+
+  const directUploadResponse = await client.images.v2.directUploads.create({
+    account_id: c.env.CLOUDFLARE_IMAGES_ACCOUNT_ID,
+    metadata: JSON.stringify(imageMeta),
+    requireSignedURLs: true,
+  });
+
+  if (!directUploadResponse.id || !directUploadResponse.uploadURL) {
+    return c.json(
+      {
+        success: false,
+        error: "Failed to create direct upload",
+        code: "GetAssetUploadURLInvalidAssetType",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      500
+    );
+  }
+
+  const meta: ImageAssetMeta = {
+    ...imageMeta,
+    images_id: directUploadResponse.id,
+  };
+
+  await setAssetMeta(c.env, meta);
+
+  return c.json(
+    {
+      success: true,
+      data: { uploadURL: directUploadResponse.uploadURL },
+    } as const satisfies z.infer<typeof SuccessResponseSchema>,
+    200
+  );
+});

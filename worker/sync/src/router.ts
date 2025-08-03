@@ -2,7 +2,13 @@ import { z } from "zod/v4";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { swaggerUI } from "@hono/swagger-ui";
 import { cors } from "hono/cors";
-import { Invitation, ShareInstanceMeta, User } from "@referee-fyi/share";
+import {
+  AssetMeta,
+  Invitation,
+  ShareInstanceMeta,
+  User,
+} from "@referee-fyi/share";
+import type { Image } from "cloudflare/resources/images/v1/v1.mjs";
 
 export type Variables = {
   verifySignature?: {
@@ -23,6 +29,10 @@ export type Variables = {
     invitation: Invitation;
     instance: ShareInstanceMeta;
   };
+  verifyUserAssetAuthorized?: {
+    asset: AssetMeta;
+    image: Image;
+  };
 };
 
 export const app = new OpenAPIHono<{ Bindings: Env; Variables: Variables }>();
@@ -41,8 +51,16 @@ export const ErrorCode = z.enum([
   "VerifyIntegrationTokenInvalidInstance",
   "VerifyIntegrationTokenInvalidUser",
   "VerifyIntegrationTokenInvalidInvitation",
+  "VerifyUserAssetAuthorizedValuesNotPresent",
+  "VerifyUserAssetAuthorizedAssetNotFound",
+  "VerifyUserAssetAuthorizedImageNotFound",
+  "VerifyUserAssetAuthorizedUserNotAuthorized",
   "PutRequestCodeMustLeaveInstance",
   "GetRequestCodeUnknownCode",
+  "GetAssetUploadURLInvalidAssetType",
+  "GetAssetUploadURLAssetAlreadyExists",
+  "GetAssetPreviewURLNotFound",
+  "GetAssetURLNotFound",
 ]);
 
 export const ErrorResponseSchema = z

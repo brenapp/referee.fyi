@@ -7,6 +7,9 @@ import "./api/meta/location";
 import "./api/user";
 import "./api/$sku/[put]request";
 import "./api/$sku/[get]request";
+import "./api/$sku/asset/upload_url";
+import "./api/$sku/asset/url";
+import "./api/$sku/asset/preview_url";
 
 export default { ...app };
 

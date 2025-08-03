@@ -1,6 +1,12 @@
+import { Cloudflare } from "cloudflare";
 import { importKey, KEY_PREFIX, verifyKeySignature } from "./crypto";
 import { getInstance, getInvitation, getUser } from "./data";
-import { Invitation, ShareInstanceMeta, User } from "@referee-fyi/share";
+import {
+  ImageAssetMeta,
+  Invitation,
+  ShareInstanceMeta,
+  User,
+} from "@referee-fyi/share";
 import { createMiddleware } from "hono/factory";
 import { ErrorResponseSchema, Variables } from "../router";
 import z from "zod/v4";
@@ -479,4 +485,90 @@ export const verifyIntegrationToken = createMiddleware<{
   }
 
   return await verifyBearerToken(c, next);
+});
+
+export const VerifyUserAssetAuthorizedQuerySchema = z.object({
+  id: z.string(),
+});
+
+export const verifyUserAssetAuthorized = createMiddleware<{
+  Variables: Variables;
+  Bindings: Env;
+}>(async (c, next) => {
+  const id = c.req.query("id");
+  if (typeof id !== "string") {
+    return c.json(
+      {
+        success: false,
+        error: "Missing asset ID",
+        code: "VerifyUserAssetAuthorizedValuesNotPresent",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      400
+    );
+  }
+
+  const meta = await c.env.ASSETS.get<ImageAssetMeta>(id, "json");
+  if (!meta || !meta.images_id) {
+    return c.json(
+      {
+        success: false,
+        error: "Asset not found",
+        code: "VerifyUserAssetAuthorizedAssetNotFound",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      404
+    );
+  }
+
+  const verifyInvitation = c.get("verifyInvitation");
+  if (!verifyInvitation) {
+    return c.json(
+      {
+        success: false,
+        error: "Invitation must be verified before asset authorization.",
+        code: "VerifyUserAssetAuthorizedValuesNotPresent",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      400
+    );
+  }
+
+  const ownerInvitation = await getInvitation(c.env, meta.owner, meta.sku);
+  if (
+    !ownerInvitation ||
+    !ownerInvitation.accepted ||
+    ownerInvitation.instance_secret !==
+      verifyInvitation.invitation.instance_secret
+  ) {
+    return c.json(
+      {
+        success: false,
+        error: "Asset owner is not on the same instance as the requester.",
+        code: "VerifyUserAssetAuthorizedUserNotAuthorized",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      403
+    );
+  }
+
+  const client = new Cloudflare({
+    apiEmail: c.env.CLOUDFLARE_EMAIL,
+    apiToken: c.env.CLOUDFLARE_API_KEY,
+  });
+
+  const image = await client.images.v1.get(meta.images_id, {
+    account_id: c.env.CLOUDFLARE_IMAGES_ACCOUNT_ID,
+  });
+
+  if (Object.hasOwn(image, "draft") || !image.uploaded) {
+    return c.json(
+      {
+        success: false,
+        error: "Image has been created, but not yet uploaded.",
+        code: "VerifyUserAssetAuthorizedImageNotFound",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      404
+    );
+  }
+
+  c.set("verifyUserAssetAuthorized", { asset: meta, image });
+
+  await next();
 });

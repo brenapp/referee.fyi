@@ -41,6 +41,8 @@ export const ErrorCode = z.enum([
   "VerifyIntegrationTokenInvalidInstance",
   "VerifyIntegrationTokenInvalidUser",
   "VerifyIntegrationTokenInvalidInvitation",
+  "PutRequestCodeMustLeaveInstance",
+  "GetRequestCodeUnknownCode",
 ]);
 
 export const ErrorResponseSchema = z

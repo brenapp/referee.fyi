@@ -22,14 +22,19 @@
   },
   "dependencies": {
     "@cloudflare/workers-types": "^4.0.0",
+    "@hono/standard-validator": "^0.1.4",
+    "@hono/swagger-ui": "^0.5.2",
+    "@hono/zod-openapi": "^1.0.2",
     "@referee-fyi/consistency": "^1.0.0",
     "@referee-fyi/pdf-export": "^1.0.0",
     "@referee-fyi/share": "^1.0.0",
     "cloudflare": "^4.1.0",
+    "hono": "^4.8.12",
     "iso-3166-1": "^2.1.1",
     "itty-router": "^5.0.17",
     "jspdf": "^2.5.2",
-    "robotevents": "^6.0.3"
+    "robotevents": "^6.0.3",
+    "zod": "^4.0.14"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.7",

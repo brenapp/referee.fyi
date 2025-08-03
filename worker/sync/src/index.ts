@@ -1,14 +1,11 @@
 import { AutoRouter, IRequest, withParams } from "itty-router";
 import { corsify, preflight } from "./utils/request";
-import { Env } from "./types";
 
 import { integrationRouter } from "./routers/integration";
-import { registrationRouter } from "./routers/registration";
 import { keyExchangeRouter } from "./routers/keyexchange";
 import { invitationRouter } from "./routers/invitation";
 import { instanceRouter } from "./routers/instance";
 import { assetRouter } from "./routers/assets";
-import { metaRouter } from "./routers/meta";
 
 const router = AutoRouter<IRequest, [Env]>({
   before: [preflight, withParams],

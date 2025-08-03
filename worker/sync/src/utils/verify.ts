@@ -1,56 +1,65 @@
-import { IRequest } from "itty-router";
-import { response } from "./request";
 import { importKey, KEY_PREFIX, verifyKeySignature } from "./crypto";
-import { AuthenticatedRequest, Env, SignedRequest } from "../types";
 import { getInstance, getInvitation, getUser } from "./data";
 import { Invitation, ShareInstanceMeta, User } from "@referee-fyi/share";
+import { createMiddleware } from "hono/factory";
+import { ErrorResponseSchema, Variables } from "../router";
+import z from "zod/v4";
 
-export const verifySignature = async (request: IRequest & Request) => {
+export const verifySignature = createMiddleware<{
+  Variables: Variables;
+}>(async (c, next) => {
   const now = new Date();
 
   const signature =
-    request.headers.get("X-Referee-Signature") ?? request.query.signature;
+    c.req.header("X-Referee-Signature") ?? c.req.query("signature");
   const publicKeyRaw =
-    request.headers.get("X-Referee-Public-Key") ?? request.query.publickey;
+    c.req.header("X-Referee-Public-Key") ?? c.req.query("publickey");
   const isoDate =
-    request.headers.get("X-Referee-Date") ?? request.query.signature_date;
+    c.req.header("X-Referee-Date") ?? c.req.query("signature_date");
 
   if (
     typeof signature !== "string" ||
     typeof publicKeyRaw !== "string" ||
     typeof isoDate !== "string"
   ) {
-    return response({
-      success: false,
-      reason: "incorrect_code",
-      details: "Request must contain signature, public key, and date headers.",
-    });
+    return c.json(
+      {
+        success: false,
+        error: "Request must contain signature, public key, and date headers.",
+        code: "VerifySignatureValuesNotPresent",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      401
+    );
   }
 
   const dateToVerify = new Date(isoDate);
-
   const skew = Math.abs(now.getTime() - dateToVerify.getTime());
   if (skew > 60 * 1000) {
-    return response({
-      success: false,
-      reason: "bad_request",
-      details: `Skew between reported date (${dateToVerify.toISOString()}) and actual date (${now.toISOString()}) too large.`,
-    });
+    return c.json(
+      {
+        success: false,
+        error: `Skew between reported date (${dateToVerify.toISOString()}) and actual date (${now.toISOString()}) too large.`,
+        code: "VerifySignatureInvalidDateSkew",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      401
+    );
   }
 
   const key = await importKey(publicKeyRaw);
-
   if (!key) {
-    return response({
-      success: false,
-      reason: "bad_request",
-      details: "Invalid public key.",
-    });
+    return c.json(
+      {
+        success: false,
+        error: "Invalid public key.",
+        code: "VerifySignatureInvalidPublicKey",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      401
+    );
   }
 
-  const body = await request.text();
+  const body = await c.req.text();
+  const canonicalURL = new URL(c.req.url);
 
-  const canonicalURL = new URL(request.url);
   canonicalURL.searchParams.delete("signature");
   canonicalURL.searchParams.delete("publickey");
   canonicalURL.searchParams.delete("signature_date");
@@ -58,7 +67,7 @@ export const verifySignature = async (request: IRequest & Request) => {
 
   const message = [
     dateToVerify.toISOString(),
-    request.method,
+    c.req.method,
     canonicalURL.host,
     canonicalURL.pathname,
     canonicalURL.search,
@@ -68,79 +77,139 @@ export const verifySignature = async (request: IRequest & Request) => {
   const valid = await verifyKeySignature(key, signature, message);
 
   if (!valid) {
-    return response({
-      success: false,
-      reason: "incorrect_code",
-      details: "Invalid signature.",
-    });
+    return c.json(
+      {
+        success: false,
+        error: "Invalid signature.",
+        code: "VerifySignatureInvalidSignature",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      401
+    );
   }
 
-  request.key = key;
-  request.keyHex = publicKeyRaw.slice(KEY_PREFIX.length);
-  request.payload = body;
-};
+  c.set("verifySignature", {
+    key,
+    keyHex: publicKeyRaw.slice(KEY_PREFIX.length),
+    payload: body,
+  });
 
-export const verifyUser = async (request: SignedRequest, env: Env) => {
-  const user: User | null = await getUser(env, request.keyHex);
+  await next();
+});
+
+export const verifyUser = createMiddleware<{
+  Variables: Variables;
+  Bindings: Env;
+}>(async (c, next) => {
+  const keyHex = c.get("verifySignature")?.keyHex;
+
+  if (!keyHex) {
+    return c.json(
+      {
+        success: false,
+        error:
+          "Signature verification must be performed before user verification.",
+        code: "VerifySignatureValuesNotPresent",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      400
+    );
+  }
+
+  const user: User | null = await getUser(c.env, keyHex);
 
   if (!user) {
-    return response({
-      success: false,
-      reason: "bad_request",
-      details: "You must register to perform this action.",
-    });
+    return c.json(
+      {
+        success: false,
+        error: "You must register to perform this action.",
+        code: "VerifyUserNotRegistered",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      401
+    );
   }
 
-  request.user = user;
-};
+  c.set("verifyUser", { user });
+  await next();
+});
 
-export const verifyInvitation = async (
-  request: AuthenticatedRequest,
-  env: Env
-) => {
-  const sku = request.params.sku;
+export const verifyInvitation = createMiddleware<{
+  Variables: Variables;
+  Bindings: Env;
+}>(async (c, next) => {
+  const sku = c.req.param("sku");
+
+  if (!sku) {
+    return c.json(
+      {
+        success: false,
+        error: "SKU parameter is required.",
+        code: "VerifyInvitationNotFound",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      400
+    );
+  }
+
+  const user = c.get("verifyUser")?.user;
+  if (!user) {
+    return c.json(
+      {
+        success: false,
+        error: "User must be verified before invitation verification.",
+        code: "VerifySignatureValuesNotPresent",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      400
+    );
+  }
 
   const invitation: Invitation | null = await getInvitation(
-    env,
-    request.user.key,
+    c.env,
+    user.key,
     sku
   );
 
   if (!invitation) {
-    return response({
-      success: false,
-      reason: "incorrect_code",
-      details: "User does not have an active invitation for that event.",
-    });
+    return c.json(
+      {
+        success: false,
+        error: "User does not have an active invitation for that event.",
+        code: "VerifyInvitationNotFound",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      403
+    );
   }
 
   // Allow bypassing the acceptance check if they are rejecting their own invitation
   const canBypassAcceptance =
-    request.method === "DELETE" &&
-    new URL(request.url).pathname === `/api/${sku}/invite` &&
-    request.query.user === request.keyHex;
+    c.req.method === "DELETE" &&
+    new URL(c.req.url).pathname === `/api/${sku}/invite` &&
+    c.req.query("user") === user.key;
 
   if (!invitation.accepted && !canBypassAcceptance) {
-    return response({
-      success: false,
-      reason: "bad_request",
-      details: "Cannot perform this action until this invitation is accepted.",
-    });
+    return c.json(
+      {
+        success: false,
+        error: "Cannot perform this action until this invitation is accepted.",
+        code: "VerifyInvitationNotAccepted",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      403
+    );
   }
   const instance: ShareInstanceMeta | null = await getInstance(
-    env,
+    c.env,
     invitation.instance_secret,
     sku
   );
 
   if (!instance) {
-    return response({
-      success: false,
-      reason: "server_error",
-      details: "Could not get share instance.",
-    });
+    return c.json(
+      {
+        success: false,
+        error: "Could not get share instance.",
+        code: "VerifyInvitationInstanceNotFound",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      500
+    );
   }
 
-  request.invitation = invitation;
-  request.instance = instance;
-};
+  c.set("verifyInvitation", { invitation, instance });
+  await next();
+});

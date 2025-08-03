@@ -2,7 +2,11 @@ import { app, ErrorResponseSchema } from "../../router";
 import { createRoute } from "@hono/zod-openapi";
 import { z } from "zod/v4";
 import { ErrorResponses } from "../../router";
-import { verifySignature, verifyUser } from "../../utils/verify";
+import {
+  verifySignature,
+  VerifySignatureHeadersSchema,
+  verifyUser,
+} from "../../utils/verify";
 import { getInvitation, setRequestCode } from "../../utils/data";
 
 export const ParamsSchema = z.object({
@@ -27,6 +31,7 @@ export const route = createRoute({
   summary: "Publishes your public key.",
   middleware: [verifySignature, verifyUser],
   request: {
+    headers: VerifySignatureHeadersSchema,
     params: ParamsSchema,
     query: QuerySchema,
   },

@@ -2,7 +2,11 @@ import { app, ErrorResponseSchema } from "../../router";
 import { createRoute } from "@hono/zod-openapi";
 import { z } from "zod/v4";
 import { ErrorResponses } from "../../router";
-import { verifySignature, verifyUser } from "../../utils/verify";
+import {
+  verifySignature,
+  VerifySignatureHeadersSchema,
+  verifyUser,
+} from "../../utils/verify";
 import { getRequestCodeUserKey, getUser } from "../../utils/data";
 import { UserSchema } from "@referee-fyi/share";
 
@@ -28,6 +32,7 @@ export const route = createRoute({
   summary: "Obtains another user's public key.",
   middleware: [verifySignature, verifyUser],
   request: {
+    headers: VerifySignatureHeadersSchema,
     params: ParamsSchema,
     query: QuerySchema,
   },

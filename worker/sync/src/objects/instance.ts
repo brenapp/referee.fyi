@@ -11,7 +11,6 @@ import {
   type User,
   type InstanceIncidents,
   type InstanceScratchpads,
-  incidentMatchNameToString,
   WebSocketMessageSchema,
 } from "@referee-fyi/share";
 import { getUser } from "../utils/data";
@@ -230,38 +229,6 @@ export class ShareInstance extends DurableObject {
     await this.setInstanceSecret(data.instance);
     await this.setSKU(data.sku);
   }
-
-  // async getIncidentCSV() {
-  //   const incidents = await this.getAllIncidents();
-
-  //   let output =
-  //     "Date,Time,ID,SKU,Division,Match,Team,Outcome,Rules,Notes,Flags\n";
-
-  //   output += incidents
-  //     .map((incident) => {
-  //       const notes = incident.notes.replaceAll(/[\s\r\n]/g, " ");
-
-  //       const division =
-  //         incident.match?.type === "match" ? incident.match.division : "";
-
-  //       return [
-  //         new Date(incident.time).toISOString(),
-  //         new Date(incident.time).toISOString(),
-  //         incident.id,
-  //         incident.event,
-  //         division,
-  //         incidentMatchNameToString(incident.match),
-  //         incident.team,
-  //         incident.outcome,
-  //         incident.rules.join(" "),
-  //         notes,
-  //         incident.flags?.join(" ") ?? "",
-  //       ].join(",");
-  //     })
-  //     .join("\n");
-
-  //   return output;
-  // }
 
   // async handleAddIncident(request: Request) {
   //   const user = this.getRequestUser(request);

@@ -1,17 +1,17 @@
+import {
+  app,
+  ErrorResponses,
+  ErrorResponseSchema,
+} from "../../../../../router";
+import { createRoute } from "@hono/zod-openapi";
 import { z } from "zod/v4";
-import { app, ErrorResponses, ErrorResponseSchema } from "../../../../router";
 import {
   verifyIntegrationToken,
   VerifyIntegrationTokenParamsSchema,
   VerifyIntegrationTokenQuerySchema,
-} from "../../../../utils/verify";
-import { createRoute } from "@hono/zod-openapi";
-import {
-  InvitationListItem,
-  InvitationListItemSchema,
-  User,
-  UserSchema,
-} from "@referee-fyi/share";
+} from "../../../../../utils/verify";
+import {} from "../../../../../utils/data";
+import { IncidentSchema } from "@referee-fyi/share";
 
 export const ParamsSchema = VerifyIntegrationTokenParamsSchema;
 export const QuerySchema = VerifyIntegrationTokenQuerySchema;
@@ -19,34 +19,31 @@ export const QuerySchema = VerifyIntegrationTokenQuerySchema;
 export const SuccessResponseSchema = z
   .object({
     success: z.literal(true),
-    data: z.object({
-      invitations: z.array(InvitationListItemSchema),
-      active: z.array(UserSchema).meta({
-        description:
-          "The list of users who are current connected to the instance websocket.",
-      }),
-    }),
+    data: IncidentSchema.array(),
   })
   .meta({
-    id: "GetIntegrationV1UsersResponse",
+    id: "GetIntegrationV1IncidentsResponse",
   });
 
 export const route = createRoute({
   method: "get",
-  path: "/api/integration/v1/{sku}/users",
+  path: "/api/integration/v1/{sku}/incidents.json",
   tags: ["Integration"],
-  summary: "Gets information about the users in a shared instance.",
-  middlewares: [verifyIntegrationToken],
+  summary: "Get incidents as JSON",
+  middleware: [verifyIntegrationToken],
   request: {
     params: ParamsSchema,
     query: QuerySchema,
   },
   responses: {
     200: {
-      description: "Successful verification",
+      description: "JSON of incidents",
       content: {
-        "application/json": {
-          schema: SuccessResponseSchema,
+        "text/json": {
+          schema: z.object({
+            success: z.literal(true),
+            data: IncidentSchema.array(),
+          }),
         },
       },
     },
@@ -71,16 +68,12 @@ app.openapi(route, async (c) => {
     c.env.INCIDENTS.idFromString(verifyIntegrationToken.instance.secret)
   );
 
-  const invitations: InvitationListItem[] = await stub.getInvitationList();
-  const active: User[] = await stub.getActiveUsers();
+  const incidents = await stub.getAllIncidents();
 
   return c.json(
     {
       success: true,
-      data: {
-        invitations,
-        active,
-      },
+      data: incidents,
     } as const satisfies z.infer<typeof SuccessResponseSchema>,
     200
   );

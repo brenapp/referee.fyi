@@ -10,7 +10,6 @@ import {
   VerifyIntegrationTokenParamsSchema,
   VerifyIntegrationTokenQuerySchema,
 } from "../../../../../utils/verify";
-import {} from "../../../../../utils/data";
 import { IncidentSchema } from "@referee-fyi/share";
 
 export const ParamsSchema = VerifyIntegrationTokenParamsSchema;

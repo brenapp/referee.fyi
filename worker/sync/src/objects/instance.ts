@@ -570,7 +570,7 @@ export class ShareInstance extends DurableObject {
     }
   }
 
-  async webSocketError(ws: WebSocket, error: unknown): Promise<void> {
+  async webSocketError(ws: WebSocket /*error: unknown*/): Promise<void> {
     const key = this.sockets.get(ws);
     if (!key) {
       return;

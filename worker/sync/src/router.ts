@@ -43,6 +43,7 @@ export const ErrorCode = z.enum([
   "VerifySignatureInvalidPublicKey",
   "VerifySignatureInvalidSignature",
   "VerifyUserNotRegistered",
+  "VerifyUserNotSystemKey",
   "VerifyInvitationNotFound",
   "VerifyInvitationNotAccepted",
   "VerifyInvitationInstanceNotFound",
@@ -61,6 +62,10 @@ export const ErrorCode = z.enum([
   "GetAssetUploadURLAssetAlreadyExists",
   "GetAssetPreviewURLNotFound",
   "GetAssetURLNotFound",
+  "GetInvitationNotFound",
+  "GetInvitationUserFromNotFound",
+  "PutInvitationAcceptNotFound",
+  "PutInvitationAcceptInvalid",
 ]);
 
 export const ErrorResponseSchema = z
@@ -85,6 +90,22 @@ export const ErrorResponses = {
   },
   401: {
     description: "Unauthorized",
+    content: {
+      "application/json": {
+        schema: ErrorResponseSchema,
+      },
+    },
+  },
+  403: {
+    description: "Forbidden",
+    content: {
+      "application/json": {
+        schema: ErrorResponseSchema,
+      },
+    },
+  },
+  404: {
+    description: "Not found",
     content: {
       "application/json": {
         schema: ErrorResponseSchema,

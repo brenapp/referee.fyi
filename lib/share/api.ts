@@ -1,7 +1,7 @@
 import { ConsistentMap } from "@referee-fyi/consistency";
 import type { Incident } from "./incident.js";
 import type { MatchScratchpad } from "./index.js";
-import type { Invitation } from "./server.js";
+import { InvitationSchema } from "./server.js";
 import type { Iso3166Alpha2Code } from "@cloudflare/workers-types";
 import { z } from "zod/v4";
 
@@ -35,12 +35,16 @@ export type ShareResponseFailure = {
 
 export type ShareResponse<T> = ShareResponseSuccess<T> | ShareResponseFailure;
 
-export type UserInvitation = Pick<
-  Invitation,
-  "id" | "admin" | "accepted" | "sku"
-> & {
-  from: User;
-};
+export const UserInvitationSchema = InvitationSchema.pick({
+  id: true,
+  admin: true,
+  accepted: true,
+  sku: true,
+}).extend({
+  from: UserSchema,
+});
+
+export type UserInvitation = z.infer<typeof UserInvitationSchema>;
 
 // POST /api/user
 export type APIRegisterUserResponseBody = {

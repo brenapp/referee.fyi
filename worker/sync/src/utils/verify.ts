@@ -10,7 +10,7 @@ import {
 import { createMiddleware } from "hono/factory";
 import { ErrorResponseSchema, Variables } from "../router";
 import z from "zod/v4";
-import { getSystemKeyMetadata } from "./systemKey";
+import { getSystemKeyMetadata, isSystemKey } from "./systemKey";
 
 export const VerifySignatureHeadersSchema = z.object({
   "X-Referee-Signature": z.string().optional(),
@@ -570,5 +570,39 @@ export const verifyUserAssetAuthorized = createMiddleware<{
 
   c.set("verifyUserAssetAuthorized", { asset: meta, image });
 
+  await next();
+});
+
+export const verifyInvitationAdmin = createMiddleware<{
+  Variables: Variables;
+  Bindings: Env;
+}>(async (c, next) => {
+  const verifyInvitation = c.get("verifyInvitation");
+  if (!verifyInvitation) {
+    return c.json(
+      {
+        success: false,
+        error: "You are not authorized to perform this action.",
+        code: "VerifyInvitationAdminNotAuthorized",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      400
+    );
+  }
+
+  const isAdmin = verifyInvitation.invitation.admin;
+  const systemKey = await isSystemKey(c.env, verifyInvitation.invitation.user);
+
+  if (!isAdmin) {
+    return c.json(
+      {
+        success: false,
+        error: "You are not authorized to perform this action.",
+        code: "VerifyInvitationAdminNotAuthorized",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      403
+    );
+  }
+
+  c.set("verifyInvitationAdmin", { admin: isAdmin, systemKey });
   await next();
 });

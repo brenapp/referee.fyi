@@ -33,6 +33,10 @@ export type Variables = {
     asset: AssetMeta;
     image: Image;
   };
+  verifyInvitationAdmin?: {
+    admin: boolean;
+    systemKey: boolean;
+  };
 };
 
 export const app = new OpenAPIHono<{ Bindings: Env; Variables: Variables }>();
@@ -56,6 +60,7 @@ export const ErrorCode = z.enum([
   "VerifyUserAssetAuthorizedAssetNotFound",
   "VerifyUserAssetAuthorizedImageNotFound",
   "VerifyUserAssetAuthorizedUserNotAuthorized",
+  "VerifyInvitationAdminNotAuthorized",
   "PutRequestCodeMustLeaveInstance",
   "GetRequestCodeUnknownCode",
   "GetAssetUploadURLInvalidAssetType",
@@ -66,6 +71,7 @@ export const ErrorCode = z.enum([
   "GetInvitationUserFromNotFound",
   "PutInvitationAcceptNotFound",
   "PutInvitationAcceptInvalid",
+  "PutInvitationMustLeaveCurrentInstance",
 ]);
 
 export const ErrorResponseSchema = z

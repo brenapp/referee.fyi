@@ -52,14 +52,6 @@ export const route = createRoute({
         },
       },
     },
-    404: {
-      description: "Asset not found",
-      content: {
-        "application/json": {
-          schema: ErrorResponseSchema,
-        },
-      },
-    },
     ...ErrorResponses,
   },
 });

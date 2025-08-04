@@ -1,10 +1,14 @@
 import z from "zod/v4";
-import { app, ErrorResponses, ErrorResponseSchema } from "../../../../router";
+import {
+  app,
+  ErrorResponses,
+  ErrorResponseSchema,
+} from "../../../../../router";
 import {
   verifyIntegrationToken,
   VerifyIntegrationTokenParamsSchema,
   VerifyIntegrationTokenQuerySchema,
-} from "../../../../utils/verify";
+} from "../../../../../utils/verify";
 import { createRoute } from "@hono/zod-openapi";
 
 export const ParamsSchema = VerifyIntegrationTokenParamsSchema;

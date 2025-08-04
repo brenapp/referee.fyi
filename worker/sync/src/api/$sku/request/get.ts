@@ -1,13 +1,13 @@
-import { app, ErrorResponseSchema } from "../../router";
+import { app, ErrorResponseSchema } from "../../../router";
 import { createRoute } from "@hono/zod-openapi";
 import { z } from "zod/v4";
-import { ErrorResponses } from "../../router";
+import { ErrorResponses } from "../../../router";
 import {
   verifySignature,
   VerifySignatureHeadersSchema,
   verifyUser,
-} from "../../utils/verify";
-import { getRequestCodeUserKey, getUser } from "../../utils/data";
+} from "../../../utils/verify";
+import { getRequestCodeUserKey, getUser } from "../../../utils/data";
 import { UserSchema } from "@referee-fyi/share";
 
 export const ParamsSchema = z.object({
@@ -42,14 +42,6 @@ export const route = createRoute({
       content: {
         "application/json": {
           schema: SuccessResponseSchema,
-        },
-      },
-    },
-    404: {
-      description: "No such request code.",
-      content: {
-        "application/json": {
-          schema: ErrorResponseSchema,
         },
       },
     },

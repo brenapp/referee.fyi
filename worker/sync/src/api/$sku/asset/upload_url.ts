@@ -43,7 +43,7 @@ export const route = createRoute({
   },
   responses: {
     200: {
-      description: "Public key retrieved successfully",
+      description: "Successfully retrieved asset upload URL",
       content: {
         "application/json": {
           schema: SuccessResponseSchema,

@@ -72,6 +72,9 @@ export const ErrorCode = z.enum([
   "PutInvitationAcceptNotFound",
   "PutInvitationAcceptInvalid",
   "PutInvitationMustLeaveCurrentInstance",
+  "PutIncidentDeleted",
+  "PatchIncidentDeleted",
+  "PatchIncidentEditInvalid",
 ]);
 
 export const ErrorResponseSchema = z

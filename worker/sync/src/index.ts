@@ -19,6 +19,9 @@ import "./api/$sku/accept";
 import "./api/$sku/asset/upload_url";
 import "./api/$sku/asset/url";
 import "./api/$sku/asset/preview_url";
+import "./api/$sku/incident/put";
+import "./api/$sku/incident/patch";
+import "./api/$sku/incident/delete";
 
 export default { ...app };
 

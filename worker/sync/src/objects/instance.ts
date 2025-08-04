@@ -110,6 +110,9 @@ export class ShareInstance extends DurableObject {
     return new Set(map.keys().map((k) => k.slice(prefix.length)));
   }
 
+  /**
+   * @returns All incidents in the instance.
+   */
   async getAllIncidents(): Promise<Incident[]> {
     const prefix = this.KEYS.incident("");
     const map = await this.state.storage.list<Incident>({
@@ -120,6 +123,9 @@ export class ShareInstance extends DurableObject {
     return [...map.values()].filter((i) => !deleted.has(i.id));
   }
 
+  /**
+   * @returns All incidents data in the instance.
+   **/
   async getIncidentsData(): Promise<InstanceIncidents> {
     const incidents = await this.getAllIncidents();
     const deleted = await this.getDeletedIncidents();
@@ -130,6 +136,9 @@ export class ShareInstance extends DurableObject {
     };
   }
 
+  /**
+   * @returns All scratchpads data in the instance.
+   */
   async getScratchpadData(): Promise<InstanceScratchpads> {
     const values = await this.getAllScratchpads();
     return {
@@ -138,6 +147,9 @@ export class ShareInstance extends DurableObject {
     };
   }
 
+  /**
+   * Creates information for the server_share_info message.
+   **/
   async createServerShareMessage(): Promise<WebSocketServerShareInfoMessage> {
     const sku = await this.getSKU();
     const incidents = await this.getIncidentsData();
@@ -163,27 +175,10 @@ export class ShareInstance extends DurableObject {
     return { ...message, sender, date: new Date().toISOString() };
   }
 
-  getRequestBody<T = unknown>(request: Request): T | null {
-    const content = request.headers.get("X-Referee-Content");
-
-    if (!content) {
-      return null;
-    }
-
-    try {
-      return JSON.parse(content);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  getRequestUser(request: Request): User {
-    const name = request.headers.get("X-Referee-User-Name") ?? "";
-    const key = request.headers.get("X-Referee-User-Key") ?? "";
-
-    return { name, key };
-  }
-
+  /**
+   * Returns information about the share instance.
+   * @returns
+   */
   async getInstance(): Promise<ShareInstanceMeta | null> {
     const sku = await this.getSKU();
     const secret = await this.getInstanceSecret();
@@ -195,6 +190,9 @@ export class ShareInstance extends DurableObject {
     return instance;
   }
 
+  /**
+   * @returns A list of invitations in the instance.
+   **/
   async getInvitationList(): Promise<InvitationListItem[]> {
     const instance = await this.getInstance();
 
@@ -220,11 +218,19 @@ export class ShareInstance extends DurableObject {
     return invitations;
   }
 
+  /**
+   * @returns Active users in the instance
+   **/
   getActiveUsers(): User[] {
     return Object.values(this.clients)
       .filter((client) => client.active)
       .map((client) => client.user);
   }
+
+  /**
+   * Call when you first construct the DO
+   * @param data
+   **/
   async init(data: ShareInstanceInitData): Promise<void> {
     await this.setInstanceSecret(data.instance);
     await this.setSKU(data.sku);

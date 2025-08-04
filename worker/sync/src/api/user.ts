@@ -27,6 +27,8 @@ export const route = createRoute({
   method: "post",
   path: "/api/user",
   tags: ["User"],
+  summary: "Register information about a user device.",
+  description: "Register a device's public key with the sync engine.",
   middleware: [verifySignature],
   request: {
     query: QuerySchema,

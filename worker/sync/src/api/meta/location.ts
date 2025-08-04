@@ -61,6 +61,8 @@ export const route = createRoute({
   method: "get",
   path: "/api/meta/location",
   tags: ["Meta"],
+  summary: "Gets location information for a user.",
+  description: "Returns location information based on the request's origin.",
   responses: {
     200: {
       description: "Location information",

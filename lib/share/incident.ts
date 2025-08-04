@@ -1,5 +1,8 @@
 import { z } from "zod/v4";
-import { WithLWWConsistency } from "@referee-fyi/consistency";
+import {
+  LastWriteWinsConsistencySchema,
+  WithLWWConsistency,
+} from "@referee-fyi/consistency";
 
 export const OUTCOMES = [
   "General",
@@ -82,6 +85,10 @@ export type Incident = WithLWWConsistency<
   BaseIncident,
   IncidentUnchangeableProperties
 >;
+
+export const IncidentSchema = BaseIncidentSchema.extend({
+  consistency: LastWriteWinsConsistencySchema,
+});
 
 export type EditIncident = Omit<BaseIncident, IncidentUnchangeableProperties>;
 

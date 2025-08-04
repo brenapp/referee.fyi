@@ -1,13 +1,20 @@
+import { z } from "zod/v4";
 import type { Color } from "robotevents";
-import { WithLWWConsistency } from "@referee-fyi/consistency";
-import { IncidentMatchHeadToHead } from "./incident.js";
+import {
+  LastWriteWinsConsistencySchema,
+  WithLWWConsistency,
+} from "@referee-fyi/consistency";
+import { IncidentMatchHeadToHeadSchema } from "./incident.js";
 
-export type BaseMatchScratchpad = {
-  id: string;
-  event: string;
-  match: IncidentMatchHeadToHead;
-  notes: string;
-};
+export const BaseMatchScratchpadSchema = z.object({
+  id: z.string(),
+  event: z.string(),
+  match: IncidentMatchHeadToHeadSchema,
+  notes: z.string().optional(),
+});
+
+export type BaseMatchScratchpad = z.infer<typeof BaseMatchScratchpadSchema>;
+
 export const SCRATCHPAD_IGNORE = ["event", "match", "notes", "id"] as const;
 export type ScratchpadUnchangeableProperties =
   (typeof SCRATCHPAD_IGNORE)[number];
@@ -38,6 +45,10 @@ export type DefaultVIQRCMatchScratchpad = WithLWWConsistency<
 export type MatchScratchpad =
   | DefaultV5RCMatchScratchpad
   | DefaultVIQRCMatchScratchpad;
+
+export const MatchScratchpadSchema = BaseMatchScratchpadSchema.extend({
+  consistency: LastWriteWinsConsistencySchema,
+});
 
 export type Scratchpads = {
   DefaultV5RC: DefaultV5RCMatchScratchpad;

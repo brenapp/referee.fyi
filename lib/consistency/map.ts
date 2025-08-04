@@ -1,5 +1,7 @@
+import { z } from "zod/v4";
 import { MergeFunction, mergeLWW, WithLWWConsistency } from "./lww.js";
 import { mergeGrowSet } from "./gset.js";
+import { ZodType } from "zod";
 
 type ConsistentMapElement = WithLWWConsistency<
   Record<string, unknown> & { id: string },
@@ -10,6 +12,12 @@ export type ConsistentMap<T extends ConsistentMapElement> = {
   deleted: string[];
   values: Record<string, T>;
 };
+
+export const ConsistentMapSchema = <T extends ZodType>(type: T) =>
+  z.object({
+    deleted: z.array(z.string()),
+    values: z.record(z.string(), type),
+  });
 
 export type ConsistentMapMergeOptions<T extends ConsistentMapElement> = {
   local: ConsistentMap<T>;

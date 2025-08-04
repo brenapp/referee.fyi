@@ -1,8 +1,16 @@
+import { z } from "zod";
+
 export type History<T extends Record<string, unknown>, K extends keyof T> = {
   prev: T[K];
   peer: string;
   instant: string;
 };
+
+export const HistorySchema = z.object({
+  prev: z.any(),
+  peer: z.string(),
+  instant: z.string(),
+});
 
 export type KeyRegister<
   T extends Record<string, unknown>,
@@ -14,12 +22,24 @@ export type KeyRegister<
   history: History<T, K>[];
 };
 
+export const KeyRegisterSchema = z.object({
+  count: z.number(),
+  peer: z.string(),
+  instant: z.string(), // ISO Date
+  history: z.array(HistorySchema),
+});
+
 export type LastWriteWinsConsistency<
   T extends Record<string, unknown>,
   U extends keyof T,
 > = {
   [K in Exclude<keyof T, U>]: KeyRegister<T, K>;
 };
+
+export const LastWriteWinsConsistencySchema = z.record(
+  z.string(),
+  KeyRegisterSchema
+);
 
 export type WithLWWConsistency<
   T extends Record<string, unknown>,

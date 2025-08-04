@@ -2,7 +2,7 @@ import { ConsistentMap, ConsistentMapSchema } from "@referee-fyi/consistency";
 import { IncidentSchema, type Incident } from "./incident.js";
 import { MatchScratchpadSchema, type MatchScratchpad } from "./index.js";
 import { InvitationSchema } from "./server.js";
-import { z } from "zod/v4";
+import { z, ZodType } from "zod/v4";
 
 export const UserSchema = z
   .object({
@@ -121,8 +121,8 @@ export type WebSocketPeerMessage = z.infer<typeof WebSocketPeerMessageSchema>;
 export const WebSocketServerShareInfoMessageSchema = z.object({
   type: z.literal("server_share_info"),
   sku: z.string(),
-  incidents: z.record(z.string(), IncidentSchema),
-  scratchpads: z.record(z.string(), MatchScratchpadSchema),
+  incidents: InstanceIncidentsSchema,
+  scratchpads: InstanceScratchpadSchema,
   users: z.object({
     active: z.array(UserSchema),
     invitations: z.array(InvitationListItemSchema),
@@ -152,10 +152,19 @@ export type WebsocketServerUserRemoveMessage = z.infer<
   typeof WebsocketServerUserRemoveMessageSchema
 >;
 
+export const WebSocketServerErrorMessageSchema = z.object({
+  type: z.literal("server_error"),
+  error: z.string(),
+});
+export type WebSocketServerErrorMessage = z.infer<
+  typeof WebSocketServerErrorMessageSchema
+>;
+
 export const WebSocketServerMessageSchema = z.discriminatedUnion("type", [
   WebSocketServerShareInfoMessageSchema,
   WebsocketServerUserAddMessageSchema,
   WebsocketServerUserRemoveMessageSchema,
+  WebSocketServerErrorMessageSchema,
 ]);
 export type WebSocketServerMessage = z.infer<
   typeof WebSocketServerMessageSchema
@@ -173,7 +182,16 @@ export const WebSocketSenderSchema = z.union([
 ]);
 export type WebSocketSender = z.infer<typeof WebSocketSenderSchema>;
 
-export type WebSocketPayload<T extends WebSocketMessage> = T & {
-  date: string; // ISO string
-  sender: WebSocketSender;
-};
+export const WebSocketPayloadAdditionalInfoSchema = z.object({
+  date: z.string(), // ISO string
+  sender: WebSocketSenderSchema,
+});
+
+export type WebSocketPayloadAdditionalInfo = z.infer<
+  typeof WebSocketPayloadAdditionalInfoSchema
+>;
+
+export const WebSocketPayloadSchema = <T extends ZodType>(type: T) =>
+  WebSocketPayloadAdditionalInfoSchema.extend(type);
+export type WebSocketPayload<T extends WebSocketMessage> = T &
+  WebSocketPayloadAdditionalInfo;

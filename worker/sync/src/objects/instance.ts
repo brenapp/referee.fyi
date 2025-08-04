@@ -11,11 +11,10 @@ import {
   type User,
   type InstanceIncidents,
   type InstanceScratchpads,
-  INCIDENT_IGNORE,
   incidentMatchNameToString,
+  WebSocketMessageSchema,
 } from "@referee-fyi/share";
 import { getUser } from "../utils/data";
-import { mergeLWW } from "@referee-fyi/consistency";
 import { DurableObject } from "cloudflare:workers";
 
 export type SessionClient = {
@@ -31,7 +30,12 @@ export type ShareInstanceInitData = {
 };
 
 export class ShareInstance extends DurableObject {
+  // Stores information about connected clients
   clients: Record<string, SessionClient> = {};
+
+  // WebSocket -> User Public Key
+  sockets: Map<WebSocket, string> = new Map();
+
   state: DurableObjectState;
 
   env: Env;
@@ -222,228 +226,207 @@ export class ShareInstance extends DurableObject {
       .filter((client) => client.active)
       .map((client) => client.user);
   }
-
   async init(data: ShareInstanceInitData): Promise<void> {
     await this.setInstanceSecret(data.instance);
     await this.setSKU(data.sku);
   }
 
-  async handleGet() {
-    const data = await this.createServerShareMessage();
-    return response({
-      success: true,
-      data,
-    });
-  }
+  // async getIncidentCSV() {
+  //   const incidents = await this.getAllIncidents();
 
-  async handleCSV() {
-    const incidents = await this.getAllIncidents();
+  //   let output =
+  //     "Date,Time,ID,SKU,Division,Match,Team,Outcome,Rules,Notes,Flags\n";
 
-    let output =
-      "Date,Time,ID,SKU,Division,Match,Team,Outcome,Rules,Notes,Flags\n";
+  //   output += incidents
+  //     .map((incident) => {
+  //       const notes = incident.notes.replaceAll(/[\s\r\n]/g, " ");
 
-    output += incidents
-      .map((incident) => {
-        const notes = incident.notes.replaceAll(/[\s\r\n]/g, " ");
+  //       const division =
+  //         incident.match?.type === "match" ? incident.match.division : "";
 
-        const division =
-          incident.match?.type === "match" ? incident.match.division : "";
+  //       return [
+  //         new Date(incident.time).toISOString(),
+  //         new Date(incident.time).toISOString(),
+  //         incident.id,
+  //         incident.event,
+  //         division,
+  //         incidentMatchNameToString(incident.match),
+  //         incident.team,
+  //         incident.outcome,
+  //         incident.rules.join(" "),
+  //         notes,
+  //         incident.flags?.join(" ") ?? "",
+  //       ].join(",");
+  //     })
+  //     .join("\n");
 
-        return [
-          new Date(incident.time).toISOString(),
-          new Date(incident.time).toISOString(),
-          incident.id,
-          incident.event,
-          division,
-          incidentMatchNameToString(incident.match),
-          incident.team,
-          incident.outcome,
-          incident.rules.join(" "),
-          notes,
-          incident.flags?.join(" ") ?? "",
-        ].join(",");
-      })
-      .join("\n");
+  //   return output;
+  // }
 
-    return this.csv(output);
-  }
+  // async handleAddIncident(request: Request) {
+  //   const user = this.getRequestUser(request);
+  //   const client = this.clients[user.key];
 
-  async handleJSON() {
-    const incidents = await this.getAllIncidents();
+  //   const sender: WebSocketSender = client
+  //     ? {
+  //         type: "client",
+  //         name: client.user.name,
+  //         id: client.user.key,
+  //       }
+  //     : { type: "server" };
 
-    return response({
-      success: true,
-      data: incidents,
-    });
-  }
+  //   const incident = this.getRequestBody<Incident>(request);
 
-  async handleAddIncident(request: Request) {
-    const user = this.getRequestUser(request);
-    const client = this.clients[user.key];
+  //   if (!incident) {
+  //     return response({
+  //       success: false,
+  //       reason: "bad_request",
+  //       details: "Must specify a valid incident.",
+  //     });
+  //   }
 
-    const sender: WebSocketSender = client
-      ? {
-          type: "client",
-          name: client.user.name,
-          id: client.user.key,
-        }
-      : { type: "server" };
+  //   const deleted = await this.getDeletedIncidents();
 
-    const incident = this.getRequestBody<Incident>(request);
+  //   if (deleted.has(incident.id)) {
+  //     return response({
+  //       success: false,
+  //       reason: "bad_request",
+  //       details: "That incident has been deleted.",
+  //     });
+  //   }
 
-    if (!incident) {
-      return response({
-        success: false,
-        reason: "bad_request",
-        details: "Must specify a valid incident.",
-      });
-    }
+  //   await this.addIncident(incident);
+  //   await this.broadcast({ type: "add_incident", incident }, sender);
 
-    const deleted = await this.getDeletedIncidents();
+  //   return response({
+  //     success: true,
+  //     data: incident,
+  //   });
+  // }
 
-    if (deleted.has(incident.id)) {
-      return response({
-        success: false,
-        reason: "bad_request",
-        details: "That incident has been deleted.",
-      });
-    }
+  // async handleEditIncident(request: Request): Promise<Response> {
+  //   const incident = this.getRequestBody<Incident>(request);
 
-    await this.addIncident(incident);
-    await this.broadcast({ type: "add_incident", incident }, sender);
+  //   if (!incident) {
+  //     return response({
+  //       success: false,
+  //       reason: "bad_request",
+  //       details: "Must specify a valid incident to edit.",
+  //     });
+  //   }
 
-    return response({
-      success: true,
-      data: incident,
-    });
-  }
+  //   const deletedIncidents = await this.getDeletedIncidents();
+  //   if (deletedIncidents.has(incident.id)) {
+  //     return response({
+  //       success: false,
+  //       reason: "bad_request",
+  //       details: "That incident has been deleted.",
+  //     });
+  //   }
 
-  async handleEditIncident(request: Request): Promise<Response> {
-    const incident = this.getRequestBody<Incident>(request);
+  //   const user = this.getRequestUser(request);
+  //   const client = this.clients[user.key];
+  //   const currentIncident = await this.getIncident(incident.id);
 
-    if (!incident) {
-      return response({
-        success: false,
-        reason: "bad_request",
-        details: "Must specify a valid incident to edit.",
-      });
-    }
+  //   const result = mergeLWW({
+  //     local: currentIncident,
+  //     remote: incident,
+  //     ignore: INCIDENT_IGNORE,
+  //   });
 
-    const deletedIncidents = await this.getDeletedIncidents();
-    if (deletedIncidents.has(incident.id)) {
-      return response({
-        success: false,
-        reason: "bad_request",
-        details: "That incident has been deleted.",
-      });
-    }
+  //   if (!result.resolved) {
+  //     return response({
+  //       success: false,
+  //       reason: "bad_request",
+  //       details: "Could not edit incident with that ID",
+  //     });
+  //   }
 
-    const user = this.getRequestUser(request);
-    const client = this.clients[user.key];
-    const currentIncident = await this.getIncident(incident.id);
+  //   await this.editIncident(result.resolved);
 
-    const result = mergeLWW({
-      local: currentIncident,
-      remote: incident,
-      ignore: INCIDENT_IGNORE,
-    });
+  //   const sender: WebSocketSender = client
+  //     ? {
+  //         type: "client",
+  //         name: client.user.name,
+  //         id: client.user.key,
+  //       }
+  //     : { type: "server" };
 
-    if (!result.resolved) {
-      return response({
-        success: false,
-        reason: "bad_request",
-        details: "Could not edit incident with that ID",
-      });
-    }
+  //   await this.broadcast(
+  //     { type: "update_incident", incident: result.resolved },
+  //     sender
+  //   );
 
-    await this.editIncident(result.resolved);
+  //   return response({
+  //     success: true,
+  //     data: incident,
+  //   });
+  // }
 
-    const sender: WebSocketSender = client
-      ? {
-          type: "client",
-          name: client.user.name,
-          id: client.user.key,
-        }
-      : { type: "server" };
+  // async handleDeleteIncident(request: Request) {
+  //   const params = new URL(request.url).searchParams;
+  //   const user = this.getRequestUser(request);
+  //   const client = this.clients[user.key];
 
-    await this.broadcast(
-      { type: "update_incident", incident: result.resolved },
-      sender
-    );
+  //   const sender: WebSocketSender = client
+  //     ? {
+  //         type: "client",
+  //         name: client.user.name,
+  //         id: client.user.key,
+  //       }
+  //     : { type: "server" };
 
-    return response({
-      success: true,
-      data: incident,
-    });
-  }
+  //   const id = params.get("id");
 
-  async handleDeleteIncident(request: Request) {
-    const params = new URL(request.url).searchParams;
-    const user = this.getRequestUser(request);
-    const client = this.clients[user.key];
+  //   if (!id) {
+  //     return response({
+  //       success: false,
+  //       reason: "bad_request",
+  //       details: "Must specify `id` of incident to delete",
+  //     });
+  //   }
 
-    const sender: WebSocketSender = client
-      ? {
-          type: "client",
-          name: client.user.name,
-          id: client.user.key,
-        }
-      : { type: "server" };
+  //   await this.deleteIncident(id);
+  //   this.broadcast({ type: "remove_incident", id }, sender);
 
-    const id = params.get("id");
+  //   return response({
+  //     success: true,
+  //     data: {},
+  //   });
+  // }
 
-    if (!id) {
-      return response({
-        success: false,
-        reason: "bad_request",
-        details: "Must specify `id` of incident to delete",
-      });
-    }
-
-    await this.deleteIncident(id);
-    this.broadcast({ type: "remove_incident", id }, sender);
-
-    return response({
-      success: true,
-      data: {},
-    });
-  }
-
-  async handleWebsocket(request: Request) {
+  /**
+   * Accepts a websocket connection and handles the session.
+   * @param request
+   **/
+  async fetch(request: Request): Promise<Response> {
     const ip = request.headers.get("CF-Connecting-IP") ?? "0.0.0.0";
+    const webSocketPair = new WebSocketPair();
+    const [client, server] = Object.values(webSocketPair);
 
-    if (request.headers.get("Upgrade") === "websocket") {
-      const pair = new WebSocketPair();
+    const search = new URL(request.url).searchParams;
+    const name = search.get("name");
+    const key = search.get("id");
 
-      const search = new URL(request.url).searchParams;
+    if (!name || !key) {
+      const socket = server;
+      socket.accept();
 
-      const name = search.get("name");
-      const key = search.get("id");
-
-      if (!name || !key) {
-        const socket = pair[1];
-        socket.accept();
-
-        socket.send(JSON.stringify({ error: "must specify name and user id" }));
-        socket.close(1011, "Must specify name and user id");
-        return new Response(null, { status: 101, webSocket: pair[0] });
-      }
-
-      this.handleSession(pair[1], ip, { name, key });
-
-      return new Response(null, {
-        status: 101,
-        webSocket: pair[0],
-      });
+      socket.send(JSON.stringify({ error: "must specify name and user id" }));
+      socket.close(1011, "Must specify name and user id");
+      return new Response(null, { status: 101, webSocket: client });
     }
-  }
 
-  async handleSession(socket: WebSocket, ip: string, user: User) {
-    socket.accept();
+    this.ctx.acceptWebSocket(server);
 
-    const client: SessionClient = { socket, ip, active: true, user };
+    const user: User = { name, key };
+    const sessionClient: SessionClient = {
+      socket: client,
+      ip,
+      active: true,
+      user,
+    };
 
-    // Ensure that clients aren't listed twice
     const current = this.clients[user.key];
     if (current) {
       current.active = false;
@@ -455,71 +438,8 @@ export class ShareInstance extends DurableObject {
       current.socket.close(1011, "Replaced by new connection.");
     }
 
-    this.clients[user.key] = client;
-
-    // Set event handlers to receive messages.
-    socket.addEventListener("message", async (event: MessageEvent) => {
-      try {
-        if (!client.active) {
-          socket.close(1011, "WebSocket broken.");
-          return;
-        }
-
-        const data = JSON.parse(
-          event.data as string
-        ) as WebSocketPayload<WebSocketPeerMessage>;
-
-        switch (data.type) {
-          case "add_incident": {
-            const incident = data.incident;
-            await this.addIncident(incident);
-            this.broadcast(
-              { type: "add_incident", incident },
-              { type: "client", name: client.user.name, id: client.user.key }
-            );
-            break;
-          }
-          case "update_incident": {
-            const incident = data.incident;
-            await this.editIncident(incident);
-            this.broadcast(
-              { type: "update_incident", incident },
-              { type: "client", name: client.user.name, id: client.user.key }
-            );
-            break;
-          }
-          case "remove_incident": {
-            await this.deleteIncident(data.id);
-            this.broadcast(
-              { type: "remove_incident", id: data.id },
-              { type: "client", name: client.user.name, id: client.user.key }
-            );
-            break;
-          }
-          case "scratchpad_update": {
-            await this.setScratchpad(data.id, data.scratchpad);
-            this.broadcast(
-              {
-                type: "scratchpad_update",
-                id: data.id,
-                scratchpad: data.scratchpad,
-              },
-              { type: "client", name: client.user.name, id: client.user.key }
-            );
-            break;
-          }
-          case "message": {
-            this.broadcast(
-              { type: "message", message: data.message },
-              { type: "client", name: client.user.name, id: client.user.key }
-            );
-            break;
-          }
-        }
-      } catch (err) {
-        socket.send(JSON.stringify({ error: err }));
-      }
-    });
+    this.clients[user.key] = sessionClient;
+    this.sockets.set(client, user.key);
 
     const activeUsers = this.getActiveUsers();
     const invitations = await this.getInvitationList();
@@ -531,25 +451,187 @@ export class ShareInstance extends DurableObject {
 
     const state = await this.createServerShareMessage();
     const payload = this.createPayload(state, { type: "server" });
-    socket.send(JSON.stringify(payload));
+    client.send(JSON.stringify(payload));
 
-    const quitHandler = async () => {
-      client.active = false;
-      delete this.clients[user.key];
+    return new Response(null, {
+      status: 101,
+      webSocket: client,
+    });
+  }
 
-      const activeUsers = await this.getActiveUsers();
-      const invitations = await this.getInvitationList();
+  async webSocketMessage(
+    ws: WebSocket,
+    message: string | ArrayBuffer
+  ): Promise<void> {
+    try {
+      const string =
+        typeof message === "string"
+          ? message
+          : new TextDecoder().decode(message);
+      const result = WebSocketMessageSchema.safeParse(JSON.parse(string));
 
-      if (client.user) {
-        await this.broadcast(
-          { type: "server_user_remove", user, invitations, activeUsers },
+      if (!result.success) {
+        const payload = this.createPayload(
+          {
+            type: "server_error",
+            error: `Invalid message format: ${result.error.message}`,
+          },
           { type: "server" }
         );
+        ws.send(JSON.stringify(payload));
+        return;
       }
-    };
 
-    socket.addEventListener("close", quitHandler);
-    socket.addEventListener("error", quitHandler);
+      const key = this.sockets.get(ws);
+      if (!key) {
+        const payload = this.createPayload(
+          {
+            type: "server_error",
+            error: "WebSocket not associated with a user.",
+          },
+          { type: "server" }
+        );
+        ws.send(JSON.stringify(payload));
+        ws.close(1011, "WebSocket not associated with a user.");
+        return;
+      }
+
+      const client = this.clients[key];
+      if (!client) {
+        const payload = this.createPayload(
+          {
+            type: "server_error",
+            error: "WebSocket client not found.",
+          },
+          { type: "server" }
+        );
+        ws.send(JSON.stringify(payload));
+        ws.close(1011, "WebSocket client not found.");
+        return;
+      }
+
+      const data = result.data as WebSocketPeerMessage;
+      switch (data.type) {
+        case "add_incident": {
+          const incident = data.incident as Incident;
+          await this.addIncident(incident);
+          this.broadcast(
+            { type: "add_incident", incident },
+            { type: "client", name: client.user.name, id: client.user.key }
+          );
+          break;
+        }
+        case "update_incident": {
+          const incident = data.incident as Incident;
+          await this.editIncident(incident);
+          this.broadcast(
+            { type: "update_incident", incident },
+            { type: "client", name: client.user.name, id: client.user.key }
+          );
+          break;
+        }
+        case "remove_incident": {
+          await this.deleteIncident(data.id);
+          this.broadcast(
+            { type: "remove_incident", id: data.id },
+            { type: "client", name: client.user.name, id: client.user.key }
+          );
+          break;
+        }
+        case "scratchpad_update": {
+          await this.setScratchpad(data.id, data.scratchpad);
+          this.broadcast(
+            {
+              type: "scratchpad_update",
+              id: data.id,
+              scratchpad: data.scratchpad,
+            },
+            { type: "client", name: client.user.name, id: client.user.key }
+          );
+          break;
+        }
+        case "message": {
+          this.broadcast(
+            { type: "message", message: data.message },
+            { type: "client", name: client.user.name, id: client.user.key }
+          );
+          break;
+        }
+      }
+    } catch (e) {
+      const payload = this.createPayload(
+        {
+          type: "server_error",
+          error: `${e}`,
+        },
+        { type: "server" }
+      );
+
+      ws.send(JSON.stringify(payload));
+      return;
+    }
+  }
+
+  async webSocketClose(ws: WebSocket): Promise<void> {
+    const key = this.sockets.get(ws);
+    if (!key) {
+      return;
+    }
+
+    const client = this.clients[key];
+    if (!client) {
+      return;
+    }
+
+    client.active = false;
+    delete this.clients[key];
+    this.sockets.delete(ws);
+
+    const activeUsers = this.getActiveUsers();
+    const invitations = await this.getInvitationList();
+
+    if (client.user) {
+      await this.broadcast(
+        {
+          type: "server_user_remove",
+          user: client.user,
+          activeUsers,
+          invitations,
+        },
+        { type: "server" }
+      );
+    }
+  }
+
+  async webSocketError(ws: WebSocket, error: unknown): Promise<void> {
+    const key = this.sockets.get(ws);
+    if (!key) {
+      return;
+    }
+
+    const client = this.clients[key];
+    if (!client) {
+      return;
+    }
+
+    client.active = false;
+    delete this.clients[key];
+    this.sockets.delete(ws);
+
+    const activeUsers = this.getActiveUsers();
+    const invitations = await this.getInvitationList();
+
+    if (client.user) {
+      await this.broadcast(
+        {
+          type: "server_user_remove",
+          user: client.user,
+          activeUsers,
+          invitations,
+        },
+        { type: "server" }
+      );
+    }
   }
 
   async broadcast<T extends WebSocketMessage>(

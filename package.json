@@ -12,6 +12,7 @@
     "worker:dev:secure": "npm --prefix worker/sync run dev:secure",
     "worker:build": "npm run lib:build && npm --prefix worker/sync run build",
     "worker:deploy": "npm run lib:build && npm --prefix worker/sync run deploy",
+    "worker:typegen": "openapi-typescript http://localhost:8787/openapi --output types/generated/worker/sync.d.ts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
     "pages:build": "npm run lib:build && npm run frontend:build",
     "dev": "concurrently \"npm run frontend:dev\" \"npm run lib:dev\""
@@ -79,6 +80,7 @@
     "eslint-plugin-prettier": "^5.0.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.4",
+    "openapi-typescript": "^7.9.1",
     "postcss": "^8.4.24",
     "prettier": "^3.1.0",
     "rollup": "^4.9.1",

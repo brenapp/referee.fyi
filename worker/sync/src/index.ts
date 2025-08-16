@@ -22,6 +22,7 @@ import "./api/$sku/asset/preview_url";
 import "./api/$sku/incident/put";
 import "./api/$sku/incident/patch";
 import "./api/$sku/incident/delete";
+import "./api/$sku/data";
 
 export default { ...app };
 

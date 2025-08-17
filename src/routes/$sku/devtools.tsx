@@ -111,7 +111,7 @@ export const EventDevTools: React.FC = () => {
                 : undefined,
               outcome,
               rules: rule ? [rule.rule] : [],
-              time: new Date(),
+              time: new Date().toISOString(),
               notes,
               assets: [],
               flags: [],

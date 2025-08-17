@@ -1,5 +1,4 @@
 import {
-  APIRegisterUserResponseBody,
   Incident,
   INCIDENT_IGNORE,
   InvitationListItem,
@@ -57,6 +56,7 @@ import {
   LocalAsset,
   setAssetUploadStatus,
 } from "~utils/data/assets";
+import { Routes, SuccessResponseData } from "~types/worker/sync";
 
 export enum ReadyState {
   Closed = WebSocket.CLOSED,
@@ -65,7 +65,10 @@ export enum ReadyState {
   Open = WebSocket.OPEN,
 }
 
-export type UserMetadata = Omit<APIRegisterUserResponseBody, "user">;
+export type UserMetadata = Omit<
+  SuccessResponseData<"post", "/api/user">,
+  "user"
+>;
 
 export type ShareConnectionData = {
   readyState: ReadyState;
@@ -92,9 +95,7 @@ export type ShareConnectionActions = {
   connect(invitation: UserInvitation): Promise<void>;
   disconnect(): Promise<void>;
   forceSync(): Promise<void>;
-  updateProfile(
-    profile: Partial<User>
-  ): Promise<ShareResponse<APIRegisterUserResponseBody>>;
+  updateProfile(profile: Partial<User>): Promise<Routes["/api/user"]["post"]>;
 };
 
 type ShareConnection = ShareConnectionData & ShareConnectionActions;
@@ -148,7 +149,7 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
     if (!response.success) {
       toast({
         type: "error",
-        message: `Error when communicating with sharing server. ${response.details}`,
+        message: `Error when communicating with sharing server. ${response.error}`,
         context: JSON.stringify(response),
       });
       return;

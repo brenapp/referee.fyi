@@ -518,7 +518,7 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
       } else {
         toast({
           type: "error",
-          message: response.details,
+          message: response.error,
           context: JSON.stringify(response),
         });
       }

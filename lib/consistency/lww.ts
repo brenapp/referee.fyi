@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export type History<T extends Record<string, unknown>, K extends keyof T> = {
   prev: T[K];
@@ -6,11 +6,16 @@ export type History<T extends Record<string, unknown>, K extends keyof T> = {
   instant: string;
 };
 
-export const HistorySchema = z.object({
-  prev: z.any(),
-  peer: z.string(),
-  instant: z.string(),
-});
+export const HistorySchema = z
+  .object({
+    prev: z.any(),
+    peer: z.string(),
+    instant: z.string(),
+  })
+  .meta({
+    id: "History",
+    description: "History entry of a value.",
+  });
 
 export type KeyRegister<
   T extends Record<string, unknown>,
@@ -22,12 +27,18 @@ export type KeyRegister<
   history: History<T, K>[];
 };
 
-export const KeyRegisterSchema = z.object({
-  count: z.number(),
-  peer: z.string(),
-  instant: z.string(), // ISO Date
-  history: z.array(HistorySchema),
-});
+export const KeyRegisterSchema = z
+  .object({
+    count: z.number(),
+    peer: z.string(),
+    instant: z.string(), // ISO Date
+    history: z.array(HistorySchema),
+  })
+  .meta({
+    id: "KeyRegister",
+    description:
+      "Tracks the change in a value over time using last-write wins consistency.",
+  });
 
 export type LastWriteWinsConsistency<
   T extends Record<string, unknown>,
@@ -36,10 +47,11 @@ export type LastWriteWinsConsistency<
   [K in Exclude<keyof T, U>]: KeyRegister<T, K>;
 };
 
-export const LastWriteWinsConsistencySchema = z.record(
-  z.string(),
-  KeyRegisterSchema
-);
+export const LastWriteWinsConsistencySchema = <
+  T extends z.ZodRecord["keyType"],
+>(
+  key: T
+) => z.record(key, KeyRegisterSchema);
 
 export type WithLWWConsistency<
   T extends Record<string, unknown>,

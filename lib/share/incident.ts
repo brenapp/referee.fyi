@@ -1,7 +1,7 @@
 import { z } from "zod/v4";
 import {
+  ConsistentMapSchema,
   LastWriteWinsConsistencySchema,
-  WithLWWConsistency,
 } from "@referee-fyi/consistency";
 
 export const OUTCOMES = [
@@ -53,7 +53,9 @@ export type IncidentFlag = z.infer<typeof IncidentFlagSchema>;
 export const BaseIncidentSchema = z
   .object({
     id: z.string(),
-    time: z.date(),
+    time: z.string().meta({
+      description: "ISO 8601 timestamp of when the incident occurred.",
+    }),
     event: z.string().meta({ description: "Event Code" }),
     match: IncidentMatchSchema.optional(),
     team: z.string().meta({ description: "Team Number" }),
@@ -74,6 +76,18 @@ export const BaseIncidentSchema = z
 export type BaseIncident = z.infer<typeof BaseIncidentSchema>;
 
 export const INCIDENT_IGNORE = ["id", "time", "event", "team"] as const;
+
+export const INCIDENT_INCLUDE = [
+  "match",
+  "outcome",
+  "rules",
+  "notes",
+  "assets",
+  "flags",
+] as const satisfies readonly (keyof {
+  [K in Exclude<keyof BaseIncident, (typeof INCIDENT_IGNORE)[number]>]: K;
+})[];
+
 export const IncidentIgnoreSchema = z.enum(INCIDENT_IGNORE).meta({
   id: "IncidentIgnore",
 });
@@ -81,15 +95,11 @@ export type IncidentUnchangeableProperties = z.infer<
   typeof IncidentIgnoreSchema
 >;
 
-export type Incident = WithLWWConsistency<
-  BaseIncident,
-  IncidentUnchangeableProperties
->;
-
 export const IncidentSchema = BaseIncidentSchema.extend({
-  consistency: LastWriteWinsConsistencySchema,
+  consistency: LastWriteWinsConsistencySchema(z.enum(INCIDENT_INCLUDE)),
 });
 
+export type Incident = z.infer<typeof IncidentSchema>;
 export type EditIncident = Omit<BaseIncident, IncidentUnchangeableProperties>;
 
 export function incidentMatchNameToString(match?: IncidentMatch) {

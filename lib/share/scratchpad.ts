@@ -47,7 +47,7 @@ export type MatchScratchpad =
   | DefaultVIQRCMatchScratchpad;
 
 export const MatchScratchpadSchema = BaseMatchScratchpadSchema.extend({
-  consistency: LastWriteWinsConsistencySchema,
+  consistency: LastWriteWinsConsistencySchema(z.string()),
 });
 
 export type Scratchpads = {

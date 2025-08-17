@@ -183,7 +183,7 @@ export const WebSocketSenderSchema = z.union([
 export type WebSocketSender = z.infer<typeof WebSocketSenderSchema>;
 
 export const WebSocketPayloadAdditionalInfoSchema = z.object({
-  date: z.string(), // ISO string
+  date: z.string().meta({ description: "ISO-8601 String" }), // ISO string
   sender: WebSocketSenderSchema,
 });
 

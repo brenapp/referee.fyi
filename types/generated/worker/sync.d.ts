@@ -275,7 +275,7 @@ export interface paths {
                             success: true;
                             data: {
                                 id: string;
-                                /** Format: date */
+                                /** @description ISO 8601 timestamp of when the incident occurred. */
                                 time: string;
                                 /** @description Event Code */
                                 event: string;
@@ -302,16 +302,12 @@ export interface paths {
                                 assets: string[];
                                 flags: components["schemas"]["IncidentFlag"][];
                                 consistency: {
-                                    [key: string]: {
-                                        count: number;
-                                        peer: string;
-                                        instant: string;
-                                        history: {
-                                            prev?: unknown;
-                                            peer: string;
-                                            instant: string;
-                                        }[];
-                                    };
+                                    match?: components["schemas"]["KeyRegister"];
+                                    outcome?: components["schemas"]["KeyRegister"];
+                                    rules?: components["schemas"]["KeyRegister"];
+                                    notes?: components["schemas"]["KeyRegister"];
+                                    assets?: components["schemas"]["KeyRegister"];
+                                    flags?: components["schemas"]["KeyRegister"];
                                 };
                             }[];
                         };
@@ -1532,7 +1528,7 @@ export interface paths {
                 content: {
                     "application/json": {
                         id: string;
-                        /** Format: date */
+                        /** @description ISO 8601 timestamp of when the incident occurred. */
                         time: string;
                         /** @description Event Code */
                         event: string;
@@ -1559,16 +1555,12 @@ export interface paths {
                         assets: string[];
                         flags: components["schemas"]["IncidentFlag"][];
                         consistency: {
-                            [key: string]: {
-                                count: number;
-                                peer: string;
-                                instant: string;
-                                history: {
-                                    prev?: unknown;
-                                    peer: string;
-                                    instant: string;
-                                }[];
-                            };
+                            match?: components["schemas"]["KeyRegister"];
+                            outcome?: components["schemas"]["KeyRegister"];
+                            rules?: components["schemas"]["KeyRegister"];
+                            notes?: components["schemas"]["KeyRegister"];
+                            assets?: components["schemas"]["KeyRegister"];
+                            flags?: components["schemas"]["KeyRegister"];
                         };
                     };
                 };
@@ -1708,7 +1700,7 @@ export interface paths {
                 content: {
                     "application/json": {
                         id: string;
-                        /** Format: date */
+                        /** @description ISO 8601 timestamp of when the incident occurred. */
                         time: string;
                         /** @description Event Code */
                         event: string;
@@ -1735,16 +1727,12 @@ export interface paths {
                         assets: string[];
                         flags: components["schemas"]["IncidentFlag"][];
                         consistency: {
-                            [key: string]: {
-                                count: number;
-                                peer: string;
-                                instant: string;
-                                history: {
-                                    prev?: unknown;
-                                    peer: string;
-                                    instant: string;
-                                }[];
-                            };
+                            match?: components["schemas"]["KeyRegister"];
+                            outcome?: components["schemas"]["KeyRegister"];
+                            rules?: components["schemas"]["KeyRegister"];
+                            notes?: components["schemas"]["KeyRegister"];
+                            assets?: components["schemas"]["KeyRegister"];
+                            flags?: components["schemas"]["KeyRegister"];
                         };
                     };
                 };
@@ -1941,6 +1929,19 @@ export interface components {
          * @enum {string}
          */
         IncidentFlag: "judge";
+        /** @description History entry of a value. */
+        History: {
+            prev?: unknown;
+            peer: string;
+            instant: string;
+        };
+        /** @description Tracks the change in a value over time using last-write wins consistency. */
+        KeyRegister: {
+            count: number;
+            peer: string;
+            instant: string;
+            history: components["schemas"]["History"][];
+        };
         /** @description Response for the /api/meta/location endpoint */
         GetMetaLocationResponse: {
             /** @enum {boolean} */
@@ -2048,7 +2049,7 @@ export interface components {
             success: true;
             data: {
                 id: string;
-                /** Format: date */
+                /** @description ISO 8601 timestamp of when the incident occurred. */
                 time: string;
                 /** @description Event Code */
                 event: string;
@@ -2075,16 +2076,12 @@ export interface components {
                 assets: string[];
                 flags: components["schemas"]["IncidentFlag"][];
                 consistency: {
-                    [key: string]: {
-                        count: number;
-                        peer: string;
-                        instant: string;
-                        history: {
-                            prev?: unknown;
-                            peer: string;
-                            instant: string;
-                        }[];
-                    };
+                    match?: components["schemas"]["KeyRegister"];
+                    outcome?: components["schemas"]["KeyRegister"];
+                    rules?: components["schemas"]["KeyRegister"];
+                    notes?: components["schemas"]["KeyRegister"];
+                    assets?: components["schemas"]["KeyRegister"];
+                    flags?: components["schemas"]["KeyRegister"];
                 };
             };
         };
@@ -2093,7 +2090,7 @@ export interface components {
             success: true;
             data: {
                 id: string;
-                /** Format: date */
+                /** @description ISO 8601 timestamp of when the incident occurred. */
                 time: string;
                 /** @description Event Code */
                 event: string;
@@ -2120,16 +2117,12 @@ export interface components {
                 assets: string[];
                 flags: components["schemas"]["IncidentFlag"][];
                 consistency: {
-                    [key: string]: {
-                        count: number;
-                        peer: string;
-                        instant: string;
-                        history: {
-                            prev?: unknown;
-                            peer: string;
-                            instant: string;
-                        }[];
-                    };
+                    match?: components["schemas"]["KeyRegister"];
+                    outcome?: components["schemas"]["KeyRegister"];
+                    rules?: components["schemas"]["KeyRegister"];
+                    notes?: components["schemas"]["KeyRegister"];
+                    assets?: components["schemas"]["KeyRegister"];
+                    flags?: components["schemas"]["KeyRegister"];
                 };
             };
         };
@@ -2151,7 +2144,7 @@ export interface components {
                     values: {
                         [key: string]: {
                             id: string;
-                            /** Format: date */
+                            /** @description ISO 8601 timestamp of when the incident occurred. */
                             time: string;
                             /** @description Event Code */
                             event: string;
@@ -2178,16 +2171,12 @@ export interface components {
                             assets: string[];
                             flags: components["schemas"]["IncidentFlag"][];
                             consistency: {
-                                [key: string]: {
-                                    count: number;
-                                    peer: string;
-                                    instant: string;
-                                    history: {
-                                        prev?: unknown;
-                                        peer: string;
-                                        instant: string;
-                                    }[];
-                                };
+                                match?: components["schemas"]["KeyRegister"];
+                                outcome?: components["schemas"]["KeyRegister"];
+                                rules?: components["schemas"]["KeyRegister"];
+                                notes?: components["schemas"]["KeyRegister"];
+                                assets?: components["schemas"]["KeyRegister"];
+                                flags?: components["schemas"]["KeyRegister"];
                             };
                         };
                     };
@@ -2207,16 +2196,7 @@ export interface components {
                             };
                             notes?: string;
                             consistency: {
-                                [key: string]: {
-                                    count: number;
-                                    peer: string;
-                                    instant: string;
-                                    history: {
-                                        prev?: unknown;
-                                        peer: string;
-                                        instant: string;
-                                    }[];
-                                };
+                                [key: string]: components["schemas"]["KeyRegister"];
                             };
                         };
                     };

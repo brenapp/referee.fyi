@@ -2,24 +2,9 @@ import { del, get, set } from "~utils/data/keyval";
 import type {
   ShareResponse,
   User,
-  APIRegisterUserResponseBody,
-  APIPostCreateResponseBody,
-  APIGetInvitationResponseBody,
-  APIPutInvitationAcceptResponseBody,
   UserInvitation,
-  APIPutInviteResponseBody,
-  APIDeleteInviteResponseBody,
-  APIGetShareDataResponseBody,
-  APIPutIncidentResponseBody,
-  APIPatchIncidentResponseBody,
   WebSocketSender,
-  APIPutInvitationRequestResponseBody,
-  APIGetInvitationRequestResponseBody,
-  APIGetListShareInstance,
   AssetType,
-  APIGetAssetUploadURLResponseBody,
-  ApiGetAssetPreviewURLResponseBody,
-  ApiGetAssetOriginalURLResponseBody,
   InvitationListItem,
 } from "@referee-fyi/share";
 import { Incident } from "./incident";
@@ -27,6 +12,7 @@ import { queryClient } from "./query";
 import { exportPublicKey, getSignRequestHeaders } from "./crypto";
 import { useShareConnection } from "~models/ShareConnection";
 import { useMemo } from "react";
+import { Routes } from "~types/worker/sync";
 
 export const URL_BASE =
   import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER ?? "https://referee.fyi/api";
@@ -115,9 +101,13 @@ export async function signedFetch(
 
 export async function registerUser(
   profile: Omit<User, "key">
-): Promise<ShareResponse<APIRegisterUserResponseBody>> {
+): Promise<Routes["/api/user"]["post"]> {
   if (!profile.name) {
-    return { success: false, reason: "bad_request", details: "No name" };
+    return {
+      success: false,
+      error: "No name",
+      code: "VerifyUserNotRegistered",
+    };
   }
 
   const url = new URL("/api/user", URL_BASE);
@@ -132,12 +122,12 @@ export async function registerUser(
 
 export async function createInstance(
   sku: string
-): Promise<ShareResponse<APIPostCreateResponseBody>> {
+): Promise<Routes["/api/{sku}/create"]["post"]> {
   const response = await signedFetch(new URL(`/api/${sku}/create`, URL_BASE), {
     method: "POST",
   });
 
-  const body: ShareResponse<APIPostCreateResponseBody> = await response.json();
+  const body: Routes["/api/{sku}/create"]["post"] = await response.json();
 
   if (body.success) {
     await set(`invitation_${sku}`, body.data);
@@ -156,8 +146,7 @@ export async function fetchInvitation(sku: string) {
       }
     );
 
-    const body: ShareResponse<APIGetInvitationResponseBody> =
-      await response.json();
+    const body: Routes["/api/{sku}/invitation"]["get"] = await response.json();
 
     if (!body.success) {
       return null;
@@ -172,7 +161,7 @@ export async function fetchInvitation(sku: string) {
 export async function getEventInvitation(
   sku: string
 ): Promise<UserInvitation | null> {
-  const current = await get<APIGetInvitationResponseBody>(`invitation_${sku}`);
+  const current = await get<UserInvitation>(`invitation_${sku}`);
 
   if (current && current.accepted) {
     return current;
@@ -211,10 +200,9 @@ export async function verifyEventInvitation(
     return null;
   }
 
-  const body: ShareResponse<APIGetInvitationResponseBody> =
-    await response.json();
+  const body: Routes["/api/{sku}/invitation"]["get"] = await response.json();
 
-  if (!body.success && body.reason !== "server_error") {
+  if (!body.success && response.status !== 500) {
     await del(`invitation_${sku}`);
     queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
   }
@@ -231,7 +219,7 @@ export async function verifyEventInvitation(
 export async function acceptEventInvitation(
   sku: string,
   invitationId: string
-): Promise<ShareResponse<APIPutInvitationAcceptResponseBody>> {
+): Promise<Routes["/api/{sku}/accept"]["put"]> {
   const url = new URL(`/api/${sku}/accept`, URL_BASE);
   url.searchParams.set("invitation", invitationId);
 
@@ -239,10 +227,9 @@ export async function acceptEventInvitation(
     method: "PUT",
   });
 
-  const body: ShareResponse<APIPutInvitationAcceptResponseBody> =
-    await response.json();
+  const body: Routes["/api/{sku}/accept"]["put"] = await response.json();
 
-  if (!body.success && body.reason !== "server_error") {
+  if (!body.success && response.status !== 500) {
     await del(`invitation_${sku}`);
     queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
   }
@@ -263,7 +250,7 @@ export async function inviteUser(
   sku: string,
   user: string,
   options: InviteUserOptions
-): Promise<ShareResponse<APIPutInviteResponseBody>> {
+): Promise<Routes["/api/{sku}/invite"]["put"]> {
   const url = new URL(`/api/${sku}/invite`, URL_BASE);
   url.searchParams.set("user", user);
 
@@ -278,15 +265,14 @@ export async function inviteUser(
 export async function removeInvitation(
   sku: string,
   user?: string
-): Promise<ShareResponse<APIDeleteInviteResponseBody>> {
+): Promise<Routes["/api/{sku}/invite"]["delete"]> {
   const { key: id } = await getShareProfile();
 
   const url = new URL(`/api/${sku}/invite`, URL_BASE);
   url.searchParams.set("user", user ?? id);
 
   const response = await signedFetch(url, { method: "DELETE" });
-  const body: ShareResponse<APIDeleteInviteResponseBody> =
-    await response.json();
+  const body: Routes["/api/{sku}/invite"]["delete"] = await response.json();
 
   await del(`invitation_${sku}`);
   queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
@@ -296,7 +282,7 @@ export async function removeInvitation(
 
 export async function getShareData(
   sku: string
-): Promise<ShareResponse<APIGetShareDataResponseBody>> {
+): Promise<Routes["/api/{sku}/data"]["get"]> {
   const url = new URL(`/api/${sku}/get`, URL_BASE);
 
   const response = await signedFetch(url);
@@ -305,7 +291,7 @@ export async function getShareData(
 
 export async function addServerIncident(
   incident: Incident
-): Promise<ShareResponse<APIPutIncidentResponseBody>> {
+): Promise<Routes["/api/{sku}/incident"]["put"]> {
   const url = new URL(`/api/${incident.event}/incident`, URL_BASE);
 
   const response = await signedFetch(url, {
@@ -317,7 +303,7 @@ export async function addServerIncident(
 
 export async function editServerIncident(
   incident: Incident
-): Promise<ShareResponse<APIPatchIncidentResponseBody>> {
+): Promise<Routes["/api/{sku}/incident"]["patch"]> {
   const url = new URL(`/api/${incident.event}/incident`, URL_BASE);
 
   const response = await signedFetch(url, {
@@ -330,7 +316,7 @@ export async function editServerIncident(
 export async function deleteServerIncident(
   id: string,
   sku: string
-): Promise<ShareResponse<APIPatchIncidentResponseBody>> {
+): Promise<Routes["/api/{sku}/incident"]["delete"]> {
   const url = new URL(`/api/${sku}/incident`, URL_BASE);
   url.searchParams.set("id", id);
 
@@ -342,7 +328,7 @@ export async function deleteServerIncident(
 
 export async function putRequestCode(
   sku: string
-): Promise<ShareResponse<APIPutInvitationRequestResponseBody>> {
+): Promise<Routes["/api/{sku}/request"]["put"]> {
   const url = new URL(`/api/${sku}/request`, URL_BASE);
   url.searchParams.set("version", __REFEREE_FYI_VERSION__);
 
@@ -353,7 +339,7 @@ export async function putRequestCode(
 export async function getRequestCodeUserKey(
   sku: string,
   code: string
-): Promise<ShareResponse<APIGetInvitationRequestResponseBody>> {
+): Promise<Routes["/api/{sku}/request"]["get"]> {
   const url = new URL(`/api/${sku}/request`, URL_BASE);
   url.searchParams.set("code", code);
 
@@ -363,7 +349,7 @@ export async function getRequestCodeUserKey(
 
 export async function getInstancesForEvent(
   sku: string
-): Promise<ShareResponse<APIGetListShareInstance>> {
+): Promise<Routes["/api/{sku}/list"]["get"]> {
   const url = new URL(`/api/${sku}/list`, URL_BASE);
   const response = await signedFetch(url, { method: "GET" });
 
@@ -526,7 +512,7 @@ export async function getAssetUploadURL(
   sku: string,
   id: string,
   type: AssetType
-): Promise<ShareResponse<APIGetAssetUploadURLResponseBody>> {
+): Promise<Routes["/api/{sku}/asset/upload_url"]["get"]> {
   const url = new URL(`/api/${sku}/asset/upload_url`, URL_BASE);
   url.searchParams.set("id", id);
   url.searchParams.set("type", type);
@@ -550,7 +536,7 @@ export async function uploadAsset(url: string, data: Blob) {
 export async function getAssetPreviewURL(
   sku: string,
   id: string
-): Promise<ShareResponse<ApiGetAssetPreviewURLResponseBody>> {
+): Promise<Routes["/api/{sku}/asset/preview_url"]["get"]> {
   const url = new URL(`/api/${sku}/asset/preview_url`, URL_BASE);
   url.searchParams.set("id", id);
   const response = await signedFetch(url, { method: "GET" });
@@ -561,7 +547,7 @@ export async function getAssetPreviewURL(
 export async function getAssetOriginalURL(
   sku: string,
   id: string
-): Promise<ShareResponse<ApiGetAssetOriginalURLResponseBody>> {
+): Promise<Routes["/api/{sku}/asset/url"]["get"]> {
   const url = new URL(`/api/${sku}/asset/url`, URL_BASE);
   url.searchParams.set("id", id);
   const response = await signedFetch(url, { method: "GET" });

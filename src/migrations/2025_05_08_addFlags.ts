@@ -47,7 +47,10 @@ queueMigration({
   dependencies: ["2024_07_24_consistency"],
   apply: async () => {
     const newIncidents: Incident[] = [];
-    const incidents = (await getAllIncidents()) as (Incident | OldIncident)[];
+    const incidents = (await getAllIncidents()) as unknown as (
+      | Incident
+      | OldIncident
+    )[];
 
     const { key: peer } = await getShareProfile();
 
@@ -81,7 +84,7 @@ queueMigration({
       newIncidents.push(newIncident);
     }
 
-    await setManyIncidents(newIncidents as CurrentIncident[]);
+    await setManyIncidents(newIncidents as unknown as CurrentIncident[]);
 
     return { success: true };
   },

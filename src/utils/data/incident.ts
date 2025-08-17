@@ -38,6 +38,7 @@ export type RichIncident = Omit<NewIncident, keyof RichIncidentElements> &
 export function packIncident(incident: RichIncident): NewIncident {
   return {
     ...incident,
+    time: incident.time.toISOString(),
     match: incident.match
       ? {
           type: "match",

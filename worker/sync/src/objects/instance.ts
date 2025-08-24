@@ -292,7 +292,7 @@ export class ShareInstance extends DurableObject {
 
     const state = await this.createServerShareMessage();
     const payload = this.createPayload(state, { type: "server" });
-    client.send(JSON.stringify(payload));
+    server.send(JSON.stringify(payload));
 
     return new Response(null, {
       status: 101,

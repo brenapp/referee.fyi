@@ -75,6 +75,7 @@ export const ErrorCode = z.enum([
   "PutIncidentDeleted",
   "PatchIncidentDeleted",
   "PatchIncidentEditInvalid",
+  "JoinInstanceMissingUpgradeHeader",
 ]);
 
 export const ErrorResponseSchema = z

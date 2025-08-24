@@ -23,6 +23,7 @@ import "./api/$sku/incident/put";
 import "./api/$sku/incident/patch";
 import "./api/$sku/incident/delete";
 import "./api/$sku/data";
+import "./api/$sku/join";
 
 export default { ...app };
 

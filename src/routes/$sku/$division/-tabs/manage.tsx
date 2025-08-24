@@ -216,7 +216,8 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
       return;
     }
     updateProfile({ name });
-  }, [profile, open, name, updateProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, name]);
 
   // Invitation
   const { data: invitation } = useQuery({

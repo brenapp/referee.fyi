@@ -62,7 +62,10 @@ app.openapi(route, async (c) => {
     return c.json(
       {
         success: false,
-        error: "User verification failed.",
+        error: {
+          name: "ValidationError",
+          message: "User verification failed.",
+        },
         code: "VerifyUserNotRegistered",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401

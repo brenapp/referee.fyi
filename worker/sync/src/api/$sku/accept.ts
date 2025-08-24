@@ -60,7 +60,10 @@ app.openapi(route, async (c) => {
     return c.json(
       {
         success: false,
-        error: "User verification failed.",
+        error: {
+          name: "ValidationError",
+          message: "User verification failed.",
+        },
         code: "VerifyUserNotRegistered",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
@@ -72,7 +75,10 @@ app.openapi(route, async (c) => {
     return c.json(
       {
         success: false,
-        error: "No invitation exists for this user and event.",
+        error: {
+          name: "ValidationError",
+          message: "No invitation exists for this user and event.",
+        },
         code: "PutInvitationAcceptNotFound",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       404
@@ -83,7 +89,10 @@ app.openapi(route, async (c) => {
     return c.json(
       {
         success: false,
-        error: "A newer invitation is available.",
+        error: {
+          name: "ValidationError",
+          message: "A newer invitation is available.",
+        },
         code: "PutInvitationAcceptInvalid",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400
@@ -96,7 +105,10 @@ app.openapi(route, async (c) => {
     return c.json(
       {
         success: false,
-        error: "Invitation sender not found.",
+        error: {
+          name: "ValidationError",
+          message: "Invitation sender not found.",
+        },
         code: "GetInvitationUserFromNotFound",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       404

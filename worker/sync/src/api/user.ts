@@ -53,7 +53,10 @@ app.openapi(route, async (c) => {
     return c.json(
       {
         success: false,
-        error: "Signature verification failed.",
+        error: {
+          name: "ValidationError",
+          message: "Signature verification failed.",
+        },
         code: "VerifySignatureInvalidSignature",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401

@@ -67,7 +67,10 @@ app.openapi(route, async (c) => {
       {
         success: false,
         code: "VerifyInvitationNotFound",
-        error: "Invitation verification failed.",
+        error: {
+          name: "ValidationError",
+          message: "Invitation verification failed.",
+        },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       403
     );
@@ -80,7 +83,10 @@ app.openapi(route, async (c) => {
       {
         success: false,
         code: "VerifyInvitationAdminNotAuthorized",
-        error: "You are not authorized to perform this action.",
+        error: {
+          name: "ValidationError",
+          message: "You are not authorized to perform this action.",
+        },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       403
     );

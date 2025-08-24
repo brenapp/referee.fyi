@@ -78,7 +78,10 @@ app.openapi(route, async (c) => {
       {
         success: false,
         code: "VerifyInvitationInstanceNotFound",
-        error: "Could not verify invitation.",
+        error: {
+          name: "ValidationError",
+          message: "Could not verify invitation.",
+        },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       403
     );
@@ -96,7 +99,10 @@ app.openapi(route, async (c) => {
       {
         success: false,
         code: "PatchIncidentDeleted",
-        error: "This incident has already been deleted.",
+        error: {
+          name: "ValidationError",
+          message: "This incident has already been deleted.",
+        },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400
     );
@@ -110,7 +116,10 @@ app.openapi(route, async (c) => {
       {
         success: false,
         code: "VerifyUserNotRegistered",
-        error: "Associated user is not registered.",
+        error: {
+          name: "ValidationError",
+          message: "Associated user is not registered.",
+        },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       404
     );
@@ -127,7 +136,10 @@ app.openapi(route, async (c) => {
       {
         success: false,
         code: "PatchIncidentEditInvalid",
-        error: "This incident could not be edited.",
+        error: {
+          name: "ValidationError",
+          message: "This incident could not be edited.",
+        },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       409
     );

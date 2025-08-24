@@ -71,7 +71,7 @@ app.openapi(route, async (c) => {
       {
         success: false,
         code: "GetAssetUploadURLInvalidAssetType",
-        error: "Unsupported asset type",
+        error: { name: "ValidationError", message: "Unsupported asset type" },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400
     );
@@ -82,7 +82,10 @@ app.openapi(route, async (c) => {
     return c.json(
       {
         success: false,
-        error: "Invitation verification failed.",
+        error: {
+          name: "ValidationError",
+          message: "Invitation verification failed.",
+        },
         code: "VerifyInvitationNotFound",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
@@ -96,7 +99,7 @@ app.openapi(route, async (c) => {
       {
         success: false,
         code: "GetAssetUploadURLAssetAlreadyExists",
-        error: "Asset already exists",
+        error: { name: "ValidationError", message: "Asset already exists" },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400
     );
@@ -124,7 +127,10 @@ app.openapi(route, async (c) => {
     return c.json(
       {
         success: false,
-        error: "Failed to create direct upload",
+        error: {
+          name: "ValidationError",
+          message: "Failed to create direct upload",
+        },
         code: "GetAssetUploadURLInvalidAssetType",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       500

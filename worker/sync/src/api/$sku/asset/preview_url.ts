@@ -63,7 +63,10 @@ app.openapi(route, async (c) => {
       {
         success: false,
         code: "VerifyUserAssetAuthorizedValuesNotPresent",
-        error: "User is not authorized to access this asset.",
+        error: {
+          name: "ValidationError",
+          message: "User is not authorized to access this asset.",
+        },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
     );
@@ -77,7 +80,10 @@ app.openapi(route, async (c) => {
       {
         success: false,
         code: "GetAssetPreviewURLNotFound",
-        error: "Preview not found for the asset.",
+        error: {
+          name: "ValidationError",
+          message: "Preview not found for the asset.",
+        },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       404
     );

@@ -59,7 +59,10 @@ app.openapi(route, async (c) => {
     return c.json(
       {
         success: false,
-        error: "User verification failed.",
+        error: {
+          name: "ValidationError",
+          message: "User verification failed.",
+        },
         code: "VerifyUserNotRegistered",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
@@ -71,7 +74,10 @@ app.openapi(route, async (c) => {
     return c.json(
       {
         success: false,
-        error: "You are not authorized to perform this action.",
+        error: {
+          name: "ValidationError",
+          message: "You are not authorized to perform this action.",
+        },
         code: "VerifyUserNotSystemKey",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       403

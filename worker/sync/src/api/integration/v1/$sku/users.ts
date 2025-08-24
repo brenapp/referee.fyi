@@ -60,7 +60,10 @@ app.openapi(route, async (c) => {
     return c.json(
       {
         success: false,
-        error: "Integration token verification failed.",
+        error: {
+          name: "ValidationError",
+          message: "Integration token verification failed.",
+        },
         code: "VerifyIntegrationTokenValuesNotPresent",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400

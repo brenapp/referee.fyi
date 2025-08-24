@@ -58,7 +58,10 @@ app.openapi(route, async (c) => {
     return c.json(
       {
         success: false,
-        error: "User verification failed.",
+        error: {
+          name: "ValidationError",
+          message: "User verification failed.",
+        },
         code: "VerifyUserNotRegistered",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
@@ -71,7 +74,7 @@ app.openapi(route, async (c) => {
       {
         success: false,
         code: "GetRequestCodeUnknownCode",
-        error: "No such request code.",
+        error: { name: "ValidationError", message: "No such request code." },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       404
     );

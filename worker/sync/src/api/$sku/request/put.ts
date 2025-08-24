@@ -57,7 +57,10 @@ app.openapi(route, async (c) => {
     return c.json(
       {
         success: false,
-        error: "User verification failed.",
+        error: {
+          name: "ValidationError",
+          message: "User verification failed.",
+        },
         code: "VerifyUserNotRegistered",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
@@ -70,7 +73,10 @@ app.openapi(route, async (c) => {
       {
         success: false,
         code: "PutRequestCodeMustLeaveInstance",
-        error: "You must leave your current instance first.",
+        error: {
+          name: "ValidationError",
+          message: "You must leave your current instance first.",
+        },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400
     );

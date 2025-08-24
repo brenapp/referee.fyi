@@ -66,7 +66,10 @@ app.openapi(route, async (c) => {
       {
         success: false,
         code: "VerifyInvitationNotFound",
-        error: "Invitation verification failed.",
+        error: {
+          name: "ValidationError",
+          message: "Invitation verification failed.",
+        },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       403
     );
@@ -93,8 +96,11 @@ app.openapi(route, async (c) => {
       {
         success: false,
         code: "PutInvitationMustLeaveCurrentInstance",
-        error:
-          "This user has already accepted an invitation for this event. They must leave their current instance first.",
+        error: {
+          name: "ValidationError",
+          message:
+            "This user has already accepted an invitation for this event. They must leave their current instance first.",
+        },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400
     );

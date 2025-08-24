@@ -51,7 +51,10 @@ app.openapi(route, async (c) => {
       {
         success: false,
         code: "VerifyInvitationInstanceNotFound",
-        error: "Could not verify invitation.",
+        error: {
+          name: "ValidationError",
+          message: "Could not verify invitation.",
+        },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       403
     );
@@ -63,7 +66,10 @@ app.openapi(route, async (c) => {
       {
         success: false,
         code: "JoinInstanceMissingUpgradeHeader",
-        error: "Upgrade header must be 'websocket'.",
+        error: {
+          name: "ValidationError",
+          message: "Upgrade header must be 'websocket'.",
+        },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       426
     );

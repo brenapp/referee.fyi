@@ -78,10 +78,20 @@ export const ErrorCode = z.enum([
   "JoinInstanceMissingUpgradeHeader",
 ]);
 
+export const RequestFormatErrorDetails = z.object({
+  name: z.literal("ZodError"),
+  message: z.string(),
+});
+
+export const ValidationErrorDetails = z.object({
+  name: z.literal("ValidationError"),
+  message: z.string(),
+});
+
 export const ErrorResponseSchema = z
   .object({
     success: z.literal(false),
-    error: z.string(),
+    error: z.union([RequestFormatErrorDetails, ValidationErrorDetails]),
     code: ErrorCode.optional(),
   })
   .meta({

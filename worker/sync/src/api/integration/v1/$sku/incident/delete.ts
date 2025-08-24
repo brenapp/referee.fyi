@@ -56,7 +56,10 @@ app.openapi(deleteRoute, async (c) => {
     return c.json(
       {
         success: false,
-        error: "Integration token verification failed.",
+        error: {
+          name: "ValidationError",
+          message: "Integration token verification failed.",
+        },
         code: "VerifyIntegrationTokenValuesNotPresent",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400
@@ -67,7 +70,10 @@ app.openapi(deleteRoute, async (c) => {
     return c.json(
       {
         success: false,
-        error: "You are not authorized to perform this action.",
+        error: {
+          name: "ValidationError",
+          message: "You are not authorized to perform this action.",
+        },
         code: "VerifyIntegrationTokenInvalidUser",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401

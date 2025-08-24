@@ -55,7 +55,10 @@ app.openapi(route, async (c) => {
       {
         success: false,
         code: "VerifyInvitationInstanceNotFound",
-        error: "Could not verify invitation.",
+        error: {
+          name: "ValidationError",
+          message: "Could not verify invitation.",
+        },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       403
     );

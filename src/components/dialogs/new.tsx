@@ -144,7 +144,6 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     event: sku ?? "",
     team: teamData?.number,
     match: matchData,
-    skills: undefined,
     rules: [],
     notes: "",
     outcome: "Minor",

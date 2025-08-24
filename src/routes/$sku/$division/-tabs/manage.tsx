@@ -13,7 +13,6 @@ import {
   getInstancesForEvent,
   getIntegrationAPIEndpoints,
   getRequestCodeUserKey,
-  inviteUser,
   putRequestCode,
   removeInvitation,
 } from "~utils/data/share";
@@ -32,6 +31,7 @@ import {
   useIntegrationAPIIncidents,
   useIntegrationAPIUsers,
   useIntegrationBearer,
+  useInviteUser,
   useSystemKeyIntegrationBearer,
 } from "~utils/hooks/share";
 import { Checkbox, Input } from "~components/Input";
@@ -86,26 +86,35 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
 
   const {
     mutateAsync: invite,
+    data: inviteResponse,
     isPending: isInvitePending,
-    isError: isInviteError,
-    isSuccess: isInviteSuccess,
-    error: inviteError,
+    error: inviteResponseError,
     reset: resetInvite,
-  } = useMutation({
-    mutationFn: (key: string) => inviteUser(sku, key, { admin }),
-  });
+  } = useInviteUser(sku, admin);
+
+  const inviteError = useMemo(() => {
+    if (inviteResponseError) {
+      return inviteResponseError.message;
+    }
+
+    if (inviteResponse && !inviteResponse.success) {
+      return inviteResponse.error;
+    }
+
+    return null;
+  }, [inviteResponse, inviteResponseError]);
 
   useEffect(() => {
-    if (isInviteSuccess) {
+    if (inviteResponse?.success) {
       setTimeout(() => {
-        if (isInviteSuccess) {
+        if (inviteResponse?.success) {
           setInviteCode("");
           setAdmin(false);
           resetInvite();
         }
       }, 2000);
     }
-  }, [resetInvite, isInviteSuccess]);
+  }, [inviteResponse, resetInvite]);
 
   return (
     <Dialog open={open} onClose={onClose} mode="modal" aria-label="Invite User">
@@ -162,10 +171,8 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
           <Error message="Invalid Code" className="mt-4" />
         ) : null}
         <Spinner show={isInvitePending} className="mt-4" />
-        {isInviteError ? (
-          <Error message={inviteError.message} className="mt-4" />
-        ) : null}
-        {isInviteSuccess ? (
+        {inviteError ? <Error message={inviteError} className="mt-4" /> : null}
+        {inviteResponse?.success ? (
           <Success message="Sent Invitation!" className="mt-4 bg-emerald-600" />
         ) : null}
       </DialogBody>

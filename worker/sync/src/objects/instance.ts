@@ -16,11 +16,9 @@ import {
 import { getUser } from "../utils/data";
 import { DurableObject } from "cloudflare:workers";
 
-export type SessionClient = {
-  user: User;
-  socket: WebSocket;
-  ip: string;
+export type ClientSession = {
   active: boolean;
+  user: User;
 };
 
 export type ShareInstanceInitData = {
@@ -29,11 +27,11 @@ export type ShareInstanceInitData = {
 };
 
 export class ShareInstance extends DurableObject {
-  // Stores information about connected clients
-  clients: Record<string, SessionClient> = {};
+  // User Key -> WebSocket
+  sockets: Map<string, WebSocket> = new Map();
 
-  // WebSocket -> User Public Key
-  sockets: Map<WebSocket, string> = new Map();
+  // WebSocket -> Session
+  sessions: Map<WebSocket, ClientSession> = new Map();
 
   state: DurableObjectState;
 
@@ -43,6 +41,15 @@ export class ShareInstance extends DurableObject {
     super(state, env);
     this.state = state;
     this.env = env;
+
+    // Restore sockets
+    this.ctx.getWebSockets().forEach((ws) => {
+      const attachment: ClientSession = ws.deserializeAttachment();
+      if (attachment) {
+        this.sessions.set(ws, { ...attachment });
+        this.sockets.set(attachment.user.key, ws);
+      }
+    });
   }
 
   // Storage
@@ -222,9 +229,7 @@ export class ShareInstance extends DurableObject {
    * @returns Active users in the instance
    **/
   getActiveUsers(): User[] {
-    return Object.values(this.clients)
-      .filter((client) => client.active)
-      .map((client) => client.user);
+    return [...this.sessions].map(([, session]) => session.user);
   }
 
   /**
@@ -241,7 +246,6 @@ export class ShareInstance extends DurableObject {
    * @param request
    **/
   async fetch(request: Request): Promise<Response> {
-    const ip = request.headers.get("CF-Connecting-IP") ?? "0.0.0.0";
     const webSocketPair = new WebSocketPair();
     const [client, server] = Object.values(webSocketPair);
 
@@ -258,29 +262,31 @@ export class ShareInstance extends DurableObject {
       return new Response(null, { status: 101, webSocket: client });
     }
 
-    this.ctx.acceptWebSocket(server);
-
     const user: User = { name, key };
-    const sessionClient: SessionClient = {
-      socket: client,
-      ip,
+    const session: ClientSession = {
       active: true,
       user,
     };
 
-    const current = this.clients[user.key];
+    const current = this.sockets.get(user.key);
     if (current) {
-      current.active = false;
       const payload = this.createPayload(
         { type: "message", message: "Replaced by new connection" },
         { type: "server" }
       );
-      current.socket.send(JSON.stringify(payload));
-      current.socket.close(1011, "Replaced by new connection.");
+      current.send(JSON.stringify(payload));
+      current.close(1011, "Replaced by new connection.");
+      this.sessions.delete(current);
     }
 
-    this.clients[user.key] = sessionClient;
-    this.sockets.set(client, user.key);
+    console.log("this.sockets", user.key, this.sockets);
+    console.log("this.sessions", server, this.sessions);
+
+    this.sockets.set(user.key, server);
+    this.sessions.set(server, session);
+
+    this.ctx.acceptWebSocket(server);
+    server.serializeAttachment(session);
 
     const activeUsers = this.getActiveUsers();
     const invitations = await this.getInvitationList();
@@ -323,8 +329,9 @@ export class ShareInstance extends DurableObject {
         return;
       }
 
-      const key = this.sockets.get(ws);
-      if (!key) {
+      const session = this.sessions.get(ws);
+      console.log("sessions: ", this.sessions);
+      if (!session) {
         const payload = this.createPayload(
           {
             type: "server_error",
@@ -337,20 +344,6 @@ export class ShareInstance extends DurableObject {
         return;
       }
 
-      const client = this.clients[key];
-      if (!client) {
-        const payload = this.createPayload(
-          {
-            type: "server_error",
-            error: "WebSocket client not found.",
-          },
-          { type: "server" }
-        );
-        ws.send(JSON.stringify(payload));
-        ws.close(1011, "WebSocket client not found.");
-        return;
-      }
-
       const data = result.data as WebSocketPeerMessage;
       switch (data.type) {
         case "add_incident": {
@@ -358,7 +351,7 @@ export class ShareInstance extends DurableObject {
           await this.addIncident(incident);
           this.broadcast(
             { type: "add_incident", incident },
-            { type: "client", name: client.user.name, id: client.user.key }
+            { type: "client", name: session.user.name, id: session.user.key }
           );
           break;
         }
@@ -367,7 +360,7 @@ export class ShareInstance extends DurableObject {
           await this.editIncident(incident);
           this.broadcast(
             { type: "update_incident", incident },
-            { type: "client", name: client.user.name, id: client.user.key }
+            { type: "client", name: session.user.name, id: session.user.key }
           );
           break;
         }
@@ -375,7 +368,7 @@ export class ShareInstance extends DurableObject {
           await this.deleteIncident(data.id);
           this.broadcast(
             { type: "remove_incident", id: data.id },
-            { type: "client", name: client.user.name, id: client.user.key }
+            { type: "client", name: session.user.name, id: session.user.key }
           );
           break;
         }
@@ -387,14 +380,14 @@ export class ShareInstance extends DurableObject {
               id: data.id,
               scratchpad: data.scratchpad,
             },
-            { type: "client", name: client.user.name, id: client.user.key }
+            { type: "client", name: session.user.name, id: session.user.key }
           );
           break;
         }
         case "message": {
           this.broadcast(
             { type: "message", message: data.message },
-            { type: "client", name: client.user.name, id: client.user.key }
+            { type: "client", name: session.user.name, id: session.user.key }
           );
           break;
         }
@@ -414,28 +407,22 @@ export class ShareInstance extends DurableObject {
   }
 
   async webSocketClose(ws: WebSocket): Promise<void> {
-    const key = this.sockets.get(ws);
-    if (!key) {
+    const session = this.sessions.get(ws);
+    if (!session) {
       return;
     }
 
-    const client = this.clients[key];
-    if (!client) {
-      return;
-    }
-
-    client.active = false;
-    delete this.clients[key];
-    this.sockets.delete(ws);
+    this.sockets.delete(session.user.key);
+    this.sessions.delete(ws);
 
     const activeUsers = this.getActiveUsers();
     const invitations = await this.getInvitationList();
 
-    if (client.user) {
+    if (session.user) {
       await this.broadcast(
         {
           type: "server_user_remove",
-          user: client.user,
+          user: session.user,
           activeUsers,
           invitations,
         },
@@ -445,28 +432,22 @@ export class ShareInstance extends DurableObject {
   }
 
   async webSocketError(ws: WebSocket /*error: unknown*/): Promise<void> {
-    const key = this.sockets.get(ws);
-    if (!key) {
+    const session = this.sessions.get(ws);
+    if (!session) {
       return;
     }
 
-    const client = this.clients[key];
-    if (!client) {
-      return;
-    }
-
-    client.active = false;
-    delete this.clients[key];
-    this.sockets.delete(ws);
+    this.sockets.delete(session.user.key);
+    this.sessions.delete(ws);
 
     const activeUsers = this.getActiveUsers();
     const invitations = await this.getInvitationList();
 
-    if (client.user) {
+    if (session.user) {
       await this.broadcast(
         {
           type: "server_user_remove",
-          user: client.user,
+          user: session.user,
           activeUsers,
           invitations,
         },
@@ -481,15 +462,18 @@ export class ShareInstance extends DurableObject {
   ) {
     const payload: WebSocketPayload<T> = this.createPayload(message, sender);
 
-    const clientLefts: SessionClient[] = [];
+    const clientLefts: ClientSession[] = [];
 
-    for (const [key, client] of Object.entries(this.clients)) {
+    for (const [key, socket] of this.sockets) {
       try {
-        client.socket.send(JSON.stringify(payload));
+        socket.send(JSON.stringify(payload));
       } catch (err) {
-        client.active = false;
-        clientLefts.push(client);
-        delete this.clients[key];
+        const session = this.sessions.get(socket);
+        if (session) {
+          clientLefts.push(session);
+        }
+        this.sockets.delete(key);
+        this.sessions.delete(socket);
       }
     }
 

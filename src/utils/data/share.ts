@@ -286,7 +286,7 @@ export async function removeInvitation(
 export async function getShareData(
   sku: string
 ): Promise<Routes["/api/{sku}/data"]["get"]> {
-  const url = new URL(`/api/${sku}/get`, URL_BASE);
+  const url = new URL(`/api/${sku}/data`, URL_BASE);
 
   const response = await signedFetch(url);
   return response.json();

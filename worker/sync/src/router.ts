@@ -39,7 +39,12 @@ export type Variables = {
   };
 };
 
-export const app = new OpenAPIHono<{ Bindings: Env; Variables: Variables }>();
+export type AppArgs = {
+  Bindings: Env;
+  Variables: Variables;
+};
+
+export const app = new OpenAPIHono<AppArgs>();
 
 export const ErrorCode = z.enum([
   "VerifySignatureValuesNotPresent",

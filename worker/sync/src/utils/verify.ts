@@ -8,7 +8,7 @@ import {
   User,
 } from "@referee-fyi/share";
 import { createMiddleware } from "hono/factory";
-import { ErrorResponseSchema, Variables } from "../router";
+import { AppArgs, ErrorResponseSchema } from "../router";
 import z from "zod/v4";
 import { getSystemKeyMetadata, isSystemKey } from "./systemKey";
 
@@ -24,9 +24,7 @@ export const VerifySignatureQuerySchema = z.object({
   signature_date: z.string().optional(),
 });
 
-export const verifySignature = createMiddleware<{
-  Variables: Variables;
-}>(async (c, next) => {
+export const verifySignature = createMiddleware<AppArgs>(async (c, next) => {
   const now = new Date();
 
   const signature =
@@ -122,10 +120,7 @@ export const verifySignature = createMiddleware<{
   await next();
 });
 
-export const verifyUser = createMiddleware<{
-  Variables: Variables;
-  Bindings: Env;
-}>(async (c, next) => {
+export const verifyUser = createMiddleware<AppArgs>(async (c, next) => {
   const keyHex = c.get("verifySignature")?.keyHex;
 
   if (!keyHex) {
@@ -163,10 +158,7 @@ export const verifyUser = createMiddleware<{
   await next();
 });
 
-export const verifyInvitation = createMiddleware<{
-  Variables: Variables;
-  Bindings: Env;
-}>(async (c, next) => {
+export const verifyInvitation = createMiddleware<AppArgs>(async (c, next) => {
   const sku = c.req.param("sku");
 
   if (!sku) {
@@ -271,10 +263,7 @@ export const VerifyIntegrationTokenQuerySchema = z.object({
   instance: z.string().optional(),
 });
 
-export const verifySystemToken = createMiddleware<{
-  Variables: Variables;
-  Bindings: Env;
-}>(async (c, next) => {
+export const verifySystemToken = createMiddleware<AppArgs>(async (c, next) => {
   const sku = c.req.param("sku");
   const token = c.req.query("token");
   const instanceSecret = c.req.query("instance");
@@ -384,10 +373,7 @@ export const verifySystemToken = createMiddleware<{
   await next();
 });
 
-export const verifyBearerToken = createMiddleware<{
-  Variables: Variables;
-  Bindings: Env;
-}>(async (c, next) => {
+export const verifyBearerToken = createMiddleware<AppArgs>(async (c, next) => {
   const sku = c.req.param("sku");
   const token = c.req.query("token");
 
@@ -513,99 +499,74 @@ export const verifyBearerToken = createMiddleware<{
   await next();
 });
 
-export const verifyIntegrationToken = createMiddleware<{
-  Variables: Variables;
-  Bindings: Env;
-}>(async (c, next) => {
-  const sku = c.req.param("sku");
-  const token = c.req.query("token");
-  const instanceSecret = c.req.query("instance");
+export const verifyIntegrationToken = createMiddleware<AppArgs>(
+  async (c, next) => {
+    const sku = c.req.param("sku");
+    const token = c.req.query("token");
+    const instanceSecret = c.req.query("instance");
 
-  if (typeof sku !== "string" || typeof token !== "string") {
-    return c.json(
-      {
-        success: false,
-        error: {
-          name: "ValidationError",
-          message: "SKU and token parameters are required.",
-        },
-        code: "VerifyIntegrationTokenValuesNotPresent",
-      } as const satisfies z.infer<typeof ErrorResponseSchema>,
-      400
-    );
-  }
-
-  if (typeof instanceSecret === "string") {
-    return await verifySystemToken(c, next);
-  }
-
-  return await verifyBearerToken(c, next);
-});
-
-export const VerifyUserAssetAuthorizedQuerySchema = z.object({
-  id: z.string(),
-});
-
-export const verifyUserAssetAuthorized = createMiddleware<{
-  Variables: Variables;
-  Bindings: Env;
-}>(async (c, next) => {
-  const id = c.req.query("id");
-  if (typeof id !== "string") {
-    return c.json(
-      {
-        success: false,
-        error: { name: "ValidationError", message: "Missing asset ID" },
-        code: "VerifyUserAssetAuthorizedValuesNotPresent",
-      } as const satisfies z.infer<typeof ErrorResponseSchema>,
-      400
-    );
-  }
-
-  const meta = await c.env.ASSETS.get<ImageAssetMeta>(id, "json");
-  if (!meta || !meta.images_id) {
-    return c.json(
-      {
-        success: false,
-        error: { name: "ValidationError", message: "Asset not found" },
-        code: "VerifyUserAssetAuthorizedAssetNotFound",
-      } as const satisfies z.infer<typeof ErrorResponseSchema>,
-      404
-    );
-  }
-
-  const ownerInvitation = await getInvitation(c.env, meta.owner, meta.sku);
-  const verifyInvitation = c.get("verifyInvitation");
-  const verifyIntegrationToken = c.get("verifyIntegrationToken");
-
-  if (verifyInvitation) {
-    if (
-      !ownerInvitation ||
-      !ownerInvitation.accepted ||
-      ownerInvitation.instance_secret !==
-        verifyInvitation.invitation.instance_secret
-    ) {
+    if (typeof sku !== "string" || typeof token !== "string") {
       return c.json(
         {
           success: false,
           error: {
             name: "ValidationError",
-            message:
-              "Asset owner is not on the same instance as the requester.",
+            message: "SKU and token parameters are required.",
           },
-          code: "VerifyUserAssetAuthorizedUserNotAuthorized",
+          code: "VerifyIntegrationTokenValuesNotPresent",
         } as const satisfies z.infer<typeof ErrorResponseSchema>,
-        403
+        400
       );
     }
-  } else if (verifyIntegrationToken) {
-    // Require bearer token owners to share an instance with the asset owner
-    if (verifyIntegrationToken.grantType === "bearer") {
+
+    if (typeof instanceSecret === "string") {
+      return await verifySystemToken(c, next);
+    }
+
+    return await verifyBearerToken(c, next);
+  }
+);
+
+export const VerifyUserAssetAuthorizedQuerySchema = z.object({
+  id: z.string(),
+});
+
+export const verifyUserAssetAuthorized = createMiddleware<AppArgs>(
+  async (c, next) => {
+    const id = c.req.query("id");
+    if (typeof id !== "string") {
+      return c.json(
+        {
+          success: false,
+          error: { name: "ValidationError", message: "Missing asset ID" },
+          code: "VerifyUserAssetAuthorizedValuesNotPresent",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        400
+      );
+    }
+
+    const meta = await c.env.ASSETS.get<ImageAssetMeta>(id, "json");
+    if (!meta || !meta.images_id) {
+      return c.json(
+        {
+          success: false,
+          error: { name: "ValidationError", message: "Asset not found" },
+          code: "VerifyUserAssetAuthorizedAssetNotFound",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        404
+      );
+    }
+
+    const ownerInvitation = await getInvitation(c.env, meta.owner, meta.sku);
+    const verifyInvitation = c.get("verifyInvitation");
+    const verifyIntegrationToken = c.get("verifyIntegrationToken");
+
+    if (verifyInvitation) {
       if (
         !ownerInvitation ||
         !ownerInvitation.accepted ||
         ownerInvitation.instance_secret !==
-          verifyIntegrationToken.invitation.instance_secret
+          verifyInvitation.invitation.instance_secret
       ) {
         return c.json(
           {
@@ -620,85 +581,110 @@ export const verifyUserAssetAuthorized = createMiddleware<{
           403
         );
       }
+    } else if (verifyIntegrationToken) {
+      // Require bearer token owners to share an instance with the asset owner
+      if (verifyIntegrationToken.grantType === "bearer") {
+        if (
+          !ownerInvitation ||
+          !ownerInvitation.accepted ||
+          ownerInvitation.instance_secret !==
+            verifyIntegrationToken.invitation.instance_secret
+        ) {
+          return c.json(
+            {
+              success: false,
+              error: {
+                name: "ValidationError",
+                message:
+                  "Asset owner is not on the same instance as the requester.",
+              },
+              code: "VerifyUserAssetAuthorizedUserNotAuthorized",
+            } as const satisfies z.infer<typeof ErrorResponseSchema>,
+            403
+          );
+        }
+      }
+    } else {
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: "ValidationError",
+            message: "Invitation must be verified before asset authorization.",
+          },
+          code: "VerifyUserAssetAuthorizedValuesNotPresent",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        400
+      );
     }
-  } else {
-    return c.json(
-      {
-        success: false,
-        error: {
-          name: "ValidationError",
-          message: "Invitation must be verified before asset authorization.",
-        },
-        code: "VerifyUserAssetAuthorizedValuesNotPresent",
-      } as const satisfies z.infer<typeof ErrorResponseSchema>,
-      400
-    );
+
+    const client = new Cloudflare({
+      apiEmail: c.env.CLOUDFLARE_EMAIL,
+      apiToken: c.env.CLOUDFLARE_API_KEY,
+    });
+
+    const image = await client.images.v1.get(meta.images_id, {
+      account_id: c.env.CLOUDFLARE_IMAGES_ACCOUNT_ID,
+    });
+
+    if (Object.hasOwn(image, "draft") || !image.uploaded) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: "ValidationError",
+            message: "Image has been created, but not yet uploaded.",
+          },
+          code: "VerifyUserAssetAuthorizedImageNotFound",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        404
+      );
+    }
+
+    c.set("verifyUserAssetAuthorized", { asset: meta, image });
+
+    await next();
   }
+);
 
-  const client = new Cloudflare({
-    apiEmail: c.env.CLOUDFLARE_EMAIL,
-    apiToken: c.env.CLOUDFLARE_API_KEY,
-  });
+export const verifyInvitationAdmin = createMiddleware<AppArgs>(
+  async (c, next) => {
+    const verifyInvitation = c.get("verifyInvitation");
+    if (!verifyInvitation) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: "ValidationError",
+            message: "You are not authorized to perform this action.",
+          },
+          code: "VerifyInvitationAdminNotAuthorized",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        400
+      );
+    }
 
-  const image = await client.images.v1.get(meta.images_id, {
-    account_id: c.env.CLOUDFLARE_IMAGES_ACCOUNT_ID,
-  });
-
-  if (Object.hasOwn(image, "draft") || !image.uploaded) {
-    return c.json(
-      {
-        success: false,
-        error: {
-          name: "ValidationError",
-          message: "Image has been created, but not yet uploaded.",
-        },
-        code: "VerifyUserAssetAuthorizedImageNotFound",
-      } as const satisfies z.infer<typeof ErrorResponseSchema>,
-      404
+    const isAdmin = verifyInvitation.invitation.admin;
+    const systemKey = await isSystemKey(
+      c.env,
+      verifyInvitation.invitation.user
     );
+
+    if (!isAdmin) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: "ValidationError",
+            message: "You are not authorized to perform this action.",
+          },
+          code: "VerifyInvitationAdminNotAuthorized",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        403
+      );
+    }
+
+    c.set("verifyInvitationAdmin", { admin: isAdmin, systemKey });
+    await next();
   }
-
-  c.set("verifyUserAssetAuthorized", { asset: meta, image });
-
-  await next();
-});
-
-export const verifyInvitationAdmin = createMiddleware<{
-  Variables: Variables;
-  Bindings: Env;
-}>(async (c, next) => {
-  const verifyInvitation = c.get("verifyInvitation");
-  if (!verifyInvitation) {
-    return c.json(
-      {
-        success: false,
-        error: {
-          name: "ValidationError",
-          message: "You are not authorized to perform this action.",
-        },
-        code: "VerifyInvitationAdminNotAuthorized",
-      } as const satisfies z.infer<typeof ErrorResponseSchema>,
-      400
-    );
-  }
-
-  const isAdmin = verifyInvitation.invitation.admin;
-  const systemKey = await isSystemKey(c.env, verifyInvitation.invitation.user);
-
-  if (!isAdmin) {
-    return c.json(
-      {
-        success: false,
-        error: {
-          name: "ValidationError",
-          message: "You are not authorized to perform this action.",
-        },
-        code: "VerifyInvitationAdminNotAuthorized",
-      } as const satisfies z.infer<typeof ErrorResponseSchema>,
-      403
-    );
-  }
-
-  c.set("verifyInvitationAdmin", { admin: isAdmin, systemKey });
-  await next();
-});
+);

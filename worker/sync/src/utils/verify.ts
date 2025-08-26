@@ -61,7 +61,10 @@ export const verifySignature = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: `Skew between reported date (${dateToVerify.toISOString()}) and actual date (${now.toISOString()}) too large.`,
+        error: {
+          name: "ValidationError",
+          message: `Skew between reported date (${dateToVerify.toISOString()}) and actual date (${now.toISOString()}) too large.`,
+        },
         code: "VerifySignatureInvalidDateSkew",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
@@ -129,8 +132,11 @@ export const verifyUser = createMiddleware<{
     return c.json(
       {
         success: false,
-        error:
-          "Signature verification must be performed before user verification.",
+        error: {
+          name: "ValidationError",
+          message:
+            "Signature verification must be performed before user verification.",
+        },
         code: "VerifySignatureValuesNotPresent",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400

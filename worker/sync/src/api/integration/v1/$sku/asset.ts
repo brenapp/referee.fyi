@@ -10,9 +10,10 @@ import {
 import { createRoute } from "@hono/zod-openapi";
 
 export const ParamsSchema = VerifyIntegrationTokenParamsSchema;
-export const QuerySchema = VerifyIntegrationTokenQuerySchema.extend(
-  VerifyUserAssetAuthorizedQuerySchema
-);
+export const QuerySchema = z.object({
+  ...VerifyUserAssetAuthorizedQuerySchema.shape,
+  ...VerifyIntegrationTokenQuerySchema.shape,
+});
 
 export const SuccessResponseSchema = z
   .object({
@@ -20,7 +21,7 @@ export const SuccessResponseSchema = z
     data: z.object({}),
   })
   .meta({
-    id: "GetIntegrationV1UsersResponse",
+    id: "GetIntegrationV1AssetResponse",
   });
 
 export const route = createRoute({

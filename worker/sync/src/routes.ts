@@ -4,6 +4,7 @@ import "./api/integration/v1/$sku/users";
 import "./api/integration/v1/$sku/incident/json";
 import "./api/integration/v1/$sku/incident/pdf";
 import "./api/integration/v1/$sku/incident/csv";
+import "./api/integration/v1/$sku/asset";
 import "./api/meta/location";
 import "./api/user";
 import "./api/$sku/invitation";

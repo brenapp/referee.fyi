@@ -1,5 +1,5 @@
-import type { paths } from "../generated/worker/sync/openapi";
-import type { components } from "../generated/worker/sync/openapi";
+import type { paths } from "../generated/worker/rules/openapi";
+import type { components } from "../generated/worker/rules/openapi";
 
 export { paths };
 export type Schemas = components["schemas"];

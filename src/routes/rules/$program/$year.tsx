@@ -13,6 +13,9 @@ import { useState } from "react";
 import { getUpdatedQuestionsForProgram } from "~utils/data/qna";
 import { ProgramAbbr, programs, Year, years } from "robotevents";
 import { useQuestionsForProgram } from "~utils/hooks/qna";
+import { Schemas } from "~types/worker/rules";
+
+type Question = Schemas["Question"];
 
 type RuleGroupProps = {
   ruleGroup: Game["ruleGroups"][number];

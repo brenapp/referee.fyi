@@ -574,8 +574,54 @@ export const verifyUserAssetAuthorized = createMiddleware<{
     );
   }
 
+  const ownerInvitation = await getInvitation(c.env, meta.owner, meta.sku);
   const verifyInvitation = c.get("verifyInvitation");
-  if (!verifyInvitation) {
+  const verifyIntegrationToken = c.get("verifyIntegrationToken");
+
+  if (verifyInvitation) {
+    if (
+      !ownerInvitation ||
+      !ownerInvitation.accepted ||
+      ownerInvitation.instance_secret !==
+        verifyInvitation.invitation.instance_secret
+    ) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: "ValidationError",
+            message:
+              "Asset owner is not on the same instance as the requester.",
+          },
+          code: "VerifyUserAssetAuthorizedUserNotAuthorized",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        403
+      );
+    }
+  } else if (verifyIntegrationToken) {
+    // Require bearer token owners to share an instance with the asset owner
+    if (verifyIntegrationToken.grantType === "bearer") {
+      if (
+        !ownerInvitation ||
+        !ownerInvitation.accepted ||
+        ownerInvitation.instance_secret !==
+          verifyIntegrationToken.invitation.instance_secret
+      ) {
+        return c.json(
+          {
+            success: false,
+            error: {
+              name: "ValidationError",
+              message:
+                "Asset owner is not on the same instance as the requester.",
+            },
+            code: "VerifyUserAssetAuthorizedUserNotAuthorized",
+          } as const satisfies z.infer<typeof ErrorResponseSchema>,
+          403
+        );
+      }
+    }
+  } else {
     return c.json(
       {
         success: false,
@@ -586,26 +632,6 @@ export const verifyUserAssetAuthorized = createMiddleware<{
         code: "VerifyUserAssetAuthorizedValuesNotPresent",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400
-    );
-  }
-
-  const ownerInvitation = await getInvitation(c.env, meta.owner, meta.sku);
-  if (
-    !ownerInvitation ||
-    !ownerInvitation.accepted ||
-    ownerInvitation.instance_secret !==
-      verifyInvitation.invitation.instance_secret
-  ) {
-    return c.json(
-      {
-        success: false,
-        error: {
-          name: "ValidationError",
-          message: "Asset owner is not on the same instance as the requester.",
-        },
-        code: "VerifyUserAssetAuthorizedUserNotAuthorized",
-      } as const satisfies z.infer<typeof ErrorResponseSchema>,
-      403
     );
   }
 

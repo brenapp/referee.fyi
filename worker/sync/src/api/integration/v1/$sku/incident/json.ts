@@ -38,7 +38,7 @@ export const route = createRoute({
     200: {
       description: "JSON of incidents",
       content: {
-        "text/json": {
+        "application/json": {
           schema: z.object({
             success: z.literal(true),
             data: IncidentSchema.array(),

@@ -1,14 +1,14 @@
 import { z } from "zod/v4";
 
 export type History<T extends Record<string, unknown>, K extends keyof T> = {
-  prev: T[K];
+  prev?: T[K];
   peer: string;
   instant: string;
 };
 
 export const HistorySchema = z
   .object({
-    prev: z.any(),
+    prev: z.unknown().optional(),
     peer: z.string(),
     instant: z.string(),
   })

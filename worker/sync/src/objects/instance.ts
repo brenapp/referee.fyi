@@ -279,9 +279,6 @@ export class ShareInstance extends DurableObject {
       this.sessions.delete(current);
     }
 
-    console.log("this.sockets", user.key, this.sockets);
-    console.log("this.sessions", server, this.sessions);
-
     this.sockets.set(user.key, server);
     this.sessions.set(server, session);
 
@@ -330,7 +327,6 @@ export class ShareInstance extends DurableObject {
       }
 
       const session = this.sessions.get(ws);
-      console.log("sessions: ", this.sessions);
       if (!session) {
         const payload = this.createPayload(
           {

@@ -1,8 +1,6 @@
 {
   "include": [
     "src",
-    "../types",
-    "src/api/integration/v1/$sku/verify.ts"
   ],
   "exclude": [
     "node_modules",

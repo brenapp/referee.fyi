@@ -7,7 +7,10 @@ import {
   VerifySignatureHeadersSchema,
   verifyUser,
 } from "../../utils/verify";
-import { WebSocketServerShareInfoMessageSchema } from "@referee-fyi/share";
+import {
+  WebSocketServerShareInfoMessage,
+  WebSocketServerShareInfoMessageSchema,
+} from "@referee-fyi/share";
 
 export const ParamsSchema = z.object({
   sku: z.string(),
@@ -68,7 +71,8 @@ app.openapi(route, async (c) => {
     c.env.INCIDENTS.idFromString(verifyInvitation.instance.secret)
   );
 
-  const data = await stub.createServerShareMessage();
+  const data =
+    (await stub.createServerShareMessage()) as WebSocketServerShareInfoMessage;
   return c.json(
     {
       success: true,

@@ -44,6 +44,7 @@ export const route = createRoute({
   },
 });
 
+//@ts-expect-error Response is a WebSocket upgrade
 app.openapi(route, async (c) => {
   const verifyInvitation = c.get("verifyInvitation");
   if (!verifyInvitation) {

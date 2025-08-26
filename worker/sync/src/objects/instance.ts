@@ -114,7 +114,7 @@ export class ShareInstance extends DurableObject {
     const map = await this.state.storage.list<boolean>({
       prefix,
     });
-    return new Set(map.keys().map((k) => k.slice(prefix.length)));
+    return new Set([...map.keys()].map((k: string) => k.slice(prefix.length)));
   }
 
   /**

@@ -10,7 +10,7 @@ import {
   VerifyIntegrationTokenParamsSchema,
   VerifyIntegrationTokenQuerySchema,
 } from "../../../../../utils/verify";
-import { IncidentSchema } from "@referee-fyi/share";
+import { Incident, IncidentSchema } from "@referee-fyi/share";
 
 export const ParamsSchema = VerifyIntegrationTokenParamsSchema;
 export const QuerySchema = VerifyIntegrationTokenQuerySchema;
@@ -70,7 +70,7 @@ app.openapi(route, async (c) => {
     c.env.INCIDENTS.idFromString(verifyIntegrationToken.instance.secret)
   );
 
-  const incidents = await stub.getAllIncidents();
+  const incidents = (await stub.getAllIncidents()) as Incident[];
 
   return c.json(
     {

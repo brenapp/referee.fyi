@@ -1,5 +1,4 @@
-import createClient from "openapi-fetch";
-import { paths, Question } from "@referee-fyi/rules/worker";
+import type { Schemas, SuccessResponseData } from "~types/worker/rules";
 
 import { get, set } from "./keyval";
 import { ProgramAbbr, Year } from "robotevents";
@@ -7,9 +6,9 @@ import { getMany } from "idb-keyval";
 import { captureException } from "@sentry/react";
 import { relatedPrograms } from "@referee-fyi/rules/programs";
 
-export const client = createClient<paths>({
-  baseUrl: import.meta.env.VITE_REFEREE_FYI_RULES_SERVER,
-});
+type Question = Schemas["Question"];
+
+const base = new URL(import.meta.env.VITE_REFEREE_FYI_RULES_SERVER);
 
 export async function getQNAPlusVersion() {
   return (await get<string>("qnaplus_version")) ?? "";
@@ -65,22 +64,29 @@ export async function updateQNAs() {
   const version = await getQNAPlusVersion();
 
   try {
-    const response = await client.GET("/api/updateQuestions", {
-      params: { query: { version } },
-    });
+    const url = new URL("/api/updateQuestions", base);
+    if (version) {
+      url.searchParams.set("version", version);
+    }
+    const response = await fetch(url);
 
-    if (!response.data) {
+    if (!response.ok) {
       return null;
     }
 
-    if (response.data.version) {
-      await setQNAPlusVersion(response.data.version);
+    const data = (await response.json()) as SuccessResponseData<
+      "get",
+      "/api/updateQuestions"
+    >;
+
+    if (data.version) {
+      await setQNAPlusVersion(data.version);
     }
 
-    if (!response.data.questions) {
+    if (!data.questions) {
       return null;
     }
-    const questions = response.data.questions;
+    const questions = data.questions;
     for (const question of questions) {
       await setQuestion(question);
     }

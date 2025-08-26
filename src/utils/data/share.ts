@@ -105,7 +105,10 @@ export async function registerUser(
   if (!profile.name) {
     return {
       success: false,
-      error: "No name",
+      error: {
+        name: "ValidationError",
+        message: "No name",
+      },
       code: "VerifyUserNotRegistered",
     };
   }

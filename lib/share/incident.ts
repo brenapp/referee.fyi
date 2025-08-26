@@ -1,8 +1,5 @@
 import { z } from "zod/v4";
-import {
-  ConsistentMapSchema,
-  LastWriteWinsConsistencySchema,
-} from "@referee-fyi/consistency";
+import { LastWriteWinsConsistencySchema } from "@referee-fyi/consistency";
 
 export const OUTCOMES = [
   "General",

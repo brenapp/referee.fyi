@@ -98,7 +98,7 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
     }
 
     if (inviteResponse && !inviteResponse.success) {
-      return inviteResponse.error;
+      return inviteResponse.error.message;
     }
 
     return null;
@@ -526,7 +526,7 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
       } else {
         toast({
           type: "error",
-          message: response.error,
+          message: response.error.message,
           context: JSON.stringify(response),
         });
       }

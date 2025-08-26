@@ -1,4 +1,4 @@
-import type { paths } from "../generated/worker/sync";
+import type { paths } from "../generated/worker/sync/openapi";
 
 export type Method =
   | "get"

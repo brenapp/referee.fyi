@@ -529,7 +529,7 @@ export const verifyIntegrationToken = createMiddleware<{
     );
   }
 
-  if (typeof instanceSecret !== "string") {
+  if (typeof instanceSecret === "string") {
     return await verifySystemToken(c, next);
   }
 

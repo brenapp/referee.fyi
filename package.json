@@ -15,7 +15,8 @@
     "sync:typegen": "openapi-typescript http://localhost:8787/openapi --output types/generated/worker/sync.d.ts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
     "pages:build": "npm run lib:build && npm run frontend:build",
-    "dev": "concurrently \"npm run frontend:dev\" \"npm run lib:dev\""
+    "dev": "concurrently \"npm run frontend:dev\" \"npm run lib:dev\"",
+    "build": "npm run --workspaces --if-present build && npm run frontend:build"
   },
   "workspaces": [
     "lib/*",

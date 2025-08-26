@@ -136,9 +136,15 @@ export const ErrorResponses = {
 
 app.use("/api/*", cors());
 
-app.doc("/openapi", {
+const config = {
   openapi: "3.0.0",
   info: { title: "Referee FYI Sync Engine", version: "0.0.0" },
-});
+};
+
+app.doc("/openapi", config);
+
+export function getOpenApiDocument() {
+  return app.getOpenAPIDocument(config);
+}
 
 app.get("/swagger", swaggerUI({ url: "/openapi" }));

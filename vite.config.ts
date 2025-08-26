@@ -80,7 +80,10 @@ const generateJsonSchema: (schemas: SchemaGeneration[]) => Plugin = (
 //#region OpenAPI Types
 
 type OpenApiTypesGeneration = {
-  output: string;
+  output: {
+    sync: string;
+    rules: string;
+  };
 };
 
 const PREAMBLE = `
@@ -98,14 +101,26 @@ const generateOpenApiTypes: (options: OpenApiTypesGeneration) => Plugin = ({
   apply: "build",
   async buildStart() {
     this.info("Generating OpenAPI document");
-    const { getOpenApiDocument } = await import("./worker/sync/src/routes");
-    const doc = getOpenApiDocument();
-    const ast = await openApiTypescript(doc as OpenAPI3, {
-      propertiesRequiredByDefault: true,
-      defaultNonNullable: true,
-    });
-    const definition = astToString(ast);
-    await fs.writeFile(output, PREAMBLE + definition);
+    const { getOpenApiDocument: getSyncDoc } = await import(
+      "./worker/sync/src/routes"
+    );
+
+    const { getOpenApiDocument: getRulesDoc } = await import(
+      "./worker/rules-indexer/src/routes"
+    );
+
+    async function generateTypings(path: string, doc: OpenAPI3) {
+      const ast = await openApiTypescript(doc, {
+        propertiesRequiredByDefault: true,
+        defaultNonNullable: true,
+      });
+      const definition = astToString(ast);
+      await fs.writeFile(path, PREAMBLE + definition);
+    }
+
+    generateTypings(output.sync, getSyncDoc() as OpenAPI3);
+    generateTypings(output.rules, getRulesDoc() as OpenAPI3);
+
     this.info(`Wrote OpenAPI types to ${output}`);
   },
 });
@@ -136,7 +151,10 @@ export default defineConfig(() => ({
       },
     ]),
     generateOpenApiTypes({
-      output: "./types/generated/worker/sync/openapi.d.ts",
+      output: {
+        sync: "./types/generated/worker/sync/openapi.d.ts",
+        rules: "./types/generated/worker/rules/openapi.d.ts",
+      },
     }),
     tsconfigPaths({}),
     VitePWA({

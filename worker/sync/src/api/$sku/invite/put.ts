@@ -16,7 +16,7 @@ export const ParamsSchema = z.object({
 });
 export const QuerySchema = z.object({
   user: z.string(),
-  admin: z.boolean(),
+  admin: z.coerce.boolean(),
 });
 
 export const SuccessResponseSchema = z

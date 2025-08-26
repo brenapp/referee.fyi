@@ -47,7 +47,7 @@ export type UserInvitation = z.infer<typeof UserInvitationSchema>;
 
 export const InvitationListItemSchema = z
   .object({
-    admin: z.boolean(),
+    admin: z.coerce.boolean(),
     user: UserSchema,
   })
   .meta({

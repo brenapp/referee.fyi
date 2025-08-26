@@ -3,7 +3,7 @@ import { z } from "zod/v4";
 export const GrowSetElementSchema = z.union([
   z.string(),
   z.number(),
-  z.boolean(),
+  z.coerce.boolean(),
   z.undefined(),
   z.null(),
 ]);
@@ -12,7 +12,7 @@ export type GrowSetElement = z.infer<typeof GrowSetElementSchema>;
 
 export type GrowSet<T extends GrowSetElement> = T[];
 export const GrowSetSchema = z.array(
-  z.union([z.string(), z.number(), z.boolean(), z.undefined(), z.null()])
+  z.union([z.string(), z.number(), z.coerce.boolean(), z.undefined(), z.null()])
 );
 
 export type MergeGrowSetOptions<T extends GrowSetElement> = {

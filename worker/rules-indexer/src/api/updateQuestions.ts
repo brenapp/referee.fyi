@@ -19,7 +19,7 @@ export const QuestionSchema = z
     askedTimestampMs: z.number(),
     answeredTimestamp: z.string().nullable(),
     answeredTimestampMs: z.number().nullable(),
-    answered: z.boolean(),
+    answered: z.coerce.boolean(),
     tags: z.array(z.string()),
     question: z.string(),
     questionRaw: z.string(),
@@ -33,7 +33,7 @@ export const QuestionSchema = z
 
 export const QuestionsResponseSchema = z
   .object({
-    outdated: z.boolean().optional(),
+    outdated: z.coerce.boolean().optional(),
     version: z.string().optional(),
     questions: z.array(QuestionSchema).optional(),
   })

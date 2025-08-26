@@ -44,7 +44,11 @@ export const verifySignature = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Request must contain signature, public key, and date headers.",
+        error: {
+          name: "ValidationError",
+          message:
+            "Request must contain signature, public key, and date headers.",
+        },
         code: "VerifySignatureValuesNotPresent",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
@@ -69,7 +73,7 @@ export const verifySignature = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Invalid public key.",
+        error: { name: "ValidationError", message: "Invalid public key." },
         code: "VerifySignatureInvalidPublicKey",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
@@ -99,7 +103,7 @@ export const verifySignature = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Invalid signature.",
+        error: { name: "ValidationError", message: "Invalid signature." },
         code: "VerifySignatureInvalidSignature",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
@@ -139,7 +143,10 @@ export const verifyUser = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "You must register to perform this action.",
+        error: {
+          name: "ValidationError",
+          message: "You must register to perform this action.",
+        },
         code: "VerifyUserNotRegistered",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
@@ -160,7 +167,10 @@ export const verifyInvitation = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "SKU parameter is required.",
+        error: {
+          name: "ValidationError",
+          message: "SKU parameter is required.",
+        },
         code: "VerifyInvitationNotFound",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400
@@ -172,7 +182,10 @@ export const verifyInvitation = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "User must be verified before invitation verification.",
+        error: {
+          name: "ValidationError",
+          message: "User must be verified before invitation verification.",
+        },
         code: "VerifySignatureValuesNotPresent",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400
@@ -189,7 +202,10 @@ export const verifyInvitation = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "User does not have an active invitation for that event.",
+        error: {
+          name: "ValidationError",
+          message: "User does not have an active invitation for that event.",
+        },
         code: "VerifyInvitationNotFound",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       403
@@ -206,7 +222,11 @@ export const verifyInvitation = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Cannot perform this action until this invitation is accepted.",
+        error: {
+          name: "ValidationError",
+          message:
+            "Cannot perform this action until this invitation is accepted.",
+        },
         code: "VerifyInvitationNotAccepted",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       403
@@ -222,7 +242,10 @@ export const verifyInvitation = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Could not get share instance.",
+        error: {
+          name: "ValidationError",
+          message: "Could not get share instance.",
+        },
         code: "VerifyInvitationInstanceNotFound",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       500
@@ -273,7 +296,10 @@ export const verifySystemToken = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Invalid Bearer Token: can't obtain user key.",
+        error: {
+          name: "ValidationError",
+          message: "Invalid Bearer Token: can't obtain user key.",
+        },
         code: "VerifyIntegrationTokenInvalidSignature",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
@@ -286,7 +312,7 @@ export const verifySystemToken = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Key is not a system key.",
+        error: { name: "ValidationError", message: "Key is not a system key." },
         code: "VerifyIntegrationTokenInvalidSignature",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
@@ -299,7 +325,10 @@ export const verifySystemToken = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Invalid Bearer Token: signature verification failed.",
+        error: {
+          name: "ValidationError",
+          message: "Invalid Bearer Token: signature verification failed.",
+        },
         code: "VerifyIntegrationTokenInvalidSignature",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
@@ -311,7 +340,7 @@ export const verifySystemToken = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Instance not found.",
+        error: { name: "ValidationError", message: "Instance not found." },
         code: "VerifyIntegrationTokenInvalidInstance",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       404
@@ -323,7 +352,7 @@ export const verifySystemToken = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "User not found.",
+        error: { name: "ValidationError", message: "User not found." },
         code: "VerifyIntegrationTokenInvalidUser",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       404
@@ -360,7 +389,10 @@ export const verifyBearerToken = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Token and SKU parameters are required.",
+        error: {
+          name: "ValidationError",
+          message: "Token and SKU parameters are required.",
+        },
         code: "VerifyIntegrationTokenValuesNotPresent",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400
@@ -380,7 +412,10 @@ export const verifyBearerToken = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Invalid Bearer Token: can't obtain user key.",
+        error: {
+          name: "ValidationError",
+          message: "Invalid Bearer Token: can't obtain user key.",
+        },
         code: "VerifyIntegrationTokenInvalidSignature",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
@@ -394,7 +429,11 @@ export const verifyBearerToken = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Invalid Bearer Token: User does not have active invitation.",
+        error: {
+          name: "ValidationError",
+          message:
+            "Invalid Bearer Token: User does not have active invitation.",
+        },
         code: "VerifyIntegrationTokenInvalidInvitation",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
@@ -405,7 +444,11 @@ export const verifyBearerToken = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Invalid Bearer Token: User does not have admin permissions.",
+        error: {
+          name: "ValidationError",
+          message:
+            "Invalid Bearer Token: User does not have admin permissions.",
+        },
         code: "VerifyIntegrationTokenInvalidUser",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
@@ -419,7 +462,10 @@ export const verifyBearerToken = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Invalid Bearer Token: Invalid signature.",
+        error: {
+          name: "ValidationError",
+          message: "Invalid Bearer Token: Invalid signature.",
+        },
         code: "VerifyIntegrationTokenInvalidSignature",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
@@ -432,7 +478,7 @@ export const verifyBearerToken = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Unknown Share Instance.",
+        error: { name: "ValidationError", message: "Unknown Share Instance." },
         code: "VerifyIntegrationTokenInvalidInstance",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400
@@ -444,7 +490,7 @@ export const verifyBearerToken = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Unknown User.",
+        error: { name: "ValidationError", message: "Unknown User." },
         code: "VerifyIntegrationTokenInvalidUser",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400
@@ -473,7 +519,10 @@ export const verifyIntegrationToken = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "SKU and token parameters are required.",
+        error: {
+          name: "ValidationError",
+          message: "SKU and token parameters are required.",
+        },
         code: "VerifyIntegrationTokenValuesNotPresent",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400
@@ -500,7 +549,7 @@ export const verifyUserAssetAuthorized = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Missing asset ID",
+        error: { name: "ValidationError", message: "Missing asset ID" },
         code: "VerifyUserAssetAuthorizedValuesNotPresent",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400
@@ -512,7 +561,7 @@ export const verifyUserAssetAuthorized = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Asset not found",
+        error: { name: "ValidationError", message: "Asset not found" },
         code: "VerifyUserAssetAuthorizedAssetNotFound",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       404
@@ -524,7 +573,10 @@ export const verifyUserAssetAuthorized = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Invitation must be verified before asset authorization.",
+        error: {
+          name: "ValidationError",
+          message: "Invitation must be verified before asset authorization.",
+        },
         code: "VerifyUserAssetAuthorizedValuesNotPresent",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400
@@ -541,7 +593,10 @@ export const verifyUserAssetAuthorized = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Asset owner is not on the same instance as the requester.",
+        error: {
+          name: "ValidationError",
+          message: "Asset owner is not on the same instance as the requester.",
+        },
         code: "VerifyUserAssetAuthorizedUserNotAuthorized",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       403
@@ -561,7 +616,10 @@ export const verifyUserAssetAuthorized = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "Image has been created, but not yet uploaded.",
+        error: {
+          name: "ValidationError",
+          message: "Image has been created, but not yet uploaded.",
+        },
         code: "VerifyUserAssetAuthorizedImageNotFound",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       404
@@ -582,7 +640,10 @@ export const verifyInvitationAdmin = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "You are not authorized to perform this action.",
+        error: {
+          name: "ValidationError",
+          message: "You are not authorized to perform this action.",
+        },
         code: "VerifyInvitationAdminNotAuthorized",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       400
@@ -596,7 +657,10 @@ export const verifyInvitationAdmin = createMiddleware<{
     return c.json(
       {
         success: false,
-        error: "You are not authorized to perform this action.",
+        error: {
+          name: "ValidationError",
+          message: "You are not authorized to perform this action.",
+        },
         code: "VerifyInvitationAdminNotAuthorized",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       403

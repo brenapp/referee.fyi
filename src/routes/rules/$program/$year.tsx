@@ -11,7 +11,6 @@ import {
 } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { getUpdatedQuestionsForProgram } from "~utils/data/qna";
-import type { Question } from "@referee-fyi/rules/worker";
 import { ProgramAbbr, programs, Year, years } from "robotevents";
 import { useQuestionsForProgram } from "~utils/hooks/qna";
 

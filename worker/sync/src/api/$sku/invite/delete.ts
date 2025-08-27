@@ -17,6 +17,7 @@ import {
   getUser,
   setInstance,
 } from "../../../utils/data";
+import { env } from "cloudflare:workers";
 
 export const ParamsSchema = z.object({
   sku: z.string(),
@@ -39,6 +40,7 @@ export const route = createRoute({
   path: "/api/{sku}/invite",
   tags: ["Invitation Management"],
   summary: "Remove an invitation from a user.",
+  hide: env.ENVIRONMENT !== "staging",
   middleware: [verifySignature, verifyUser, verifyInvitation],
   request: {
     headers: VerifySignatureHeadersSchema,

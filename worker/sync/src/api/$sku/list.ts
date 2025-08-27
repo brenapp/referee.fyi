@@ -9,6 +9,7 @@ import {
 } from "../../utils/verify";
 import { getInstancesForEvent } from "../../utils/data";
 import { isSystemKey } from "../../utils/systemKey";
+import { env } from "cloudflare:workers";
 
 export const ParamsSchema = z.object({
   sku: z.string(),
@@ -32,6 +33,7 @@ export const route = createRoute({
   path: "/api/{sku}/list",
   tags: ["Invitation Management"],
   summary: "Gets all active instances for an event.",
+  hide: env.ENVIRONMENT !== "staging",
   middleware: [verifySignature, verifyUser],
   request: {
     headers: VerifySignatureHeadersSchema,

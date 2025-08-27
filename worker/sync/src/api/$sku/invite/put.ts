@@ -10,6 +10,7 @@ import {
 } from "../../../utils/verify";
 import { Invitation } from "@referee-fyi/share";
 import { getInvitation, setInstance, setInvitation } from "../../../utils/data";
+import { env } from "cloudflare:workers";
 
 export const ParamsSchema = z.object({
   sku: z.string(),
@@ -33,6 +34,7 @@ export const route = createRoute({
   path: "/api/{sku}/invite",
   tags: ["Invitation Management"],
   summary: "Invites another user to join an instance",
+  hide: env.ENVIRONMENT !== "staging",
   middleware: [
     verifySignature,
     verifyUser,

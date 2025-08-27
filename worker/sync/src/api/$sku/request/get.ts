@@ -9,6 +9,7 @@ import {
 } from "../../../utils/verify";
 import { getRequestCodeUserKey, getUser } from "../../../utils/data";
 import { UserSchema } from "@referee-fyi/share";
+import { env } from "cloudflare:workers";
 
 export const ParamsSchema = z.object({
   sku: z.string(),
@@ -30,6 +31,7 @@ export const route = createRoute({
   path: "/api/{sku}/request",
   tags: ["Key Exchange"],
   summary: "Obtains another user's public key.",
+  hide: env.ENVIRONMENT !== "staging",
   middleware: [verifySignature, verifyUser],
   request: {
     headers: VerifySignatureHeadersSchema,
@@ -82,10 +84,24 @@ app.openapi(route, async (c) => {
 
   const { key, version } = req;
   const user = await getUser(c.env, key);
+  if (!user) {
+    return c.json(
+      {
+        success: false,
+        code: "VerifyUserNotRegistered",
+        error: {
+          name: "ValidationError",
+          message: "User associated with request code not found.",
+        },
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      404
+    );
+  }
+
   return c.json(
     {
       success: true,
-      data: { user: user ?? { key, name: "<Unknown User>" }, version },
+      data: { user, version },
     } as const satisfies z.infer<typeof SuccessResponseSchema>,
     200
   );

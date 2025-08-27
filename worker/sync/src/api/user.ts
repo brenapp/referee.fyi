@@ -5,6 +5,7 @@ import { verifySignature, VerifySignatureHeadersSchema } from "../utils/verify";
 import { User, UserSchema } from "@referee-fyi/share";
 import { setUser } from "../utils/data";
 import { isSystemKey } from "../utils/systemKey";
+import { env } from "cloudflare:workers";
 
 export const QuerySchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -28,6 +29,7 @@ export const route = createRoute({
   path: "/api/user",
   tags: ["User"],
   summary: "Register information about a user device.",
+  hide: env.ENVIRONMENT !== "staging",
   description: "Register a device's public key with the sync engine.",
   middleware: [verifySignature],
   request: {

@@ -10,6 +10,7 @@ import {
 } from "../../../utils/verify";
 import { ImageAssetMeta } from "@referee-fyi/share";
 import { getAssetMeta, setAssetMeta } from "../../../utils/data";
+import { env } from "cloudflare:workers";
 
 export const ParamsSchema = z.object({
   sku: z.string(),
@@ -35,6 +36,7 @@ export const route = createRoute({
   path: "/api/{sku}/asset/upload_url",
   tags: ["Assets"],
   summary: "Gets an upload URL for an asset.",
+  hide: env.ENVIRONMENT !== "staging",
   middleware: [verifySignature, verifyUser, verifyInvitation],
   request: {
     headers: VerifySignatureHeadersSchema,

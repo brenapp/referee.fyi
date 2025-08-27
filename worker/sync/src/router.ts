@@ -168,10 +168,10 @@ const config: OpenAPIObjectConfig = {
   ],
 };
 
-app.doc("/openapi", config);
+app.doc("/api/openapi", config);
 
 export function getOpenApiDocument() {
   return app.getOpenAPIDocument(config);
 }
 
-app.get("/swagger", swaggerUI({ url: "/openapi" }));
+app.get("/api/swagger", swaggerUI({ url: "/openapi" }));

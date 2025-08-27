@@ -20,9 +20,9 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: "worker/sync"
-          environment: "prod"
+          environment: "production"
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: "worker/rules-indexer"
-          environment: "prod"
+          environment: "production"

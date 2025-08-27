@@ -9,7 +9,8 @@ import {
 } from "../../../../utils/verify";
 import { createRoute } from "@hono/zod-openapi";
 import { signAssetUrl } from "../../../../utils/crypto";
-import { AssetTypeSchema } from "@referee-fyi/share";
+import { AssetTypeSchema, UserSchema } from "@referee-fyi/share";
+import { getUser } from "../../../../utils/data";
 
 export const ParamsSchema = VerifyIntegrationTokenParamsSchema;
 export const QuerySchema = z.object({
@@ -22,7 +23,7 @@ export const SuccessResponseSchema = z
     success: z.literal(true),
     data: z.object({
       type: AssetTypeSchema,
-      owner: z.string().optional(),
+      owner: UserSchema,
       sku: z.string(),
       url: z.url(),
       expires_at: z.string(),
@@ -109,12 +110,27 @@ app.openapi(route, async (c) => {
     60 * 5
   );
 
+  const owner = await getUser(c.env, verifyUserAssetAuthorized.asset.owner);
+  if (!owner) {
+    return c.json(
+      {
+        success: false,
+        error: {
+          name: "ValidationError",
+          message: "Could not find asset owner.",
+        },
+        code: "VerifyUserNotRegistered",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      400
+    );
+  }
+
   return c.json(
     {
       success: true,
       data: {
         type: "image",
-        owner: verifyUserAssetAuthorized.asset.owner,
+        owner,
         sku: c.req.param("sku"),
         url: signed.toString(),
         expires_at: new Date(Date.now() + 1000 * 60 * 5).toISOString(),

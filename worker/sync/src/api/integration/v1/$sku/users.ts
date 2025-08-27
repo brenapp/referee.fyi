@@ -36,7 +36,7 @@ export const route = createRoute({
   path: "/api/integration/v1/{sku}/users",
   tags: ["Integration"],
   summary: "Gets information about the users in a shared instance.",
-  middlewares: [verifyIntegrationToken],
+  middleware: [verifyIntegrationToken],
   request: {
     params: ParamsSchema,
     query: QuerySchema,

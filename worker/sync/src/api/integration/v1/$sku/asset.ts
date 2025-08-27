@@ -37,7 +37,7 @@ export const route = createRoute({
   path: "/api/integration/v1/{sku}/asset",
   tags: ["Integration"],
   summary: "Gets information about an asset.",
-  middlewares: [verifyIntegrationToken, verifyUserAssetAuthorized],
+  middleware: [verifyIntegrationToken, verifyUserAssetAuthorized],
   request: {
     params: ParamsSchema,
     query: QuerySchema,

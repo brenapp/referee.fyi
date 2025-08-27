@@ -29,7 +29,7 @@ export const route = createRoute({
   tags: ["Integration"],
   summary: "Verify Integration Token",
   description: "Verifies the integration token and returns user information.",
-  middlewares: [verifyIntegrationToken],
+  middleware: [verifyIntegrationToken],
   request: {
     params: ParamsSchema,
     query: QuerySchema,
@@ -46,7 +46,6 @@ export const route = createRoute({
     ...ErrorResponses,
   },
 });
-
 app.openapi(route, async (c) => {
   const verifyIntegrationToken = c.get("verifyIntegrationToken");
   if (!verifyIntegrationToken) {

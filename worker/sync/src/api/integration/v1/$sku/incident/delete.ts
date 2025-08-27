@@ -32,7 +32,7 @@ export const deleteRoute = createRoute({
   summary: "Delete an incident in a shared instance",
   description:
     "Deletes an incident in a shared instance. Requires a system token.",
-  middlewares: [verifyIntegrationToken],
+  middleware: [verifyIntegrationToken],
   request: {
     params: ParamsSchema,
     query: QuerySchema,

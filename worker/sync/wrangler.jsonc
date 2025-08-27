@@ -64,7 +64,7 @@
         }
       ],
       "vars": {
-        "ENVIRONMENT": "staging",
+        "ENVIRONMENT": "production",
         "CLOUDFLARE_EMAIL": "brendan@bren.app",
         "CLOUDFLARE_IMAGES_ACCOUNT_ID": "f9b9e088206092e25d77f0def608c799"
       },

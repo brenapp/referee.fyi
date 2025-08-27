@@ -1,5 +1,5 @@
-import { app } from "../router.js";
-import { z, createRoute } from "@hono/zod-openapi";
+import { AppArgs } from "../router.js";
+import { z, createRoute, RouteHandler } from "@hono/zod-openapi";
 
 export const QuerySchema = z.object({
   query: z.string().min(4),
@@ -43,7 +43,7 @@ export const SuccessfulResponseSchema = z
     id: "SearchSuccessResponse",
   });
 
-const route = createRoute({
+export const route = createRoute({
   tags: ["rules"],
   summary: "Search for rules and Q&As.",
   method: "get",
@@ -63,7 +63,8 @@ const route = createRoute({
   },
 });
 
-app.openapi(route, async (c) => {
+export type Route = typeof route;
+export const handler: RouteHandler<typeof route, AppArgs> = async (c) => {
   const { query } = c.req.valid("query");
   const data = await c.env.ai.autorag("referee-fyi-rules-rag").search({
     query,
@@ -85,4 +86,6 @@ app.openapi(route, async (c) => {
     >,
     200
   );
-});
+};
+
+export default [route, handler] as const;

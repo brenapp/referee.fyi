@@ -1,6 +1,6 @@
-import { createRoute } from "@hono/zod-openapi";
+import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { z } from "zod/v4";
-import { app, ErrorResponseSchema } from "../router.js";
+import { AppArgs, ErrorResponseSchema } from "../router.js";
 import { client } from "../qnaplus.js";
 
 export const QuerySchema = z.object({
@@ -79,7 +79,8 @@ export const route = createRoute({
   },
 });
 
-app.openapi(route, async (c) => {
+export type Route = typeof route;
+export const handler: RouteHandler<typeof route, AppArgs> = async (c) => {
   const { version } = c.req.valid("query");
   const response = await client.GET("/internal/update", {
     params: { query: { version } },
@@ -102,4 +103,6 @@ app.openapi(route, async (c) => {
     >,
     200
   );
-});
+};
+
+export default [route, handler] as const;

@@ -174,4 +174,4 @@ export function getOpenApiDocument() {
   return app.getOpenAPIDocument(config);
 }
 
-app.get("/api/swagger", swaggerUI({ url: "/openapi" }));
+app.get("/api/swagger", swaggerUI({ url: "/api/openapi" }));

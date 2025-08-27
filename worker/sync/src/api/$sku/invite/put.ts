@@ -9,7 +9,7 @@ import {
   verifyUser,
 } from "../../../utils/verify";
 import { Invitation } from "@referee-fyi/share";
-import { getInvitation, setInstance, setInvitation } from "../../../utils/data";
+import { getInvitation, setInvitation } from "../../../utils/data";
 import { env } from "cloudflare:workers";
 
 export const ParamsSchema = z.object({
@@ -108,16 +108,6 @@ app.openapi(route, async (c) => {
     );
   }
 
-  const instance = verifyInvitation.instance;
-  if (!instance.invitations.includes(newInvitation.user)) {
-    instance.invitations.push(newInvitation.user);
-  }
-
-  if (newInvitation.admin && !instance.admins.includes(newInvitation.user)) {
-    instance.admins.push(newInvitation.user);
-  }
-
-  await setInstance(c.env, instance);
   await setInvitation(c.env, newInvitation);
 
   return c.json(

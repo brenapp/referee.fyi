@@ -1,12 +1,7 @@
 import { Cloudflare } from "cloudflare";
 import { importKey, KEY_PREFIX, verifyKeySignature } from "./crypto";
-import { getInstance, getInvitation, getUser } from "./data";
-import {
-  ImageAssetMeta,
-  Invitation,
-  ShareInstanceMeta,
-  User,
-} from "@referee-fyi/share";
+import { getAssetMeta, getInstance, getInvitation, getUser } from "./data";
+import { Invitation, ShareInstanceMeta, User } from "@referee-fyi/share";
 import { createMiddleware } from "hono/factory";
 import { AppArgs, ErrorResponseSchema } from "../router";
 import z from "zod/v4";
@@ -545,7 +540,7 @@ export const verifyUserAssetAuthorized = createMiddleware<AppArgs>(
       );
     }
 
-    const meta = await c.env.ASSETS.get<ImageAssetMeta>(id, "json");
+    const meta = await getAssetMeta(c.env, id);
     if (!meta || !meta.images_id) {
       return c.json(
         {

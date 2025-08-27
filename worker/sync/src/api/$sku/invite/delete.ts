@@ -12,10 +12,10 @@ import {
   WebsocketServerUserRemoveMessage,
 } from "@referee-fyi/share";
 import {
+  deleteAllInvitationsForInstance,
   deleteInvitation,
   getInvitation,
   getUser,
-  setInstance,
 } from "../../../utils/data";
 import { env } from "cloudflare:workers";
 
@@ -111,25 +111,13 @@ app.openapi(route, async (c) => {
   }
 
   const instance = verifyInvitation.instance;
-  const index = instance.invitations.findIndex(
-    (i) => i === userInvitation.user
-  );
-  instance.invitations.splice(index, 1);
 
-  if (userInvitation.admin) {
-    const index = instance.admins.findIndex((i) => i === userInvitation.user);
-    instance.admins.splice(index, 1);
-  }
-
+  // If this is the last admin, remove everyone's invitations
   if (userInvitation.admin && instance.admins.length < 1) {
-    for (const user of instance.invitations) {
-      await deleteInvitation(c.env, user, instance.sku);
-    }
-    instance.invitations = [];
+    await deleteAllInvitationsForInstance(c.env, instance.secret, sku);
   }
 
   await deleteInvitation(c.env, user, invitation.sku);
-  await setInstance(c.env, instance);
 
   const id = c.env.INCIDENTS.idFromString(instance.secret);
   const stub = c.env.INCIDENTS.get(id);

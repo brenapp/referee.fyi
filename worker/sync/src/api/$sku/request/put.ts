@@ -93,15 +93,7 @@ app.openapi(route, async (c) => {
     .join("")
     .toUpperCase();
 
-  await setRequestCode(
-    c.env,
-    code,
-    sku,
-    { key: verifyUser.user.key, version },
-    {
-      expirationTtl: 600,
-    }
-  );
+  await setRequestCode(c.env, code, sku, { key: verifyUser.user.key, version });
 
   return c.json(
     {

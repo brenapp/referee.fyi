@@ -1,51 +1,193 @@
 import {
   AssetMeta,
+  AssetType,
   Invitation,
   ShareInstanceMeta,
   User,
 } from "@referee-fyi/share";
 
+export type UserRow = {
+  key: string;
+  name: string;
+  is_system: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export async function setUser(env: Env, user: User): Promise<void> {
-  return env.USERS.put(user.key, JSON.stringify(user));
+  await env.DB.prepare(
+    `
+    INSERT INTO users (key, name, is_system, created_at, updated_at)
+      VALUES (?, ?, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ON CONFLICT(key) DO UPDATE SET
+      name = excluded.name,
+      updated_at = CURRENT_TIMESTAMP
+    `
+  )
+    .bind(user.key, user.name)
+    .run();
 }
 
 export async function getUser(env: Env, key: string): Promise<User | null> {
-  return env.USERS.get<User>(key, "json");
+  const row = await env.DB.prepare("SELECT * FROM users WHERE key = ?")
+    .bind(key)
+    .first<UserRow>();
+
+  if (!row) {
+    return null;
+  }
+
+  return row satisfies User;
 }
+
+export type InvitationRole = "none" | "admin";
+
+export type InvitationRow = {
+  id: string;
+  instance: string;
+  invitee: string;
+  inviter: string;
+  role: InvitationRole;
+  accepted: number;
+  sku: string;
+  created_at: string;
+  updated_at: string;
+};
 
 export async function setInvitation(env: Env, invitation: Invitation) {
-  return env.INVITATIONS.put(
-    `${invitation.user}#${invitation.sku}`,
-    JSON.stringify(invitation)
-  );
+  await env.DB.prepare(
+    `
+    INSERT INTO invitations (id, instance, invitee, inviter, role, accepted, sku, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ON CONFLICT(id) DO UPDATE SET
+      instance = excluded.instance,
+      invitee = excluded.invitee,
+      inviter = excluded.inviter,
+      role = excluded.role,
+      accepted = excluded.accepted,
+      sku = excluded.sku,
+      updated_at = CURRENT_TIMESTAMP
+    `
+  )
+    .bind(
+      invitation.id,
+      invitation.instance_secret,
+      invitation.user,
+      invitation.from,
+      invitation.admin ? "admin" : "none",
+      invitation.accepted ? 1 : 0,
+      invitation.sku
+    )
+    .run();
 }
 
-export async function getInvitation(env: Env, userKey: string, sku: string) {
-  return env.INVITATIONS.get<Invitation>(`${userKey}#${sku}`, "json");
+export async function getInvitation(
+  env: Env,
+  userKey: string,
+  sku: string
+): Promise<Invitation | null> {
+  const row = await env.DB.prepare(
+    `
+    SELECT * FROM invitations
+    WHERE invitee = ? AND sku = ?
+    LIMIT 1
+    `
+  )
+    .bind(userKey, sku)
+    .first<InvitationRow>();
+
+  if (!row) {
+    return null;
+  }
+
+  return {
+    id: row.id,
+    sku: row.sku,
+    instance_secret: row.instance,
+    user: row.invitee,
+    from: row.inviter,
+    admin: row.role === "admin",
+    accepted: !!row.accepted,
+  } satisfies Invitation;
 }
 
 export async function deleteInvitation(env: Env, userKey: string, sku: string) {
-  return env.INVITATIONS.delete(`${userKey}#${sku}`);
+  return env.DB.prepare(
+    `
+    DELETE FROM invitations
+    WHERE invitee = ? AND sku = ?
+    `
+  )
+    .bind(userKey, sku)
+    .run();
 }
 
-export async function setInstance(env: Env, instance: ShareInstanceMeta) {
-  return env.SHARES.put(
-    `${instance.sku}#${instance.secret}`,
-    JSON.stringify(instance)
-  );
+export async function deleteAllInvitationsForInstance(
+  env: Env,
+  secret: string,
+  sku: string
+) {
+  return env.DB.prepare(
+    `
+    DELETE FROM invitations
+    WHERE instance = ? AND sku = ?
+    `
+  )
+    .bind(secret, sku)
+    .run();
 }
 
-export async function getInstance(env: Env, secret: string, sku: string) {
-  return env.SHARES.get<ShareInstanceMeta>(`${sku}#${secret}`, "json");
+export async function getInstance(
+  env: Env,
+  secret: string,
+  sku: string
+): Promise<ShareInstanceMeta | null> {
+  const { results: invitations } = await env.DB.prepare(
+    `
+    SELECT * FROM invitations
+    WHERE instance = ? AND sku = ?
+    `
+  )
+    .bind(secret, sku)
+    .all<InvitationRow>();
+
+  if (invitations.length === 0) {
+    return null;
+  }
+
+  return {
+    admins: invitations
+      .filter((inv) => inv.role === "admin")
+      .map((inv) => inv.invitee),
+    invitations: invitations.map((inv) => inv.invitee),
+    secret,
+    sku,
+  } satisfies ShareInstanceMeta;
 }
 
 export async function getInstancesForEvent(
   env: Env,
   sku: string
 ): Promise<string[]> {
-  const result = await env.SHARES.list({ prefix: sku + "#" });
-  return result.keys.map((result) => result.name);
+  const { results: instances } = await env.DB.prepare(
+    `
+    SELECT DISTINCT instance FROM invitations
+    WHERE sku = ?
+    `
+  )
+    .bind(sku)
+    .all<{ instance: string }>();
+
+  return instances.map((i) => i.instance);
 }
+
+export type KeyExchangeRow = {
+  id: number;
+  code: string;
+  sku: string;
+  key: string;
+  version: string;
+};
 
 export type RequestCode = {
   key: string;
@@ -56,14 +198,19 @@ export async function setRequestCode(
   env: Env,
   code: string,
   sku: string,
-  request: RequestCode,
-  options?: KVNamespacePutOptions
+  request: RequestCode
 ) {
-  return env.REQUEST_CODES.put(
-    `${sku}#${code}`,
-    JSON.stringify(request),
-    options
-  );
+  await env.DB.prepare(
+    `
+    INSERT INTO key_exchange (code, sku, key, version)
+      VALUES (?, ?, ?, ?)
+    ON CONFLICT(code, sku) DO UPDATE SET
+      key = excluded.key,
+      version = excluded.version
+    `
+  )
+    .bind(code, sku, request.key, request.version)
+    .run();
 }
 
 export async function getRequestCodeUserKey(
@@ -71,13 +218,55 @@ export async function getRequestCodeUserKey(
   code: string,
   sku: string
 ) {
-  return env.REQUEST_CODES.get<RequestCode>(`${sku}#${code}`, "json");
+  const row = await env.DB.prepare(
+    `
+    SELECT * FROM key_exchange
+    WHERE code = ? AND sku = ?
+    LIMIT 1
+    `
+  )
+    .bind(code, sku)
+    .first<KeyExchangeRow>();
+
+  if (!row) {
+    return null;
+  }
+
+  return row satisfies RequestCode;
 }
 
+export type AssetRow = {
+  id: string;
+  type: AssetType;
+  owner: string;
+  sku: string;
+  images_id: string | null;
+};
+
 export async function getAssetMeta(env: Env, id: string) {
-  return env.ASSETS.get<AssetMeta>(id, "json");
+  const row = await env.DB.prepare("SELECT * FROM assets WHERE id = ?")
+    .bind(id)
+    .first<AssetRow>();
+
+  if (!row) {
+    return null;
+  }
+
+  return row satisfies AssetMeta;
 }
 
 export async function setAssetMeta(env: Env, meta: AssetMeta) {
-  return env.ASSETS.put(meta.id, JSON.stringify(meta));
+  await env.DB.prepare(
+    `
+    INSERT INTO assets (id, type, owner, sku, images_id)
+      VALUES (?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      type = excluded.type,
+      owner = excluded.owner,
+      sku = excluded.sku,
+      images_id = excluded.images_id
+    `
+  )
+    .bind(meta.id, meta.type, meta.owner, meta.sku, meta.images_id)
+    .run();
 }

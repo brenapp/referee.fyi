@@ -34,36 +34,11 @@
   ],
   "env": {
     "staging": {
-      "kv_namespaces": [
+      "d1_databases": [
         {
-          "binding": "SHARES",
-          "id": "667b3f219f284aa7b4a88d37044ae9d9",
-          "preview_id": "667b3f219f284aa7b4a88d37044ae9d9"
-        },
-        {
-          "binding": "INVITATIONS",
-          "id": "bf2c971507354390ba314b8e18b4e908",
-          "preview_id": "bf2c971507354390ba314b8e18b4e908"
-        },
-        {
-          "binding": "USERS",
-          "id": "5af999adc77a401880ed7339dd3c02c2",
-          "preview_id": "5af999adc77a401880ed7339dd3c02c2"
-        },
-        {
-          "binding": "REQUEST_CODES",
-          "id": "8aff2d84d528425689cd1d110053313f",
-          "preview_id": "8aff2d84d528425689cd1d110053313f"
-        },
-        {
-          "binding": "SYSTEM_KEYS",
-          "id": "57ca4e6108bb4f3a8ac1a069d68aaae8",
-          "preview_id": "57ca4e6108bb4f3a8ac1a069d68aaae8"
-        },
-        {
-          "binding": "ASSETS",
-          "id": "b7df12c587e3445d823e33fc1a4a213e",
-          "preview_id": "b7df12c587e3445d823e33fc1a4a213e"
+          "binding": "DB",
+          "database_name": "referee-fyi-sync-staging",
+          "database_id": "43fa3665-c837-4b71-b986-b8a5f8f9dbf2"
         }
       ],
       "vars": {
@@ -81,36 +56,11 @@
       }
     },
     "production": {
-      "kv_namespaces": [
+      "d1_databases": [
         {
-          "binding": "SHARES",
-          "id": "667b3f219f284aa7b4a88d37044ae9d9",
-          "preview_id": "667b3f219f284aa7b4a88d37044ae9d9"
-        },
-        {
-          "binding": "INVITATIONS",
-          "id": "bf2c971507354390ba314b8e18b4e908",
-          "preview_id": "bf2c971507354390ba314b8e18b4e908"
-        },
-        {
-          "binding": "USERS",
-          "id": "5af999adc77a401880ed7339dd3c02c2",
-          "preview_id": "5af999adc77a401880ed7339dd3c02c2"
-        },
-        {
-          "binding": "REQUEST_CODES",
-          "id": "8aff2d84d528425689cd1d110053313f",
-          "preview_id": "8aff2d84d528425689cd1d110053313f"
-        },
-        {
-          "binding": "SYSTEM_KEYS",
-          "id": "57ca4e6108bb4f3a8ac1a069d68aaae8",
-          "preview_id": "57ca4e6108bb4f3a8ac1a069d68aaae8"
-        },
-        {
-          "binding": "ASSETS",
-          "id": "b7df12c587e3445d823e33fc1a4a213e",
-          "preview_id": "b7df12c587e3445d823e33fc1a4a213e"
+          "binding": "DB",
+          "database_name": "referee-fyi-sync-production",
+          "database_id": "0efde566-ac6e-4814-bc5f-dd578943bf33"
         }
       ],
       "vars": {

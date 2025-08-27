@@ -13,7 +13,7 @@ import {
   type InstanceScratchpads,
   WebSocketMessageSchema,
 } from "@referee-fyi/share";
-import { getUser } from "../utils/data";
+import { getInstance, getUser } from "../utils/data";
 import { DurableObject } from "cloudflare:workers";
 
 export type ClientSession = {
@@ -190,10 +190,11 @@ export class ShareInstance extends DurableObject {
     const sku = await this.getSKU();
     const secret = await this.getInstanceSecret();
 
-    const instance = await this.env.SHARES.get<ShareInstanceMeta>(
-      `${sku}#${secret}`,
-      "json"
-    );
+    if (!sku || !secret) {
+      return null;
+    }
+
+    const instance = await getInstance(this.env, secret, sku);
     return instance;
   }
 

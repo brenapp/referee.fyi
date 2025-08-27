@@ -7,12 +7,8 @@ import {
   VerifySignatureHeadersSchema,
   verifyUser,
 } from "../../utils/verify";
-import { setInstance, setInvitation } from "../../utils/data";
-import {
-  Invitation,
-  ShareInstanceMeta,
-  UserInvitationSchema,
-} from "@referee-fyi/share";
+import { setInvitation } from "../../utils/data";
+import { Invitation, UserInvitationSchema } from "@referee-fyi/share";
 import { ShareInstanceInitData } from "../../objects/instance";
 import { env } from "cloudflare:workers";
 
@@ -77,13 +73,6 @@ app.openapi(route, async (c) => {
   const instanceId = c.env.INCIDENTS.newUniqueId();
   const secret = instanceId.toString();
 
-  const instance: ShareInstanceMeta = {
-    secret,
-    admins: [verifyUser.user.key],
-    invitations: [],
-    sku,
-  };
-
   const invitation: Invitation = {
     id: crypto.randomUUID(),
     admin: true,
@@ -94,9 +83,7 @@ app.openapi(route, async (c) => {
     from: verifyUser.user.key,
   };
 
-  instance.invitations.push(invitation.user);
   await setInvitation(c.env, invitation);
-  await setInstance(c.env, instance);
 
   const stub = c.env.INCIDENTS.get(instanceId);
 

@@ -111,7 +111,7 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
     );
   }
 
-  await stub.addIncident(incident);
+  await stub.editIncident(incident);
 
   const user = await getUser(c.env, verifyInvitation.invitation.user);
   if (!user) {

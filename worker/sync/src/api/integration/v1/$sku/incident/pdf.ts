@@ -1,9 +1,9 @@
 import {
-  app,
+  AppArgs,
   ErrorResponses,
   ErrorResponseSchema,
 } from "../../../../../router";
-import { createRoute } from "@hono/zod-openapi";
+import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { z } from "zod/v4";
 import {
   verifyIntegrationToken,
@@ -40,7 +40,8 @@ export const route = createRoute({
   },
 });
 
-app.openapi(route, async (c) => {
+export type Route = typeof route;
+export const handler: RouteHandler<typeof route, AppArgs> = async (c) => {
   const { sku } = c.req.valid("param");
   const verifyIntegrationToken = c.get("verifyIntegrationToken");
   if (!verifyIntegrationToken) {
@@ -91,4 +92,4 @@ app.openapi(route, async (c) => {
         .replace(/[:.]/g, "-")}.pdf"`,
     },
   });
-});
+};

@@ -1,5 +1,9 @@
 import { z } from "zod/v4";
-import { app, ErrorResponses, ErrorResponseSchema } from "../../../../router";
+import {
+  AppArgs,
+  ErrorResponses,
+  ErrorResponseSchema,
+} from "../../../../router";
 import {
   verifyIntegrationToken,
   VerifyIntegrationTokenParamsSchema,
@@ -7,7 +11,7 @@ import {
   verifyUserAssetAuthorized,
   VerifyUserAssetAuthorizedQuerySchema,
 } from "../../../../utils/verify";
-import { createRoute } from "@hono/zod-openapi";
+import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { signAssetUrl } from "../../../../utils/crypto";
 import { AssetTypeSchema, UserSchema } from "@referee-fyi/share";
 import { getUser } from "../../../../utils/data";
@@ -56,7 +60,8 @@ export const route = createRoute({
   },
 });
 
-app.openapi(route, async (c) => {
+export type Route = typeof route;
+export const handler: RouteHandler<typeof route, AppArgs> = async (c) => {
   const verifyIntegrationToken = c.get("verifyIntegrationToken");
   if (!verifyIntegrationToken) {
     return c.json(
@@ -138,4 +143,4 @@ app.openapi(route, async (c) => {
     } as const satisfies z.infer<typeof SuccessResponseSchema>,
     200
   );
-});
+};

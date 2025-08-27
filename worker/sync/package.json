@@ -12,6 +12,11 @@
     "lint": "eslint --max-warnings=0 src && prettier --check '*.{json,js}' 'src/**/*.{js,ts}'",
     "cf-typegen": "wrangler types --env staging"
   },
+  "exports": {
+    "route": {
+      "types": "./src/routes.ts"
+    }
+  },
   "author": "Brendan McGuire",
   "license": "ISC",
   "eslintConfig": {

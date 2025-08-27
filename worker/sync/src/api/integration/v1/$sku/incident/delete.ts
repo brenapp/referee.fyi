@@ -1,6 +1,6 @@
 import z from "zod/v4";
 import {
-  app,
+  AppArgs,
   ErrorResponses,
   ErrorResponseSchema,
 } from "../../../../../router";
@@ -9,7 +9,7 @@ import {
   VerifyIntegrationTokenParamsSchema,
   VerifyIntegrationTokenQuerySchema,
 } from "../../../../../utils/verify";
-import { createRoute } from "@hono/zod-openapi";
+import { createRoute, RouteHandler } from "@hono/zod-openapi";
 
 export const ParamsSchema = VerifyIntegrationTokenParamsSchema;
 export const QuerySchema = VerifyIntegrationTokenQuerySchema.extend({
@@ -25,7 +25,7 @@ export const SuccessResponseSchema = z
     id: "DeleteIntegrationV1IncidentResponse",
   });
 
-export const deleteRoute = createRoute({
+export const route = createRoute({
   method: "delete",
   path: "/api/integration/v1/{sku}/incident",
   tags: ["Integration"],
@@ -50,7 +50,8 @@ export const deleteRoute = createRoute({
   },
 });
 
-app.openapi(deleteRoute, async (c) => {
+export type Route = typeof route;
+export const handler: RouteHandler<typeof route, AppArgs> = async (c) => {
   const verifyIntegrationToken = c.get("verifyIntegrationToken");
   if (!verifyIntegrationToken) {
     return c.json(
@@ -93,4 +94,4 @@ app.openapi(deleteRoute, async (c) => {
     } as const satisfies z.infer<typeof SuccessResponseSchema>,
     200
   );
-});
+};

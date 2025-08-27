@@ -1,6 +1,6 @@
-import { createRoute } from "@hono/zod-openapi";
+import { ErrorResponseSchema, ErrorResponses, AppArgs } from "../../router";
+import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { z } from "zod/v4";
-import { app, ErrorResponses, ErrorResponseSchema } from "../../router";
 import {
   verifyInvitation,
   verifySignature,
@@ -46,8 +46,10 @@ export const route = createRoute({
   },
 });
 
-//@ts-expect-error Response is a WebSocket upgrade
-app.openapi(route, async (c) => {
+export type Route = typeof route;
+
+// @ts-expect-error OpenAPI WebSocket Handled
+export const handler: RouteHandler<Route, AppArgs> = async (c) => {
   const verifyInvitation = c.get("verifyInvitation");
   if (!verifyInvitation) {
     return c.json(
@@ -83,4 +85,4 @@ app.openapi(route, async (c) => {
   );
 
   return stub.fetch(c.req.raw);
-});
+};

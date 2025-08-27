@@ -1,7 +1,6 @@
-import { app, ErrorResponseSchema } from "../../router";
-import { createRoute } from "@hono/zod-openapi";
+import { ErrorResponseSchema, ErrorResponses, AppArgs } from "../../router";
+import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { z } from "zod/v4";
-import { ErrorResponses } from "../../router";
 import {
   verifySignature,
   VerifySignatureHeadersSchema,
@@ -53,7 +52,8 @@ export const route = createRoute({
   },
 });
 
-app.openapi(route, async (c) => {
+export type Route = typeof route;
+export const handler: RouteHandler<Route, AppArgs> = async (c) => {
   const sku = c.req.valid("param").sku;
   const id = c.req.valid("query").invitation;
   const verifyUser = c.get("verifyUser");
@@ -147,4 +147,4 @@ app.openapi(route, async (c) => {
     } as const satisfies z.infer<typeof SuccessResponseSchema>,
     200
   );
-});
+};

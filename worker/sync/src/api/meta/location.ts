@@ -1,8 +1,8 @@
-import { createRoute } from "@hono/zod-openapi";
-import { app } from "../../router";
+import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { whereAlpha2 } from "iso-3166-1";
 import { z } from "zod/v4";
 import { env } from "cloudflare:workers";
+import { AppArgs } from "../../router";
 
 const COMMON_COUNTRIES = {
   US: "United States",
@@ -77,7 +77,8 @@ export const route = createRoute({
   },
 });
 
-app.openapi(route, async (c) => {
+export type Route = typeof route;
+export const handler: RouteHandler<typeof route, AppArgs> = async (c) => {
   const request = c.req.raw;
   const location = request.cf
     ? {
@@ -97,4 +98,4 @@ app.openapi(route, async (c) => {
     >,
     200
   );
-});
+};

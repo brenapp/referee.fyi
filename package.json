@@ -95,7 +95,7 @@
     "vite-plugin-pwa": "^0.17.2",
     "vite-plugin-version-mark": "^0.0.10",
     "vite-tsconfig-paths": "^4.2.1",
-    "wrangler": "^4.19.1",
+    "wrangler": "^4.33.0",
     "zod": "^3.25"
   },
   "optionalDependencies": {

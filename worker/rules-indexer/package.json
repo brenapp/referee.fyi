@@ -1,5 +1,5 @@
 {
-	"name": "@referee-fyi/rules-indexer",
+	"name": "@referee-fyi/worker-rules-indexer",
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",

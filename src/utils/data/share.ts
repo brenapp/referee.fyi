@@ -15,7 +15,7 @@ import { useMemo } from "react";
 import { Routes } from "~types/worker/sync";
 
 export const URL_BASE =
-  import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER ?? "https://referee.fyi/api";
+  import.meta.env.VITE_REFEREE_FYI_SHARE_SERVER ?? "https://referee.fyi/";
 
 export async function getShareSessionID(): Promise<string> {
   let id = sessionStorage.getItem("share_session_id");

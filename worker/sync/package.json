@@ -13,9 +13,7 @@
     "cf-typegen": "wrangler types --env staging"
   },
   "exports": {
-    "routes": {
-      "types": "./src/routes.ts"
-    }
+    "types": "./src/routes.ts"
   },
   "author": "Brendan McGuire",
   "license": "ISC",

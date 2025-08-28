@@ -29,7 +29,7 @@ export const route = createRoute({
   path: "/api/{sku}/incident",
   tags: ["Incident"],
   summary: "Creates a new incident.",
-  hide: process.env.ENVIRONMENT !== "staging",
+  hide: process.env.WRANGLER_ENVIRONMENT === "production",
   middleware: [verifySignature, verifyUser, verifyInvitation],
   request: {
     headers: VerifySignatureHeadersSchema,

@@ -34,7 +34,7 @@ export const route = createRoute({
   path: "/api/{sku}/asset/upload_url",
   tags: ["Assets"],
   summary: "Gets an upload URL for an asset.",
-  hide: process.env.ENVIRONMENT !== "staging",
+  hide: process.env.WRANGLER_ENVIRONMENT === "production",
   middleware: [verifySignature, verifyUser, verifyInvitation],
   request: {
     headers: VerifySignatureHeadersSchema,

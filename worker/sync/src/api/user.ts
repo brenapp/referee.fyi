@@ -27,7 +27,7 @@ export const route = createRoute({
   path: "/api/user",
   tags: ["User"],
   summary: "Register information about a user device.",
-  hide: process.env.ENVIRONMENT !== "staging",
+  hide: process.env.WRANGLER_ENVIRONMENT === "production",
   description: "Register a device's public key with the sync engine.",
   middleware: [verifySignature],
   request: {

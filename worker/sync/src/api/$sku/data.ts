@@ -31,7 +31,7 @@ export const route = createRoute({
   path: "/api/{sku}/data",
   tags: ["Incident"],
   summary: "Get instance share data.",
-  hide: process.env.ENVIRONMENT !== "staging",
+  hide: process.env.WRANGLER_ENVIRONMENT === "production",
   middleware: [verifySignature, verifyUser, verifyInvitation],
   request: {
     headers: VerifySignatureHeadersSchema,

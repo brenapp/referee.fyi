@@ -20,7 +20,7 @@ export const route = createRoute({
   path: "/api/{sku}/join",
   tags: ["Instance"],
   summary: "Join an instance websocket",
-  hide: process.env.ENVIRONMENT !== "staging",
+  hide: process.env.WRANGLER_ENVIRONMENT === "production",
   middleware: [verifySignature, verifyUser, verifyInvitation],
   request: {
     headers: VerifySignatureHeadersSchema,

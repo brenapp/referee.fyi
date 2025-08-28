@@ -27,7 +27,7 @@ export const route = createRoute({
   path: "/api/{sku}/request",
   tags: ["Key Exchange"],
   summary: "Publishes your public key.",
-  hide: process.env.ENVIRONMENT !== "staging",
+  hide: process.env.WRANGLER_ENVIRONMENT === "production",
   middleware: [verifySignature, verifyUser],
   request: {
     headers: VerifySignatureHeadersSchema,

@@ -30,7 +30,7 @@ export const route = createRoute({
   path: "/api/{sku}/accept",
   tags: ["Invitation Management"],
   summary: "Accept an invitation to join an shared instance.",
-  hide: process.env.ENVIRONMENT !== "staging",
+  hide: process.env.WRANGLER_ENVIRONMENT === "production",
   middleware: [verifySignature, verifyUser],
   request: {
     headers: VerifySignatureHeadersSchema,

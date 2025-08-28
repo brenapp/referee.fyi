@@ -271,7 +271,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "text/json": {
+                        "application/json": {
                             /** @enum {boolean} */
                             success: true;
                             data: {
@@ -466,6 +466,84 @@ export interface paths {
                     };
                     content: {
                         "text/csv": string;
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/integration/v1/{sku}/asset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Gets information about an asset. */
+        get: {
+            parameters: {
+                query: {
+                    id: string;
+                    token: string;
+                    instance?: string;
+                };
+                header?: never;
+                path: {
+                    sku: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Asset information */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetIntegrationV1AssetResponse"];
                     };
                 };
                 /** @description Bad request */
@@ -725,7 +803,7 @@ export interface paths {
             parameters: {
                 query: {
                     user: string;
-                    admin: boolean;
+                    admin?: boolean | null;
                 };
                 header?: {
                     "X-Referee-Signature"?: string;
@@ -2004,7 +2082,7 @@ export interface components {
         };
         /** @description Represents a user who has access to a shared instance. */
         InvitationListItem: {
-            admin: boolean;
+            admin?: boolean | null;
             user: components["schemas"]["User"];
         };
         GetIntegrationV1UsersResponse: {
@@ -2039,6 +2117,20 @@ export interface components {
             instant: string;
             history: components["schemas"]["History"][];
         };
+        /** @enum {string} */
+        AssetType: "image";
+        GetIntegrationV1AssetResponse: {
+            /** @enum {boolean} */
+            success: true;
+            data: {
+                type: components["schemas"]["AssetType"];
+                owner: components["schemas"]["User"];
+                sku: string;
+                /** Format: uri */
+                url: string;
+                expires_at: string;
+            };
+        };
         /** @description Response for the /api/meta/location endpoint */
         GetMetaLocationResponse: {
             /** @enum {boolean} */
@@ -2061,7 +2153,7 @@ export interface components {
             success: true;
             data: {
                 user: components["schemas"]["User"];
-                isSystemKey: boolean;
+                isSystemKey?: boolean | null;
             };
         };
         /** @description The user's invitation for an event. */
@@ -2070,8 +2162,8 @@ export interface components {
             success: true;
             data: {
                 id: string;
-                admin: boolean;
-                accepted: boolean;
+                admin?: boolean | null;
+                accepted?: boolean | null;
                 sku: string;
                 from: components["schemas"]["User"];
             };
@@ -2100,8 +2192,8 @@ export interface components {
             success: true;
             data: {
                 id: string;
-                admin: boolean;
-                accepted: boolean;
+                admin?: boolean | null;
+                accepted?: boolean | null;
                 sku: string;
                 from: components["schemas"]["User"];
             };
@@ -2112,8 +2204,8 @@ export interface components {
             success: true;
             data: {
                 id: string;
-                admin: boolean;
-                accepted: boolean;
+                admin?: boolean | null;
+                accepted?: boolean | null;
                 sku: string;
                 from: components["schemas"]["User"];
             };

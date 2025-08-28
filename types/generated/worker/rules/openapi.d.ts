@@ -5,44 +5,6 @@
  **/
 /* eslint-disable */
 export interface paths {
-    "/api/search": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Search for rules and Q&As. */
-        get: {
-            parameters: {
-                query: {
-                    query: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Search results */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SearchSuccessResponse"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/updateQuestions": {
         parameters: {
             query?: never;
@@ -90,36 +52,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search for rules and Q&As. */
+        get: {
+            parameters: {
+                query: {
+                    query: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Search results */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SearchSuccessResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** @description The search response */
-        SearchResponse: {
-            /** @enum {string} */
-            object: "vector_store.search_results.page";
-            search_query: string;
-            data: {
-                file_id: string;
-                filename: string;
-                score: number;
-                attributes: {
-                    [key: string]: string | number | boolean | unknown | unknown;
-                };
-                content: {
-                    /** @enum {string} */
-                    type: "text";
-                    text: string;
-                }[];
-            }[];
-            has_more: boolean;
-            next_page: string | null;
-        };
-        SearchSuccessResponse: {
-            /** @enum {boolean} */
-            success: true;
-            data: components["schemas"]["SearchResponse"];
-        };
         /** @description A question in the Q&A system. */
         Question: {
             id: string;
@@ -132,7 +106,7 @@ export interface components {
             askedTimestampMs: number;
             answeredTimestamp: string | null;
             answeredTimestampMs: number | null;
-            answered: boolean;
+            answered?: boolean | null;
             tags: string[];
             question: string;
             questionRaw: string;
@@ -141,7 +115,7 @@ export interface components {
         };
         /** @description Response schema for questions update */
         QuestionsResponse: {
-            outdated: boolean;
+            outdated: boolean | null;
             version: string;
             questions: components["schemas"]["Question"][];
         };
@@ -157,6 +131,32 @@ export interface components {
             error: string;
             /** @enum {string} */
             code?: "UpdateQuestionsRefreshFailed";
+        };
+        /** @description The search response */
+        SearchResponse: {
+            /** @enum {string} */
+            object: "vector_store.search_results.page";
+            search_query: string;
+            data: {
+                file_id: string;
+                filename: string;
+                score: number;
+                attributes: {
+                    [key: string]: string | number | (boolean | null) | unknown | unknown;
+                };
+                content: {
+                    /** @enum {string} */
+                    type: "text";
+                    text: string;
+                }[];
+            }[];
+            has_more?: boolean | null;
+            next_page: string | null;
+        };
+        SearchSuccessResponse: {
+            /** @enum {boolean} */
+            success: true;
+            data: components["schemas"]["SearchResponse"];
         };
     };
     responses: never;

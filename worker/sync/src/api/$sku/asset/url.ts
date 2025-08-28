@@ -32,7 +32,7 @@ export const route = createRoute({
   path: "/api/{sku}/asset/url",
   tags: ["Assets"],
   summary: "Gets the signed URL for an asset.",
-  hide: process.env.ENVIRONMENT !== "staging",
+  hide: process.env.WRANGLER_ENVIRONMENT === "production",
   middleware: [
     verifySignature,
     verifyUser,

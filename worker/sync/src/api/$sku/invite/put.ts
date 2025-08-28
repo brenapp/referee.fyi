@@ -32,7 +32,7 @@ export const route = createRoute({
   path: "/api/{sku}/invite",
   tags: ["Invitation Management"],
   summary: "Invites another user to join an instance",
-  hide: process.env.ENVIRONMENT !== "staging",
+  hide: process.env.WRANGLER_ENVIRONMENT === "production",
   middleware: [
     verifySignature,
     verifyUser,

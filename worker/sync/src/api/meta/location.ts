@@ -62,7 +62,7 @@ export const route = createRoute({
   path: "/api/meta/location",
   tags: ["Meta"],
   summary: "Gets location information for a user.",
-  hide: process.env.ENVIRONMENT !== "staging",
+  hide: process.env.WRANGLER_ENVIRONMENT === "production",
   description: "Returns location information based on the request's origin.",
   responses: {
     200: {

@@ -29,7 +29,7 @@ export const route = createRoute({
   path: "/api/{sku}/create",
   tags: ["Invitation Management"],
   summary: "Create a new shared instance, and adds user to it.",
-  hide: process.env.ENVIRONMENT !== "staging",
+  hide: process.env.WRANGLER_ENVIRONMENT === "production",
   middleware: [verifySignature, verifyUser],
   request: {
     headers: VerifySignatureHeadersSchema,

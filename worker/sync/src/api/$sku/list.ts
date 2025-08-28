@@ -30,7 +30,7 @@ export const route = createRoute({
   path: "/api/{sku}/list",
   tags: ["Invitation Management"],
   summary: "Gets all active instances for an event.",
-  hide: process.env.ENVIRONMENT !== "staging",
+  hide: process.env.WRANGLER_ENVIRONMENT === "production",
   middleware: [verifySignature, verifyUser],
   request: {
     headers: VerifySignatureHeadersSchema,

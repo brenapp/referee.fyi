@@ -28,7 +28,7 @@ export const route = createRoute({
   path: "/api/{sku}/invitation",
   tags: ["Invitation Management"],
   summary: "Gets the user's current invitation for an event.",
-  hide: process.env.ENVIRONMENT !== "staging",
+  hide: process.env.WRANGLER_ENVIRONMENT === "production",
   middleware: [verifySignature, verifyUser],
   request: {
     headers: VerifySignatureHeadersSchema,

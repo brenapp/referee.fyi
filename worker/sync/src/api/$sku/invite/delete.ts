@@ -38,7 +38,7 @@ export const route = createRoute({
   path: "/api/{sku}/invite",
   tags: ["Invitation Management"],
   summary: "Remove an invitation from a user.",
-  hide: process.env.ENVIRONMENT !== "staging",
+  hide: process.env.WRANGLER_ENVIRONMENT === "production",
   middleware: [verifySignature, verifyUser, verifyInvitation],
   request: {
     headers: VerifySignatureHeadersSchema,

@@ -7,8 +7,6 @@ import {
   verifyUser,
 } from "../../../utils/verify";
 import { getInvitation, setRequestCode } from "../../../utils/data";
-import { env } from "cloudflare:workers";
-
 export const ParamsSchema = z.object({
   sku: z.string(),
 });
@@ -29,7 +27,7 @@ export const route = createRoute({
   path: "/api/{sku}/request",
   tags: ["Key Exchange"],
   summary: "Publishes your public key.",
-  hide: env.ENVIRONMENT !== "staging",
+  hide: process.env.ENVIRONMENT !== "staging",
   middleware: [verifySignature, verifyUser],
   request: {
     headers: VerifySignatureHeadersSchema,

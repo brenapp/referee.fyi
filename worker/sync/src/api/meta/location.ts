@@ -1,7 +1,6 @@
 import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { whereAlpha2 } from "iso-3166-1";
 import { z } from "zod/v4";
-import { env } from "cloudflare:workers";
 import { AppArgs } from "../../router";
 
 const COMMON_COUNTRIES = {
@@ -63,7 +62,7 @@ export const route = createRoute({
   path: "/api/meta/location",
   tags: ["Meta"],
   summary: "Gets location information for a user.",
-  hide: env.ENVIRONMENT !== "staging",
+  hide: process.env.ENVIRONMENT !== "staging",
   description: "Returns location information based on the request's origin.",
   responses: {
     200: {

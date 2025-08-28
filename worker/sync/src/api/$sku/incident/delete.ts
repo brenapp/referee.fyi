@@ -9,8 +9,6 @@ import {
 } from "../../../utils/verify";
 import { WebSocketSender } from "@referee-fyi/share";
 import { getUser } from "../../../utils/data";
-import { env } from "cloudflare:workers";
-
 export const QuerySchema = z.object({
   id: z.string(),
 });
@@ -33,7 +31,7 @@ export const route = createRoute({
   path: "/api/{sku}/incident",
   tags: ["Incident"],
   summary: "Delete an incident.",
-  hide: env.ENVIRONMENT !== "staging",
+  hide: process.env.ENVIRONMENT !== "staging",
   middleware: [verifySignature, verifyUser, verifyInvitation],
   request: {
     headers: VerifySignatureHeadersSchema,

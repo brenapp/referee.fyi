@@ -4,8 +4,9 @@
   "description": "Sync Service for Referee FYI",
   "scripts": {
     "dev": "wrangler dev --ip 0.0.0.0 --env staging",
+    "dev:env:production": "wrangler dev --ip 0.0.0.0 --env production",
     "dev:remote": "wrangler dev --remote --env staging",
-    "dev:secure": "sudo wrangler dev --ip 0.0.0.0 --env staging --local-protocol https --https-key-path ../../.certs/privkey.pem --https-cert-path ../../.certs/cert.pem",
+    "dev:secure": "wrangler dev --ip 0.0.0.0 --env staging --local-protocol https --https-key-path ../../.certs/privkey.pem --https-cert-path ../../.certs/cert.pem",
     "build": "tsc --noEmit && wrangler deploy --env staging --dry-run",
     "deploy": "wrangler deploy",
     "format": "prettier --write  '*.{json,js}' 'src/**/*.{js,ts}'",
@@ -44,6 +45,7 @@
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.6",
+    "@types/node": "^24.3.0",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
     "eslint": "^8.20.0",

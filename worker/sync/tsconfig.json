@@ -26,6 +26,7 @@
     "strict": true,
     "paths": {},
     "types": [
+      "node",
       "./worker-configuration.d.ts"
     ],
     "skipLibCheck": true

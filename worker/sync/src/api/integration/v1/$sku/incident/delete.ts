@@ -30,6 +30,7 @@ export const route = createRoute({
   path: "/api/integration/v1/{sku}/incident",
   tags: ["Integration"],
   summary: "Delete an incident in a shared instance",
+  hide: process.env.ENVIRONMENT !== "staging",
   description:
     "Deletes an incident in a shared instance. Requires a system token.",
   middleware: [verifyIntegrationToken],

@@ -9,8 +9,6 @@ import {
   verifyUserAssetAuthorized,
   VerifyUserAssetAuthorizedQuerySchema,
 } from "../../../utils/verify";
-import { env } from "cloudflare:workers";
-
 export const ParamsSchema = z.object({
   sku: z.string(),
 });
@@ -33,7 +31,7 @@ export const route = createRoute({
   path: "/api/{sku}/asset/preview_url",
   tags: ["Assets"],
   summary: "Gets the preview URL for an asset.",
-  hide: env.ENVIRONMENT !== "staging",
+  hide: process.env.ENVIRONMENT !== "staging",
   middleware: [
     verifySignature,
     verifyUser,

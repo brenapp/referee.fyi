@@ -8,8 +8,6 @@ import {
 } from "../../utils/verify";
 import { getInvitation, getUser, setInvitation } from "../../utils/data";
 import { User, UserInvitationSchema } from "@referee-fyi/share";
-import { env } from "cloudflare:workers";
-
 export const ParamsSchema = z.object({
   sku: z.string(),
 });
@@ -32,7 +30,7 @@ export const route = createRoute({
   path: "/api/{sku}/accept",
   tags: ["Invitation Management"],
   summary: "Accept an invitation to join an shared instance.",
-  hide: env.ENVIRONMENT !== "staging",
+  hide: process.env.ENVIRONMENT !== "staging",
   middleware: [verifySignature, verifyUser],
   request: {
     headers: VerifySignatureHeadersSchema,

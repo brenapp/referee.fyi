@@ -15,6 +15,9 @@
   //     "zone_name": "referee.fyi"
   //   }
   // ],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "migrations": [
     {
       "new_classes": [

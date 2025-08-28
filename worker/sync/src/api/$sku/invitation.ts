@@ -8,8 +8,6 @@ import {
 } from "../../utils/verify";
 import { getInvitation, getUser } from "../../utils/data";
 import { Invitation, User, UserInvitationSchema } from "@referee-fyi/share";
-import { env } from "cloudflare:workers";
-
 export const ParamsSchema = z.object({
   sku: z.string(),
 });
@@ -30,7 +28,7 @@ export const route = createRoute({
   path: "/api/{sku}/invitation",
   tags: ["Invitation Management"],
   summary: "Gets the user's current invitation for an event.",
-  hide: env.ENVIRONMENT !== "staging",
+  hide: process.env.ENVIRONMENT !== "staging",
   middleware: [verifySignature, verifyUser],
   request: {
     headers: VerifySignatureHeadersSchema,

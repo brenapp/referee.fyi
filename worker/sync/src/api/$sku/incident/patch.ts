@@ -15,8 +15,6 @@ import {
 } from "@referee-fyi/share";
 import { getUser } from "../../../utils/data";
 import { mergeLWW } from "@referee-fyi/consistency";
-import { env } from "cloudflare:workers";
-
 export const ParamsSchema = z.object({
   sku: z.string(),
 });
@@ -37,7 +35,7 @@ export const route = createRoute({
   path: "/api/{sku}/incident",
   tags: ["Incident"],
   summary: "Edit an incident.",
-  hide: env.ENVIRONMENT !== "staging",
+  hide: process.env.ENVIRONMENT !== "staging",
   middleware: [verifySignature, verifyUser, verifyInvitation],
   request: {
     headers: VerifySignatureHeadersSchema,

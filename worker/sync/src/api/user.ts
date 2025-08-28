@@ -14,7 +14,7 @@ export const SuccessResponseSchema = z
     success: z.literal(true),
     data: z.object({
       user: UserSchema,
-      isSystemKey: z.coerce.boolean(),
+      isSystemKey: z.boolean(),
     }),
   })
   .meta({

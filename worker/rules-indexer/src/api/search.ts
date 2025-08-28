@@ -16,7 +16,7 @@ export const AutoRagSearchResponseSchema = z
         score: z.number(),
         attributes: z.record(
           z.string(),
-          z.union([z.string(), z.number(), z.coerce.boolean(), z.null()])
+          z.union([z.string(), z.number(), z.boolean(), z.null()])
         ),
         content: z.array(
           z.object({
@@ -26,7 +26,7 @@ export const AutoRagSearchResponseSchema = z
         ),
       })
     ),
-    has_more: z.coerce.boolean(),
+    has_more: z.boolean(),
     next_page: z.string().nullable(),
   })
   .meta({

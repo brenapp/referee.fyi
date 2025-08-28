@@ -20,8 +20,8 @@ export const InvitationSchema = z
     instance_secret: z.string(),
     user: z.string(),
     from: z.string(),
-    admin: z.coerce.boolean(),
-    accepted: z.coerce.boolean(),
+    admin: z.boolean(),
+    accepted: z.boolean(),
   })
   .meta({
     id: "Invitation",

@@ -106,7 +106,7 @@ export interface components {
             askedTimestampMs: number;
             answeredTimestamp: string | null;
             answeredTimestampMs: number | null;
-            answered?: boolean | null;
+            answered: boolean;
             tags: string[];
             question: string;
             questionRaw: string;
@@ -115,7 +115,7 @@ export interface components {
         };
         /** @description Response schema for questions update */
         QuestionsResponse: {
-            outdated: boolean | null;
+            outdated: boolean;
             version: string;
             questions: components["schemas"]["Question"][];
         };
@@ -142,7 +142,7 @@ export interface components {
                 filename: string;
                 score: number;
                 attributes: {
-                    [key: string]: string | number | (boolean | null) | unknown | unknown;
+                    [key: string]: string | number | boolean | unknown | unknown;
                 };
                 content: {
                     /** @enum {string} */
@@ -150,7 +150,7 @@ export interface components {
                     text: string;
                 }[];
             }[];
-            has_more?: boolean | null;
+            has_more: boolean;
             next_page: string | null;
         };
         SearchSuccessResponse: {

@@ -2082,7 +2082,7 @@ export interface components {
         };
         /** @description Represents a user who has access to a shared instance. */
         InvitationListItem: {
-            admin?: boolean | null;
+            admin: boolean;
             user: components["schemas"]["User"];
         };
         GetIntegrationV1UsersResponse: {
@@ -2153,7 +2153,7 @@ export interface components {
             success: true;
             data: {
                 user: components["schemas"]["User"];
-                isSystemKey?: boolean | null;
+                isSystemKey: boolean;
             };
         };
         /** @description The user's invitation for an event. */
@@ -2162,8 +2162,8 @@ export interface components {
             success: true;
             data: {
                 id: string;
-                admin?: boolean | null;
-                accepted?: boolean | null;
+                admin: boolean;
+                accepted: boolean;
                 sku: string;
                 from: components["schemas"]["User"];
             };
@@ -2192,8 +2192,8 @@ export interface components {
             success: true;
             data: {
                 id: string;
-                admin?: boolean | null;
-                accepted?: boolean | null;
+                admin: boolean;
+                accepted: boolean;
                 sku: string;
                 from: components["schemas"]["User"];
             };
@@ -2204,8 +2204,8 @@ export interface components {
             success: true;
             data: {
                 id: string;
-                admin?: boolean | null;
-                accepted?: boolean | null;
+                admin: boolean;
+                accepted: boolean;
                 sku: string;
                 from: components["schemas"]["User"];
             };

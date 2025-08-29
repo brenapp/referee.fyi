@@ -1,9 +1,14 @@
+import { OpenAPIHono } from "@hono/zod-openapi";
 import { cors } from "hono/cors";
-import { app as baseRouter } from "./router";
-import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIObjectConfig } from "@asteasolutions/zod-to-openapi/dist/v3.0/openapi-generator";
+import { swaggerUI } from "@hono/swagger-ui";
+import { AppArgs } from "./schemas";
 
-export const app = baseRouter
+const app = new OpenAPIHono<AppArgs>();
+
+app.use("/api/*", cors());
+
+export const routes = app
   .openapi(...(await import("./api/integration/v1/$sku/verify")).default)
   .openapi(
     ...(await import("./api/integration/v1/$sku/incident/delete")).default
@@ -32,8 +37,6 @@ export const app = baseRouter
   .openapi(...(await import("./api/$sku/data")).default)
   .openapi(...(await import("./api/$sku/join")).default);
 
-app.use("/api/*", cors());
-
 const config: OpenAPIObjectConfig = {
   openapi: "3.0.0",
   info: {
@@ -60,12 +63,12 @@ const config: OpenAPIObjectConfig = {
   ],
 };
 
-app.doc("/api/openapi", config);
+routes.doc("/api/openapi", config);
 
 export function getOpenApiDocument() {
-  return app.getOpenAPIDocument(config);
+  return routes.getOpenAPIDocument(config);
 }
 
-app.get("/api/swagger", swaggerUI({ url: "/api/openapi" }));
+routes.get("/api/swagger", swaggerUI({ url: "/api/openapi" }));
 
-export type AppType = typeof app;
+export type AppType = typeof routes;

@@ -15,6 +15,24 @@ import { GameSchema } from "@referee-fyi/rules";
 
 import { type Plugin } from "vite";
 
+//#region Require Envirponment Variables
+
+const requiredEnvVars = (vars: string[]): Plugin => {
+  return {
+    name: "require-env-vars",
+    config() {
+      const missingVars = vars.filter((v) => !process.env[v]);
+      if (missingVars.length > 0) {
+        throw new Error(
+          `Missing required environment variables: ${missingVars.join(", ")}`
+        );
+      }
+    },
+  };
+};
+
+// #endregion
+
 //#region Generate version.json
 
 const execCommand = (command: string) => {
@@ -130,6 +148,15 @@ const generateOpenApiTypes: (options: OpenApiTypesGeneration) => Plugin = ({
 // https://vitejs.dev/config/
 export default defineConfig(() => ({
   plugins: [
+    requiredEnvVars([
+      "VITE_REFEREE_FYI_SHARE_SERVER",
+      "VITE_REFEREE_FYI_BUILD_MODE",
+      "VITE_REFEREE_FYI_ENABLE_SENTRY",
+      "VITE_REFEREE_FYI_RULES_SERVER",
+      "VITE_ROBOTEVENTS_TOKEN",
+      "VITE_LOGSERVER_TOKEN",
+      "SENTRY_AUTH_TOKEN",
+    ]),
     TanStackRouterVite({
       target: "react",
       autoCodeSplitting: true,

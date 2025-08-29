@@ -141,7 +141,7 @@ export default defineConfig(() => ({
     vitePluginVersionMark({
       name: "Referee FYI",
       ifGitSHA: true,
-      version: `${process.env.CF_PAGES_COMMIT_SHA}`,
+      version: `${process.env.GITHUB_SHA}`,
     }),
     generateVersionJson,
     generateJsonSchema([

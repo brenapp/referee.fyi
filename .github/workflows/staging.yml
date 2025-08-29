@@ -15,7 +15,17 @@ jobs:
         with:
           node-version: "20.x"
       - run: npm ci
-      - run: npm run sync:build
+      - run: npm run build
+      - run: npm run frontend:build
+      - name: Preview Alias
+        id: preview_alias
+        run: |
+          SAFE_REF=$(echo "${GITHUB_REF_NAME}" | sed 's|/|-|g' | sed 's|[^a-zA-Z0-9._-]||g')
+          echo "preview_alias=$SAFE_REF" >> $GITHUB_OUTPUT
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          command: versions upload --preview-alias ${{ steps.preview_alias.outputs.preview_alias }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

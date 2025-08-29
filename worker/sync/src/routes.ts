@@ -8,7 +8,7 @@ const app = new OpenAPIHono<AppArgs>();
 
 app.use("/api/*", cors());
 
-export const routes = app
+app
   .openapi(...(await import("./api/integration/v1/$sku/verify")).default)
   .openapi(
     ...(await import("./api/integration/v1/$sku/incident/delete")).default
@@ -63,12 +63,13 @@ const config: OpenAPIObjectConfig = {
   ],
 };
 
-routes.doc("/api/openapi", config);
+app.doc("/api/openapi", config);
 
 export function getOpenApiDocument() {
-  return routes.getOpenAPIDocument(config);
+  return app.getOpenAPIDocument(config);
 }
 
-routes.get("/api/swagger", swaggerUI({ url: "/api/openapi" }));
+app.get("/api/swagger", swaggerUI({ url: "/api/openapi" }));
 
-export type AppType = typeof routes;
+export { app };
+export type AppType = typeof app;

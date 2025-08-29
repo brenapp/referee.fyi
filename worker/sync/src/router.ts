@@ -42,8 +42,6 @@ export type AppArgs = {
   Variables: Variables;
 };
 
-export const app = new OpenAPIHono<AppArgs>();
-
 export const ErrorCode = z.enum([
   "VerifySignatureValuesNotPresent",
   "VerifySignatureInvalidDateSkew",

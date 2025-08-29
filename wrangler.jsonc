@@ -7,11 +7,5 @@
     "assets": {
         "directory": "./dist",
         "not_found_handling": "single-page-application"
-    },
-    "vars": {
-        "VITE_REFEREE_FYI_BUILD_MODE": "STANDARD",
-        "VITE_REFEREE_FYI_ENABLE_SENTRY": false,
-        "VITE_REFEREE_FYI_SHARE_SERVER": "https://referee-fyi-sync-staging.bren.workers.dev",
-        "VITE_REFEREE_FYI_RULES_SERVER": "https://staging.rules.referee.fyi/"
-    },
+    }
 }

@@ -15,6 +15,10 @@
   //     "zone_name": "referee.fyi"
   //   }
   // ],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
   "compatibility_flags": [
     "nodejs_compat"
   ],

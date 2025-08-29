@@ -94,7 +94,7 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
 
   const signed = await signAssetUrl(
     url,
-    c.env.CLOUDFLARE_IMAGES_SIGNATURE_TOKEN,
+    await c.env.CLOUDFLARE_IMAGES_SIGNATURE_TOKEN.get(),
     60 * 5
   );
 

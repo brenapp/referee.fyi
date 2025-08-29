@@ -615,7 +615,7 @@ export const verifyUserAssetAuthorized = createMiddleware<AppArgs>(
 
     const client = new Cloudflare({
       apiEmail: c.env.CLOUDFLARE_EMAIL,
-      apiToken: c.env.CLOUDFLARE_API_KEY,
+      apiToken: await c.env.CLOUDFLARE_API_KEY.get(),
     });
 
     const image = await client.images.v1.get(meta.images_id, {

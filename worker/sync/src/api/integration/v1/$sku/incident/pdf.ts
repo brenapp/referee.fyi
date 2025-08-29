@@ -10,9 +10,8 @@ import {
   VerifyIntegrationTokenParamsSchema,
   VerifyIntegrationTokenQuerySchema,
 } from "../../../../../utils/verify";
-import {} from "../../../../../utils/data";
-import { getRobotEventsClient } from "../../../../../utils/robotevents";
 import { generateIncidentReportPDF } from "@referee-fyi/pdf-export";
+import { Client } from "robotevents";
 
 export const ParamsSchema = VerifyIntegrationTokenParamsSchema;
 export const QuerySchema = VerifyIntegrationTokenQuerySchema;
@@ -58,7 +57,11 @@ export const handler: RouteHandler<typeof route, AppArgs> = async (c) => {
     );
   }
 
-  const client = getRobotEventsClient(c.env);
+  const client = Client({
+    authorization: {
+      token: await c.env.ROBOTEVENTS_TOKEN.get(),
+    },
+  });
 
   const id = c.env.INCIDENTS.idFromString(
     verifyIntegrationToken.instance.secret

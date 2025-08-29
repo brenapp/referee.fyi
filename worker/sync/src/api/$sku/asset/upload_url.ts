@@ -115,7 +115,7 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
 
   const client = new Cloudflare({
     apiEmail: c.env.CLOUDFLARE_EMAIL,
-    apiToken: c.env.CLOUDFLARE_API_KEY,
+    apiToken: await c.env.CLOUDFLARE_API_KEY.get(),
   });
 
   const directUploadResponse = await client.images.v2.directUploads.create({

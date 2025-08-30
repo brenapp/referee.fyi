@@ -1,13 +1,15 @@
+PRAGMA foreign_keys=OFF;
+
 DROP TABLE IF EXISTS users;
 CREATE TABLE IF NOT EXISTS users(
     key TEXT UNIQUE PRIMARY KEY NOT NULL, -- Long Hex String (182 chars)
     name TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT 'none'
+    role TEXT NOT NULL DEFAULT 'none',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) WITHOUT ROWID;
 
-CREATE INDEX IF NOT EXISTS idx_users_is_system ON users(is_system);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 
 DROP TABLE IF EXISTS invitations;
 CREATE TABLE IF NOT EXISTS invitations(
@@ -21,8 +23,8 @@ CREATE TABLE IF NOT EXISTS invitations(
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-    FOREIGN KEY (invitee) REFERENCES users(key),
-    FOREIGN KEY (inviter) REFERENCES users(key)
+    FOREIGN KEY (invitee) REFERENCES users(key) ON DELETE CASCADE,
+    FOREIGN KEY (inviter) REFERENCES users(key) ON DELETE CASCADE
 ) WITHOUT ROWID;
 
 CREATE INDEX IF NOT EXISTS idx_invitations_sku ON invitations(sku);
@@ -50,8 +52,10 @@ CREATE TABLE IF NOT EXISTS key_exchange(
     code TEXT NOT NULL,
     sku TEXT NOT NULL,
     key TEXT NOT NULL,
-    version TEXT NOT NULL
+    version TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_key_exchange_code_sku ON key_exchange(code, sku);
+
+PRAGMA foreign_keys=ON;

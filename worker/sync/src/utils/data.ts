@@ -16,8 +16,15 @@ export type UserRow = {
   updated_at: string;
 };
 
+function log(label: string, response: D1Response) {
+  if (!response.success) {
+    console.error(`${label} failed`, response);
+  }
+  console.log(`${label} success`, response.meta);
+}
+
 export async function setUser(env: Env, user: User): Promise<void> {
-  await env.DB.prepare(
+  const response = await env.DB.prepare(
     `
     INSERT INTO users (key, name)
       VALUES (?, ?)
@@ -28,18 +35,21 @@ export async function setUser(env: Env, user: User): Promise<void> {
   )
     .bind(user.key, user.name)
     .run();
+
+  log("setUser", response);
 }
 
 export async function getUser(env: Env, key: string): Promise<UserRow | null> {
-  const row = await env.DB.prepare("SELECT * FROM users WHERE key = ?")
+  const response = await env.DB.prepare("SELECT * FROM users WHERE key = ?")
     .bind(key)
-    .first<UserRow>();
+    .run<UserRow>();
+  log("getUser", response);
 
-  if (!row) {
+  if (!response.success) {
     return null;
   }
 
-  return row satisfies User;
+  return response.results?.[0] ?? null;
 }
 
 export async function isSystemKey(env: Env, key: string) {
@@ -62,7 +72,7 @@ export type InvitationRow = {
 };
 
 export async function setInvitation(env: Env, invitation: Invitation) {
-  await env.DB.prepare(
+  const response = await env.DB.prepare(
     `
     INSERT INTO invitations (id, instance, invitee, inviter, role, accepted, sku, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
@@ -86,6 +96,8 @@ export async function setInvitation(env: Env, invitation: Invitation) {
       invitation.sku
     )
     .run();
+
+  log("setInvitation", response);
 }
 
 export async function getInvitation(
@@ -93,7 +105,7 @@ export async function getInvitation(
   userKey: string,
   sku: string
 ): Promise<Invitation | null> {
-  const row = await env.DB.prepare(
+  const response = await env.DB.prepare(
     `
     SELECT * FROM invitations
     WHERE invitee = ? AND sku = ?
@@ -101,25 +113,31 @@ export async function getInvitation(
     `
   )
     .bind(userKey, sku)
-    .first<InvitationRow>();
+    .run<InvitationRow>();
+  log("getInvitation", response);
 
-  if (!row) {
+  if (!response.success) {
+    return null;
+  }
+
+  const result = response.results?.[0];
+  if (!result) {
     return null;
   }
 
   return {
-    id: row.id,
-    sku: row.sku,
-    instance_secret: row.instance,
-    user: row.invitee,
-    from: row.inviter,
-    admin: row.role === "admin",
-    accepted: !!row.accepted,
+    id: result.id,
+    sku: result.sku,
+    instance_secret: result.instance,
+    user: result.invitee,
+    from: result.inviter,
+    admin: result.role === "admin",
+    accepted: !!result.accepted,
   } satisfies Invitation;
 }
 
 export async function deleteInvitation(env: Env, userKey: string, sku: string) {
-  return env.DB.prepare(
+  const response = await env.DB.prepare(
     `
     DELETE FROM invitations
     WHERE invitee = ? AND sku = ?
@@ -127,6 +145,10 @@ export async function deleteInvitation(env: Env, userKey: string, sku: string) {
   )
     .bind(userKey, sku)
     .run();
+
+  log("deleteInvitation", response);
+
+  return response;
 }
 
 export async function deleteAllInvitationsForInstance(
@@ -134,7 +156,7 @@ export async function deleteAllInvitationsForInstance(
   secret: string,
   sku: string
 ) {
-  return env.DB.prepare(
+  const response = await env.DB.prepare(
     `
     DELETE FROM invitations
     WHERE instance = ? AND sku = ?
@@ -142,6 +164,10 @@ export async function deleteAllInvitationsForInstance(
   )
     .bind(secret, sku)
     .run();
+
+  log("deleteAllInvitationsForInstance", response);
+
+  return response;
 }
 
 export async function getInstance(
@@ -149,7 +175,7 @@ export async function getInstance(
   secret: string,
   sku: string
 ): Promise<ShareInstanceMeta | null> {
-  const { results: invitations } = await env.DB.prepare(
+  const { results: invitations, ...response } = await env.DB.prepare(
     `
     SELECT * FROM invitations
     WHERE instance = ? AND sku = ?
@@ -157,6 +183,7 @@ export async function getInstance(
   )
     .bind(secret, sku)
     .all<InvitationRow>();
+  log("getInstance", response);
 
   if (invitations.length === 0) {
     return null;
@@ -176,7 +203,7 @@ export async function getInstancesForEvent(
   env: Env,
   sku: string
 ): Promise<string[]> {
-  const { results: instances } = await env.DB.prepare(
+  const { results: instances, ...response } = await env.DB.prepare(
     `
     SELECT DISTINCT instance FROM invitations
     WHERE sku = ?
@@ -184,6 +211,8 @@ export async function getInstancesForEvent(
   )
     .bind(sku)
     .all<{ instance: string }>();
+
+  log("getInstancesForEvent", response);
 
   return instances.map((i) => i.instance);
 }
@@ -208,7 +237,7 @@ export async function setRequestCode(
   sku: string,
   request: RequestCode
 ) {
-  await env.DB.prepare(
+  const response = await env.DB.prepare(
     `
     INSERT INTO key_exchange (code, sku, key, version)
       VALUES (?, ?, ?, ?)
@@ -219,6 +248,7 @@ export async function setRequestCode(
   )
     .bind(code, sku, request.key, request.version)
     .run();
+  log("setRequestCode", response);
 }
 
 export async function getRequestCodeUserKey(
@@ -226,7 +256,7 @@ export async function getRequestCodeUserKey(
   code: string,
   sku: string
 ) {
-  const row = await env.DB.prepare(
+  const response = await env.DB.prepare(
     `
     SELECT * FROM key_exchange
     WHERE code = ? AND sku = ? AND created_at >= datetime('now', '-60 seconds')
@@ -234,13 +264,19 @@ export async function getRequestCodeUserKey(
     `
   )
     .bind(code, sku)
-    .first<KeyExchangeRow>();
+    .run<KeyExchangeRow>();
+  log("getRequestCodeUserKey", response);
 
-  if (!row) {
+  if (!response.success) {
     return null;
   }
 
-  return row satisfies RequestCode;
+  const result = response.results?.[0];
+  if (!result) {
+    return null;
+  }
+
+  return result satisfies RequestCode;
 }
 
 export type AssetRow = {
@@ -252,19 +288,25 @@ export type AssetRow = {
 };
 
 export async function getAssetMeta(env: Env, id: string) {
-  const row = await env.DB.prepare("SELECT * FROM assets WHERE id = ?")
+  const response = await env.DB.prepare("SELECT * FROM assets WHERE id = ?")
     .bind(id)
-    .first<AssetRow>();
+    .run<AssetRow>();
+  log("getAssetMeta", response);
 
-  if (!row) {
+  if (!response.success) {
     return null;
   }
 
-  return row satisfies AssetMeta;
+  const result = response.results?.[0];
+  if (!result) {
+    return null;
+  }
+
+  return result satisfies AssetMeta;
 }
 
 export async function setAssetMeta(env: Env, meta: AssetMeta) {
-  await env.DB.prepare(
+  const response = await env.DB.prepare(
     `
     INSERT INTO assets (id, type, owner, sku, images_id)
       VALUES (?, ?, ?, ?, ?)
@@ -277,4 +319,5 @@ export async function setAssetMeta(env: Env, meta: AssetMeta) {
   )
     .bind(meta.id, meta.type, meta.owner, meta.sku, meta.images_id)
     .run();
+  log("setAssetMeta", response);
 }

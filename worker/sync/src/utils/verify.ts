@@ -1,11 +1,16 @@
 import { Cloudflare } from "cloudflare";
 import { importKey, KEY_PREFIX, verifyKeySignature } from "./crypto";
-import { getAssetMeta, getInstance, getInvitation, getUser } from "./data";
+import {
+  getAssetMeta,
+  getInstance,
+  getInvitation,
+  getUser,
+  isSystemKey,
+} from "./data";
 import { Invitation, ShareInstanceMeta, User } from "@referee-fyi/share";
 import { createMiddleware } from "hono/factory";
 import { AppArgs, ErrorResponseSchema } from "../router";
 import z from "zod/v4";
-import { getSystemKeyMetadata, isSystemKey } from "./systemKey";
 
 export const VerifySignatureHeadersSchema = z.object({
   "X-Referee-Signature": z.string().optional(),
@@ -333,8 +338,8 @@ export const verifySystemToken = createMiddleware<AppArgs>(async (c, next) => {
   }
 
   const keyHex = publicKeyRaw.slice(KEY_PREFIX.length);
-  const metadata = await getSystemKeyMetadata(c.env, keyHex);
-  if (!metadata) {
+  const isSystem = await isSystemKey(c.env, keyHex);
+  if (!isSystem) {
     return c.json(
       {
         success: false,

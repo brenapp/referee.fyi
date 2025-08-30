@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE IF NOT EXISTS users(
     key TEXT UNIQUE PRIMARY KEY NOT NULL, -- Long Hex String (182 chars)
     name TEXT NOT NULL,
-    is_system INTEGER DEFAULT FALSE, 
+    role TEXT NOT NULL DEFAULT 'none'
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) WITHOUT ROWID;
@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS key_exchange(
     sku TEXT NOT NULL,
     key TEXT NOT NULL,
     version TEXT NOT NULL
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_key_exchange_code_sku ON key_exchange(code, sku);

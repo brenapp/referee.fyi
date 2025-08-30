@@ -6,10 +6,12 @@ import {
   User,
 } from "@referee-fyi/share";
 
+export type UserRole = "none" | "system";
+
 export type UserRow = {
   key: string;
   name: string;
-  is_system: boolean;
+  role: UserRole;
   created_at: string;
   updated_at: string;
 };
@@ -17,8 +19,8 @@ export type UserRow = {
 export async function setUser(env: Env, user: User): Promise<void> {
   await env.DB.prepare(
     `
-    INSERT INTO users (key, name, is_system, created_at, updated_at)
-      VALUES (?, ?, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    INSERT INTO users (key, name)
+      VALUES (?, ?)
     ON CONFLICT(key) DO UPDATE SET
       name = excluded.name,
       updated_at = CURRENT_TIMESTAMP
@@ -28,7 +30,7 @@ export async function setUser(env: Env, user: User): Promise<void> {
     .run();
 }
 
-export async function getUser(env: Env, key: string): Promise<User | null> {
+export async function getUser(env: Env, key: string): Promise<UserRow | null> {
   const row = await env.DB.prepare("SELECT * FROM users WHERE key = ?")
     .bind(key)
     .first<UserRow>();
@@ -38,6 +40,11 @@ export async function getUser(env: Env, key: string): Promise<User | null> {
   }
 
   return row satisfies User;
+}
+
+export async function isSystemKey(env: Env, key: string) {
+  const user = await getUser(env, key);
+  return user?.role === "system";
 }
 
 export type InvitationRole = "none" | "admin";

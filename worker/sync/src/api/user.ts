@@ -3,8 +3,7 @@ import { ErrorResponseSchema, ErrorResponses, AppArgs } from "../router";
 import { z } from "zod/v4";
 import { verifySignature, VerifySignatureHeadersSchema } from "../utils/verify";
 import { User, UserSchema } from "@referee-fyi/share";
-import { setUser } from "../utils/data";
-import { isSystemKey } from "../utils/systemKey";
+import { isSystemKey, setUser } from "../utils/data";
 export const QuerySchema = z.object({
   name: z.string().min(1, "Name is required"),
 });

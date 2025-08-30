@@ -2,6 +2,7 @@ import {
   AssetMeta,
   AssetType,
   Invitation,
+  InvitationListItem,
   ShareInstanceMeta,
   User,
 } from "@referee-fyi/share";
@@ -197,6 +198,32 @@ export async function getInstance(
     secret,
     sku,
   } satisfies ShareInstanceMeta;
+}
+
+export async function getAllInvitationsForInstance(
+  env: Env,
+  secret: string,
+  sku: string
+): Promise<InvitationListItem[]> {
+  const { results: invitations, ...response } = await env.DB.prepare(
+    `
+    SELECT users.key, users.name, invitations.* FROM invitations
+    JOIN users ON invitations.invitee = users.key
+    WHERE instance = ? AND sku = ?
+    `
+  )
+    .bind(secret, sku)
+    .all<InvitationRow & User>();
+
+  log("getInvitationsInInstance", response);
+
+  return invitations.map((inv) => ({
+    admin: inv.role === "admin",
+    user: {
+      key: inv.invitee,
+      name: inv.name,
+    } satisfies User,
+  }));
 }
 
 export async function getInstancesForEvent(

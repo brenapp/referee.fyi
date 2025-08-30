@@ -13,7 +13,7 @@ import {
   type InstanceScratchpads,
   WebSocketMessageSchema,
 } from "@referee-fyi/share";
-import { getInstance, getUser } from "../utils/data";
+import { getAllInvitationsForInstance, getInstance } from "../utils/data";
 import { DurableObject } from "cloudflare:workers";
 
 export type ClientSession = {
@@ -198,32 +198,30 @@ export class ShareInstance extends DurableObject {
     return instance;
   }
 
+  sortInvitationListItems(a: InvitationListItem, b: InvitationListItem) {
+    if (a.admin && !b.admin) {
+      return -1;
+    }
+    if (!a.admin && b.admin) {
+      return 1;
+    }
+
+    return a.user.name.localeCompare(b.user.name);
+  }
+
   /**
    * @returns A list of invitations in the instance.
    **/
   async getInvitationList(): Promise<InvitationListItem[]> {
-    const instance = await this.getInstance();
+    const sku = await this.getSKU();
+    const secret = await this.getInstanceSecret();
 
-    if (!instance) {
+    if (!sku || !secret) {
       return [];
     }
 
-    const users = instance.invitations.filter(
-      (u, i) => instance.invitations.indexOf(u) === i
-    );
-
-    const invitations: InvitationListItem[] = await Promise.all(
-      users.map(async (key) => {
-        const user = await getUser(this.env, key);
-
-        return {
-          user: user ?? { key, name: "<Unknown User>" },
-          admin: instance.admins.includes(key),
-        };
-      })
-    );
-
-    return invitations;
+    const items = await getAllInvitationsForInstance(this.env, secret, sku);
+    return items.toSorted(this.sortInvitationListItems);
   }
 
   /**

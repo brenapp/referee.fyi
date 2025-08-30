@@ -194,6 +194,7 @@ export type KeyExchangeRow = {
   sku: string;
   key: string;
   version: string;
+  created_at: string;
 };
 
 export type RequestCode = {
@@ -228,7 +229,7 @@ export async function getRequestCodeUserKey(
   const row = await env.DB.prepare(
     `
     SELECT * FROM key_exchange
-    WHERE code = ? AND sku = ?
+    WHERE code = ? AND sku = ? AND created_at >= datetime('now', '-60 seconds')
     LIMIT 1
     `
   )

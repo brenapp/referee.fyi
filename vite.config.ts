@@ -20,6 +20,7 @@ import { type Plugin } from "vite";
 const requiredEnvVars = (vars: string[]): Plugin => {
   return {
     name: "require-env-vars",
+    apply: "build",
     config() {
       const missingVars = vars.filter((v) => !process.env[v]);
       if (missingVars.length > 0) {

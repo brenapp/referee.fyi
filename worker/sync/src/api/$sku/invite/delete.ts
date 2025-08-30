@@ -112,11 +112,11 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
   const instance = verifyInvitation.instance;
 
   // If this is the last admin, remove everyone's invitations
-  if (userInvitation.admin && instance.admins.length < 1) {
+  if (userInvitation.admin && instance.admins.length < 2) {
     await deleteAllInvitationsForInstance(c.env, instance.secret, sku);
+  } else {
+    await deleteInvitation(c.env, user, invitation.sku);
   }
-
-  await deleteInvitation(c.env, user, invitation.sku);
 
   const id = c.env.INCIDENTS.idFromString(instance.secret);
   const stub = c.env.INCIDENTS.get(id);

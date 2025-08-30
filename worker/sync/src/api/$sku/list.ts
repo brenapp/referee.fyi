@@ -70,8 +70,7 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
     );
   }
 
-  const ids = await getInstancesForEvent(c.env, sku);
-  const instances = ids.map((id) => id.split("#")[1]);
+  const instances = await getInstancesForEvent(c.env, sku);
   return c.json(
     {
       success: true,

@@ -153,6 +153,42 @@ export const verifyUser = createMiddleware<AppArgs>(async (c, next) => {
   await next();
 });
 
+export const verifyUserHasSystemKey = createMiddleware<AppArgs>(
+  async (c, next) => {
+    const user = c.get("verifyUser")?.user;
+    if (!user) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: "ValidationError",
+            message: "User is not verified.",
+          },
+          code: "VerifyUserNotRegistered",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        400
+      );
+    }
+
+    const isSystem = await isSystemKey(c.env, user.key);
+    if (!isSystem) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: "ValidationError",
+            message: "You are not authorized to perform this action.",
+          },
+          code: "VerifyUserNotSystemKey",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        403
+      );
+    }
+
+    await next();
+  }
+);
+
 export const verifyInvitation = createMiddleware<AppArgs>(async (c, next) => {
   const sku = c.req.param("sku");
 

@@ -5,9 +5,10 @@ import {
   verifySignature,
   VerifySignatureHeadersSchema,
   verifyUser,
+  verifyUserHasSystemKey,
 } from "../../utils/verify";
 import { getInstancesForEvent } from "../../utils/data";
-import { isSystemKey } from "../../utils/systemKey";
+
 export const ParamsSchema = z.object({
   sku: z.string(),
 });
@@ -31,7 +32,7 @@ export const route = createRoute({
   tags: ["Invitation Management"],
   summary: "Gets all active instances for an event.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",
-  middleware: [verifySignature, verifyUser],
+  middleware: [verifySignature, verifyUser, verifyUserHasSystemKey],
   request: {
     headers: VerifySignatureHeadersSchema,
     params: ParamsSchema,
@@ -66,21 +67,6 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
         code: "VerifyUserNotRegistered",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
-    );
-  }
-
-  const isSystem = await isSystemKey(c.env, verifyUser.user.key);
-  if (!isSystem) {
-    return c.json(
-      {
-        success: false,
-        error: {
-          name: "ValidationError",
-          message: "You are not authorized to perform this action.",
-        },
-        code: "VerifyUserNotSystemKey",
-      } as const satisfies z.infer<typeof ErrorResponseSchema>,
-      403
     );
   }
 

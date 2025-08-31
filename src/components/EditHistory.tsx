@@ -51,10 +51,12 @@ export const EditHistoryItem = <
         <span className="sr-only">Time: </span>
         {date.toLocaleTimeString()}
       </p>
-      <p>
-        <span>From </span>
-        {render(history.prev)}
-      </p>
+      {history.prev ? (
+        <p>
+          <span>From </span>
+          {render(history.prev)}
+        </p>
+      ) : null}
       <p>
         <span>To </span>
         {render(to)}

@@ -7,7 +7,10 @@
 		"enabled": true
 	},
 	"env": {
-		"prod": {
+		"production": {
+			"vars": {
+				"ENVIRONMENT": "production"
+			},
 			"triggers": {
 				"crons": [
 					"*/30 * * * *"
@@ -18,41 +21,67 @@
 					"pattern": "rules.referee.fyi",
 					"custom_domain": true
 				}
+			],
+			"ai": {
+				"binding": "ai"
+			},
+			"r2_buckets": [
+				{
+					"binding": "rules",
+					"bucket_name": "referee-fyi-game-rules",
+					"preview_bucket_name": "referee-fyi-game-rules"
+				}
+			],
+			"browser": {
+				"binding": "browser"
+			},
+			"compatibility_flags": [
+				"nodejs_compat_v2"
+			],
+			"kv_namespaces": [
+				{
+					"binding": "qnaplus",
+					"id": "6afc92c2ed874a9cb7a1557681f19ea5",
+					"preview_id": "6afc92c2ed874a9cb7a1557681f19ea5"
+				}
 			]
 		},
 		"staging": {
+			"vars": {
+				"ENVIRONMENT": "staging"
+			},
 			"routes": [
 				{
 					"pattern": "staging.rules.referee.fyi",
 					"custom_domain": true
+				}
+			],
+			"ai": {
+				"binding": "ai"
+			},
+			"r2_buckets": [
+				{
+					"binding": "rules",
+					"bucket_name": "referee-fyi-game-rules",
+					"preview_bucket_name": "referee-fyi-game-rules"
+				}
+			],
+			"browser": {
+				"binding": "browser"
+			},
+			"compatibility_flags": [
+				"nodejs_compat_v2"
+			],
+			"kv_namespaces": [
+				{
+					"binding": "qnaplus",
+					"id": "6afc92c2ed874a9cb7a1557681f19ea5",
+					"preview_id": "6afc92c2ed874a9cb7a1557681f19ea5"
 				}
 			]
 		}
 	},
 	"placement": {
 		"mode": "smart"
-	},
-	"ai": {
-		"binding": "ai"
-	},
-	"r2_buckets": [
-		{
-			"binding": "rules",
-			"bucket_name": "referee-fyi-game-rules",
-			"preview_bucket_name": "referee-fyi-game-rules"
-		}
-	],
-	"browser": {
-		"binding": "browser"
-	},
-	"compatibility_flags": [
-		"nodejs_compat_v2"
-	],
-	"kv_namespaces": [
-		{
-			"binding": "qnaplus",
-			"id": "6afc92c2ed874a9cb7a1557681f19ea5",
-			"preview_id": "6afc92c2ed874a9cb7a1557681f19ea5"
-		}
-	]
+	}
 }

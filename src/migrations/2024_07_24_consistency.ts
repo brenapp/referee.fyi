@@ -59,7 +59,10 @@ queueMigration({
   run_order: 1,
   dependencies: ["2024_05_07_matchSkills"],
   apply: async () => {
-    const incidents = (await getAllIncidents()) as (OldIncident | Incident)[];
+    const incidents = (await getAllIncidents()) as unknown as (
+      | OldIncident
+      | Incident
+    )[];
 
     const { key: peer } = await getShareProfile();
     const output: Incident[] = [];

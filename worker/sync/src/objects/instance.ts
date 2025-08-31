@@ -1,5 +1,3 @@
-import { AutoRouter, cors, createResponse } from "itty-router";
-import { response } from "../utils/request";
 import {
   type Incident,
   type WebSocketMessage,
@@ -13,28 +11,28 @@ import {
   type User,
   type InstanceIncidents,
   type InstanceScratchpads,
-  INCIDENT_IGNORE,
-  incidentMatchNameToString,
+  WebSocketMessageSchema,
 } from "@referee-fyi/share";
-import { getUser } from "../utils/data";
-import { Env, EventIncidentsInitData, RequestHasInvitation } from "../types";
-import { mergeLWW } from "@referee-fyi/consistency";
+import { getAllInvitationsForInstance, getInstance } from "../utils/data";
 import { DurableObject } from "cloudflare:workers";
 
-export type SessionClient = {
-  user: User;
-  socket: WebSocket;
-  ip: string;
+export type ClientSession = {
   active: boolean;
+  user: User;
 };
 
-const { preflight, corsify } = cors();
+export type ShareInstanceInitData = {
+  instance: string;
+  sku: string;
+};
+
 export class ShareInstance extends DurableObject {
-  router = AutoRouter<RequestHasInvitation, [Env]>({
-    before: [preflight],
-    finally: [corsify],
-  });
-  clients: Record<string, SessionClient> = {};
+  // User Key -> WebSocket
+  sockets: Map<string, WebSocket> = new Map();
+
+  // WebSocket -> Session
+  sessions: Map<WebSocket, ClientSession> = new Map();
+
   state: DurableObjectState;
 
   env: Env;
@@ -44,21 +42,14 @@ export class ShareInstance extends DurableObject {
     this.state = state;
     this.env = env;
 
-    this.router
-      .get("/join", (r) => this.handleWebsocket(r))
-      .get("/get", () => this.handleGet())
-      .get("/csv", () => this.handleCSV())
-      .get("/json", () => this.handleJSON())
-      .put("/incident", (r) => this.handleAddIncident(r))
-      .patch("/incident", (r) => this.handleEditIncident(r))
-      .delete("/incident", (r) => this.handleDeleteIncident(r))
-      .all("*", () =>
-        response({
-          success: false,
-          reason: "bad_request",
-          details: "durable object unknown action",
-        })
-      );
+    // Restore sockets
+    this.ctx.getWebSockets().forEach((ws) => {
+      const attachment: ClientSession = ws.deserializeAttachment();
+      if (attachment) {
+        this.sessions.set(ws, { ...attachment });
+        this.sockets.set(attachment.user.key, ws);
+      }
+    });
   }
 
   // Storage
@@ -123,9 +114,12 @@ export class ShareInstance extends DurableObject {
     const map = await this.state.storage.list<boolean>({
       prefix,
     });
-    return new Set(map.keys().map((k) => k.slice(prefix.length)));
+    return new Set([...map.keys()].map((k: string) => k.slice(prefix.length)));
   }
 
+  /**
+   * @returns All incidents in the instance.
+   */
   async getAllIncidents(): Promise<Incident[]> {
     const prefix = this.KEYS.incident("");
     const map = await this.state.storage.list<Incident>({
@@ -136,6 +130,9 @@ export class ShareInstance extends DurableObject {
     return [...map.values()].filter((i) => !deleted.has(i.id));
   }
 
+  /**
+   * @returns All incidents data in the instance.
+   **/
   async getIncidentsData(): Promise<InstanceIncidents> {
     const incidents = await this.getAllIncidents();
     const deleted = await this.getDeletedIncidents();
@@ -146,6 +143,9 @@ export class ShareInstance extends DurableObject {
     };
   }
 
+  /**
+   * @returns All scratchpads data in the instance.
+   */
   async getScratchpadData(): Promise<InstanceScratchpads> {
     const values = await this.getAllScratchpads();
     return {
@@ -154,6 +154,9 @@ export class ShareInstance extends DurableObject {
     };
   }
 
+  /**
+   * Creates information for the server_share_info message.
+   **/
   async createServerShareMessage(): Promise<WebSocketServerShareInfoMessage> {
     const sku = await this.getSKU();
     const incidents = await this.getIncidentsData();
@@ -179,376 +182,107 @@ export class ShareInstance extends DurableObject {
     return { ...message, sender, date: new Date().toISOString() };
   }
 
-  getRequestBody<T = unknown>(request: Request): T | null {
-    const content = request.headers.get("X-Referee-Content");
-
-    if (!content) {
-      return null;
-    }
-
-    try {
-      return JSON.parse(content);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  getRequestUser(request: Request): User {
-    const name = request.headers.get("X-Referee-User-Name") ?? "";
-    const key = request.headers.get("X-Referee-User-Key") ?? "";
-
-    return { name, key };
-  }
-
+  /**
+   * Returns information about the share instance.
+   * @returns
+   */
   async getInstance(): Promise<ShareInstanceMeta | null> {
     const sku = await this.getSKU();
     const secret = await this.getInstanceSecret();
 
-    const instance = await this.env.SHARES.get<ShareInstanceMeta>(
-      `${sku}#${secret}`,
-      "json"
-    );
+    if (!sku || !secret) {
+      return null;
+    }
+
+    const instance = await getInstance(this.env, secret, sku);
     return instance;
   }
 
-  async getInvitationList(): Promise<InvitationListItem[]> {
-    const instance = await this.getInstance();
+  sortInvitationListItems(a: InvitationListItem, b: InvitationListItem) {
+    if (a.admin && !b.admin) {
+      return -1;
+    }
+    if (!a.admin && b.admin) {
+      return 1;
+    }
 
-    if (!instance) {
+    return a.user.name.localeCompare(b.user.name);
+  }
+
+  /**
+   * @returns A list of invitations in the instance.
+   **/
+  async getInvitationList(): Promise<InvitationListItem[]> {
+    const sku = await this.getSKU();
+    const secret = await this.getInstanceSecret();
+
+    if (!sku || !secret) {
       return [];
     }
 
-    const users = instance.invitations.filter(
-      (u, i) => instance.invitations.indexOf(u) === i
-    );
-
-    const invitations: InvitationListItem[] = await Promise.all(
-      users.map(async (key) => {
-        const user = await getUser(this.env, key);
-
-        return {
-          user: user ?? { key, name: "<Unknown User>" },
-          admin: instance.admins.includes(key),
-        };
-      })
-    );
-
-    return invitations;
+    const items = await getAllInvitationsForInstance(this.env, secret, sku);
+    return items.toSorted(this.sortInvitationListItems);
   }
 
+  /**
+   * @returns Active users in the instance
+   **/
   getActiveUsers(): User[] {
-    return Object.values(this.clients)
-      .filter((client) => client.active)
-      .map((client) => client.user);
+    return [...this.sessions].map(([, session]) => session.user);
   }
 
-  async handle(request: RequestHasInvitation) {
-    return this.router.fetch(request);
-  }
-
-  async fetch(request: Request) {
-    return this.router.fetch(request);
-  }
-
-  async init(data: EventIncidentsInitData) {
+  /**
+   * Call when you first construct the DO
+   * @param data
+   **/
+  async init(data: ShareInstanceInitData): Promise<void> {
     await this.setInstanceSecret(data.instance);
     await this.setSKU(data.sku);
   }
 
-  async handleGet() {
-    const data = await this.createServerShareMessage();
-    return response({
-      success: true,
-      data,
-    });
-  }
+  /**
+   * Accepts a websocket connection and handles the session.
+   * @param request
+   **/
+  async fetch(request: Request): Promise<Response> {
+    const webSocketPair = new WebSocketPair();
+    const [client, server] = Object.values(webSocketPair);
 
-  csv = createResponse("text/csv");
+    const search = new URL(request.url).searchParams;
+    const name = search.get("name");
+    const key = search.get("id");
 
-  async handleCSV() {
-    const incidents = await this.getAllIncidents();
+    if (!name || !key) {
+      const socket = server;
+      socket.accept();
 
-    let output =
-      "Date,Time,ID,SKU,Division,Match,Team,Outcome,Rules,Notes,Flags\n";
-
-    output += incidents
-      .map((incident) => {
-        const notes = incident.notes.replaceAll(/[\s\r\n]/g, " ");
-
-        const division =
-          incident.match?.type === "match" ? incident.match.division : "";
-
-        return [
-          new Date(incident.time).toISOString(),
-          new Date(incident.time).toISOString(),
-          incident.id,
-          incident.event,
-          division,
-          incidentMatchNameToString(incident.match),
-          incident.team,
-          incident.outcome,
-          incident.rules.join(" "),
-          notes,
-          incident.flags?.join(" ") ?? "",
-        ].join(",");
-      })
-      .join("\n");
-
-    return this.csv(output);
-  }
-
-  async handleJSON() {
-    const incidents = await this.getAllIncidents();
-
-    return response({
-      success: true,
-      data: incidents,
-    });
-  }
-
-  async handleAddIncident(request: Request) {
-    const user = this.getRequestUser(request);
-    const client = this.clients[user.key];
-
-    const sender: WebSocketSender = client
-      ? {
-          type: "client",
-          name: client.user.name,
-          id: client.user.key,
-        }
-      : { type: "server" };
-
-    const incident = this.getRequestBody<Incident>(request);
-
-    if (!incident) {
-      return response({
-        success: false,
-        reason: "bad_request",
-        details: "Must specify a valid incident.",
-      });
+      socket.send(JSON.stringify({ error: "must specify name and user id" }));
+      socket.close(1011, "Must specify name and user id");
+      return new Response(null, { status: 101, webSocket: client });
     }
 
-    const deleted = await this.getDeletedIncidents();
+    const user: User = { name, key };
+    const session: ClientSession = {
+      active: true,
+      user,
+    };
 
-    if (deleted.has(incident.id)) {
-      return response({
-        success: false,
-        reason: "bad_request",
-        details: "That incident has been deleted.",
-      });
-    }
-
-    await this.addIncident(incident);
-    await this.broadcast({ type: "add_incident", incident }, sender);
-
-    return response({
-      success: true,
-      data: incident,
-    });
-  }
-
-  async handleEditIncident(request: Request): Promise<Response> {
-    const incident = this.getRequestBody<Incident>(request);
-
-    if (!incident) {
-      return response({
-        success: false,
-        reason: "bad_request",
-        details: "Must specify a valid incident to edit.",
-      });
-    }
-
-    const deletedIncidents = await this.getDeletedIncidents();
-    if (deletedIncidents.has(incident.id)) {
-      return response({
-        success: false,
-        reason: "bad_request",
-        details: "That incident has been deleted.",
-      });
-    }
-
-    const user = this.getRequestUser(request);
-    const client = this.clients[user.key];
-    const currentIncident = await this.getIncident(incident.id);
-
-    const result = mergeLWW({
-      local: currentIncident,
-      remote: incident,
-      ignore: INCIDENT_IGNORE,
-    });
-
-    if (!result.resolved) {
-      return response({
-        success: false,
-        reason: "bad_request",
-        details: "Could not edit incident with that ID",
-      });
-    }
-
-    await this.editIncident(result.resolved);
-
-    const sender: WebSocketSender = client
-      ? {
-          type: "client",
-          name: client.user.name,
-          id: client.user.key,
-        }
-      : { type: "server" };
-
-    await this.broadcast(
-      { type: "update_incident", incident: result.resolved },
-      sender
-    );
-
-    return response({
-      success: true,
-      data: incident,
-    });
-  }
-
-  async handleDeleteIncident(request: Request) {
-    const params = new URL(request.url).searchParams;
-    const user = this.getRequestUser(request);
-    const client = this.clients[user.key];
-
-    const sender: WebSocketSender = client
-      ? {
-          type: "client",
-          name: client.user.name,
-          id: client.user.key,
-        }
-      : { type: "server" };
-
-    const id = params.get("id");
-
-    if (!id) {
-      return response({
-        success: false,
-        reason: "bad_request",
-        details: "Must specify `id` of incident to delete",
-      });
-    }
-
-    await this.deleteIncident(id);
-    this.broadcast({ type: "remove_incident", id }, sender);
-
-    return response({
-      success: true,
-      data: {},
-    });
-  }
-
-  async handleWebsocket(request: Request) {
-    const ip = request.headers.get("CF-Connecting-IP") ?? "0.0.0.0";
-
-    if (request.headers.get("Upgrade") === "websocket") {
-      const pair = new WebSocketPair();
-
-      const search = new URL(request.url).searchParams;
-
-      const name = search.get("name");
-      const key = search.get("id");
-
-      if (!name || !key) {
-        const socket = pair[1];
-        socket.accept();
-
-        socket.send(JSON.stringify({ error: "must specify name and user id" }));
-        socket.close(1011, "Must specify name and user id");
-        return new Response(null, { status: 101, webSocket: pair[0] });
-      }
-
-      this.handleSession(pair[1], ip, { name, key });
-
-      return new Response(null, {
-        status: 101,
-        webSocket: pair[0],
-      });
-    }
-  }
-
-  async handleSession(socket: WebSocket, ip: string, user: User) {
-    socket.accept();
-
-    const client: SessionClient = { socket, ip, active: true, user };
-
-    // Ensure that clients aren't listed twice
-    const current = this.clients[user.key];
+    const current = this.sockets.get(user.key);
     if (current) {
-      current.active = false;
       const payload = this.createPayload(
         { type: "message", message: "Replaced by new connection" },
         { type: "server" }
       );
-      current.socket.send(JSON.stringify(payload));
-      current.socket.close(1011, "Replaced by new connection.");
+      current.send(JSON.stringify(payload));
+      current.close(1011, "Replaced by new connection.");
+      this.sessions.delete(current);
     }
 
-    this.clients[user.key] = client;
+    this.sockets.set(user.key, server);
+    this.sessions.set(server, session);
 
-    // Set event handlers to receive messages.
-    socket.addEventListener("message", async (event: MessageEvent) => {
-      try {
-        if (!client.active) {
-          socket.close(1011, "WebSocket broken.");
-          return;
-        }
-
-        const data = JSON.parse(
-          event.data as string
-        ) as WebSocketPayload<WebSocketPeerMessage>;
-
-        switch (data.type) {
-          case "add_incident": {
-            const incident = data.incident;
-            await this.addIncident(incident);
-            this.broadcast(
-              { type: "add_incident", incident },
-              { type: "client", name: client.user.name, id: client.user.key }
-            );
-            break;
-          }
-          case "update_incident": {
-            const incident = data.incident;
-            await this.editIncident(incident);
-            this.broadcast(
-              { type: "update_incident", incident },
-              { type: "client", name: client.user.name, id: client.user.key }
-            );
-            break;
-          }
-          case "remove_incident": {
-            await this.deleteIncident(data.id);
-            this.broadcast(
-              { type: "remove_incident", id: data.id },
-              { type: "client", name: client.user.name, id: client.user.key }
-            );
-            break;
-          }
-          case "scratchpad_update": {
-            await this.setScratchpad(data.id, data.scratchpad);
-            this.broadcast(
-              {
-                type: "scratchpad_update",
-                id: data.id,
-                scratchpad: data.scratchpad,
-              },
-              { type: "client", name: client.user.name, id: client.user.key }
-            );
-            break;
-          }
-          case "message": {
-            this.broadcast(
-              { type: "message", message: data.message },
-              { type: "client", name: client.user.name, id: client.user.key }
-            );
-            break;
-          }
-        }
-      } catch (err) {
-        socket.send(JSON.stringify({ error: err }));
-      }
-    });
+    this.ctx.acceptWebSocket(server);
+    server.serializeAttachment(session);
 
     const activeUsers = this.getActiveUsers();
     const invitations = await this.getInvitationList();
@@ -560,25 +294,161 @@ export class ShareInstance extends DurableObject {
 
     const state = await this.createServerShareMessage();
     const payload = this.createPayload(state, { type: "server" });
-    socket.send(JSON.stringify(payload));
+    server.send(JSON.stringify(payload));
 
-    const quitHandler = async () => {
-      client.active = false;
-      delete this.clients[user.key];
+    return new Response(null, {
+      status: 101,
+      webSocket: client,
+    });
+  }
 
-      const activeUsers = await this.getActiveUsers();
-      const invitations = await this.getInvitationList();
+  async webSocketMessage(
+    ws: WebSocket,
+    message: string | ArrayBuffer
+  ): Promise<void> {
+    try {
+      const string =
+        typeof message === "string"
+          ? message
+          : new TextDecoder().decode(message);
+      const result = WebSocketMessageSchema.safeParse(JSON.parse(string));
 
-      if (client.user) {
-        await this.broadcast(
-          { type: "server_user_remove", user, invitations, activeUsers },
+      if (!result.success) {
+        const payload = this.createPayload(
+          {
+            type: "server_error",
+            error: `Invalid message format: ${result.error.message}`,
+          },
           { type: "server" }
         );
+        ws.send(JSON.stringify(payload));
+        return;
       }
-    };
 
-    socket.addEventListener("close", quitHandler);
-    socket.addEventListener("error", quitHandler);
+      const session = this.sessions.get(ws);
+      if (!session) {
+        const payload = this.createPayload(
+          {
+            type: "server_error",
+            error: "WebSocket not associated with a user.",
+          },
+          { type: "server" }
+        );
+        ws.send(JSON.stringify(payload));
+        ws.close(1011, "WebSocket not associated with a user.");
+        return;
+      }
+
+      const data = result.data as WebSocketPeerMessage;
+      switch (data.type) {
+        case "add_incident": {
+          const incident = data.incident as Incident;
+          await this.addIncident(incident);
+          this.broadcast(
+            { type: "add_incident", incident },
+            { type: "client", name: session.user.name, id: session.user.key }
+          );
+          break;
+        }
+        case "update_incident": {
+          const incident = data.incident as Incident;
+          await this.editIncident(incident);
+          this.broadcast(
+            { type: "update_incident", incident },
+            { type: "client", name: session.user.name, id: session.user.key }
+          );
+          break;
+        }
+        case "remove_incident": {
+          await this.deleteIncident(data.id);
+          this.broadcast(
+            { type: "remove_incident", id: data.id },
+            { type: "client", name: session.user.name, id: session.user.key }
+          );
+          break;
+        }
+        case "scratchpad_update": {
+          await this.setScratchpad(data.id, data.scratchpad);
+          this.broadcast(
+            {
+              type: "scratchpad_update",
+              id: data.id,
+              scratchpad: data.scratchpad,
+            },
+            { type: "client", name: session.user.name, id: session.user.key }
+          );
+          break;
+        }
+        case "message": {
+          this.broadcast(
+            { type: "message", message: data.message },
+            { type: "client", name: session.user.name, id: session.user.key }
+          );
+          break;
+        }
+      }
+    } catch (e) {
+      const payload = this.createPayload(
+        {
+          type: "server_error",
+          error: `${e}`,
+        },
+        { type: "server" }
+      );
+
+      ws.send(JSON.stringify(payload));
+      return;
+    }
+  }
+
+  async webSocketClose(ws: WebSocket): Promise<void> {
+    const session = this.sessions.get(ws);
+    if (!session) {
+      return;
+    }
+
+    this.sockets.delete(session.user.key);
+    this.sessions.delete(ws);
+
+    const activeUsers = this.getActiveUsers();
+    const invitations = await this.getInvitationList();
+
+    if (session.user) {
+      await this.broadcast(
+        {
+          type: "server_user_remove",
+          user: session.user,
+          activeUsers,
+          invitations,
+        },
+        { type: "server" }
+      );
+    }
+  }
+
+  async webSocketError(ws: WebSocket /*error: unknown*/): Promise<void> {
+    const session = this.sessions.get(ws);
+    if (!session) {
+      return;
+    }
+
+    this.sockets.delete(session.user.key);
+    this.sessions.delete(ws);
+
+    const activeUsers = this.getActiveUsers();
+    const invitations = await this.getInvitationList();
+
+    if (session.user) {
+      await this.broadcast(
+        {
+          type: "server_user_remove",
+          user: session.user,
+          activeUsers,
+          invitations,
+        },
+        { type: "server" }
+      );
+    }
   }
 
   async broadcast<T extends WebSocketMessage>(
@@ -587,15 +457,18 @@ export class ShareInstance extends DurableObject {
   ) {
     const payload: WebSocketPayload<T> = this.createPayload(message, sender);
 
-    const clientLefts: SessionClient[] = [];
+    const clientLefts: ClientSession[] = [];
 
-    for (const [key, client] of Object.entries(this.clients)) {
+    for (const [key, socket] of this.sockets) {
       try {
-        client.socket.send(JSON.stringify(payload));
+        socket.send(JSON.stringify(payload));
       } catch (err) {
-        client.active = false;
-        clientLefts.push(client);
-        delete this.clients[key];
+        const session = this.sessions.get(socket);
+        if (session) {
+          clientLefts.push(session);
+        }
+        this.sockets.delete(key);
+        this.sessions.delete(socket);
       }
     }
 

@@ -100,7 +100,7 @@ queueMigration({
   run_order: 0,
   dependencies: [],
   apply: async () => {
-    const incidents = (await getAllIncidents()) as (
+    const incidents = (await getAllIncidents()) as unknown as (
       | NewIncident
       | OldIncident
     )[];

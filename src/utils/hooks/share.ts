@@ -8,6 +8,7 @@ import {
   getIntegrationAPIUsers,
   IntegrationAPICredentials,
   IntegrationUsersResponse,
+  inviteUser,
 } from "~utils/data/share";
 import { exportPublicKey, signMessage } from "~utils/data/crypto";
 import { HookQueryOptions } from "./robotevents";
@@ -39,6 +40,12 @@ export function useEventInvitation(sku?: string | null) {
 export function useAcceptInvitation(sku: string, id: string) {
   return useMutation({
     mutationFn: () => acceptEventInvitation(sku, id),
+  });
+}
+
+export function useInviteUser(sku: string, admin: boolean) {
+  return useMutation({
+    mutationFn: (key: string) => inviteUser(sku, key, { admin }),
   });
 }
 

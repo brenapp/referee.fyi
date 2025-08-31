@@ -6,9 +6,6 @@
     ".": {
       "default": "./main.js"
     },
-    "./worker": {
-      "types": "./worker.d.ts"
-    },
     "./qnaplus": {
       "types": "./qnaplus.d.ts"
     },

@@ -28,7 +28,7 @@ export const SuccessResponseSchema = z
 export const route = createRoute({
   method: "delete",
   path: "/api/integration/v1/{sku}/incident",
-  tags: ["Integration"],
+  tags: ["Integration API"],
   summary: "Delete an incident in a shared instance",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",
   description:

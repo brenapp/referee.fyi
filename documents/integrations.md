@@ -2,10 +2,35 @@
 
 Referee FYI supports an integration API that allows third-party applications to
 pull data from a sharing instance with the permission of an administrator on
-that instance. _Currently, this integration supports readonly access to Incident
+that instance. _Currently, this integration supports readonly access to incident
 data._
 
-## Bearer Token
+> Note: the Integration API is currently provided for free for applications that
+> wish to pull data from Referee FYI. The authors disclaim all liability from
+> integrating with Referee FYI in your application, and all services are
+> provided as-is, with no guarantee of future available. We will attempt to
+> provide notice here for any significant disruption or change to the service.
+
+## Background
+
+Referee FYI is an application that allows Head Referees at robotics events to
+record match violations (Incidents) and maintain a digital anomaly log. If they
+wish to share the anomaly log between multiple people, they can use the Sync
+Engine to allow multiple Head Referees to coordinate on a shared match anomaly
+log. Your application communicates with the Sync Engine to obtain information
+about a particular event.
+
+Referee FYI's sharing mechanism is designed to be resilient to unstable network
+conditions, so different users can have different understandings of the current
+match anomaly log, and we must reconcile those changes when the devices are able
+to "sync up" again at some point in the future. How this is accomplished is
+beyond the scope of this document, but it's important to remember that your
+application is accessing the _sync engine's_ understanding of the current match
+anomaly log. If the Head Referee's device loses internet access for multiple
+hours, they wil be able to continue to record incidents, and your application
+would not have access to that data.
+
+## Authorization
 
 All access to the integration requires a bearer token from an instance
 administrator. The bearer token is cryptographically derived from the grantor's
@@ -15,166 +40,33 @@ administrators and invalid if the user leaves the instance.
 Instance Admins can access the bearer token (and data URLs) from the Manage tab
 for the event they are an administrator for.
 
+When developing applications that integrate with Referee FYI, you should prompt
+the user to copy the Bearer token from the Manage tab for a particular event.
+Access to a bearer token allows your application to pull data from a particular
+event on behalf of that user.
+
+You can pass the bearer token either in the `token` query parameter, or using
+the standard `Authorization: Bearer <token>`, but you should not specify both.
+You should only use the `token` query parameter if your use case (say, exporting
+Referee FYI to a spreadsheet), does not support passing a header.
+
+You can use the verify endpoint to validate that the token a user has given to
+you is currently valid.
+
+```bash
+curl -X 'GET' \
+  'https://referee.fyi/api/integration/v1/RE-VIQRC-25-1030/verify' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer <TOKEN>'
+```
+
 ## Supported Endpoints
 
-The base URL for the production integration API is
+The main base URL for the production integration API is:
 
 ```
-https://referee.fyi/api/integration/v1/<SKU>/
+https://referee.fyi/api/
 ```
 
-where the SKU is the RobotEvents event code. All endpoints return data in the form of a `ShareResponse`.
-
-```ts
-export type ShareResponseSuccess<T> = {
-  success: true;
-  data: T;
-};
-
-export type ShareResponseFailureReason =
-  | "bad_request"
-  | "server_error"
-  | "incorrect_code";
-
-export type ShareResponseFailure = {
-  success: false;
-  reason: ShareResponseFailureReason;
-  details: string;
-};
-
-export type ShareResponse<T> = ShareResponseSuccess<T> | ShareResponseFailure;
-```
-
-### `https://referee.fyi/api/integration/v1/<SKU>/verify`
-
-The verify endpoint can be used to ensure that your bearer token is valid.
-
-```
-/verify?token=<TOKEN>
-```
-
-```ts
-type User = {
-  // Base-64 encoded public key for this user
-  key: string;
-
-  // user-entered friendly name
-  name: string;
-};
-
-type VerifyResponse = ShareResponse<{
-  // If the bearer token is valid
-  valid: boolean;
-
-  // The user who this bearer token belongs to.
-  user: User;
-
-  // The invitation ID. Represents this specific user's invitation to this specific
-  // sharing instance. Will change if the user leaves and rejoins a different instance
-  invitation: string;
-}>;
-```
-
-### `https://referee.fyi/api/integration/v1/<SKU>/users`
-
-Gets information about the current users on the sharing instance.
-
-```
-/users?token=<TOKEN>
-```
-
-```ts
-type Invitation = {
-  admin: boolean;
-  user: User;
-};
-
-type UsersResponse = ShareResponse<{
-  // Invitations are all users that have access to the sharing instance
-  invitations: Invitation[];
-
-  // Active users are directly connected to the websocket and can receive live updates. All active users have invitations.
-  active: User[];
-}>;
-```
-
-### `https://referee.fyi/api/integration/v1/<SKU>/incidents.json`
-
-Returns all incidents for a given instance, in JSON form.
-
-```ts
-export type IncidentOutcome =
-  | "Minor"
-  | "Major"
-  | "Disabled"
-  | "General"
-  | "Inspection";
-
-export type IncidentMatchHeadToHead = {
-  type: "match";
-  division: number;
-  name: string;
-  id: number;
-};
-
-export type IncidentMatchSkills = {
-  type: "skills";
-  skillsType: "driver" | "programming";
-  attempt: number;
-};
-
-export type IncidentMatch = IncidentMatchHeadToHead | IncidentMatchSkills;
-
-export type Incident = {
-  // Globally unique, even across sharing instances
-  id: string;
-
-  // The timestamp the incident was created, encoded as an ISO-8601 timestamp
-  time: string;
-
-  // Event SKU
-  event: string;
-
-  match?: IncidentMatch;
-
-  // Team *number*
-  team: string;
-
-  outcome: IncidentOutcome;
-
-  // Any attached rules, for this program. Notated like <G1>, <SG7>
-  rules: string[];
-
-  // User-entered notes
-  notes: string;
-
-  // Any attached assets. The integration API does not currently provide a way to grant access to assets.
-  assets: string[];
-};
-
-type IncidentsResponse = ShareResponse<Incident[]>;
-```
-
-### `https://referee.fyi/api/integration/v1/<SKU>/incidents.csv`
-
-Returns all incidents for a given instance, in CSV form.
-
-```
-/incidents.csv?token=<TOKEN>
-```
-
-Columns:
-
-```csv
-Date,Time,ID,SKU,Division,Match,Team,Outcome,Rules,Notes
-```
-
-### `https://referee.fyi/api/integration/v1/<SKU>/incidents.pdf`
-
-Returns all incidents for a given instance, as a human-readable PDF report. The
-PDF is grouped by team, and is intended to be a format useful to show to judges
-and other external stakeholders.
-
-```
-/incidents.pdf?token=<TOKEN>
-```
+- OpenAPI Specification: `https://referee.fyi/api/openapi`
+- Swagger Documentation: `https://referee.fyi/api/swagger`

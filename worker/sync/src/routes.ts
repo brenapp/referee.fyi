@@ -82,19 +82,19 @@ const routes = app
   .openapi(api_$sku_data.route, api_$sku_data.handler)
   .openapi(api_$sku_join.route, api_$sku_join.handler);
 
+app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
+  type: "http",
+  scheme: "bearer",
+  bearerFormat: "ECDSA",
+});
+
 const config: OpenAPIObjectConfig = {
   openapi: "3.0.0",
   info: {
-    title: "Referee FYI Sync Engine",
+    title: "Referee FYI Integration API",
     version: "0.0.0",
-    contact: {
-      name: "Brendan McGuire",
-    },
     description:
-      "The Referee FYI Sync Engine API describes the protocol that different Referee FYI client applications use to share incident and realtime data.",
-    license: {
-      name: "Copyright (c) 2025 Brendan McGuire. All Rights Reserved",
-    },
+      "The Referee FYI Integration API gives applications readonly access to incident data with the permission of an instance administrator.",
   },
   externalDocs: {
     url: "https://github.com/brenapp/referee.fyi/blob/main/documents/integrations.md",
@@ -102,10 +102,15 @@ const config: OpenAPIObjectConfig = {
   },
   tags: [
     {
-      name: "Integration",
+      name: "Integration API",
       description: "Exposes read-only data to third-party applications.",
+      externalDocs: {
+        description: "Documentation",
+        url: "https://github.com/brenapp/referee.fyi/blob/main/documents/integrations.md",
+      },
     },
   ],
+  security: [{ Bearer: [] }],
 };
 
 app.doc("/api/openapi", config);
@@ -114,7 +119,12 @@ export function getOpenApiDocument() {
   return app.getOpenAPIDocument(config);
 }
 
-app.get("/api/swagger", swaggerUI({ url: "/api/openapi" }));
+app.get(
+  "/api/swagger",
+  swaggerUI({
+    url: "/api/openapi",
+  })
+);
 
 export { app };
 

@@ -15,13 +15,17 @@ import { GameSchema } from "@referee-fyi/rules";
 
 import { type Plugin } from "vite";
 
-//#region Require Envirponment Variables
+//#region Require Environment Variables
 
 const requiredEnvVars = (vars: string[]): Plugin => {
   return {
     name: "require-env-vars",
     apply: "build",
     config() {
+      if (!process.env.CI) {
+        return;
+      }
+
       const missingVars = vars.filter((v) => !process.env[v]);
       if (missingVars.length > 0) {
         throw new Error(

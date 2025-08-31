@@ -13,7 +13,11 @@ import {
   type InstanceScratchpads,
   WebSocketMessageSchema,
 } from "@referee-fyi/share";
-import { getAllInvitationsForInstance, getInstance } from "../utils/data";
+import {
+  getAllInvitationsForInstance,
+  getInstance,
+  getUser,
+} from "../utils/data";
 import { DurableObject } from "cloudflare:workers";
 
 export type ClientSession = {
@@ -249,10 +253,9 @@ export class ShareInstance extends DurableObject {
     const [client, server] = Object.values(webSocketPair);
 
     const search = new URL(request.url).searchParams;
-    const name = search.get("name");
     const key = search.get("id");
 
-    if (!name || !key) {
+    if (!key) {
       const socket = server;
       socket.accept();
 
@@ -261,7 +264,16 @@ export class ShareInstance extends DurableObject {
       return new Response(null, { status: 101, webSocket: client });
     }
 
-    const user: User = { name, key };
+    const user = await getUser(this.env, key);
+    if (!user) {
+      const socket = server;
+      socket.accept();
+
+      socket.send(JSON.stringify({ error: "invalid user id" }));
+      socket.close(1011, "Invalid user id");
+      return new Response(null, { status: 101, webSocket: client });
+    }
+
     const session: ClientSession = {
       active: true,
       user,

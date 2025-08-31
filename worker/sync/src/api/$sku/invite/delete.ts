@@ -124,7 +124,7 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
   const removedUser = await getUser(c.env, user);
   const message = {
     type: "server_user_remove",
-    user: removedUser ?? { key: user, name: "Unknown User" },
+    user: removedUser ?? { key: user, name: "Unknown User", role: "none" },
     activeUsers: await stub.getActiveUsers(),
     invitations: await stub.getInvitationList(),
   } satisfies WebsocketServerUserRemoveMessage;

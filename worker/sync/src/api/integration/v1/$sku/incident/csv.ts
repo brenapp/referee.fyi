@@ -18,7 +18,7 @@ export const QuerySchema = VerifyIntegrationTokenQuerySchema;
 export const route = createRoute({
   method: "get",
   path: "/api/integration/v1/{sku}/incidents.csv",
-  tags: ["Integration"],
+  tags: ["Integration API"],
   summary: "Get incidents as CSV",
   middleware: [verifyIntegrationToken],
   request: {

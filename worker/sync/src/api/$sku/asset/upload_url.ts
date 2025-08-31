@@ -50,14 +50,6 @@ export const route = createRoute({
         },
       },
     },
-    500: {
-      description: "Internal server error",
-      content: {
-        "application/json": {
-          schema: ErrorResponseSchema,
-        },
-      },
-    },
     ...ErrorResponses,
   },
 });

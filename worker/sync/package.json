@@ -3,15 +3,15 @@
   "version": "1.0.0",
   "description": "Sync Service for Referee FYI",
   "scripts": {
-    "dev": "wrangler dev --ip 0.0.0.0 --env staging",
+    "dev": "wrangler dev --ip 0.0.0.0 --env development",
     "dev:env:production": "wrangler dev --ip 0.0.0.0 --env production",
-    "dev:remote": "wrangler dev --remote --env staging",
-    "dev:secure": "wrangler dev --ip 0.0.0.0 --env staging --local-protocol https --https-key-path ../../.certs/privkey.pem --https-cert-path ../../.certs/cert.pem",
-    "build": "tsc --noEmit && wrangler deploy --env staging --dry-run",
+    "dev:remote": "wrangler dev --remote --env development",
+    "dev:secure": "wrangler dev --ip 0.0.0.0 --env development --local-protocol https --https-key-path ../../.certs/privkey.pem --https-cert-path ../../.certs/cert.pem",
+    "build": "tsc --noEmit && wrangler deploy --env development --dry-run",
     "deploy": "wrangler deploy",
     "format": "prettier --write  '*.{json,js}' 'src/**/*.{js,ts}'",
     "lint": "eslint --max-warnings=0 src && prettier --check '*.{json,js}' 'src/**/*.{js,ts}'",
-    "cf-typegen": "wrangler types --env staging"
+    "cf-typegen": "wrangler types --env development"
   },
   "exports": {
     "types": "./src/routes.ts"

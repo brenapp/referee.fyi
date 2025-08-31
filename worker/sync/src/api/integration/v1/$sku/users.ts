@@ -38,7 +38,7 @@ export const SuccessResponseSchema = z
 export const route = createRoute({
   method: "get",
   path: "/api/integration/v1/{sku}/users",
-  tags: ["Integration"],
+  tags: ["Integration API"],
   summary: "Gets information about the users in a shared instance.",
   middleware: [verifyIntegrationToken],
   request: {

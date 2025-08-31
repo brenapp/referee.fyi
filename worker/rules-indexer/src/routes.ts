@@ -6,14 +6,13 @@ import * as api_search from "./api/search.js";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { AppArgs } from "./router.js";
 
-
 const app = new OpenAPIHono<AppArgs>();
+
+app.use("/api/*", cors());
 
 const routes = app
   .openapi(api_updateQuestions.route, api_updateQuestions.handler)
   .openapi(api_search.route, api_search.handler);
-
-app.use("/api/*", cors());
 
 const config = {
   openapi: "3.0.0",
@@ -29,4 +28,5 @@ export function getOpenApiDocument() {
 app.get("/api/swagger", swaggerUI({ url: "/api/openapi" }));
 
 export { app };
+
 export type AppType = typeof routes;

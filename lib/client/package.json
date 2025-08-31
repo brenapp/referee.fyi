@@ -1,6 +1,6 @@
 {
   "name": "@referee-fyi/client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "SDK for for the Referee FYI Integration API",
   "type": "module",
   "author": "Brendan McGuire",

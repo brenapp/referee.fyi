@@ -1,10 +1,17 @@
 import { cors } from "hono/cors";
-import { app as baseRouter } from "./router.js";
 import { swaggerUI } from "@hono/swagger-ui";
 
-export const app = baseRouter
-  .openapi(...(await import("./api/updateQuestions.js")).default)
-  .openapi(...(await import("./api/search.js")).default);
+import * as api_updateQuestions from "./api/updateQuestions.js";
+import * as api_search from "./api/search.js";
+import { OpenAPIHono } from "@hono/zod-openapi";
+import { AppArgs } from "./router.js";
+
+
+const app = new OpenAPIHono<AppArgs>();
+
+const routes = app
+  .openapi(api_updateQuestions.route, api_updateQuestions.handler)
+  .openapi(api_search.route, api_search.handler);
 
 app.use("/api/*", cors());
 
@@ -13,10 +20,13 @@ const config = {
   info: { title: "Referee FYI Rules", version: "0.0.0" },
 };
 
-app.doc("/openapi", config);
+app.doc("/api/openapi", config);
 
 export function getOpenApiDocument() {
   return app.getOpenAPIDocument(config);
 }
 
-app.get("/swagger", swaggerUI({ url: "/openapi" }));
+app.get("/api/swagger", swaggerUI({ url: "/api/openapi" }));
+
+export { app };
+export type AppType = typeof routes;

@@ -17,5 +17,3 @@ export const ErrorResponseSchema = z
 export type AppArgs = {
   Bindings: Env;
 };
-
-export const app = new OpenAPIHono<AppArgs>();

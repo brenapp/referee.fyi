@@ -63,7 +63,6 @@ export const route = createRoute({
   },
 });
 
-export type Route = typeof route;
 export const handler: RouteHandler<typeof route, AppArgs> = async (c) => {
   const { query } = c.req.valid("query");
   const data = await c.env.ai.autorag("referee-fyi-rules-rag").search({
@@ -87,5 +86,3 @@ export const handler: RouteHandler<typeof route, AppArgs> = async (c) => {
     200
   );
 };
-
-export default [route, handler] as const;

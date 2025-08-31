@@ -79,7 +79,6 @@ export const route = createRoute({
   },
 });
 
-export type Route = typeof route;
 export const handler: RouteHandler<typeof route, AppArgs> = async (c) => {
   const { version } = c.req.valid("query");
   const response = await client.GET("/internal/update", {
@@ -104,5 +103,3 @@ export const handler: RouteHandler<typeof route, AppArgs> = async (c) => {
     200
   );
 };
-
-export default [route, handler] as const;

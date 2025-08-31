@@ -1,4 +1,4 @@
-import type { Schemas, SuccessResponseData } from "~types/worker/rules";
+import type { Schemas, Routes } from "~types/worker/rules";
 
 import { get, set } from "./keyval";
 import { ProgramAbbr, Year } from "robotevents";
@@ -66,25 +66,23 @@ export async function updateQNAs() {
   try {
     const url = new URL("/api/updateQuestions", base);
     url.searchParams.set("version", version);
-    const response = await fetch(url);
+    const response: Routes["/api/updateQuestions"]["get"] = await fetch(
+      url
+    ).then((r) => r.json());
 
-    if (!response.ok) {
+    if (!response.success) {
       return null;
     }
 
-    const data = (await response.json()) as SuccessResponseData<
-      "get",
-      "/api/updateQuestions"
-    >;
-
-    if (data.version) {
-      await setQNAPlusVersion(data.version);
+    if (response.data.version) {
+      await setQNAPlusVersion(response.data.version);
     }
 
-    if (!data.questions) {
+    if (!response.data.questions) {
       return null;
     }
-    const questions = data.questions;
+
+    const questions = response.data.questions;
     for (const question of questions) {
       await setQuestion(question);
     }

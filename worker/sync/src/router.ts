@@ -1,5 +1,4 @@
 import { z } from "zod/v4";
-import { OpenAPIHono } from "@hono/zod-openapi";
 import {
   AssetMeta,
   Invitation,

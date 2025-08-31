@@ -30,6 +30,50 @@
     }
   ],
   "env": {
+    "development": {
+      "secrets_store_secrets": [
+        {
+          "store_id": "8e1adb056fd34b4c95266f0a7e767fae",
+          "binding": "CLOUDFLARE_API_KEY",
+          "secret_name": "CLOUDFLARE_API_KEY"
+        },
+        {
+          "store_id": "8e1adb056fd34b4c95266f0a7e767fae",
+          "binding": "CLOUDFLARE_IMAGES_SIGNATURE_TOKEN",
+          "secret_name": "CLOUDFLARE_IMAGES_SIGNATURE_TOKEN"
+        },
+        {
+          "store_id": "8e1adb056fd34b4c95266f0a7e767fae",
+          "binding": "CLOUDFLARE_IMAGES_WEBHOOK_SECRET",
+          "secret_name": "CLOUDFLARE_IMAGES_WEBHOOK_SECRET"
+        },
+        {
+          "store_id": "8e1adb056fd34b4c95266f0a7e767fae",
+          "binding": "ROBOTEVENTS_TOKEN",
+          "secret_name": "ROBOTEVENTS_TOKEN"
+        }
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "referee-fyi-sync-staging",
+          "database_id": "43fa3665-c837-4b71-b986-b8a5f8f9dbf2"
+        }
+      ],
+      "vars": {
+        "WRANGLER_ENVIRONMENT": "development",
+        "CLOUDFLARE_EMAIL": "brendan@bren.app",
+        "CLOUDFLARE_IMAGES_ACCOUNT_ID": "f9b9e088206092e25d77f0def608c799"
+      },
+      "durable_objects": {
+        "bindings": [
+          {
+            "class_name": "ShareInstance",
+            "name": "INCIDENTS"
+          }
+        ]
+      }
+    },
     "staging": {
       "routes": [
         {

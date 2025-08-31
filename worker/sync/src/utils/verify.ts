@@ -295,13 +295,19 @@ export const VerifyIntegrationTokenParamsSchema = z.object({
 });
 
 export const VerifyIntegrationTokenQuerySchema = z.object({
-  token: z.string(),
+  token: z.string().optional(),
   instance: z.string().optional(),
+});
+
+export const VerifyIntegrationTokenHeaderSchema = z.object({
+  Authorization: z.string().optional(),
 });
 
 export const verifySystemToken = createMiddleware<AppArgs>(async (c, next) => {
   const sku = c.req.param("sku");
-  const token = c.req.query("token");
+  const token =
+    c.req.query("token") ||
+    c.req.header("Authorization")?.replace("Bearer ", "");
   const instanceSecret = c.req.query("instance");
 
   // Skip to bearer token

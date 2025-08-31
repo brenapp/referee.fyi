@@ -1,7 +1,7 @@
 import { GameSchema } from "@referee-fyi/rules";
 import puppeteer from "@cloudflare/puppeteer";
 import { ProgramAbbr, Year } from "robotevents";
-import { normalizeRule } from "../utils";
+import { normalizeRule } from "../utils.js";
 
 export type GameRuleToIndex = {
   path: `${ProgramAbbr}_${Year}/rule_${string}`;

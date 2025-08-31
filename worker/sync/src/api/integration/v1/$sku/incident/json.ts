@@ -27,7 +27,7 @@ export const SuccessResponseSchema = z
 export const route = createRoute({
   method: "get",
   path: "/api/integration/v1/{sku}/incidents.json",
-  tags: ["Integration"],
+  tags: ["Integration API"],
   summary: "Get incidents as JSON",
   middleware: [verifyIntegrationToken],
   request: {

@@ -30,7 +30,7 @@ export const SuccessResponseSchema = z
 export const route = createRoute({
   method: "get",
   path: "/api/integration/v1/{sku}/verify",
-  tags: ["Integration"],
+  tags: ["Integration API"],
   summary: "Verify Integration Token",
   description: "Verifies the integration token and returns user information.",
   middleware: [verifyIntegrationToken],

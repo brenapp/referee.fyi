@@ -301,43 +301,7 @@ export interface paths {
                         "application/json": {
                             /** @enum {boolean} */
                             success: true;
-                            data: {
-                                id: string;
-                                /** @description ISO 8601 timestamp of when the incident occurred. */
-                                time: string;
-                                /** @description Event Code */
-                                event: string;
-                                match?: {
-                                    /** @enum {string} */
-                                    type: "match";
-                                    division: number;
-                                    name: string;
-                                    id: number;
-                                } | {
-                                    /** @enum {string} */
-                                    type: "skills";
-                                    /** @enum {string} */
-                                    skillsType: "driver" | "programming";
-                                    attempt: number;
-                                };
-                                /** @description Team Number */
-                                team: string;
-                                outcome: components["schemas"]["IncidentOutcome"];
-                                /** @description Cited rules in the violation, in the form <SG1> */
-                                rules: string[];
-                                notes: string;
-                                /** @description Asset IDs associated with the incident. */
-                                assets: string[];
-                                flags: components["schemas"]["IncidentFlag"][];
-                                consistency: {
-                                    match: components["schemas"]["KeyRegister"];
-                                    outcome: components["schemas"]["KeyRegister"];
-                                    rules: components["schemas"]["KeyRegister"];
-                                    notes: components["schemas"]["KeyRegister"];
-                                    assets: components["schemas"]["KeyRegister"];
-                                    flags: components["schemas"]["KeyRegister"];
-                                };
-                            }[];
+                            data: components["schemas"]["Incident"][];
                         };
                     };
                 };
@@ -1767,43 +1731,7 @@ export interface paths {
             /** @description Incident body to create */
             requestBody: {
                 content: {
-                    "application/json": {
-                        id: string;
-                        /** @description ISO 8601 timestamp of when the incident occurred. */
-                        time: string;
-                        /** @description Event Code */
-                        event: string;
-                        match?: {
-                            /** @enum {string} */
-                            type: "match";
-                            division: number;
-                            name: string;
-                            id: number;
-                        } | {
-                            /** @enum {string} */
-                            type: "skills";
-                            /** @enum {string} */
-                            skillsType: "driver" | "programming";
-                            attempt: number;
-                        };
-                        /** @description Team Number */
-                        team: string;
-                        outcome: components["schemas"]["IncidentOutcome"];
-                        /** @description Cited rules in the violation, in the form <SG1> */
-                        rules: string[];
-                        notes: string;
-                        /** @description Asset IDs associated with the incident. */
-                        assets: string[];
-                        flags: components["schemas"]["IncidentFlag"][];
-                        consistency: {
-                            match: components["schemas"]["KeyRegister"];
-                            outcome: components["schemas"]["KeyRegister"];
-                            rules: components["schemas"]["KeyRegister"];
-                            notes: components["schemas"]["KeyRegister"];
-                            assets: components["schemas"]["KeyRegister"];
-                            flags: components["schemas"]["KeyRegister"];
-                        };
-                    };
+                    "application/json": components["schemas"]["Incident"];
                 };
             };
             responses: {
@@ -1957,43 +1885,7 @@ export interface paths {
             /** @description Incident body to edit */
             requestBody: {
                 content: {
-                    "application/json": {
-                        id: string;
-                        /** @description ISO 8601 timestamp of when the incident occurred. */
-                        time: string;
-                        /** @description Event Code */
-                        event: string;
-                        match?: {
-                            /** @enum {string} */
-                            type: "match";
-                            division: number;
-                            name: string;
-                            id: number;
-                        } | {
-                            /** @enum {string} */
-                            type: "skills";
-                            /** @enum {string} */
-                            skillsType: "driver" | "programming";
-                            attempt: number;
-                        };
-                        /** @description Team Number */
-                        team: string;
-                        outcome: components["schemas"]["IncidentOutcome"];
-                        /** @description Cited rules in the violation, in the form <SG1> */
-                        rules: string[];
-                        notes: string;
-                        /** @description Asset IDs associated with the incident. */
-                        assets: string[];
-                        flags: components["schemas"]["IncidentFlag"][];
-                        consistency: {
-                            match: components["schemas"]["KeyRegister"];
-                            outcome: components["schemas"]["KeyRegister"];
-                            rules: components["schemas"]["KeyRegister"];
-                            notes: components["schemas"]["KeyRegister"];
-                            assets: components["schemas"]["KeyRegister"];
-                            flags: components["schemas"]["KeyRegister"];
-                        };
-                    };
+                    "application/json": components["schemas"]["Incident"];
                 };
             };
             responses: {
@@ -2303,6 +2195,28 @@ export interface components {
                 active: components["schemas"]["User"][];
             };
         };
+        IncidentMatchHeadToHead: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "match";
+            division: number;
+            name: string;
+            id: number;
+        };
+        IncidentMatchSkills: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "skills";
+            /** @enum {string} */
+            skillsType: "driver" | "programming";
+            attempt: number;
+        };
+        /** @description The match associated with the incident, if applicable. */
+        IncidentMatch: components["schemas"]["IncidentMatchHeadToHead"] | components["schemas"]["IncidentMatchSkills"];
         /**
          * @description The referee determined outcome of the incident.
          * @enum {string}
@@ -2325,6 +2239,32 @@ export interface components {
             peer: string;
             instant: string;
             history: components["schemas"]["History"][];
+        };
+        Incident: {
+            id: string;
+            /** @description ISO 8601 timestamp of when the incident occurred. */
+            time: string;
+            /** @description Event Code */
+            event: string;
+            match?: components["schemas"]["IncidentMatch"];
+            /** @description Team Number */
+            team: string;
+            outcome: components["schemas"]["IncidentOutcome"];
+            /** @description Cited rules in the violation, in the form <SG1> */
+            rules: string[];
+            notes: string;
+            /** @description Asset IDs associated with the incident. */
+            assets: string[];
+            flags: components["schemas"]["IncidentFlag"][];
+        } & {
+            consistency: {
+                match: components["schemas"]["KeyRegister"];
+                outcome: components["schemas"]["KeyRegister"];
+                rules: components["schemas"]["KeyRegister"];
+                notes: components["schemas"]["KeyRegister"];
+                assets: components["schemas"]["KeyRegister"];
+                flags: components["schemas"]["KeyRegister"];
+            };
         };
         /** @enum {string} */
         AssetType: "image";
@@ -2445,84 +2385,12 @@ export interface components {
         PutIncidentResponse: {
             /** @enum {boolean} */
             success: true;
-            data: {
-                id: string;
-                /** @description ISO 8601 timestamp of when the incident occurred. */
-                time: string;
-                /** @description Event Code */
-                event: string;
-                match?: {
-                    /** @enum {string} */
-                    type: "match";
-                    division: number;
-                    name: string;
-                    id: number;
-                } | {
-                    /** @enum {string} */
-                    type: "skills";
-                    /** @enum {string} */
-                    skillsType: "driver" | "programming";
-                    attempt: number;
-                };
-                /** @description Team Number */
-                team: string;
-                outcome: components["schemas"]["IncidentOutcome"];
-                /** @description Cited rules in the violation, in the form <SG1> */
-                rules: string[];
-                notes: string;
-                /** @description Asset IDs associated with the incident. */
-                assets: string[];
-                flags: components["schemas"]["IncidentFlag"][];
-                consistency: {
-                    match: components["schemas"]["KeyRegister"];
-                    outcome: components["schemas"]["KeyRegister"];
-                    rules: components["schemas"]["KeyRegister"];
-                    notes: components["schemas"]["KeyRegister"];
-                    assets: components["schemas"]["KeyRegister"];
-                    flags: components["schemas"]["KeyRegister"];
-                };
-            };
+            data: components["schemas"]["Incident"];
         };
         PatchIncidentResponse: {
             /** @enum {boolean} */
             success: true;
-            data: {
-                id: string;
-                /** @description ISO 8601 timestamp of when the incident occurred. */
-                time: string;
-                /** @description Event Code */
-                event: string;
-                match?: {
-                    /** @enum {string} */
-                    type: "match";
-                    division: number;
-                    name: string;
-                    id: number;
-                } | {
-                    /** @enum {string} */
-                    type: "skills";
-                    /** @enum {string} */
-                    skillsType: "driver" | "programming";
-                    attempt: number;
-                };
-                /** @description Team Number */
-                team: string;
-                outcome: components["schemas"]["IncidentOutcome"];
-                /** @description Cited rules in the violation, in the form <SG1> */
-                rules: string[];
-                notes: string;
-                /** @description Asset IDs associated with the incident. */
-                assets: string[];
-                flags: components["schemas"]["IncidentFlag"][];
-                consistency: {
-                    match: components["schemas"]["KeyRegister"];
-                    outcome: components["schemas"]["KeyRegister"];
-                    rules: components["schemas"]["KeyRegister"];
-                    notes: components["schemas"]["KeyRegister"];
-                    assets: components["schemas"]["KeyRegister"];
-                    flags: components["schemas"]["KeyRegister"];
-                };
-            };
+            data: components["schemas"]["Incident"];
         };
         DeleteIncidentResponse: {
             /** @enum {boolean} */
@@ -2540,43 +2408,7 @@ export interface components {
                 incidents: {
                     deleted: string[];
                     values: {
-                        [key: string]: {
-                            id: string;
-                            /** @description ISO 8601 timestamp of when the incident occurred. */
-                            time: string;
-                            /** @description Event Code */
-                            event: string;
-                            match?: {
-                                /** @enum {string} */
-                                type: "match";
-                                division: number;
-                                name: string;
-                                id: number;
-                            } | {
-                                /** @enum {string} */
-                                type: "skills";
-                                /** @enum {string} */
-                                skillsType: "driver" | "programming";
-                                attempt: number;
-                            };
-                            /** @description Team Number */
-                            team: string;
-                            outcome: components["schemas"]["IncidentOutcome"];
-                            /** @description Cited rules in the violation, in the form <SG1> */
-                            rules: string[];
-                            notes: string;
-                            /** @description Asset IDs associated with the incident. */
-                            assets: string[];
-                            flags: components["schemas"]["IncidentFlag"][];
-                            consistency: {
-                                match: components["schemas"]["KeyRegister"];
-                                outcome: components["schemas"]["KeyRegister"];
-                                rules: components["schemas"]["KeyRegister"];
-                                notes: components["schemas"]["KeyRegister"];
-                                assets: components["schemas"]["KeyRegister"];
-                                flags: components["schemas"]["KeyRegister"];
-                            };
-                        };
+                        [key: string]: components["schemas"]["Incident"];
                     };
                 };
                 scratchpads: {
@@ -2585,13 +2417,7 @@ export interface components {
                         [key: string]: {
                             id: string;
                             event: string;
-                            match: {
-                                /** @enum {string} */
-                                type: "match";
-                                division: number;
-                                name: string;
-                                id: number;
-                            };
+                            match: components["schemas"]["IncidentMatchHeadToHead"];
                             notes?: string;
                             consistency: {
                                 [key: string]: components["schemas"]["KeyRegister"];

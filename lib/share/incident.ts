@@ -1,6 +1,13 @@
 import { z } from "zod/v4";
 import { LastWriteWinsConsistencySchema } from "@referee-fyi/consistency";
 
+export type Simplify<T> = T extends unknown[] | Date
+  ? T
+  : {
+      [K in keyof T]: T[K];
+      // eslint-disable-next-line @typescript-eslint/ban-types
+    } & {};
+
 export const OUTCOMES = [
   "General",
   "Minor",
@@ -16,28 +23,43 @@ export const IncidentOutcomeSchema = z.enum(OUTCOMES).meta({
 
 export type IncidentOutcome = z.infer<typeof IncidentOutcomeSchema>;
 
-export const IncidentMatchHeadToHeadSchema = z.object({
-  type: z.literal("match"),
-  division: z.number(),
-  name: z.string(),
-  id: z.number(),
-});
+export const IncidentMatchHeadToHeadSchema = z
+  .object({
+    type: z.literal("match"),
+    division: z.number(),
+    name: z.string(),
+    id: z.number(),
+  })
+  .meta({
+    id: "IncidentMatchHeadToHead",
+  });
 
 export type IncidentMatchHeadToHead = z.infer<
   typeof IncidentMatchHeadToHeadSchema
 >;
 
-export const IncidentMatchSkillsSchema = z.object({
-  type: z.literal("skills"),
-  skillsType: z.enum(["driver", "programming"]),
-  attempt: z.number(),
-});
+export const IncidentMatchSkillsSchema = z
+  .object({
+    type: z.literal("skills"),
+    skillsType: z.enum(["driver", "programming"]),
+    attempt: z.number(),
+  })
+  .meta({
+    id: "IncidentMatchSkills",
+  });
+
 export type IncidentMatchSkills = z.infer<typeof IncidentMatchSkillsSchema>;
 
-export const IncidentMatchSchema = z.discriminatedUnion("type", [
-  IncidentMatchHeadToHeadSchema,
-  IncidentMatchSkillsSchema,
-]);
+export const IncidentMatchSchema = z
+  .discriminatedUnion("type", [
+    IncidentMatchHeadToHeadSchema,
+    IncidentMatchSkillsSchema,
+  ])
+  .meta({
+    id: "IncidentMatch",
+    description: "The match associated with the incident, if applicable.",
+  });
+
 export type IncidentMatch = z.infer<typeof IncidentMatchSchema>;
 
 export const FLAGS = ["judge"] as const;
@@ -47,29 +69,25 @@ export const IncidentFlagSchema = z.enum(FLAGS).meta({
 });
 export type IncidentFlag = z.infer<typeof IncidentFlagSchema>;
 
-export const BaseIncidentSchema = z
-  .object({
-    id: z.string(),
-    time: z.string().meta({
-      description: "ISO 8601 timestamp of when the incident occurred.",
-    }),
-    event: z.string().meta({ description: "Event Code" }),
-    match: IncidentMatchSchema.optional(),
-    team: z.string().meta({ description: "Team Number" }),
-    outcome: IncidentOutcomeSchema,
-    rules: z
-      .array(z.string())
-      .meta({ description: "Cited rules in the violation, in the form <SG1>" }),
-    notes: z.string(),
-    assets: z.array(z.string()).meta({
-      description: "Asset IDs associated with the incident.",
-    }),
-    flags: z.array(IncidentFlagSchema),
-  })
-  .meta({
-    id: "BaseIncident",
-    description: "A violation for a team at an event.",
-  });
+export const BaseIncidentSchema = z.object({
+  id: z.string(),
+  time: z.string().meta({
+    description: "ISO 8601 timestamp of when the incident occurred.",
+  }),
+  event: z.string().meta({ description: "Event Code" }),
+  match: IncidentMatchSchema.optional(),
+  team: z.string().meta({ description: "Team Number" }),
+  outcome: IncidentOutcomeSchema,
+  rules: z
+    .array(z.string())
+    .meta({ description: "Cited rules in the violation, in the form <SG1>" }),
+  notes: z.string(),
+  assets: z.array(z.string()).meta({
+    description: "Asset IDs associated with the incident.",
+  }),
+  flags: z.array(IncidentFlagSchema),
+});
+
 export type BaseIncident = z.infer<typeof BaseIncidentSchema>;
 
 export const INCIDENT_IGNORE = ["id", "time", "event", "team"] as const;
@@ -92,11 +110,18 @@ export type IncidentUnchangeableProperties = z.infer<
   typeof IncidentIgnoreSchema
 >;
 
-export const IncidentSchema = BaseIncidentSchema.extend({
-  consistency: LastWriteWinsConsistencySchema(z.enum(INCIDENT_INCLUDE)),
-});
+export const IncidentSchema = z
+  .intersection(
+    BaseIncidentSchema,
+    z.object({
+      consistency: LastWriteWinsConsistencySchema(z.enum(INCIDENT_INCLUDE)),
+    })
+  )
+  .meta({
+    id: "Incident",
+  });
 
-export type Incident = z.infer<typeof IncidentSchema>;
+export type Incident = Simplify<z.infer<typeof IncidentSchema>>;
 export type EditIncident = Omit<BaseIncident, IncidentUnchangeableProperties>;
 
 export function incidentMatchNameToString(match?: IncidentMatch) {

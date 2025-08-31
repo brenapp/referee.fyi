@@ -133,4 +133,12 @@ export const ErrorResponses = {
       },
     },
   },
+  500: {
+    description: "Internal server error",
+    content: {
+      "application/json": {
+        schema: ErrorResponseSchema,
+      },
+    },
+  },
 };

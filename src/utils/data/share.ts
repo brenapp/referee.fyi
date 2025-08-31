@@ -61,7 +61,7 @@ export async function getShareProfile(): Promise<User> {
   const key = await exportPublicKey(false);
   const name = (await get<string>("share_name")) ?? "";
 
-  return { key, name };
+  return { key, name, role: "none" };
 }
 
 export async function saveShareProfile(profile: Omit<User, "key">) {

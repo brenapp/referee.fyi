@@ -5,9 +5,8 @@ import {
   InvitationListItem,
   ShareInstanceMeta,
   User,
+  UserRole,
 } from "@referee-fyi/share";
-
-export type UserRole = "none" | "system";
 
 export type UserRow = {
   key: string;
@@ -24,7 +23,10 @@ function log(label: string, response: D1Response) {
   console.log(`${label} success`, response.meta);
 }
 
-export async function setUser(env: Env, user: User): Promise<void> {
+export async function setUser(
+  env: Env,
+  user: Pick<User, "key" | "name">
+): Promise<void> {
   const response = await env.DB.prepare(
     `
     INSERT INTO users (key, name)
@@ -207,13 +209,15 @@ export async function getAllInvitationsForInstance(
 ): Promise<InvitationListItem[]> {
   const { results: invitations, ...response } = await env.DB.prepare(
     `
-    SELECT users.key, users.name, invitations.* FROM invitations
+    SELECT users.key, users.name, users.role as user_role, invitations.* FROM invitations
     JOIN users ON invitations.invitee = users.key
     WHERE instance = ? AND sku = ?
     `
   )
     .bind(secret, sku)
-    .all<InvitationRow & User>();
+    .all<
+      InvitationRow & Pick<User, "key" | "name"> & { user_role: UserRole }
+    >();
 
   log("getInvitationsInInstance", response);
 
@@ -222,6 +226,7 @@ export async function getAllInvitationsForInstance(
     user: {
       key: inv.invitee,
       name: inv.name,
+      role: inv.user_role,
     } satisfies User,
   }));
 }

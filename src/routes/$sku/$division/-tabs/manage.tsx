@@ -443,17 +443,22 @@ export const InstanceUserListItem: React.FC<InstanceUserListItemProps> = ({
     <div className="flex gap-2 items-center flex-1">
       <UserCircleIcon height={24} />
       <p>{user.user.name}</p>
+      {user.user.role === "system" ? (
+        <span className="text-xs bg-blue-700 px-2 py-0.5 rounded-md">
+          System
+        </span>
+      ) : null}
       {user.admin ? (
-        <span className="text-xs  bg-purple-600 px-2 py-0.5 rounded-md">
+        <span className="text-xs bg-purple-600 px-2 py-0.5 rounded-md">
           Admin
         </span>
       ) : null}
       {active ? (
-        <span className="text-xs  bg-emerald-600 px-2 py-0.5 rounded-md">
+        <span className="text-xs bg-emerald-600 px-2 py-0.5 rounded-md">
           Connected
         </span>
       ) : (
-        <span className="text-xs  bg-zinc-700 px-2 py-0.5 rounded-md">
+        <span className="text-xs bg-zinc-700 px-2 py-0.5 rounded-md">
           Offline
         </span>
       )}

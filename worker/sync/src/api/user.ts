@@ -2,8 +2,8 @@ import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { ErrorResponseSchema, ErrorResponses, AppArgs } from "../router";
 import { z } from "zod/v4";
 import { verifySignature, VerifySignatureHeadersSchema } from "../utils/verify";
-import { User, UserSchema } from "@referee-fyi/share";
-import { isSystemKey, setUser } from "../utils/data";
+import { UserSchema } from "@referee-fyi/share";
+import { getUser, isSystemKey, setUser } from "../utils/data";
 export const QuerySchema = z.object({
   name: z.string().min(1, "Name is required"),
 });
@@ -63,15 +63,29 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
     );
   }
 
+  const key = signature.keyHex;
   const name = c.req.valid("query").name;
 
-  const user: User = {
-    key: signature.keyHex,
+  await setUser(c.env, {
+    key,
     name,
-  };
-  await setUser(c.env, user);
+  });
 
-  const systemKey = await isSystemKey(c.env, user.key);
+  const user = await getUser(c.env, key);
+  if (!user) {
+    return c.json(
+      {
+        success: false,
+        error: {
+          name: "ValidationError",
+          message: "Encountered error when registering user.",
+        },
+      },
+      500
+    );
+  }
+
+  const systemKey = await isSystemKey(c.env, key);
   return c.json(
     {
       success: true,

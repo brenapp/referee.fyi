@@ -4,10 +4,15 @@ import { MatchScratchpadSchema, type MatchScratchpad } from "./index.js";
 import { InvitationSchema } from "./server.js";
 import { z, ZodType } from "zod/v4";
 
+export const UserRole = ["none", "system"] as const;
+
+export type UserRole = (typeof UserRole)[number];
+
 export const UserSchema = z
   .object({
     key: z.string(),
     name: z.string(),
+    role: z.enum(UserRole),
   })
   .meta({
     id: "User",

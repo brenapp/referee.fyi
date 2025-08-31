@@ -110,7 +110,7 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
 
   assetUploads: {},
 
-  profile: { name: "", key: "" },
+  profile: { name: "", key: "", role: "none" },
   userMetadata: { isSystemKey: false },
   updateProfile: async (updates) => {
     const current = await getShareProfile();

@@ -5,16 +5,6 @@
   "compatibility_date": "2025-08-01",
   "logpush": true,
   "preview_urls": true,
-  // "routes": [
-  //   {
-  //     "custom_domain": true,
-  //     "pattern": "share.referee.fyi"
-  //   },
-  //   {
-  //     "pattern": "referee.fyi/api/*",
-  //     "zone_name": "referee.fyi"
-  //   }
-  // ],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1
@@ -41,6 +31,12 @@
   ],
   "env": {
     "staging": {
+      "routes": [
+        {
+          "custom_domain": true,
+          "pattern": "staging.share.referee.fyi"
+        },
+      ],
       "secrets_store_secrets": [
         {
           "store_id": "8e1adb056fd34b4c95266f0a7e767fae",
@@ -85,6 +81,16 @@
       }
     },
     "production": {
+      "routes": [
+        {
+          "custom_domain": true,
+          "pattern": "share.referee.fyi"
+        },
+        {
+          "pattern": "referee.fyi/api/*",
+          "zone_name": "referee.fyi"
+        }
+      ],
       "secrets_store_secrets": [
         {
           "store_id": "8e1adb056fd34b4c95266f0a7e767fae",

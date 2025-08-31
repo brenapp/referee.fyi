@@ -1,5 +1,4 @@
 import { z } from "zod/v4";
-import { OpenAPIHono } from "@hono/zod-openapi";
 
 export const ErrorCode = z.enum(["UpdateQuestionsRefreshFailed"]);
 

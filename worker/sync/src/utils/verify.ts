@@ -417,7 +417,9 @@ export const verifySystemToken = createMiddleware<AppArgs>(async (c, next) => {
 
 export const verifyBearerToken = createMiddleware<AppArgs>(async (c, next) => {
   const sku = c.req.param("sku");
-  const token = c.req.query("token");
+  const token =
+    c.req.query("token") ||
+    c.req.header("Authorization")?.replace("Bearer ", "");
 
   if (typeof token !== "string" || typeof sku !== "string") {
     return c.json(
@@ -425,7 +427,7 @@ export const verifyBearerToken = createMiddleware<AppArgs>(async (c, next) => {
         success: false,
         error: {
           name: "ValidationError",
-          message: "Token and SKU parameters are required.",
+          message: "Bearer token and SKU are both required.",
         },
         code: "VerifyIntegrationTokenValuesNotPresent",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
@@ -544,7 +546,9 @@ export const verifyBearerToken = createMiddleware<AppArgs>(async (c, next) => {
 export const verifyIntegrationToken = createMiddleware<AppArgs>(
   async (c, next) => {
     const sku = c.req.param("sku");
-    const token = c.req.query("token");
+    const token =
+      c.req.query("token") ||
+      c.req.header("Authorization")?.replace("Bearer ", "");
     const instanceSecret = c.req.query("instance");
 
     if (typeof sku !== "string" || typeof token !== "string") {

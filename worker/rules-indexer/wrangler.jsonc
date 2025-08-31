@@ -6,6 +6,9 @@
 	"observability": {
 		"enabled": true
 	},
+	"compatibility_flags": [
+		"nodejs_compat_v2"
+	],
 	"env": {
 		"production": {
 			"vars": {

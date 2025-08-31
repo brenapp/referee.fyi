@@ -1,5 +1,4 @@
 import { z } from "zod/v4";
-import { OpenAPIHono } from "@hono/zod-openapi";
 
 export const ErrorCode = z.enum(["UpdateQuestionsRefreshFailed"]);
 
@@ -17,5 +16,3 @@ export const ErrorResponseSchema = z
 export type AppArgs = {
   Bindings: Env;
 };
-
-export const app = new OpenAPIHono<AppArgs>();

@@ -1,6 +1,6 @@
 import type { Question } from "@referee-fyi/rules/qnaplus";
 import type { ProgramAbbr, Year } from "robotevents";
-import { client } from "../qnaplus";
+import { client } from "../qnaplus.js";
 import { affiliatedPrograms } from "@referee-fyi/rules/programs";
 
 export type CurrentVersion = {

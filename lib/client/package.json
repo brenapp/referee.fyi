@@ -11,6 +11,10 @@
   },
   "scripts": {
     "build": "tsc",
+    "publish": "npm publish --access public",
+    "version:patch": "npm version patch --no-git-tag-version",
+    "version:minor": "npm version minor --no-git-tag-version",
+    "version:major": "npm version major --no-git-tag-version",
     "typegen": "openapi-typescript https://referee.fyi/api/openapi --output ./openapi.d.ts --properties-required-by-default --default-non-nullable"
   },
   "devDependencies": {

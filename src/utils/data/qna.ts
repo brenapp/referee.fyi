@@ -65,9 +65,7 @@ export async function updateQNAs() {
 
   try {
     const url = new URL("/api/updateQuestions", base);
-    if (version) {
-      url.searchParams.set("version", version);
-    }
+    url.searchParams.set("version", version);
     const response = await fetch(url);
 
     if (!response.ok) {

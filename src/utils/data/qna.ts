@@ -5,6 +5,7 @@ import { ProgramAbbr, Year } from "robotevents";
 import { getMany } from "idb-keyval";
 import { captureException } from "@sentry/react";
 import { relatedPrograms } from "@referee-fyi/rules/programs";
+import { toast } from "~components/Toast";
 
 type Question = Schemas["Question"];
 
@@ -98,6 +99,11 @@ export async function getUpdatedQuestionsForProgram(
   try {
     await updateQNAs();
   } catch (error) {
+    toast({
+      type: "error",
+      message: "Failed to update Q&A data.",
+      context: error instanceof Error ? error.message : String(error),
+    });
     captureException(error, {
       extra: { program, season },
       tags: { action: "getUpdatedQuestionsForProgram" },

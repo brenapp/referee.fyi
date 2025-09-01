@@ -8,12 +8,15 @@ import {
   MagnifyingGlassIcon,
   BookOpenIcon,
   ChatBubbleLeftRightIcon,
+  UserCircleIcon,
 } from "@heroicons/react/24/solid";
 import { useState } from "react";
 import { getUpdatedQuestionsForProgram } from "~utils/data/qna";
 import { ProgramAbbr, programs, Year, years } from "robotevents";
 import { useQuestionsForProgram } from "~utils/hooks/qna";
 import { Schemas } from "~types/worker/rules";
+import { MenuButton } from "~components/MenuButton";
+import { ArrowTopRightOnSquareIcon } from "@heroicons/react/20/solid";
 
 type Question = Schemas["Question"];
 
@@ -54,18 +57,87 @@ const RuleGroup: React.FC<RuleGroupProps> = ({ ruleGroup, query }) => {
   );
 };
 
+export type QuestionMenuProps = {
+  question: Question;
+} & React.HTMLProps<HTMLDivElement>;
+
+export const QuestionMenu: React.FC<QuestionMenuProps> = ({
+  question,
+  ...props
+}) => {
+  return (
+    <div {...props}>
+      <div className="overflow-y-auto max-h-[60vh]">
+        <h1 className="font-bold text-lg">{question.title}</h1>
+        <div className="flex items-center gap-x-1 justify-between mt-4">
+          <span className="flex items-center gap-1">
+            <UserCircleIcon height={20} />
+            <span className="inline">{question.author}</span>
+          </span>
+
+          <span className="text-zinc-400">
+            {new Date(question.askedTimestamp).toLocaleDateString(undefined, {
+              month: "2-digit",
+              day: "2-digit",
+              year: "2-digit",
+            })}
+          </span>
+        </div>
+        {question.answeredTimestamp ? (
+          <p className="mt-4">
+            Answered on{" "}
+            {new Date(question.answeredTimestamp).toLocaleDateString(
+              undefined,
+              {
+                month: "2-digit",
+                day: "2-digit",
+                year: "2-digit",
+              }
+            )}
+          </p>
+        ) : null}
+        <article className="mt-4">
+          <section
+            className="qna-content"
+            dangerouslySetInnerHTML={{ __html: question.questionRaw }}
+          ></section>
+        </article>
+        {question.answered ? (
+          <section className="mt-4">
+            <h2 className="text-emerald-400 font-bold">Answer by Committee</h2>
+            <section
+              className="mt-2 qna-content "
+              dangerouslySetInnerHTML={{ __html: question.answerRaw ?? "" }}
+            ></section>
+          </section>
+        ) : null}
+      </div>
+      <ExternalLinkButton
+        href={question.url}
+        className="mt-2 w-full text-center flex items-center gap-4 justify-center text-emerald-400"
+      >
+        Official Question
+        <ArrowTopRightOnSquareIcon height={20} />
+      </ExternalLinkButton>
+    </div>
+  );
+};
+
 export type QuestionItemProps = {
   question: Question;
 };
 
 export const QuestionItem: React.FC<QuestionItemProps> = ({ question }) => {
   return (
-    <ExternalLinkButton href={question.url} className="w-full mt-2">
+    <MenuButton
+      className="w-full mt-2 text-left"
+      menu={<QuestionMenu question={question} />}
+    >
       <strong className="text-sm font-mono text-emerald-400">
         {question.id}
       </strong>
       <p className="font-normal">{question.title}</p>
-    </ExternalLinkButton>
+    </MenuButton>
   );
 };
 

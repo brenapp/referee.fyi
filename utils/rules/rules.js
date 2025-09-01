@@ -1,29 +1,17 @@
 const puppeteer = require("puppeteer");
 
 const games = [
-  //   {
-  //     title: "High Stakes",
-  //     season: "2024-2025",
-  //     programs: ["V5RC", "VURC", "VAIRC"],
-  //     url: "https://www.robotevents.com/storage/game_manual/V5RC_2024-2025_High_Stakes/rules/",
-  //   },
-  //   {
-  //     title: "Rapid Relay",
-  //     season: "2024-2025",
-  //     programs: ["VIQRC"],
-  //     url: "https://www.robotevents.com/storage/game_manual/VIQRC_2024-2025_Rapid_Relay/rules/",
-  //   },
-  //   {
-  //     title: "Over Under",
-  //     season: "2023-2024",
-  //     programs: ["V5RC", "VURC", "VAIRC"],
-  //     url: "https://www.robotevents.com/storage/game_manual/VRC_2023-2024_Over_Under/rules/",
-  //   },
+  // {
+  //   title: "Push Back",
+  //   season: "2025-2026",
+  //   programs: ["V5RC", "VURC", "VAIRC"],
+  //   url: "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/",
+  // },
   {
-    title: "Full Volume",
-    season: "2023-2024",
+    title: "Mix & Match",
+    season: "2025-2026",
     programs: ["VIQRC"],
-    url: "https://www.robotevents.com/storage/game_manual/VIQRC_2023-2024_Full_Volume/rules/",
+    url: "https://www.robotevents.com/storage/game_manual/VEX_IQ_Robotics_Competition_2025-2026_Mix_Match/rules/",
   },
 ];
 

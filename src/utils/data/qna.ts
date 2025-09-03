@@ -65,9 +65,9 @@ export async function updateQNAs() {
   const version = await getQNAPlusVersion();
 
   try {
-    const url = new URL("/api/updateQuestions", base);
+    const url = new URL("/api/rules/updateQuestions", base);
     url.searchParams.set("version", version);
-    const response: Routes["/api/updateQuestions"]["get"] = await fetch(
+    const response: Routes["/api/rules/updateQuestions"]["get"] = await fetch(
       url
     ).then((r) => r.json());
 

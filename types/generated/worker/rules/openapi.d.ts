@@ -5,7 +5,7 @@
  **/
 /* eslint-disable */
 export interface paths {
-    "/api/updateQuestions": {
+    "/api/rules/updateQuestions": {
         parameters: {
             query?: never;
             header?: never;
@@ -52,7 +52,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/search": {
+    "/api/rules/search": {
         parameters: {
             query?: never;
             header?: never;

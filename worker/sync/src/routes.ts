@@ -128,16 +128,24 @@ const config: OpenAPIObjectConfig = {
   security: [{ Bearer: [] }],
 };
 
-app.doc("/api/openapi", config);
+app.doc("/api/sync/openapi", config);
+app.doc("/api/integration/openapi", config);
 
 export function getOpenApiDocument() {
   return app.getOpenAPIDocument(config);
 }
 
 app.get(
-  "/api/swagger",
+  "/api/sync/swagger",
   swaggerUI({
-    url: "/api/openapi",
+    url: "/api/sync/openapi",
+  })
+);
+
+app.get(
+  "/api/integration/swagger",
+  swaggerUI({
+    url: "/api/integration/openapi",
   })
 );
 

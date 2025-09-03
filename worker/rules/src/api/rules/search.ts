@@ -1,4 +1,4 @@
-import { AppArgs } from "../router.js";
+import { AppArgs } from "../../router.js";
 import { z, createRoute, RouteHandler } from "@hono/zod-openapi";
 
 export const QuerySchema = z.object({
@@ -47,7 +47,7 @@ export const route = createRoute({
   tags: ["rules"],
   summary: "Search for rules and Q&As.",
   method: "get",
-  path: "/api/search",
+  path: "/api/rules/search",
   request: {
     query: QuerySchema,
   },

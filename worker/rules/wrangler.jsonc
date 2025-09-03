@@ -23,6 +23,10 @@
 				{
 					"pattern": "rules.referee.fyi",
 					"custom_domain": true
+				},
+				{
+					"pattern": "referee.fyi/api/rules/*",
+					"zone_name": "referee.fyi"
 				}
 			],
 			"ai": {

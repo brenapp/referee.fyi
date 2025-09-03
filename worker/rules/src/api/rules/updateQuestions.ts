@@ -1,7 +1,7 @@
 import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { z } from "zod/v4";
-import { AppArgs, ErrorResponseSchema } from "../router.js";
-import { client } from "../qnaplus.js";
+import { AppArgs, ErrorResponseSchema } from "../../router.js";
+import { client } from "../../qnaplus.js";
 
 export const QuerySchema = z.object({
   version: z.string(),
@@ -53,7 +53,7 @@ export const SuccessfulResponseSchema = z
 
 export const route = createRoute({
   method: "get",
-  path: "/api/updateQuestions",
+  path: "/api/rules/updateQuestions",
   request: {
     query: QuerySchema,
   },

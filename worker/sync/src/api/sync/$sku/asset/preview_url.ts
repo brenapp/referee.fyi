@@ -32,7 +32,7 @@ export const SuccessResponseSchema = z
 
 export const route = createRoute({
   method: "get",
-  path: "/api/{sku}/asset/preview_url",
+  path: "/api/sync/{sku}/asset/preview_url",
   tags: ["Assets"],
   summary: "Gets the preview URL for an asset.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",

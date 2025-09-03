@@ -39,7 +39,7 @@ export const SuccessResponseSchema = z
 
 export const route = createRoute({
   method: "delete",
-  path: "/api/{sku}/invite",
+  path: "/api/sync/{sku}/invite",
   tags: ["Invitation Management"],
   summary: "Remove an invitation from a user.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",

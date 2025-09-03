@@ -29,7 +29,7 @@ export const SuccessResponseSchema = z.object({
 
 export const route = createRoute({
   method: "get",
-  path: "/api/{sku}/request",
+  path: "/api/sync/{sku}/request",
   tags: ["Key Exchange"],
   summary: "Obtains another user's public key.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",

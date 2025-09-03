@@ -26,7 +26,7 @@ export const SuccessResponseSchema = z
 
 export const route = createRoute({
   method: "post",
-  path: "/api/user",
+  path: "/api/sync/register",
   tags: ["User"],
   summary: "Register information about a user device.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",
@@ -83,7 +83,7 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
           name: "ValidationError",
           message: "Encountered error when registering user.",
         },
-      },
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
       500
     );
   }
@@ -97,5 +97,3 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
     200
   );
 };
-
-export default [route, handler] as const;

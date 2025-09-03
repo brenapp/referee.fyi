@@ -28,7 +28,7 @@ export const SuccessResponseSchema = z.object({
 
 export const route = createRoute({
   method: "put",
-  path: "/api/{sku}/request",
+  path: "/api/sync/{sku}/request",
   tags: ["Key Exchange"],
   summary: "Publishes your public key.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",

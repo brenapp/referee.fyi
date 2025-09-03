@@ -28,7 +28,7 @@ export const SuccessResponseSchema = z
 
 export const route = createRoute({
   method: "get",
-  path: "/api/{sku}/list",
+  path: "/api/sync/{sku}/list",
   tags: ["Invitation Management"],
   summary: "Gets all active instances for an event.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",

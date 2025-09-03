@@ -32,7 +32,7 @@ export const SuccessResponseSchema = z
 
 export const route = createRoute({
   method: "delete",
-  path: "/api/{sku}/incident",
+  path: "/api/sync/{sku}/incident",
   tags: ["Incident"],
   summary: "Delete an incident.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",

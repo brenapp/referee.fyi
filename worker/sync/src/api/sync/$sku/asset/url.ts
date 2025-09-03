@@ -33,7 +33,7 @@ export const SuccessResponseSchema = z
 
 export const route = createRoute({
   method: "get",
-  path: "/api/{sku}/asset/url",
+  path: "/api/sync/{sku}/asset/url",
   tags: ["Assets"],
   summary: "Gets the signed URL for an asset.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",

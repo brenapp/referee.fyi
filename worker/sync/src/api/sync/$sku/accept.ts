@@ -27,7 +27,7 @@ export const SuccessResponseSchema = z
 
 export const route = createRoute({
   method: "put",
-  path: "/api/{sku}/accept",
+  path: "/api/sync/{sku}/accept",
   tags: ["Invitation Management"],
   summary: "Accept an invitation to join an shared instance.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",

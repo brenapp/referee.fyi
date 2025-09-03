@@ -1,7 +1,7 @@
 import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { whereAlpha2 } from "iso-3166-1";
 import { z } from "zod/v4";
-import { AppArgs } from "../../../router";
+import { AppArgs } from "../../router";
 
 const COMMON_COUNTRIES = {
   US: "United States",

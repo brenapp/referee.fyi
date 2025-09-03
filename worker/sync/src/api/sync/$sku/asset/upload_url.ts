@@ -35,7 +35,7 @@ export const SuccessResponseSchema = z
 
 export const route = createRoute({
   method: "get",
-  path: "/api/{sku}/asset/upload_url",
+  path: "/api/sync/{sku}/asset/upload_url",
   tags: ["Assets"],
   summary: "Gets an upload URL for an asset.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",

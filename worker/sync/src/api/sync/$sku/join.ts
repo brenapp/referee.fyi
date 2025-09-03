@@ -17,7 +17,7 @@ export const QuerySchema = z.object({
 
 export const route = createRoute({
   method: "get",
-  path: "/api/{sku}/join",
+  path: "/api/sync/{sku}/join",
   tags: ["Instance"],
   summary: "Join an instance websocket",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",

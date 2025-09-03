@@ -36,7 +36,7 @@ export const SuccessResponseSchema = z
 
 export const route = createRoute({
   method: "patch",
-  path: "/api/{sku}/incident",
+  path: "/api/sync/{sku}/incident",
   tags: ["Incident"],
   summary: "Edit an incident.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",

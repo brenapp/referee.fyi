@@ -28,7 +28,7 @@ export const SuccessResponseSchema = z
 
 export const route = createRoute({
   method: "get",
-  path: "/api/{sku}/data",
+  path: "/api/sync/{sku}/data",
   tags: ["Incident"],
   summary: "Get instance share data.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",

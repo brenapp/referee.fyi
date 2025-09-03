@@ -1,7 +1,7 @@
 import { getAllIncidents, setManyIncidents } from "~utils/data/incident";
 import { queueMigration } from "./utils";
 import { IncidentMatch, IncidentOutcome } from "./2024_07_24_consistency";
-import { WithLWWConsistency } from "@referee-fyi/consistency";
+import type { WithLWWConsistency } from "@referee-fyi/consistency";
 import { Incident as CurrentIncident } from "~utils/data/incident";
 import { getShareProfile } from "~utils/data/share";
 

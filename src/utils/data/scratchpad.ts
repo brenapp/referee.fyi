@@ -1,12 +1,12 @@
 import { get, getMany, set, setMany, update } from "~utils/data/keyval";
 import {
-  BaseMatchScratchpad,
-  EditScratchpad,
-  MatchScratchpad,
+  type BaseMatchScratchpad,
+  type EditScratchpad,
+  type MatchScratchpad,
+  type DefaultV5RCMatchScratchpad,
+  type DefaultVIQRCMatchScratchpad,
+  type ScratchpadKind,
   SCRATCHPAD_IGNORE,
-  DefaultV5RCMatchScratchpad,
-  DefaultVIQRCMatchScratchpad,
-  ScratchpadKind,
 } from "@referee-fyi/share";
 import { getShareProfile } from "./share";
 import { MatchData, programs } from "robotevents";

@@ -1,14 +1,13 @@
-import {
+import type {
   Incident,
-  INCIDENT_IGNORE,
   InvitationListItem,
-  SCRATCHPAD_IGNORE,
   ShareResponse,
   User,
   UserInvitation,
   WebSocketMessage,
   WebSocketPayload,
   WebSocketPeerMessage,
+  MatchScratchpad,
 } from "@referee-fyi/share";
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
@@ -39,7 +38,7 @@ import {
 } from "~utils/data/incident";
 import { queryClient } from "~utils/data/query";
 import { toast } from "~components/Toast";
-import { MatchScratchpad } from "@referee-fyi/share";
+import { INCIDENT_IGNORE, SCRATCHPAD_IGNORE } from "@referee-fyi/share";
 import { mergeMap } from "@referee-fyi/consistency";
 import {
   getManyMatchScratchpads,

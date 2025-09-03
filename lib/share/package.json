@@ -5,8 +5,7 @@
   "version": "1.0.0",
   "description": "Share Instance Objects",
   "exports": {
-    "import": "./dist/index.js",
-    "types": "./dist/index.d.ts"
+    "import": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",

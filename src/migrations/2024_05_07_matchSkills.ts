@@ -1,7 +1,7 @@
 import { getAllIncidents } from "~utils/data/incident";
 import { queueMigration } from "./utils";
 import { setMany } from "~utils/data/keyval";
-import { WebSocketSender } from "@referee-fyi/share";
+import type { WebSocketSender } from "@referee-fyi/share";
 
 type IncidentOutcome = "Minor" | "Major" | "Disabled" | "General";
 

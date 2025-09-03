@@ -12,7 +12,7 @@ import {
 } from "~utils/data/share";
 import { exportPublicKey, signMessage } from "~utils/data/crypto";
 import { HookQueryOptions } from "./robotevents";
-import { Incident } from "@referee-fyi/share";
+import type { Incident } from "@referee-fyi/share";
 
 export type UseCreateShareOptions = {
   sku: string;

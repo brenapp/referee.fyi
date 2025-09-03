@@ -23,6 +23,6 @@
   "description": "",
   "dependencies": {
     "robotevents": "^6.0.3",
-    "zod": "^3.25"
+    "zod": "^4.1.5"
   }
 }

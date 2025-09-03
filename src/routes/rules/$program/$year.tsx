@@ -133,9 +133,15 @@ export const QuestionItem: React.FC<QuestionItemProps> = ({ question }) => {
       className="w-full mt-2 text-left"
       menu={<QuestionMenu question={question} />}
     >
-      <strong className="text-sm font-mono text-emerald-400">
-        {question.id}
-      </strong>
+      <span className="text-sm">
+        {question.answered ? (
+          <strong className="text-emerald-400">Answered</strong>
+        ) : (
+          <strong>Unanswered</strong>
+        )}
+        {question.tags.length > 0 ? " • " : ""}
+        <span className="font-mono">{question.tags.join(", ")}</span>
+      </span>
       <p className="font-normal">{question.title}</p>
     </MenuButton>
   );

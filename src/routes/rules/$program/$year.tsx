@@ -158,9 +158,9 @@ function questionMatchesQuery(question: Question, query: string) {
     question.title.toLowerCase().includes(queryLower) ||
     question.id.toLowerCase().includes(queryLower) ||
     question.author.toLowerCase().includes(queryLower) ||
+    question.tags.some((tag) => tag.toLowerCase().includes(queryLower)) ||
     question.questionRaw.toLowerCase().includes(queryLower) ||
-    question.answerRaw?.toLowerCase().includes(queryLower) ||
-    question.tags.some((tag) => tag.toLowerCase().includes(queryLower))
+    question.answerRaw?.toLowerCase().includes(queryLower)
   );
 }
 

@@ -1,4 +1,4 @@
-import { Question } from "@referee-fyi/rules/qnaplus";
+import type { Question } from "~types/worker/rules";
 import {
   useQuery,
   UseQueryOptions,

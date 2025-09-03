@@ -4,6 +4,8 @@ import type { components } from "../generated/worker/rules/openapi";
 export { paths };
 export type Schemas = components["schemas"];
 
+export type Question = Schemas["Question"];
+
 export type Method =
   | "get"
   | "post"

@@ -153,13 +153,14 @@ export type QuestionListProps = {
 };
 
 function questionMatchesQuery(question: Question, query: string) {
+  const queryLower = query.toLowerCase();
   return (
-    question.title.toLowerCase().includes(query.toLowerCase()) ||
-    question.id.toLowerCase().includes(query.toLowerCase()) ||
-    question.author.toLowerCase().includes(query.toLowerCase()) ||
-    question.questionRaw.toLowerCase().includes(query.toLowerCase()) ||
-    question.answerRaw?.toLowerCase().includes(query.toLowerCase()) ||
-    question.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase()))
+    question.title.toLowerCase().includes(queryLower) ||
+    question.id.toLowerCase().includes(queryLower) ||
+    question.author.toLowerCase().includes(queryLower) ||
+    question.questionRaw.toLowerCase().includes(queryLower) ||
+    question.answerRaw?.toLowerCase().includes(queryLower) ||
+    question.tags.some((tag) => tag.toLowerCase().includes(queryLower))
   );
 }
 

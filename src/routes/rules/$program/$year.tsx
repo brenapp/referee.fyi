@@ -158,8 +158,7 @@ function questionMatchesQuery(question: Question, query: string) {
     question.id.toLowerCase().includes(query.toLowerCase()) ||
     question.author.toLowerCase().includes(query.toLowerCase()) ||
     question.questionRaw.toLowerCase().includes(query.toLowerCase()) ||
-    (question.answerRaw?.toLowerCase().includes(query.toLowerCase()) ??
-      false) ||
+    question.answerRaw?.toLowerCase().includes(query.toLowerCase()) ||
     question.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase()))
   );
 }

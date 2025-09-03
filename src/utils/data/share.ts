@@ -101,7 +101,7 @@ export async function signedFetch(
 
 export async function registerUser(
   profile: Omit<User, "key">
-): Promise<Routes["/api/user"]["post"]> {
+): Promise<Routes["/api/sync/register"]["post"]> {
   if (!profile.name) {
     return {
       success: false,
@@ -113,7 +113,7 @@ export async function registerUser(
     };
   }
 
-  const url = new URL("/api/user", URL_BASE);
+  const url = new URL("/api/sync/register", URL_BASE);
   url.searchParams.set("name", profile.name);
 
   const response = await signedFetch(url, {
@@ -125,12 +125,15 @@ export async function registerUser(
 
 export async function createInstance(
   sku: string
-): Promise<Routes["/api/{sku}/create"]["post"]> {
-  const response = await signedFetch(new URL(`/api/${sku}/create`, URL_BASE), {
-    method: "POST",
-  });
+): Promise<Routes["/api/sync/{sku}/create"]["post"]> {
+  const response = await signedFetch(
+    new URL(`/api/sync/${sku}/create`, URL_BASE),
+    {
+      method: "POST",
+    }
+  );
 
-  const body: Routes["/api/{sku}/create"]["post"] = await response.json();
+  const body: Routes["/api/sync/{sku}/create"]["post"] = await response.json();
 
   if (body.success) {
     await set(`invitation_${sku}`, body.data);
@@ -143,13 +146,14 @@ export async function createInstance(
 export async function fetchInvitation(sku: string) {
   try {
     const response = await signedFetch(
-      new URL(`/api/${sku}/invitation`, URL_BASE),
+      new URL(`/api/sync/${sku}/invitation`, URL_BASE),
       {
         method: "GET",
       }
     );
 
-    const body: Routes["/api/{sku}/invitation"]["get"] = await response.json();
+    const body: Routes["/api/sync/{sku}/invitation"]["get"] =
+      await response.json();
 
     if (!body.success) {
       return null;
@@ -193,7 +197,7 @@ export async function verifyEventInvitation(
   sku: string
 ): Promise<UserInvitation | null> {
   const response = await signedFetch(
-    new URL(`/api/${sku}/invitation`, URL_BASE),
+    new URL(`/api/sync/${sku}/invitation`, URL_BASE),
     {
       method: "GET",
     }
@@ -203,7 +207,8 @@ export async function verifyEventInvitation(
     return null;
   }
 
-  const body: Routes["/api/{sku}/invitation"]["get"] = await response.json();
+  const body: Routes["/api/sync/{sku}/invitation"]["get"] =
+    await response.json();
 
   if (!body.success && response.status !== 500) {
     await del(`invitation_${sku}`);
@@ -222,15 +227,15 @@ export async function verifyEventInvitation(
 export async function acceptEventInvitation(
   sku: string,
   invitationId: string
-): Promise<Routes["/api/{sku}/accept"]["put"]> {
-  const url = new URL(`/api/${sku}/accept`, URL_BASE);
+): Promise<Routes["/api/sync/{sku}/accept"]["put"]> {
+  const url = new URL(`/api/sync/${sku}/accept`, URL_BASE);
   url.searchParams.set("invitation", invitationId);
 
   const response = await signedFetch(url, {
     method: "PUT",
   });
 
-  const body: Routes["/api/{sku}/accept"]["put"] = await response.json();
+  const body: Routes["/api/sync/{sku}/accept"]["put"] = await response.json();
 
   if (!body.success && response.status !== 500) {
     await del(`invitation_${sku}`);
@@ -253,8 +258,8 @@ export async function inviteUser(
   sku: string,
   user: string,
   options: InviteUserOptions
-): Promise<Routes["/api/{sku}/invite"]["put"]> {
-  const url = new URL(`/api/${sku}/invite`, URL_BASE);
+): Promise<Routes["/api/sync/{sku}/invite"]["put"]> {
+  const url = new URL(`/api/sync/${sku}/invite`, URL_BASE);
   url.searchParams.set("user", user);
 
   if (options.admin) {
@@ -268,14 +273,15 @@ export async function inviteUser(
 export async function removeInvitation(
   sku: string,
   user?: string
-): Promise<Routes["/api/{sku}/invite"]["delete"]> {
+): Promise<Routes["/api/sync/{sku}/invite"]["delete"]> {
   const { key: id } = await getShareProfile();
 
-  const url = new URL(`/api/${sku}/invite`, URL_BASE);
+  const url = new URL(`/api/sync/${sku}/invite`, URL_BASE);
   url.searchParams.set("user", user ?? id);
 
   const response = await signedFetch(url, { method: "DELETE" });
-  const body: Routes["/api/{sku}/invite"]["delete"] = await response.json();
+  const body: Routes["/api/sync/{sku}/invite"]["delete"] =
+    await response.json();
 
   await del(`invitation_${sku}`);
   queryClient.invalidateQueries({ queryKey: ["event_invitation", sku] });
@@ -285,8 +291,8 @@ export async function removeInvitation(
 
 export async function getShareData(
   sku: string
-): Promise<Routes["/api/{sku}/data"]["get"]> {
-  const url = new URL(`/api/${sku}/data`, URL_BASE);
+): Promise<Routes["/api/sync/{sku}/data"]["get"]> {
+  const url = new URL(`/api/sync/${sku}/data`, URL_BASE);
 
   const response = await signedFetch(url);
   return response.json();
@@ -294,7 +300,7 @@ export async function getShareData(
 
 export async function addServerIncident(
   incident: Incident
-): Promise<Routes["/api/{sku}/incident"]["put"]> {
+): Promise<Routes["/api/sync/{sku}/incident"]["put"]> {
   const url = new URL(`/api/${incident.event}/incident`, URL_BASE);
 
   const response = await signedFetch(url, {
@@ -306,7 +312,7 @@ export async function addServerIncident(
 
 export async function editServerIncident(
   incident: Incident
-): Promise<Routes["/api/{sku}/incident"]["patch"]> {
+): Promise<Routes["/api/sync/{sku}/incident"]["patch"]> {
   const url = new URL(`/api/${incident.event}/incident`, URL_BASE);
 
   const response = await signedFetch(url, {
@@ -319,8 +325,8 @@ export async function editServerIncident(
 export async function deleteServerIncident(
   id: string,
   sku: string
-): Promise<Routes["/api/{sku}/incident"]["delete"]> {
-  const url = new URL(`/api/${sku}/incident`, URL_BASE);
+): Promise<Routes["/api/sync/{sku}/incident"]["delete"]> {
+  const url = new URL(`/api/sync/${sku}/incident`, URL_BASE);
   url.searchParams.set("id", id);
 
   const response = await signedFetch(url, {
@@ -331,8 +337,8 @@ export async function deleteServerIncident(
 
 export async function putRequestCode(
   sku: string
-): Promise<Routes["/api/{sku}/request"]["put"]> {
-  const url = new URL(`/api/${sku}/request`, URL_BASE);
+): Promise<Routes["/api/sync/{sku}/request"]["put"]> {
+  const url = new URL(`/api/sync/${sku}/request`, URL_BASE);
   url.searchParams.set("version", __REFEREE_FYI_VERSION__);
 
   const response = await signedFetch(url, { method: "PUT" });
@@ -342,8 +348,8 @@ export async function putRequestCode(
 export async function getRequestCodeUserKey(
   sku: string,
   code: string
-): Promise<Routes["/api/{sku}/request"]["get"]> {
-  const url = new URL(`/api/${sku}/request`, URL_BASE);
+): Promise<Routes["/api/sync/{sku}/request"]["get"]> {
+  const url = new URL(`/api/sync/${sku}/request`, URL_BASE);
   url.searchParams.set("code", code);
 
   const response = await signedFetch(url, { method: "GET" });
@@ -352,8 +358,8 @@ export async function getRequestCodeUserKey(
 
 export async function getInstancesForEvent(
   sku: string
-): Promise<Routes["/api/{sku}/list"]["get"]> {
-  const url = new URL(`/api/${sku}/list`, URL_BASE);
+): Promise<Routes["/api/sync/{sku}/list"]["get"]> {
+  const url = new URL(`/api/sync/${sku}/list`, URL_BASE);
   const response = await signedFetch(url, { method: "GET" });
 
   return response.json();
@@ -515,8 +521,8 @@ export async function getAssetUploadURL(
   sku: string,
   id: string,
   type: AssetType
-): Promise<Routes["/api/{sku}/asset/upload_url"]["get"]> {
-  const url = new URL(`/api/${sku}/asset/upload_url`, URL_BASE);
+): Promise<Routes["/api/sync/{sku}/asset/upload_url"]["get"]> {
+  const url = new URL(`/api/sync/${sku}/asset/upload_url`, URL_BASE);
   url.searchParams.set("id", id);
   url.searchParams.set("type", type);
   const response = await signedFetch(url, { method: "GET" });
@@ -539,8 +545,8 @@ export async function uploadAsset(url: string, data: Blob) {
 export async function getAssetPreviewURL(
   sku: string,
   id: string
-): Promise<Routes["/api/{sku}/asset/preview_url"]["get"]> {
-  const url = new URL(`/api/${sku}/asset/preview_url`, URL_BASE);
+): Promise<Routes["/api/sync/{sku}/asset/preview_url"]["get"]> {
+  const url = new URL(`/api/sync/${sku}/asset/preview_url`, URL_BASE);
   url.searchParams.set("id", id);
   const response = await signedFetch(url, { method: "GET" });
 
@@ -550,8 +556,8 @@ export async function getAssetPreviewURL(
 export async function getAssetOriginalURL(
   sku: string,
   id: string
-): Promise<Routes["/api/{sku}/asset/url"]["get"]> {
-  const url = new URL(`/api/${sku}/asset/url`, URL_BASE);
+): Promise<Routes["/api/sync/{sku}/asset/url"]["get"]> {
+  const url = new URL(`/api/sync/${sku}/asset/url`, URL_BASE);
   url.searchParams.set("id", id);
   const response = await signedFetch(url, { method: "GET" });
 

@@ -249,7 +249,7 @@ export const verifyInvitation = createMiddleware<AppArgs>(async (c, next) => {
   // Allow bypassing the acceptance check if they are rejecting their own invitation
   const canBypassAcceptance =
     c.req.method === "DELETE" &&
-    new URL(c.req.url).pathname === `/api/${sku}/invite` &&
+    new URL(c.req.url).pathname === `/api/sync/${sku}/invite` &&
     c.req.query("user") === user.key;
 
   if (!invitation.accepted && !canBypassAcceptance) {

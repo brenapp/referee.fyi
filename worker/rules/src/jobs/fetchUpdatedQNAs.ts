@@ -1,7 +1,11 @@
-import type { Question } from "@referee-fyi/rules/qnaplus";
+import type { operations } from "@referee-fyi/rules/qnaplus";
 import type { ProgramAbbr, Year } from "robotevents";
 import { client } from "../qnaplus.js";
 import { affiliatedPrograms } from "@referee-fyi/rules/programs";
+
+type Question = NonNullable<
+  operations["getInternalUpdate"]["responses"]["200"]["content"]["application/json"]["questions"]
+>[number];
 
 export type CurrentVersion = {
   version: string;

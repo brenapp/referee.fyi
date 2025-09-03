@@ -4,20 +4,19 @@
   "version": "1.0.0",
   "exports": {
     ".": {
-      "default": "./main.js"
+      "default": "./dist/main.js"
     },
     "./qnaplus": {
-      "types": "./qnaplus.d.ts"
+      "types": "./generated/qnaplus.d.ts"
     },
     "./programs": {
-      "default": "./programs.js"
+      "default": "./dist/programs.js"
     }
   },
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w",
-    "qnaplus-typegen": "npx openapi-typescript https://api.qnapl.us/openapi -o ./generated/qnaplus.d.ts",
-    "rules-typegen": "npx openapi-typescript http://localhost:8787/openapi -o ./generated/rules.d.ts"
+    "typegen:qnaplus": "npx openapi-typescript https://api.qnapl.us/openapi -o ./generated/qnaplus.d.ts"
   },
   "author": "",
   "description": "",

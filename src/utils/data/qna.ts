@@ -4,7 +4,7 @@ import { get, set } from "./keyval";
 import { ProgramAbbr, Year } from "robotevents";
 import { getMany } from "idb-keyval";
 import { captureException } from "@sentry/react";
-import { relatedPrograms } from "@referee-fyi/rules/programs";
+import { relatedPrograms } from "../../../lib/rules/src/programs";
 import { toast } from "~components/Toast";
 
 type Question = Schemas["Question"];

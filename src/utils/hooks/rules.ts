@@ -3,7 +3,11 @@ import { EventData, ProgramAbbr, Year } from "robotevents";
 import { HookQueryOptions, useSeason } from "./robotevents";
 import { GAME_FETCHERS } from "~utils/data/rules";
 
-import type { Game as BaseGame, Rule, RuleGroup } from "@referee-fyi/rules";
+import type {
+  Game as BaseGame,
+  Rule,
+  RuleGroup,
+} from "../../../lib/rules/src/main";
 export type { Rule, RuleGroup };
 
 export type Game = BaseGame & {

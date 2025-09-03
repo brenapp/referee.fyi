@@ -1,4 +1,4 @@
-import { ErrorResponseSchema, ErrorResponses, AppArgs } from "../../router";
+import { ErrorResponseSchema, ErrorResponses, AppArgs } from "../../../router";
 import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { z } from "zod/v4";
 import {
@@ -6,20 +6,31 @@ import {
   verifySignature,
   VerifySignatureHeadersSchema,
   verifyUser,
-} from "../../utils/verify";
+} from "../../../utils/verify";
+import {
+  WebSocketServerShareInfoMessage,
+  WebSocketServerShareInfoMessageSchema,
+} from "@referee-fyi/share";
 export const ParamsSchema = z.object({
   sku: z.string(),
 });
-export const QuerySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-});
+export const QuerySchema = z.object({});
+
+export const SuccessResponseSchema = z
+  .object({
+    success: z.literal(true),
+    data: WebSocketServerShareInfoMessageSchema,
+  })
+  .meta({
+    id: "GetDataResponse",
+    description: "Indicates a new shared instance has been created.",
+  });
 
 export const route = createRoute({
   method: "get",
-  path: "/api/{sku}/join",
-  tags: ["Instance"],
-  summary: "Join an instance websocket",
+  path: "/api/{sku}/data",
+  tags: ["Incident"],
+  summary: "Get instance share data.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",
   middleware: [verifySignature, verifyUser, verifyInvitation],
   request: {
@@ -28,15 +39,11 @@ export const route = createRoute({
     query: QuerySchema,
   },
   responses: {
-    101: {
-      description: "Upgrade to WebSocket",
-      content: {},
-    },
-    426: {
-      description: "Upgrade required",
+    200: {
+      description: "Instance Share Data",
       content: {
         "application/json": {
-          schema: ErrorResponseSchema,
+          schema: SuccessResponseSchema,
         },
       },
     },
@@ -45,8 +52,6 @@ export const route = createRoute({
 });
 
 export type Route = typeof route;
-
-// @ts-expect-error OpenAPI WebSocket Handled
 export const handler: RouteHandler<Route, AppArgs> = async (c) => {
   const verifyInvitation = c.get("verifyInvitation");
   if (!verifyInvitation) {
@@ -63,26 +68,19 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
     );
   }
 
-  const upgradeHeader = c.req.header("Upgrade");
-  if (upgradeHeader?.toLowerCase() !== "websocket") {
-    return c.json(
-      {
-        success: false,
-        code: "JoinInstanceMissingUpgradeHeader",
-        error: {
-          name: "ValidationError",
-          message: "Upgrade header must be 'websocket'.",
-        },
-      } as const satisfies z.infer<typeof ErrorResponseSchema>,
-      426
-    );
-  }
-
   const stub = c.env.INCIDENTS.get(
     c.env.INCIDENTS.idFromString(verifyInvitation.instance.secret)
   );
 
-  return stub.fetch(c.req.raw);
+  const data =
+    (await stub.createServerShareMessage()) as WebSocketServerShareInfoMessage;
+  return c.json(
+    {
+      success: true,
+      data,
+    } as const satisfies z.infer<typeof SuccessResponseSchema>,
+    200
+  );
 };
 
 export default [route, handler] as const;

@@ -1,4 +1,8 @@
-import { ErrorResponseSchema, ErrorResponses, AppArgs } from "../../router";
+import {
+  ErrorResponseSchema,
+  ErrorResponses,
+  AppArgs,
+} from "../../../../router";
 import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { z } from "zod/v4";
 import {
@@ -6,41 +10,41 @@ import {
   verifySignature,
   VerifySignatureHeadersSchema,
   verifyUser,
-} from "../../utils/verify";
-import {
-  WebSocketServerShareInfoMessage,
-  WebSocketServerShareInfoMessageSchema,
-} from "@referee-fyi/share";
+} from "../../../../utils/verify";
+import { WebSocketSender } from "@referee-fyi/share";
+import { getUser } from "../../../../utils/data";
+export const QuerySchema = z.object({
+  id: z.string(),
+});
+
 export const ParamsSchema = z.object({
   sku: z.string(),
 });
-export const QuerySchema = z.object({});
 
 export const SuccessResponseSchema = z
   .object({
     success: z.literal(true),
-    data: WebSocketServerShareInfoMessageSchema,
+    data: z.object({}),
   })
   .meta({
-    id: "GetDataResponse",
-    description: "Indicates a new shared instance has been created.",
+    id: "DeleteIncidentResponse",
   });
 
 export const route = createRoute({
-  method: "get",
-  path: "/api/{sku}/data",
+  method: "delete",
+  path: "/api/{sku}/incident",
   tags: ["Incident"],
-  summary: "Get instance share data.",
+  summary: "Delete an incident.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",
   middleware: [verifySignature, verifyUser, verifyInvitation],
   request: {
     headers: VerifySignatureHeadersSchema,
-    params: ParamsSchema,
     query: QuerySchema,
+    params: ParamsSchema,
   },
   responses: {
     200: {
-      description: "Instance Share Data",
+      description: "Incident deleted successfully",
       content: {
         "application/json": {
           schema: SuccessResponseSchema,
@@ -53,6 +57,7 @@ export const route = createRoute({
 
 export type Route = typeof route;
 export const handler: RouteHandler<Route, AppArgs> = async (c) => {
+  const { id } = c.req.valid("query");
   const verifyInvitation = c.get("verifyInvitation");
   if (!verifyInvitation) {
     return c.json(
@@ -72,12 +77,35 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
     c.env.INCIDENTS.idFromString(verifyInvitation.instance.secret)
   );
 
-  const data =
-    (await stub.createServerShareMessage()) as WebSocketServerShareInfoMessage;
+  await stub.deleteIncident(id);
+
+  const user = await getUser(c.env, verifyInvitation.invitation.user);
+  if (!user) {
+    return c.json(
+      {
+        success: false,
+        code: "VerifyUserNotRegistered",
+        error: {
+          name: "ValidationError",
+          message: "Associated user is not registered.",
+        },
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      404
+    );
+  }
+
+  const sender: WebSocketSender = {
+    id: user.key,
+    name: user.name,
+    type: "client",
+  };
+
+  await stub.broadcast({ type: "remove_incident", id }, sender);
+
   return c.json(
     {
       success: true,
-      data,
+      data: {},
     } as const satisfies z.infer<typeof SuccessResponseSchema>,
     200
   );

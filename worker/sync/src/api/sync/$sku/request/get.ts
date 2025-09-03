@@ -1,33 +1,37 @@
-import { ErrorResponseSchema, ErrorResponses, AppArgs } from "../../router";
+import {
+  ErrorResponseSchema,
+  ErrorResponses,
+  AppArgs,
+} from "../../../../router";
 import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { z } from "zod/v4";
 import {
   verifySignature,
   VerifySignatureHeadersSchema,
   verifyUser,
-} from "../../utils/verify";
-import { getInvitation, getUser } from "../../utils/data";
-import { Invitation, User, UserInvitationSchema } from "@referee-fyi/share";
+} from "../../../../utils/verify";
+import { getRequestCodeUserKey, getUser } from "../../../../utils/data";
+import { UserSchema } from "@referee-fyi/share";
 export const ParamsSchema = z.object({
   sku: z.string(),
 });
-export const QuerySchema = z.object({});
+export const QuerySchema = z.object({
+  code: z.string(),
+});
 
-export const SuccessResponseSchema = z
-  .object({
-    success: z.literal(true),
-    data: UserInvitationSchema,
-  })
-  .meta({
-    id: "GetInvitationResponse",
-    description: "The user's invitation for an event.",
-  });
+export const SuccessResponseSchema = z.object({
+  success: z.literal(true),
+  data: z.object({
+    user: UserSchema,
+    version: z.string(),
+  }),
+});
 
 export const route = createRoute({
   method: "get",
-  path: "/api/{sku}/invitation",
-  tags: ["Invitation Management"],
-  summary: "Gets the user's current invitation for an event.",
+  path: "/api/{sku}/request",
+  tags: ["Key Exchange"],
+  summary: "Obtains another user's public key.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",
   middleware: [verifySignature, verifyUser],
   request: {
@@ -37,7 +41,7 @@ export const route = createRoute({
   },
   responses: {
     200: {
-      description: "The user's invitation",
+      description: "Public key retrieved successfully",
       content: {
         "application/json": {
           schema: SuccessResponseSchema,
@@ -51,8 +55,9 @@ export const route = createRoute({
 export type Route = typeof route;
 export const handler: RouteHandler<Route, AppArgs> = async (c) => {
   const sku = c.req.valid("param").sku;
-  const verifyUser = c.get("verifyUser");
+  const code = c.req.valid("query").code;
 
+  const verifyUser = c.get("verifyUser");
   if (!verifyUser) {
     return c.json(
       {
@@ -67,36 +72,29 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
     );
   }
 
-  const invitation: Invitation | null = await getInvitation(
-    c.env,
-    verifyUser.user.key,
-    sku
-  );
-
-  if (!invitation) {
+  const req = await getRequestCodeUserKey(c.env, code, sku);
+  if (!req) {
     return c.json(
       {
         success: false,
-        error: {
-          name: "ValidationError",
-          message: "No invitation found for this user and event.",
-        },
-        code: "GetInvitationNotFound",
+        code: "GetRequestCodeUnknownCode",
+        error: { name: "ValidationError", message: "No such request code." },
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       404
     );
   }
 
-  const from: User | null = await getUser(c.env, invitation.from);
-  if (!from) {
+  const { key, version } = req;
+  const user = await getUser(c.env, key);
+  if (!user) {
     return c.json(
       {
         success: false,
+        code: "VerifyUserNotRegistered",
         error: {
           name: "ValidationError",
-          message: "Could not get information about inviter.",
+          message: "User associated with request code not found.",
         },
-        code: "GetInvitationUserFromNotFound",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       404
     );
@@ -105,13 +103,7 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
   return c.json(
     {
       success: true,
-      data: {
-        id: invitation.id,
-        admin: invitation.admin,
-        from,
-        accepted: invitation.accepted,
-        sku,
-      },
+      data: { user, version },
     } as const satisfies z.infer<typeof SuccessResponseSchema>,
     200
   );

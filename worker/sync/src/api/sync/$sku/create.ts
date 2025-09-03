@@ -1,14 +1,14 @@
-import { ErrorResponseSchema, ErrorResponses, AppArgs } from "../../router";
+import { ErrorResponseSchema, ErrorResponses, AppArgs } from "../../../router";
 import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { z } from "zod/v4";
 import {
   verifySignature,
   VerifySignatureHeadersSchema,
   verifyUser,
-  verifyUserHasSystemKey,
-} from "../../utils/verify";
-import { getInstancesForEvent } from "../../utils/data";
-
+} from "../../../utils/verify";
+import { setInvitation } from "../../../utils/data";
+import { Invitation, UserInvitationSchema } from "@referee-fyi/share";
+import { ShareInstanceInitData } from "../../../objects/instance";
 export const ParamsSchema = z.object({
   sku: z.string(),
 });
@@ -17,22 +17,20 @@ export const QuerySchema = z.object({});
 export const SuccessResponseSchema = z
   .object({
     success: z.literal(true),
-    data: z.object({
-      instances: z.array(z.string()),
-    }),
+    data: UserInvitationSchema,
   })
   .meta({
-    id: "GetInvitationListResponse",
-    description: "All active instances for an event.",
+    id: "PostCreateResponse",
+    description: "Indicates a new shared instance has been created.",
   });
 
 export const route = createRoute({
-  method: "get",
-  path: "/api/{sku}/list",
+  method: "post",
+  path: "/api/{sku}/create",
   tags: ["Invitation Management"],
-  summary: "Gets all active instances for an event.",
+  summary: "Create a new shared instance, and adds user to it.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",
-  middleware: [verifySignature, verifyUser, verifyUserHasSystemKey],
+  middleware: [verifySignature, verifyUser],
   request: {
     headers: VerifySignatureHeadersSchema,
     params: ParamsSchema,
@@ -40,7 +38,7 @@ export const route = createRoute({
   },
   responses: {
     200: {
-      description: "All active instances for an event.",
+      description: "Instance created successfully",
       content: {
         "application/json": {
           schema: SuccessResponseSchema,
@@ -70,11 +68,36 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
     );
   }
 
-  const instances = await getInstancesForEvent(c.env, sku);
+  const instanceId = c.env.INCIDENTS.newUniqueId();
+  const secret = instanceId.toString();
+
+  const invitation: Invitation = {
+    id: crypto.randomUUID(),
+    admin: true,
+    user: verifyUser.user.key,
+    sku,
+    instance_secret: secret,
+    accepted: true,
+    from: verifyUser.user.key,
+  };
+
+  await setInvitation(c.env, invitation);
+
+  const stub = c.env.INCIDENTS.get(instanceId);
+
+  const body: ShareInstanceInitData = { sku, instance: secret };
+  await stub.init(body);
+
   return c.json(
     {
       success: true,
-      data: { instances },
+      data: {
+        id: invitation.id,
+        admin: invitation.admin,
+        accepted: invitation.accepted,
+        from: verifyUser.user,
+        sku,
+      },
     } as const satisfies z.infer<typeof SuccessResponseSchema>,
     200
   );

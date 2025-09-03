@@ -1,19 +1,17 @@
-import { ErrorResponseSchema, ErrorResponses, AppArgs } from "../../router";
+import { ErrorResponseSchema, ErrorResponses, AppArgs } from "../../../router";
 import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { z } from "zod/v4";
 import {
   verifySignature,
   VerifySignatureHeadersSchema,
   verifyUser,
-} from "../../utils/verify";
-import { getInvitation, getUser, setInvitation } from "../../utils/data";
-import { User, UserInvitationSchema } from "@referee-fyi/share";
+} from "../../../utils/verify";
+import { getInvitation, getUser } from "../../../utils/data";
+import { Invitation, User, UserInvitationSchema } from "@referee-fyi/share";
 export const ParamsSchema = z.object({
   sku: z.string(),
 });
-export const QuerySchema = z.object({
-  invitation: z.string().meta({ description: "The invitation ID to accept." }),
-});
+export const QuerySchema = z.object({});
 
 export const SuccessResponseSchema = z
   .object({
@@ -21,15 +19,15 @@ export const SuccessResponseSchema = z
     data: UserInvitationSchema,
   })
   .meta({
-    id: "PutInvitationAcceptResponse",
-    description: "User successfully accepted the invitation.",
+    id: "GetInvitationResponse",
+    description: "The user's invitation for an event.",
   });
 
 export const route = createRoute({
-  method: "put",
-  path: "/api/{sku}/accept",
+  method: "get",
+  path: "/api/{sku}/invitation",
   tags: ["Invitation Management"],
-  summary: "Accept an invitation to join an shared instance.",
+  summary: "Gets the user's current invitation for an event.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",
   middleware: [verifySignature, verifyUser],
   request: {
@@ -39,7 +37,7 @@ export const route = createRoute({
   },
   responses: {
     200: {
-      description: "Successfully accepted the invitation",
+      description: "The user's invitation",
       content: {
         "application/json": {
           schema: SuccessResponseSchema,
@@ -53,7 +51,6 @@ export const route = createRoute({
 export type Route = typeof route;
 export const handler: RouteHandler<Route, AppArgs> = async (c) => {
   const sku = c.req.valid("param").sku;
-  const id = c.req.valid("query").invitation;
   const verifyUser = c.get("verifyUser");
 
   if (!verifyUser) {
@@ -70,44 +67,34 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
     );
   }
 
-  const invitation = await getInvitation(c.env, verifyUser.user.key, sku);
+  const invitation: Invitation | null = await getInvitation(
+    c.env,
+    verifyUser.user.key,
+    sku
+  );
+
   if (!invitation) {
     return c.json(
       {
         success: false,
         error: {
           name: "ValidationError",
-          message: "No invitation exists for this user and event.",
+          message: "No invitation found for this user and event.",
         },
-        code: "PutInvitationAcceptNotFound",
+        code: "GetInvitationNotFound",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       404
     );
   }
 
-  if (invitation.id !== id) {
-    return c.json(
-      {
-        success: false,
-        error: {
-          name: "ValidationError",
-          message: "A newer invitation is available.",
-        },
-        code: "PutInvitationAcceptInvalid",
-      } as const satisfies z.infer<typeof ErrorResponseSchema>,
-      400
-    );
-  }
-
   const from: User | null = await getUser(c.env, invitation.from);
-
   if (!from) {
     return c.json(
       {
         success: false,
         error: {
           name: "ValidationError",
-          message: "Invitation sender not found.",
+          message: "Could not get information about inviter.",
         },
         code: "GetInvitationUserFromNotFound",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
@@ -115,31 +102,14 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
     );
   }
 
-  invitation.accepted = true;
-  await setInvitation(c.env, invitation);
-
-  // Tell DO to send an update
-  const stub = c.env.INCIDENTS.get(
-    c.env.INCIDENTS.idFromString(invitation.instance_secret)
-  );
-  stub.broadcast(
-    {
-      type: "server_user_add",
-      user: verifyUser.user,
-      activeUsers: await stub.getActiveUsers(),
-      invitations: await stub.getInvitationList(),
-    },
-    { type: "server" }
-  );
-
   return c.json(
     {
       success: true,
       data: {
         id: invitation.id,
-        accepted: invitation.accepted,
         admin: invitation.admin,
         from,
+        accepted: invitation.accepted,
         sku,
       },
     } as const satisfies z.infer<typeof SuccessResponseSchema>,

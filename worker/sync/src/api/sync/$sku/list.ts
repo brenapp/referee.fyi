@@ -2,42 +2,37 @@ import { ErrorResponseSchema, ErrorResponses, AppArgs } from "../../../router";
 import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { z } from "zod/v4";
 import {
-  verifyInvitation,
   verifySignature,
   VerifySignatureHeadersSchema,
   verifyUser,
-  verifyUserAssetAuthorized,
-  VerifyUserAssetAuthorizedQuerySchema,
+  verifyUserHasSystemKey,
 } from "../../../utils/verify";
+import { getInstancesForEvent } from "../../../utils/data";
+
 export const ParamsSchema = z.object({
   sku: z.string(),
 });
-export const QuerySchema = VerifyUserAssetAuthorizedQuerySchema;
+export const QuerySchema = z.object({});
 
 export const SuccessResponseSchema = z
   .object({
     success: z.literal(true),
     data: z.object({
-      owner: z.string(),
-      previewURL: z.string(),
+      instances: z.array(z.string()),
     }),
   })
   .meta({
-    id: "GetAssetPreviewURLResponse",
+    id: "GetInvitationListResponse",
+    description: "All active instances for an event.",
   });
 
 export const route = createRoute({
   method: "get",
-  path: "/api/{sku}/asset/preview_url",
-  tags: ["Assets"],
-  summary: "Gets the preview URL for an asset.",
+  path: "/api/{sku}/list",
+  tags: ["Invitation Management"],
+  summary: "Gets all active instances for an event.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",
-  middleware: [
-    verifySignature,
-    verifyUser,
-    verifyInvitation,
-    verifyUserAssetAuthorized,
-  ],
+  middleware: [verifySignature, verifyUser, verifyUserHasSystemKey],
   request: {
     headers: VerifySignatureHeadersSchema,
     params: ParamsSchema,
@@ -45,7 +40,7 @@ export const route = createRoute({
   },
   responses: {
     200: {
-      description: "Successfully retrieved asset preview URL",
+      description: "All active instances for an event.",
       content: {
         "application/json": {
           schema: SuccessResponseSchema,
@@ -58,46 +53,28 @@ export const route = createRoute({
 
 export type Route = typeof route;
 export const handler: RouteHandler<Route, AppArgs> = async (c) => {
-  const verifyUserAssetAuthorized = c.get("verifyUserAssetAuthorized");
-  if (!verifyUserAssetAuthorized) {
+  const sku = c.req.valid("param").sku;
+  const verifyUser = c.get("verifyUser");
+
+  if (!verifyUser) {
     return c.json(
       {
         success: false,
-        code: "VerifyUserAssetAuthorizedValuesNotPresent",
         error: {
           name: "ValidationError",
-          message: "User is not authorized to access this asset.",
+          message: "User verification failed.",
         },
+        code: "VerifyUserNotRegistered",
       } as const satisfies z.infer<typeof ErrorResponseSchema>,
       401
     );
   }
 
-  const url = verifyUserAssetAuthorized.image.variants?.find((variant) =>
-    variant.endsWith("preview")
-  );
-  if (!url) {
-    return c.json(
-      {
-        success: false,
-        code: "GetAssetPreviewURLNotFound",
-        error: {
-          name: "ValidationError",
-          message: "Preview not found for the asset.",
-        },
-      } as const satisfies z.infer<typeof ErrorResponseSchema>,
-      404
-    );
-  }
-
-  const owner = verifyUserAssetAuthorized.asset.owner;
+  const instances = await getInstancesForEvent(c.env, sku);
   return c.json(
     {
       success: true,
-      data: {
-        owner,
-        previewURL: url,
-      },
+      data: { instances },
     } as const satisfies z.infer<typeof SuccessResponseSchema>,
     200
   );

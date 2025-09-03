@@ -1,4 +1,8 @@
-import { ErrorResponseSchema, ErrorResponses, AppArgs } from "../../../router";
+import {
+  ErrorResponseSchema,
+  ErrorResponses,
+  AppArgs,
+} from "../../../../router";
 import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { z } from "zod/v4";
 import {
@@ -8,8 +12,7 @@ import {
   verifyUser,
   verifyUserAssetAuthorized,
   VerifyUserAssetAuthorizedQuerySchema,
-} from "../../../utils/verify";
-import { signAssetUrl } from "../../../utils/crypto";
+} from "../../../../utils/verify";
 export const ParamsSchema = z.object({
   sku: z.string(),
 });
@@ -20,18 +23,18 @@ export const SuccessResponseSchema = z
     success: z.literal(true),
     data: z.object({
       owner: z.string(),
-      url: z.string(),
+      previewURL: z.string(),
     }),
   })
   .meta({
-    id: "GetAssetURLResponse",
+    id: "GetAssetPreviewURLResponse",
   });
 
 export const route = createRoute({
   method: "get",
-  path: "/api/{sku}/asset/url",
+  path: "/api/{sku}/asset/preview_url",
   tags: ["Assets"],
-  summary: "Gets the signed URL for an asset.",
+  summary: "Gets the preview URL for an asset.",
   hide: process.env.WRANGLER_ENVIRONMENT === "production",
   middleware: [
     verifySignature,
@@ -46,7 +49,7 @@ export const route = createRoute({
   },
   responses: {
     200: {
-      description: "Successfully retrieved signed asset URL",
+      description: "Successfully retrieved asset preview URL",
       content: {
         "application/json": {
           schema: SuccessResponseSchema,
@@ -58,7 +61,6 @@ export const route = createRoute({
 });
 
 export type Route = typeof route;
-
 export const handler: RouteHandler<Route, AppArgs> = async (c) => {
   const verifyUserAssetAuthorized = c.get("verifyUserAssetAuthorized");
   if (!verifyUserAssetAuthorized) {
@@ -76,13 +78,13 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
   }
 
   const url = verifyUserAssetAuthorized.image.variants?.find((variant) =>
-    variant.endsWith("public")
+    variant.endsWith("preview")
   );
   if (!url) {
     return c.json(
       {
         success: false,
-        code: "GetAssetURLNotFound",
+        code: "GetAssetPreviewURLNotFound",
         error: {
           name: "ValidationError",
           message: "Preview not found for the asset.",
@@ -92,19 +94,13 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
     );
   }
 
-  const signed = await signAssetUrl(
-    url,
-    await c.env.CLOUDFLARE_IMAGES_SIGNATURE_TOKEN.get(),
-    60 * 5
-  );
-
   const owner = verifyUserAssetAuthorized.asset.owner;
   return c.json(
     {
       success: true,
       data: {
         owner,
-        url: signed.toString(),
+        previewURL: url,
       },
     } as const satisfies z.infer<typeof SuccessResponseSchema>,
     200

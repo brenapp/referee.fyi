@@ -302,4 +302,7 @@ export default defineConfig(() => ({
   build: {
     sourcemap: true,
   },
+  resolve: {
+    dedupe: ["zod"],
+  },
 }));

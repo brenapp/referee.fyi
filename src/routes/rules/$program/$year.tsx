@@ -10,7 +10,7 @@ import {
   ChatBubbleLeftRightIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/solid";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { getUpdatedQuestionsForProgram } from "~utils/data/qna";
 import { ProgramAbbr, programs, Year, years } from "robotevents";
 import { useQuestionsForProgram } from "~utils/hooks/qna";
@@ -133,9 +133,15 @@ export const QuestionItem: React.FC<QuestionItemProps> = ({ question }) => {
       className="w-full mt-2 text-left"
       menu={<QuestionMenu question={question} />}
     >
-      <strong className="text-sm font-mono text-emerald-400">
-        {question.id}
-      </strong>
+      <span className="text-sm">
+        {question.answered ? (
+          <strong className="text-emerald-400">Answered</strong>
+        ) : (
+          <strong>Unanswered</strong>
+        )}
+        {question.tags.length > 0 ? " • " : ""}
+        <span className="font-mono">{question.tags.join(", ")}</span>
+      </span>
       <p className="font-normal">{question.title}</p>
     </MenuButton>
   );
@@ -146,17 +152,29 @@ export type QuestionListProps = {
   query?: string;
 };
 
+function questionMatchesQuery(question: Question, query: string) {
+  const queryLower = query.toLowerCase();
+  return (
+    question.title.toLowerCase().includes(queryLower) ||
+    question.id.toLowerCase().includes(queryLower) ||
+    question.author.toLowerCase().includes(queryLower) ||
+    question.tags.some((tag) => tag.toLowerCase().includes(queryLower)) ||
+    question.questionRaw.toLowerCase().includes(queryLower) ||
+    question.answerRaw?.toLowerCase().includes(queryLower)
+  );
+}
+
 export const QuestionList: React.FC<QuestionListProps> = ({
   questions,
   query,
 }) => {
-  const filtered = query
-    ? questions.filter(
-        (q) =>
-          q.title.toLowerCase().includes(query.toLowerCase()) ||
-          q.id.toLowerCase().includes(query.toLowerCase())
-      )
-    : questions;
+  const filtered = useMemo(
+    () =>
+      query
+        ? questions.filter((q) => questionMatchesQuery(q, query))
+        : questions,
+    [questions, query]
+  );
 
   if (filtered.length === 0) {
     return null;

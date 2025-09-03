@@ -10,7 +10,7 @@ import {
   ChatBubbleLeftRightIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/solid";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { getUpdatedQuestionsForProgram } from "~utils/data/qna";
 import { ProgramAbbr, programs, Year, years } from "robotevents";
 import { useQuestionsForProgram } from "~utils/hooks/qna";
@@ -146,17 +146,29 @@ export type QuestionListProps = {
   query?: string;
 };
 
+function questionMatchesQuery(question: Question, query: string) {
+  return (
+    question.title.toLowerCase().includes(query.toLowerCase()) ||
+    question.id.toLowerCase().includes(query.toLowerCase()) ||
+    question.author.toLowerCase().includes(query.toLowerCase()) ||
+    question.questionRaw.toLowerCase().includes(query.toLowerCase()) ||
+    (question.answerRaw?.toLowerCase().includes(query.toLowerCase()) ??
+      false) ||
+    question.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase()))
+  );
+}
+
 export const QuestionList: React.FC<QuestionListProps> = ({
   questions,
   query,
 }) => {
-  const filtered = query
-    ? questions.filter(
-        (q) =>
-          q.title.toLowerCase().includes(query.toLowerCase()) ||
-          q.id.toLowerCase().includes(query.toLowerCase())
-      )
-    : questions;
+  const filtered = useMemo(
+    () =>
+      query
+        ? questions.filter((q) => questionMatchesQuery(q, query))
+        : questions,
+    [questions, query]
+  );
 
   if (filtered.length === 0) {
     return null;

@@ -44,3 +44,4 @@ key.json
 # TLS Certificates (Used By Wrangler Dev)
 .certs
 
+*.js.map

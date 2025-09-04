@@ -57,6 +57,10 @@ async function handle(c: Context<AppArgs>) {
     return c.json({ error: "Not Found", code: 404 }, 404);
   }
 
+  c.header("Cache-Control", "public, max-age=300, s-maxage=300");
+  c.header("Vary", "Authorization");
+  c.header("X-Canonical-URL", url.toString());
+
   const token =
     c.req.header("Authorization")?.replace("Bearer ", "") ??
     (await c.env.ROBOTEVENTS_TOKEN.get());
@@ -110,3 +114,4 @@ app.all("*", (c) => c.json({ error: "Not Found", code: 404 }, 404));
 export default {
   ...app,
 } satisfies ExportedHandler<Env>;
+``;

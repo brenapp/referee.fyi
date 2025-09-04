@@ -1,4 +1,4 @@
-import { Question } from "@referee-fyi/rules/qnaplus";
+import type { Question } from "~types/worker/rules";
 import {
   useQuery,
   UseQueryOptions,
@@ -7,7 +7,7 @@ import {
 import { ProgramAbbr, Year } from "robotevents";
 import { getQuestionsByProgram } from "~utils/data/qna";
 import { HookQueryOptions } from "./robotevents";
-import { relatedPrograms } from "@referee-fyi/rules/programs";
+import { relatedPrograms } from "../../../lib/rules/src/programs";
 
 export function getUseQuestionsForProgramQueryParams(
   program: ProgramAbbr,

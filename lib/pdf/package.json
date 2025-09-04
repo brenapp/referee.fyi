@@ -4,7 +4,9 @@
   "description": "Export a list of incidents to a human-readable PDF report of the anomaly log",
   "main": "index.js",
   "type": "module",
-  "exports": "./index.js",
+  "exports": {
+    "default": "./dist/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w"
@@ -12,6 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@referee-fyi/share": "^1.0.0",
     "jspdf": "^2.5.2",
     "robotevents": "^6.0.3"
   }

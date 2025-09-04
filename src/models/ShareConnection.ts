@@ -1,14 +1,13 @@
-import {
+import type {
   Incident,
-  INCIDENT_IGNORE,
   InvitationListItem,
-  SCRATCHPAD_IGNORE,
   ShareResponse,
   User,
   UserInvitation,
   WebSocketMessage,
   WebSocketPayload,
   WebSocketPeerMessage,
+  MatchScratchpad,
 } from "@referee-fyi/share";
 import { create } from "zustand";
 import { useShallow } from "zustand/react/shallow";
@@ -39,7 +38,7 @@ import {
 } from "~utils/data/incident";
 import { queryClient } from "~utils/data/query";
 import { toast } from "~components/Toast";
-import { MatchScratchpad } from "@referee-fyi/share";
+import { INCIDENT_IGNORE, SCRATCHPAD_IGNORE } from "@referee-fyi/share";
 import { mergeMap } from "@referee-fyi/consistency";
 import {
   getManyMatchScratchpads,
@@ -66,7 +65,7 @@ export enum ReadyState {
 }
 
 export type UserMetadata = Omit<
-  SuccessResponseData<"post", "/api/user">,
+  SuccessResponseData<"post", "/api/sync/register">,
   "user"
 >;
 
@@ -95,7 +94,9 @@ export type ShareConnectionActions = {
   connect(invitation: UserInvitation): Promise<void>;
   disconnect(): Promise<void>;
   forceSync(): Promise<void>;
-  updateProfile(profile: Partial<User>): Promise<Routes["/api/user"]["post"]>;
+  updateProfile(
+    profile: Partial<User>
+  ): Promise<Routes["/api/sync/register"]["post"]>;
 };
 
 type ShareConnection = ShareConnectionData & ShareConnectionActions;
@@ -454,7 +455,7 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
     await current.disconnect();
 
     // Prepare URL
-    const url = new URL(`/api/${invitation.sku}/join`, URL_BASE);
+    const url = new URL(`/api/sync/${invitation.sku}/join`, URL_BASE);
 
     if (url.protocol === "https:") {
       url.protocol = "wss:";

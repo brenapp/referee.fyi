@@ -658,7 +658,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/user": {
+    "/api/sync/register": {
         parameters: {
             query?: never;
             header?: never;
@@ -748,7 +748,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/{sku}/invitation": {
+    "/api/sync/{sku}/invitation": {
         parameters: {
             query?: never;
             header?: never;
@@ -835,7 +835,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/{sku}/invite": {
+    "/api/sync/{sku}/invite": {
         parameters: {
             query?: never;
             header?: never;
@@ -998,7 +998,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/{sku}/list": {
+    "/api/sync/{sku}/list": {
         parameters: {
             query?: never;
             header?: never;
@@ -1085,7 +1085,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/{sku}/request": {
+    "/api/sync/{sku}/request": {
         parameters: {
             query?: never;
             header?: never;
@@ -1261,7 +1261,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/{sku}/create": {
+    "/api/sync/{sku}/create": {
         parameters: {
             query?: never;
             header?: never;
@@ -1348,7 +1348,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/{sku}/accept": {
+    "/api/sync/{sku}/accept": {
         parameters: {
             query?: never;
             header?: never;
@@ -1438,7 +1438,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/{sku}/asset/upload_url": {
+    "/api/sync/{sku}/asset/upload_url": {
         parameters: {
             query?: never;
             header?: never;
@@ -1528,7 +1528,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/{sku}/asset/url": {
+    "/api/sync/{sku}/asset/url": {
         parameters: {
             query?: never;
             header?: never;
@@ -1617,7 +1617,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/{sku}/asset/preview_url": {
+    "/api/sync/{sku}/asset/preview_url": {
         parameters: {
             query?: never;
             header?: never;
@@ -1706,7 +1706,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/{sku}/incident": {
+    "/api/sync/{sku}/incident": {
         parameters: {
             query?: never;
             header?: never;
@@ -1956,7 +1956,7 @@ export interface paths {
         };
         trace?: never;
     };
-    "/api/{sku}/data": {
+    "/api/sync/{sku}/data": {
         parameters: {
             query?: never;
             header?: never;
@@ -2043,7 +2043,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/{sku}/join": {
+    "/api/sync/{sku}/join": {
         parameters: {
             query?: never;
             header?: never;

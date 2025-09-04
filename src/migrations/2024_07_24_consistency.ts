@@ -1,7 +1,7 @@
 import {
   initLWW,
   updateLWW,
-  WithLWWConsistency,
+  type WithLWWConsistency,
 } from "@referee-fyi/consistency";
 import { type NewIncident as OldIncident } from "./2024_05_07_matchSkills";
 import { queueMigration } from "./utils";

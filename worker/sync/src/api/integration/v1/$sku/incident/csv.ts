@@ -94,5 +94,3 @@ export const handler: RouteHandler<typeof route, AppArgs> = async (c) => {
       .replace(/[:.]/g, "-")}.csv"`,
   });
 };
-
-export default [route, handler] as const;

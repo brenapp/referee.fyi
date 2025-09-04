@@ -4,7 +4,7 @@ import { get, set } from "./keyval";
 import { ProgramAbbr, Year } from "robotevents";
 import { getMany } from "idb-keyval";
 import { captureException } from "@sentry/react";
-import { relatedPrograms } from "@referee-fyi/rules/programs";
+import { relatedPrograms } from "../../../lib/rules/src/programs";
 import { toast } from "~components/Toast";
 
 type Question = Schemas["Question"];
@@ -65,9 +65,9 @@ export async function updateQNAs() {
   const version = await getQNAPlusVersion();
 
   try {
-    const url = new URL("/api/updateQuestions", base);
+    const url = new URL("/api/rules/updateQuestions", base);
     url.searchParams.set("version", version);
-    const response: Routes["/api/updateQuestions"]["get"] = await fetch(
+    const response: Routes["/api/rules/updateQuestions"]["get"] = await fetch(
       url
     ).then((r) => r.json());
 

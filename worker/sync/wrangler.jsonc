@@ -131,7 +131,15 @@
           "pattern": "share.referee.fyi"
         },
         {
-          "pattern": "referee.fyi/api/*",
+          "pattern": "referee.fyi/api/integration/*",
+          "zone_name": "referee.fyi"
+        },
+        {
+          "pattern": "referee.fyi/api/sync/*",
+          "zone_name": "referee.fyi"
+        },
+        {
+          "pattern": "referee.fyi/api/meta/*",
           "zone_name": "referee.fyi"
         }
       ],

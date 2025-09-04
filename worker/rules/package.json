@@ -1,0 +1,35 @@
+{
+	"name": "@referee-fyi/worker-rules",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "tsc --noEmit",
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev --test-scheduled",
+		"start": "wrangler dev --test-scheduled",
+		"cf-typegen": "wrangler types --env production"
+	},
+	"exports": {
+		"routes": {
+			"types": "./src/routes.ts"
+		}
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20250607.0",
+		"openapi-typescript": "^7.8.0",
+		"typescript": "^5.5.2",
+		"wrangler": "^4.20.0"
+	},
+	"dependencies": {
+		"@cloudflare/puppeteer": "^1.0.2",
+		"@cloudflare/unenv-preset": "^2.3.2",
+		"@hono/standard-validator": "^0.1.2",
+		"@hono/swagger-ui": "^0.5.2",
+		"@hono/zod-openapi": "1.0.2",
+		"@referee-fyi/rules": "^1.0.0",
+		"hono": "^4.8.12",
+		"openapi-fetch": "^0.14.0",
+		"zod": "^4.0.14"
+	}
+}

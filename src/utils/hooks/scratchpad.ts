@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { MatchData } from "robotevents";
-import {
+import type {
   EditScratchpad,
   MatchScratchpad,
   ScratchpadUnchangeableProperties,
@@ -16,7 +16,7 @@ import {
 import { useEvent } from "./robotevents";
 import { getShareProfile } from "~utils/data/share";
 import { queryClient } from "~utils/data/query";
-import {
+import type {
   LastWriteWinsConsistency,
   WithLWWConsistency,
 } from "@referee-fyi/consistency";

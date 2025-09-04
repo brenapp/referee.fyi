@@ -144,5 +144,3 @@ export const handler: RouteHandler<typeof route, AppArgs> = async (c) => {
     200
   );
 };
-
-export default [route, handler] as const;

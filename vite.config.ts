@@ -129,7 +129,7 @@ const generateOpenApiTypes: (options: OpenApiTypesGeneration) => Plugin = ({
     );
 
     const { getOpenApiDocument: getRulesDoc } = await import(
-      "./worker/rules-indexer/src/routes"
+      "./worker/rules/src/routes"
     );
 
     async function generateTypings(path: string, doc: OpenAPI3) {
@@ -301,5 +301,8 @@ export default defineConfig(() => ({
   base: "/",
   build: {
     sourcemap: true,
+  },
+  resolve: {
+    dedupe: ["zod"],
   },
 }));

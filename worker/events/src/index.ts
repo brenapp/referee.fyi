@@ -108,7 +108,7 @@ const app = new Hono<{ Bindings: Env }>();
 app.use("*", cors());
 
 const endpoints = prefixes.flatMap((prefix) =>
-  routes.map((route) => join(prefix, route))
+  routes.map((route) => join(prefix, route.replaceAll(/\{([A-z]+)\}/g, ":$1")))
 );
 
 for (const endpoint of endpoints) {

@@ -19,13 +19,13 @@ const config = {
   info: { title: "Referee FYI Rules", version: "0.0.0" },
 };
 
-app.doc("/api/openapi", config);
+app.doc("/api/rules/openapi", config);
 
 export function getOpenApiDocument() {
   return app.getOpenAPIDocument(config);
 }
 
-app.get("/api/swagger", swaggerUI({ url: "/api/openapi" }));
+app.get("/api/rules/swagger", swaggerUI({ url: "/api/rules/openapi" }));
 
 export { app };
 

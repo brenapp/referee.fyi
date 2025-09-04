@@ -34,6 +34,8 @@ const app = new OpenAPIHono<AppArgs>();
 
 app.use("/api/*", cors());
 
+//#region Routes
+
 const routes = app
   .openapi(
     api_integration_v1_$sku_verify.route,
@@ -97,13 +99,11 @@ const routes = app
   .openapi(api_sync_$sku_data.route, api_sync_$sku_data.handler)
   .openapi(api_sync_$sku_join.route, api_sync_$sku_join.handler);
 
-app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
-  type: "http",
-  scheme: "bearer",
-  bearerFormat: "ECDSA",
-});
+//#endregion
 
-const config: OpenAPIObjectConfig = {
+//#region Integration API
+
+const integrationOpenApiConfig: OpenAPIObjectConfig = {
   openapi: "3.0.0",
   info: {
     title: "Referee FYI Integration API",
@@ -128,26 +128,61 @@ const config: OpenAPIObjectConfig = {
   security: [{ Bearer: [] }],
 };
 
-app.doc("/api/sync/openapi", config);
-app.doc("/api/integration/openapi", config);
-
-export function getOpenApiDocument() {
-  return app.getOpenAPIDocument(config);
-}
-
-app.get(
-  "/api/sync/swagger",
-  swaggerUI({
-    url: "/api/sync/openapi",
-  })
-);
-
+app.doc("/api/integration/openapi", integrationOpenApiConfig);
 app.get(
   "/api/integration/swagger",
   swaggerUI({
     url: "/api/integration/openapi",
   })
 );
+
+//#endregion
+
+//#region Sync Engine API
+
+const syncOpenApiConfig: OpenAPIObjectConfig = {
+  openapi: "3.0.0",
+  info: {
+    title: "Referee FYI Sync Engine API",
+    version: "0.0.0",
+    description:
+      "The Referee FYI Sync Engine API allows clients to exchange incident and live data with another during an event.",
+  },
+  externalDocs: {
+    url: "https://github.com/brenapp/referee.fyi/blob/main/documents/integrations.md",
+    description: "Integration API Documentation",
+  },
+  tags: [
+    {
+      name: "Integration API",
+      description: "Exposes read-only data to third-party applications.",
+      externalDocs: {
+        description: "Documentation",
+        url: "https://github.com/brenapp/referee.fyi/blob/main/documents/integrations.md",
+      },
+    },
+  ],
+  security: [{ Bearer: [] }],
+};
+
+app.doc("/api/sync/openapi", syncOpenApiConfig);
+app.get(
+  "/api/sync/swagger",
+  swaggerUI({
+    url: "/api/sync/openapi",
+  })
+);
+//#endregion
+
+app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
+  type: "http",
+  scheme: "bearer",
+  bearerFormat: "ECDSA",
+});
+
+export function getOpenApiDocument() {
+  return app.getOpenAPIDocument(syncOpenApiConfig);
+}
 
 export { app };
 

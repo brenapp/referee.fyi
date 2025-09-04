@@ -68,5 +68,5 @@ The main base URL for the production integration API is:
 https://referee.fyi/api/
 ```
 
-- OpenAPI Specification: `https://referee.fyi/api/openapi`
-- Swagger Documentation: `https://referee.fyi/api/swagger`
+- OpenAPI Specification: `https://referee.fyi/api/integration/openapi`
+- Swagger Documentation: `https://referee.fyi/api/integration/swagger`

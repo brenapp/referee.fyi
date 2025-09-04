@@ -1,0 +1,92 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "events",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-08-01",
+	"observability": {
+		"enabled": true
+	},
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"env": {
+		"development": {
+			"secrets_store_secrets": [
+				{
+					"store_id": "8e1adb056fd34b4c95266f0a7e767fae",
+					"binding": "ROBOTEVENTS_TOKEN",
+					"secret_name": "ROBOTEVENTS_TOKEN"
+				}
+			],
+			"vars": {
+				"WRANGLER_ENVIRONMENT": "development"
+			},
+			"kv_namespaces": [
+				{
+					"binding": "robotevents",
+					"id": "625e6299aecc4f85a63d3efdf1f2a7bd"
+				}
+			]
+		},
+		"staging": {
+			"routes": [
+				{
+					"custom_domain": true,
+					"pattern": "staging.events.referee.fyi"
+				}
+			],
+			"secrets_store_secrets": [
+				{
+					"store_id": "8e1adb056fd34b4c95266f0a7e767fae",
+					"binding": "ROBOTEVENTS_TOKEN",
+					"secret_name": "ROBOTEVENTS_TOKEN"
+				}
+			],
+			"vars": {
+				"WRANGLER_ENVIRONMENT": "staging"
+			},
+			"kv_namespaces": [
+				{
+					"binding": "robotevents",
+					"id": "625e6299aecc4f85a63d3efdf1f2a7bd"
+				}
+			]
+		},
+		"production": {
+			"routes": [
+				{
+					"custom_domain": true,
+					"pattern": "events.referee.fyi"
+				},
+				{
+					"custom_domain": true,
+					"pattern": "events.bren.app"
+				},
+				{
+					"pattern": "referee.fyi/api/v2/*",
+					"zone_name": "referee.fyi"
+				},
+				{
+					"pattern": "referee.fyi/api/events/*",
+					"zone_name": "referee.fyi"
+				}
+			],
+			"secrets_store_secrets": [
+				{
+					"store_id": "8e1adb056fd34b4c95266f0a7e767fae",
+					"binding": "ROBOTEVENTS_TOKEN",
+					"secret_name": "ROBOTEVENTS_TOKEN"
+				}
+			],
+			"vars": {
+				"WRANGLER_ENVIRONMENT": "production",
+			},
+			"kv_namespaces": [
+				{
+					"binding": "robotevents",
+					"id": "625e6299aecc4f85a63d3efdf1f2a7bd"
+				}
+			]
+		}
+	}
+}

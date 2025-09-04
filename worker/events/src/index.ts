@@ -1,6 +1,7 @@
 import { join } from "path";
 import { Context, Hono } from "hono";
 import { ContentfulStatusCode } from "hono/utils/http-status";
+import { cors } from "hono/cors";
 
 const ROBOTEVENTS_URL = "https://www.robotevents.com/api/v2";
 
@@ -94,6 +95,7 @@ async function handle(c: Context<AppArgs>) {
 }
 
 const app = new Hono<{ Bindings: Env }>();
+app.use("*", cors());
 
 const endpoints = prefixes.flatMap((prefix) =>
   routes.map((route) => join(prefix, route))

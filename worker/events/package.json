@@ -1,0 +1,19 @@
+{
+	"name": "@referee-fyi/worker-events",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"build": "wrangler build --env production",
+		"dev": "wrangler dev --env development --local",
+		"typegen": "wrangler types --env development"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "^0.8.19",
+		"typescript": "^5.5.2",
+		"vitest": "~3.2.0",
+		"wrangler": "^4.33.2"
+	},
+	"dependencies": {
+		"hono": "^4.9.6"
+	}
+}

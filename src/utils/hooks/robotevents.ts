@@ -24,6 +24,9 @@ import {
 import { createPersister } from "~utils/data/query";
 
 const client = Client({
+  request: {
+    baseUrl: import.meta.env.VITE_REFEREE_FYI_ROBOTEVENTS_SERVER,
+  },
   authorization: {
     token: import.meta.env.VITE_ROBOTEVENTS_TOKEN,
   },

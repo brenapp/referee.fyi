@@ -154,10 +154,11 @@ const generateOpenApiTypes: (options: OpenApiTypesGeneration) => Plugin = ({
 export default defineConfig(() => ({
   plugins: [
     requiredEnvVars([
-      "VITE_REFEREE_FYI_SHARE_SERVER",
       "VITE_REFEREE_FYI_BUILD_MODE",
-      "VITE_REFEREE_FYI_ENABLE_SENTRY",
+      "VITE_REFEREE_FYI_SHARE_SERVER",
       "VITE_REFEREE_FYI_RULES_SERVER",
+      "VITE_REFEREE_FYI_ROBOTEVENTS_SERVER",
+      "VITE_REFEREE_FYI_ENABLE_SENTRY",
       "VITE_ROBOTEVENTS_TOKEN",
       "VITE_LOGSERVER_TOKEN",
       "SENTRY_AUTH_TOKEN",

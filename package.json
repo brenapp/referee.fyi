@@ -19,7 +19,10 @@
     "build": "npm run --workspaces --if-present build && npm run frontend:build"
   },
   "workspaces": [
-    "lib/*",
+    "lib/consistency",
+    "lib/share",
+    "lib/pdf",
+    "lib/rules",
     "worker/*"
   ],
   "dependencies": {

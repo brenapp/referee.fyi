@@ -1,0 +1,23 @@
+{
+  "name": "@referee-fyi/client",
+  "version": "1.0.2",
+  "description": "SDK for for the Referee FYI Integration API",
+  "type": "module",
+  "author": "Brendan McGuire",
+  "exports": {
+    "types": "./src/index.ts",
+    "default": "./dist/main.js",
+    "import": "./dist/main.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "version:patch": "npm version patch --no-git-tag-version",
+    "version:minor": "npm version minor --no-git-tag-version",
+    "version:major": "npm version major --no-git-tag-version",
+    "typegen": "openapi-typescript https://referee.fyi/api/openapi --output ./openapi.d.ts --properties-required-by-default --default-non-nullable"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.9.1",
+    "typescript": "^5.9.2"
+  }
+}

@@ -4,6 +4,7 @@
   "main": "./src/index.ts",
   "compatibility_date": "2025-08-01",
   "logpush": true,
+  "workers_dev": true,
   "preview_urls": true,
   "observability": {
     "enabled": true,

@@ -84,5 +84,3 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
 
   return stub.fetch(c.req.raw);
 };
-
-export default [route, handler] as const;

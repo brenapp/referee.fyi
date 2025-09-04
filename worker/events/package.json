@@ -3,6 +3,7 @@
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
+		"build": "wrangler build --env production",
 		"dev": "wrangler dev --env development --local",
 		"typegen": "wrangler types --env development"
 	},

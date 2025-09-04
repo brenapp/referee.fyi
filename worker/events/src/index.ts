@@ -65,9 +65,15 @@ async function handle(c: Context<AppArgs>) {
     c.req.header("Authorization")?.replace("Bearer ", "") ??
     (await c.env.ROBOTEVENTS_TOKEN.get());
 
-  const cached = canUseCache(url)
-    ? await c.env.robotevents.get(url.toString(), "json")
-    : null;
+  const useCache = canUseCache(url);
+  let cached: unknown = null;
+  try {
+    if (useCache) {
+      cached = await c.env.robotevents.get(url.toString(), "json");
+    }
+  } catch (e) {
+    console.error("Error fetching from cache", e);
+  }
 
   if (cached) {
     return c.json(cached, 200);
@@ -89,7 +95,7 @@ async function handle(c: Context<AppArgs>) {
 
   const data = await response.json();
 
-  if (canUseCache(url)) {
+  if (useCache) {
     c.env.robotevents.put(url.toString(), JSON.stringify(data), {
       expirationTtl: 60 * 2,
     });

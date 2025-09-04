@@ -114,4 +114,3 @@ app.all("*", (c) => c.json({ error: "Not Found", code: 404 }, 404));
 export default {
   ...app,
 } satisfies ExportedHandler<Env>;
-``;

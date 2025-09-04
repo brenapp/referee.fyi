@@ -57,7 +57,7 @@ async function handle(c: Context<AppArgs>) {
     return c.json({ error: "Not Found", code: 404 }, 404);
   }
 
-  c.header("Cache-Control", "public, max-age=300, s-maxage=300");
+  c.header("Cache-Control", "public, max-age=120, s-maxage=120");
   c.header("Vary", "Authorization");
   c.header("X-Canonical-URL", url.toString());
 
@@ -91,7 +91,7 @@ async function handle(c: Context<AppArgs>) {
 
   if (canUseCache(url)) {
     c.env.robotevents.put(url.toString(), JSON.stringify(data), {
-      expirationTtl: 60 * 5,
+      expirationTtl: 60 * 2,
     });
   }
 

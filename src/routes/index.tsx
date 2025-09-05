@@ -2,7 +2,11 @@ import { Button, LinkButton } from "~components/Button";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Dialog, DialogHeader, DialogBody } from "~components/Dialog";
 
-import { Cog8ToothIcon, UserGroupIcon } from "@heroicons/react/20/solid";
+import {
+  ArrowRightIcon,
+  Cog8ToothIcon,
+  UserGroupIcon,
+} from "@heroicons/react/20/solid";
 import { useEventSearch } from "~utils/hooks/robotevents";
 import { useRecentEvents } from "~utils/hooks/history";
 import { isWorldsBuild, WORLDS_EVENTS } from "~utils/data/state";
@@ -21,6 +25,7 @@ import "./markdown.css";
 import { version } from "../../package.json";
 
 import { createFileRoute } from "@tanstack/react-router";
+import { useShareConnection } from "~models/ShareConnection";
 
 const UserWelcome: React.FC = () => {
   return (
@@ -31,6 +36,20 @@ const UserWelcome: React.FC = () => {
         started, pick your event from the dropdown above.
       </p>
     </section>
+  );
+};
+
+const Stats: React.FC = () => {
+  const { userMetadata } = useShareConnection(["userMetadata"]);
+  if (!userMetadata.isSystemKey) {
+    return null;
+  }
+
+  return (
+    <LinkButton to="/stats" className="w-full flex items-center mt-4">
+      <span className="flex-1">Stats</span>
+      <ArrowRightIcon height={20} className="text-emerald-400" />
+    </LinkButton>
   );
 };
 
@@ -166,6 +185,7 @@ export const HomePage: React.FC = () => {
             </LinkButton>
           ))}
           {events?.length === 0 ? <UserWelcome /> : null}
+          <Stats />
           <InstallPrompt />
         </section>
       </div>

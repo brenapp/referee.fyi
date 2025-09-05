@@ -100,7 +100,7 @@ export async function signedFetch(
 }
 
 export async function registerUser(
-  profile: Omit<User, "key">
+  profile: Omit<User, "key" | "system">
 ): Promise<Routes["/api/sync/register"]["post"]> {
   if (!profile.name) {
     return {

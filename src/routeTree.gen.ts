@@ -11,6 +11,7 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as StatsImport } from './routes/stats'
 import { Route as SettingsImport } from './routes/settings'
 import { Route as PrivacyImport } from './routes/privacy'
 import { Route as SkuRouteImport } from './routes/$sku/route'
@@ -25,6 +26,12 @@ import { Route as RulesProgramYearImport } from './routes/rules/$program/$year'
 import { Route as SkuTeamTeamImport } from './routes/$sku/team/$team'
 
 // Create/Update Routes
+
+const StatsRoute = StatsImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const SettingsRoute = SettingsImport.update({
   id: '/settings',
@@ -130,6 +137,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsImport
       parentRoute: typeof rootRoute
     }
+    '/stats': {
+      id: '/stats'
+      path: '/stats'
+      fullPath: '/stats'
+      preLoaderRoute: typeof StatsImport
+      parentRoute: typeof rootRoute
+    }
     '/$sku/deleted': {
       id: '/$sku/deleted'
       path: '/deleted'
@@ -220,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/$sku': typeof SkuRouteRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
+  '/stats': typeof StatsRoute
   '/$sku/deleted': typeof SkuDeletedRoute
   '/$sku/devtools': typeof SkuDevtoolsRoute
   '/$sku/skills': typeof SkuSkillsRoute
@@ -234,6 +249,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
+  '/stats': typeof StatsRoute
   '/$sku/deleted': typeof SkuDeletedRoute
   '/$sku/devtools': typeof SkuDevtoolsRoute
   '/$sku/skills': typeof SkuSkillsRoute
@@ -250,6 +266,7 @@ export interface FileRoutesById {
   '/$sku': typeof SkuRouteRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
+  '/stats': typeof StatsRoute
   '/$sku/deleted': typeof SkuDeletedRoute
   '/$sku/devtools': typeof SkuDevtoolsRoute
   '/$sku/skills': typeof SkuSkillsRoute
@@ -267,6 +284,7 @@ export interface FileRouteTypes {
     | '/$sku'
     | '/privacy'
     | '/settings'
+    | '/stats'
     | '/$sku/deleted'
     | '/$sku/devtools'
     | '/$sku/skills'
@@ -280,6 +298,7 @@ export interface FileRouteTypes {
     | '/'
     | '/privacy'
     | '/settings'
+    | '/stats'
     | '/$sku/deleted'
     | '/$sku/devtools'
     | '/$sku/skills'
@@ -294,6 +313,7 @@ export interface FileRouteTypes {
     | '/$sku'
     | '/privacy'
     | '/settings'
+    | '/stats'
     | '/$sku/deleted'
     | '/$sku/devtools'
     | '/$sku/skills'
@@ -310,6 +330,7 @@ export interface RootRouteChildren {
   SkuRouteRoute: typeof SkuRouteRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   SettingsRoute: typeof SettingsRoute
+  StatsRoute: typeof StatsRoute
   RulesProgramYearRoute: typeof RulesProgramYearRoute
 }
 
@@ -318,6 +339,7 @@ const rootRouteChildren: RootRouteChildren = {
   SkuRouteRoute: SkuRouteRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   SettingsRoute: SettingsRoute,
+  StatsRoute: StatsRoute,
   RulesProgramYearRoute: RulesProgramYearRoute,
 }
 
@@ -335,6 +357,7 @@ export const routeTree = rootRoute
         "/$sku",
         "/privacy",
         "/settings",
+        "/stats",
         "/rules/$program/$year"
       ]
     },
@@ -358,6 +381,9 @@ export const routeTree = rootRoute
     },
     "/settings": {
       "filePath": "settings.tsx"
+    },
+    "/stats": {
+      "filePath": "stats.tsx"
     },
     "/$sku/deleted": {
       "filePath": "$sku/deleted.tsx",

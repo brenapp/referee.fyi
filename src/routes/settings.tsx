@@ -89,7 +89,9 @@ export const SettingsPage: React.FC = () => {
         </Button>
       </section>
       <section className="mt-4">
-        <LinkButton to="/privacy" className="w-full flex items-center">
+        <h2 className="font-bold">Legal</h2>
+        <p className="mt-2"></p>
+        <LinkButton to="/privacy" className="w-full flex items-center mt-2">
           <span className="flex-1">Privacy Policy</span>
           <ArrowRightIcon height={20} className="text-emerald-400" />
         </LinkButton>

@@ -14,6 +14,10 @@ export const UpdatePrompt: React.FC = () => {
       return false;
     }
 
+    if (!navigator.onLine) {
+      return false;
+    }
+
     return __REFEREE_FYI_VERSION__ !== latestAppVersion;
   }, [latestAppVersion, isPendingLatestAppVersion]);
 

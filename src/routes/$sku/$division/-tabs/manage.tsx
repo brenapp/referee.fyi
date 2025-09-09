@@ -50,6 +50,7 @@ import { UpdatePrompt } from "~components/UpdatePrompt";
 import { InvitationListItem } from "@referee-fyi/share";
 import { isWorldsBuild, WORLDS_EVENTS } from "~utils/data/state";
 import { Incident } from "~components/Incident";
+import { MenuButton } from "~components/MenuButton";
 
 export type ManageDialogProps = {
   open: boolean;
@@ -327,11 +328,11 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
   );
 };
 
-export const LeaveDialog: React.FC<ManageDialogProps> = ({
-  open,
-  onClose,
-  sku,
-}) => {
+export type LeaveMenuProps = {
+  sku: string;
+} & React.HTMLProps<HTMLDivElement>;
+
+export const LeaveMenu: React.FC<LeaveMenuProps> = ({ sku, ...props }) => {
   const { data: invitation } = useEventInvitation(sku);
 
   const { forceSync, disconnect, invitations } = useShareConnection([
@@ -345,42 +346,28 @@ export const LeaveDialog: React.FC<ManageDialogProps> = ({
       await disconnect();
       await removeInvitation(sku);
       queryClient.invalidateQueries({ queryKey: ["event_invitation_all"] });
-      onClose();
       forceSync();
     },
   });
 
   return (
-    <Dialog
-      mode="modal"
-      open={open}
-      className="p-4"
-      onClose={onClose}
-      aria-label="Leave share instance"
-    >
-      <DialogBody>
-        <p>
-          Are you sure? If you leave, you will need an admin to invite you
-          again.
-        </p>
-        {invitation?.admin && invitations.filter((i) => i.admin).length < 2 ? (
-          <Warning
-            className="mt-4"
-            message="Since you are the last admin, leaving will end this instance and remove all other users."
-          />
-        ) : null}
-        <Button
-          mode="dangerous"
+    <div {...props}>
+      <p>
+        Are you sure? If you leave, you will need an admin to invite you again.
+      </p>
+      {invitation?.admin && invitations.filter((i) => i.admin).length < 2 ? (
+        <Warning
           className="mt-4"
-          onClick={() => onClickLeave()}
-        >
-          Leave
-        </Button>
-        <Button mode="normal" className="mt-4" onClick={onClose}>
-          Stay
-        </Button>
-      </DialogBody>
-    </Dialog>
+          message="Since you are the last admin, leaving will end this instance and remove all other users."
+        />
+      ) : null}
+      <Button mode="dangerous" className="mt-4" onClick={() => onClickLeave()}>
+        Leave
+      </Button>
+      <Button mode="normal" className="mt-4">
+        Stay
+      </Button>
+    </div>
   );
 };
 
@@ -470,7 +457,6 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
   // Dialogs
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
   const [joinCodeDialogOpen, setJoinCodeDialogOpen] = useState(false);
-  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
   // Instance State
   const { data: invitation } = useEventInvitation(event.sku);
@@ -566,12 +552,6 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
         open={inviteDialogOpen}
         onClose={() => setInviteDialogOpen(false)}
       />
-      <LeaveDialog
-        sku={event.sku}
-        open={leaveDialogOpen}
-        onClose={() => setLeaveDialogOpen(false)}
-      />
-
       <h2 className="font-bold">Sharing</h2>
       <p>Share Name: {connection.profile.name} </p>
       {isSharing ? (
@@ -586,13 +566,13 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
               <p>Invite</p>
             </Button>
           ) : null}
-          <Button
+          <MenuButton
             mode="dangerous"
             className="mt-2"
-            onClick={() => setLeaveDialogOpen(true)}
+            menu={<LeaveMenu sku={event.sku} />}
           >
             Leave
-          </Button>
+          </MenuButton>
           <nav className="flex gap-2 justify-evenly mt-4">
             <p className="text-lg">
               <FlagIcon height={20} className="inline mr-2" />

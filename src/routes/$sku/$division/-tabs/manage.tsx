@@ -51,33 +51,7 @@ import { InvitationListItem } from "@referee-fyi/share";
 import { isWorldsBuild, WORLDS_EVENTS } from "~utils/data/state";
 import { Incident } from "~components/Incident";
 import { MenuButton } from "~components/MenuButton";
-import { useCurrentEvent } from "~utils/hooks/state";
-import { useGeolocation } from "~utils/hooks/meta";
-
-export const OfflineNotice: React.FC = () => {
-  const { data: event } = useCurrentEvent();
-  const { data: invitation } = useEventInvitation(event?.sku);
-  const { error } = useGeolocation({
-    staleTime: 0,
-    refetchOnMount: true,
-    refetchOnReconnect: true,
-  });
-
-  if (!error) {
-    return null;
-  }
-
-  if (!invitation) {
-    return null;
-  }
-
-  return (
-    <Info message="Offline Mode" className="mt-4">
-      Referee FYI will continue to work normally, even when you are offline.
-      When you reconnect, you will sync back up with your existing instance.
-    </Info>
-  );
-};
+import { OfflineNotice } from "~components/DisconnectedWarning";
 
 export type ManageDialogProps = {
   open: boolean;

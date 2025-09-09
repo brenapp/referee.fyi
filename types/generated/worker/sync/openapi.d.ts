@@ -658,6 +658,49 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/meta/stats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Gets system-wide stats
+         * @description Returns summary statistics about Referee FYI as a whole
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    "X-Referee-Signature"?: string;
+                    "X-Referee-Public-Key"?: string;
+                    "X-Referee-Date"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description System Stats */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetMetaStatsResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/sync/register": {
         parameters: {
             query?: never;
@@ -2294,6 +2337,21 @@ export interface components {
                     postcode: string;
                     continent: string;
                 } | null;
+            };
+        };
+        /** @description Response for the /api/meta/stats endpoint */
+        GetMetaStatsResponse: {
+            /** @enum {boolean} */
+            success: true;
+            data: {
+                users: {
+                    key: string;
+                    name: string;
+                    /** @enum {string} */
+                    role: "none" | "system";
+                    created_at: string;
+                    updated_at: string;
+                }[];
             };
         };
         /** @description Response body for user registration */

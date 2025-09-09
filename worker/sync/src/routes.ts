@@ -12,6 +12,7 @@ import * as api_integration_v1_$sku_incident_pdf from "./api/integration/v1/$sku
 import * as api_integration_v1_$sku_incident_csv from "./api/integration/v1/$sku/incident/csv";
 import * as api_integration_v1_$sku_asset from "./api/integration/v1/$sku/asset";
 import * as api_meta_location from "./api/meta/location";
+import * as api_meta_stats from "./api/meta/stats";
 import * as api_sync_register from "./api/sync/register";
 import * as api_sync_$sku_invitation from "./api/sync/$sku/invitation";
 import * as api_sync_$sku_invite_put from "./api/sync/$sku/invite/put";
@@ -66,6 +67,7 @@ const routes = app
     api_integration_v1_$sku_asset.handler
   )
   .openapi(api_meta_location.route, api_meta_location.handler)
+  .openapi(api_meta_stats.route, api_meta_stats.handler)
   .openapi(api_sync_register.route, api_sync_register.handler)
   .openapi(api_sync_$sku_invitation.route, api_sync_$sku_invitation.handler)
   .openapi(api_sync_$sku_invite_put.route, api_sync_$sku_invite_put.handler)

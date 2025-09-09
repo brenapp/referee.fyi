@@ -1,3 +1,4 @@
+import { z } from "zod/v4";
 import {
   AssetMeta,
   AssetType,
@@ -8,13 +9,15 @@ import {
   UserRole,
 } from "@referee-fyi/share";
 
-export type UserRow = {
-  key: string;
-  name: string;
-  role: UserRole;
-  created_at: string;
-  updated_at: string;
-};
+export const UserRowSchema = z.object({
+  key: z.string().min(1),
+  name: z.string().min(1),
+  role: z.enum(UserRole),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+export type UserRow = z.infer<typeof UserRowSchema>;
 
 function log(label: string, response: D1Response) {
   if (!response.success) {

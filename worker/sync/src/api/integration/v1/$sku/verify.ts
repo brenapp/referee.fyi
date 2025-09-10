@@ -10,6 +10,7 @@ import {
   VerifyIntegrationTokenQuerySchema,
 } from "../../../../utils/verify";
 import { createRoute, RouteHandler } from "@hono/zod-openapi";
+import { InvitationSchema, UserSchema } from "@referee-fyi/share";
 
 export const ParamsSchema = VerifyIntegrationTokenParamsSchema;
 export const QuerySchema = VerifyIntegrationTokenQuerySchema;
@@ -19,6 +20,19 @@ export const SuccessResponseSchema = z
     success: z.literal(true),
     data: z.object({
       valid: z.literal(true),
+      user: UserSchema.meta({
+        description: "The user associated with this integration token.",
+      }),
+      invitation: InvitationSchema.pick({
+        id: true,
+        sku: true,
+        admin: true,
+        user: true,
+        accepted: true,
+        from: true,
+      }).meta({
+        description: "The invitation associated with this integration token.",
+      }),
     }),
   })
   .meta({
@@ -68,11 +82,22 @@ export const handler: RouteHandler<typeof route, AppArgs> = async (c) => {
     );
   }
 
+  const invitation = verifyIntegrationToken.invitation;
+
   return c.json(
     {
       success: true,
       data: {
         valid: true,
+        user: verifyIntegrationToken.user,
+        invitation: {
+          id: invitation.id,
+          sku: invitation.sku,
+          user: invitation.user,
+          from: invitation.from,
+          admin: invitation.admin,
+          accepted: invitation.accepted,
+        },
       },
     } as const satisfies z.infer<typeof SuccessResponseSchema>,
     200

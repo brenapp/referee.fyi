@@ -22,16 +22,20 @@ export const QuerySchema = z.object({
   ...VerifyIntegrationTokenQuerySchema.shape,
 });
 
+export const AssetInformationSchema = z
+  .object({
+    type: AssetTypeSchema,
+    owner: UserSchema,
+    sku: z.string(),
+    url: z.url(),
+    expires_at: z.string(),
+  })
+  .meta({ id: "AssetInformation" });
+
 export const SuccessResponseSchema = z
   .object({
     success: z.literal(true),
-    data: z.object({
-      type: AssetTypeSchema,
-      owner: UserSchema,
-      sku: z.string(),
-      url: z.url(),
-      expires_at: z.string(),
-    }),
+    data: AssetInformationSchema,
   })
   .meta({
     id: "GetIntegrationV1AssetResponse",

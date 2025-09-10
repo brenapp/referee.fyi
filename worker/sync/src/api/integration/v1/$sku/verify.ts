@@ -15,25 +15,33 @@ import { InvitationSchema, UserSchema } from "@referee-fyi/share";
 export const ParamsSchema = VerifyIntegrationTokenParamsSchema;
 export const QuerySchema = VerifyIntegrationTokenQuerySchema;
 
+export const TokenIntrospectionDataSchema = z
+  .object({
+    valid: z.literal(true),
+    user: UserSchema.meta({
+      description: "The user associated with this integration token.",
+    }),
+    invitation: InvitationSchema.pick({
+      id: true,
+      sku: true,
+      admin: true,
+      user: true,
+      accepted: true,
+      from: true,
+    }).meta({
+      description: "The invitation associated with this integration token.",
+    }),
+  })
+  .meta({
+    id: "TokenIntrospectionData",
+    description:
+      "Contains information about the associated session of a validation integration token.",
+  });
+
 export const SuccessResponseSchema = z
   .object({
     success: z.literal(true),
-    data: z.object({
-      valid: z.literal(true),
-      user: UserSchema.meta({
-        description: "The user associated with this integration token.",
-      }),
-      invitation: InvitationSchema.pick({
-        id: true,
-        sku: true,
-        admin: true,
-        user: true,
-        accepted: true,
-        from: true,
-      }).meta({
-        description: "The invitation associated with this integration token.",
-      }),
-    }),
+    data: TokenIntrospectionDataSchema,
   })
   .meta({
     id: "GetIntegrationV1VerifyResponse",

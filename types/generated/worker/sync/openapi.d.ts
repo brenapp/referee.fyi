@@ -2151,6 +2151,22 @@ export interface components {
             data: {
                 /** @enum {boolean} */
                 valid: true;
+                /** @description The user associated with this integration token. */
+                user: {
+                    key: string;
+                    name: string;
+                    /** @enum {string} */
+                    role: "none" | "system";
+                };
+                /** @description The invitation associated with this integration token. */
+                invitation: {
+                    id: string;
+                    sku: string;
+                    admin: boolean;
+                    user: string;
+                    accepted: boolean;
+                    from: string;
+                };
             };
         };
         /** @description Error response schema */

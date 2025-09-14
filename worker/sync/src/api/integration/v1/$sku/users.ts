@@ -20,16 +20,23 @@ import {
 export const ParamsSchema = VerifyIntegrationTokenParamsSchema;
 export const QuerySchema = VerifyIntegrationTokenQuerySchema;
 
+export const InstanceUsersSchema = z
+  .object({
+    invitations: z.array(InvitationListItemSchema),
+    active: z.array(UserSchema).meta({
+      description:
+        "The list of users who are current connected to the instance websocket.",
+    }),
+  })
+  .meta({
+    id: "InstanceUsers",
+    description: "Information about the current users in a shared instance.",
+  });
+
 export const SuccessResponseSchema = z
   .object({
     success: z.literal(true),
-    data: z.object({
-      invitations: z.array(InvitationListItemSchema),
-      active: z.array(UserSchema).meta({
-        description:
-          "The list of users who are current connected to the instance websocket.",
-      }),
-    }),
+    data: InstanceUsersSchema,
   })
   .meta({
     id: "GetIntegrationV1UsersResponse",

@@ -104,8 +104,8 @@ async function handle(c: Context<AppArgs>) {
   return c.json(data, 200);
 }
 
-const app = new Hono<{ Bindings: Env }>();
-app.use("*", cors());
+const app = new Hono<{ Bindings: Env }>()
+  .use("/api/*", cors());
 
 const endpoints = prefixes.flatMap((prefix) =>
   routes.map((route) => join(prefix, route.replaceAll(/\{([A-z]+)\}/g, ":$1")))

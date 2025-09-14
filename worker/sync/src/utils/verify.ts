@@ -716,7 +716,7 @@ export const verifyInvitationAdmin = createMiddleware<AppArgs>(
       verifyInvitation.invitation.user
     );
 
-    if (!isAdmin) {
+    if (!isAdmin && !systemKey) {
       return c.json(
         {
           success: false,

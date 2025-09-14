@@ -189,7 +189,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
                 </Button>
               </nav>
             }
-            className="flex items-center gap-4 mt-4 p-0 h-12 text-zinc-50"
+            className="flex items-center gap-4 mt-4 p-0 h-12 text-zinc-50 active:bg-zinc-600"
             aria-label={`Team ${team.number} ${team.team_name}. ${
               majorIncidents.get(team.number) ?? 0
             } major violations. ${

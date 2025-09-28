@@ -107,6 +107,9 @@ export function getScratchpadKindForSeason(
     case seasons[programs.VAIRC]["2025-2026"]: {
       return "DefaultV5RC";
     }
+    case seasons[programs.VIQRC]["2025-2026"]: {
+      return "DefaultVIQRC";
+    }
 
     case seasons[programs.V5RC]["2024-2025"]: {
       return "DefaultV5RC";
@@ -117,6 +120,9 @@ export function getScratchpadKindForSeason(
     case seasons[programs.VAIRC]["2024-2025"]: {
       return "DefaultV5RC";
     }
+    case seasons[programs.VIQRC]["2024-2025"]: {
+      return "DefaultVIQRC";
+    }
 
     case seasons[programs.V5RC]["2023-2024"]: {
       return "DefaultV5RC";
@@ -126,10 +132,6 @@ export function getScratchpadKindForSeason(
     }
     case seasons[programs.VAIRC]["2023-2024"]: {
       return "DefaultV5RC";
-    }
-
-    case seasons[programs.VIQRC]["2024-2025"]: {
-      return "DefaultVIQRC";
     }
 
     default: {

@@ -607,7 +607,7 @@ export const verifyUserAssetAuthorized = createMiddleware<AppArgs>(
     const verifyInvitation = c.get("verifyInvitation");
     const verifyIntegrationToken = c.get("verifyIntegrationToken");
 
-    if (verifyInvitation) {
+    if (verifyInvitation && !verifyIntegrationToken) {
       if (
         !ownerInvitation ||
         !ownerInvitation.accepted ||

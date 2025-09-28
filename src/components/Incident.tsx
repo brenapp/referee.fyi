@@ -92,7 +92,9 @@ export const Incident: React.FC<IncidentProps> = ({
             incident={incident}
             readonly={readonly}
             setEditIncidentOpen={setEditIncidentOpen}
-          />
+          >
+            {props.children}
+          </IncidentMenu>
         }
         {...props}
         className={twMerge(
@@ -217,6 +219,7 @@ export const IncidentMenu: React.FC<IncidentMenuProps> = ({
           </Button>
         </>
       )}
+      {props.children}
     </div>
   );
 };

@@ -1,11 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { EventData } from "robotevents";
-import {
-  Button,
-  ExternalLinkButton,
-  IconButton,
-  LinkButton,
-} from "~components/Button";
+import { Button, IconButton, LinkButton } from "~components/Button";
 import {
   acceptEventInvitation,
   fetchInvitation,
@@ -773,28 +768,31 @@ const SystemKeyIntegrationInfo: React.FC<SystemKeyIntegrationInfoProps> = ({
           </li>
         ))}
       </ul>
-      <div className="flex mt-4 gap-2">
-        <ExternalLinkButton
-          href={json.toString()}
-          className="flex-1 text-center flex items-center gap-4 justify-between"
+      <div className="mt-4">
+        <ClickToCopy
+          message={json.toString()}
+          prefix="JSON"
+          className="text-center flex items-center gap-4 justify-between"
         >
           JSON
           <ArrowUpRightIcon height={16} className="text-emerald-400" />
-        </ExternalLinkButton>
-        <ExternalLinkButton
-          href={csv.toString()}
-          className="flex-1 text-center flex items-center gap-4 justify-between"
+        </ClickToCopy>
+        <ClickToCopy
+          message={csv.toString()}
+          prefix="CSV"
+          className="text-center flex items-center gap-4 justify-between"
         >
           CSV
           <ArrowUpRightIcon height={16} className="text-emerald-400" />
-        </ExternalLinkButton>
-        <ExternalLinkButton
-          href={pdf.toString()}
-          className="flex-1 text-center flex items-center gap-4 justify-between"
+        </ClickToCopy>
+        <ClickToCopy
+          message={pdf.toString()}
+          prefix="PDF"
+          className="text-center flex items-center gap-4 justify-between"
         >
           PDF
           <ArrowUpRightIcon height={16} className="text-emerald-400" />
-        </ExternalLinkButton>
+        </ClickToCopy>
       </div>
       <details className="mt-4 p-2">
         <summary>
@@ -802,19 +800,14 @@ const SystemKeyIntegrationInfo: React.FC<SystemKeyIntegrationInfoProps> = ({
         </summary>
         <Spinner show={isPendingDeleteIncident} />
         {incidents?.map((incident) => (
-          <div className="flex gap-4 items-center" key={incident.id}>
-            <Incident
-              key={incident.id}
-              incident={incident}
-              readonly
-              className="flex-1"
-            />
-            <IconButton
-              icon={<TrashIcon height={20} />}
-              className="bg-transparent"
+          <Incident key={incident.id} incident={incident} readonly>
+            <Button
+              mode="dangerous"
               onClick={() => deleteIncident(incident.id)}
-            />
-          </div>
+            >
+              Delete
+            </Button>
+          </Incident>
         ))}
       </details>
     </div>

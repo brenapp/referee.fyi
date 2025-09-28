@@ -6,7 +6,7 @@ import {
 import { createRoute, RouteHandler } from "@hono/zod-openapi";
 import { z } from "zod/v4";
 import {
-  verifyInvitation,
+  verifyInvitationOrSystemKey,
   verifySignature,
   VerifySignatureHeadersSchema,
   verifyUser,
@@ -39,7 +39,7 @@ export const route = createRoute({
   middleware: [
     verifySignature,
     verifyUser,
-    verifyInvitation,
+    verifyInvitationOrSystemKey,
     verifyUserAssetAuthorized,
   ],
   request: {

@@ -194,6 +194,28 @@ export const verifyUserHasSystemKey = createMiddleware<AppArgs>(
   }
 );
 
+export async function makeSystemKeyInvitation(
+  env: Env,
+  key: string,
+  sku: string,
+  instance: string
+): Promise<Invitation | null> {
+  const isSystem = await isSystemKey(env, key);
+  if (!isSystem) {
+    return null;
+  }
+
+  return {
+    accepted: true,
+    admin: true,
+    from: key,
+    id: "system:" + crypto.randomUUID(),
+    sku,
+    instance_secret: instance,
+    user: key,
+  };
+}
+
 export const verifyInvitation = createMiddleware<AppArgs>(async (c, next) => {
   const sku = c.req.param("sku");
 
@@ -289,6 +311,48 @@ export const verifyInvitation = createMiddleware<AppArgs>(async (c, next) => {
   c.set("verifyInvitation", { invitation, instance });
   await next();
 });
+
+export const verifyInvitationOrSystemKey = createMiddleware<AppArgs>(
+  async (c, next) => {
+    const verifyInvitation = c.get("verifyInvitation");
+    if (verifyInvitation) {
+      await next();
+      return;
+    }
+
+    const verifyUser = c.get("verifyUser");
+    if (!verifyUser) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: "ValidationError",
+            message: "User must be verified before invitation verification.",
+          },
+          code: "VerifySignatureValuesNotPresent",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        400
+      );
+    }
+
+    const isSystem = await isSystemKey(c.env, verifyUser.user.key);
+    if (!isSystem) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: "ValidationError",
+            message: "You are not authorized to perform this action.",
+          },
+          code: "VerifyInvitationAdminNotAuthorized",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        403
+      );
+    }
+
+    await next();
+  }
+);
 
 export const VerifyIntegrationTokenParamsSchema = z.object({
   sku: z.string(),
@@ -396,15 +460,25 @@ export const verifySystemToken = createMiddleware<AppArgs>(async (c, next) => {
     );
   }
 
-  const invitation: Invitation = {
-    accepted: true,
-    admin: true,
-    from: keyHex,
-    id: "system:" + crypto.randomUUID(),
+  const invitation = await makeSystemKeyInvitation(
+    c.env,
+    keyHex,
     sku,
-    instance_secret: instanceSecret,
-    user: keyHex,
-  };
+    instanceSecret
+  );
+  if (!invitation) {
+    return c.json(
+      {
+        success: false,
+        error: {
+          name: "ValidationError",
+          message: "Could not create system key invitation.",
+        },
+        code: "VerifyIntegrationTokenInvalidInvitation",
+      } as const satisfies z.infer<typeof ErrorResponseSchema>,
+      500
+    );
+  }
 
   c.set("verifyIntegrationToken", {
     grantType: "system",

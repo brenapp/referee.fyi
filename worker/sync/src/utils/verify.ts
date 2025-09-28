@@ -607,13 +607,33 @@ export const verifyUserAssetAuthorized = createMiddleware<AppArgs>(
     const verifyInvitation = c.get("verifyInvitation");
     const verifyIntegrationToken = c.get("verifyIntegrationToken");
 
-    if (verifyInvitation && !verifyIntegrationToken) {
-      if (
-        !ownerInvitation ||
-        !ownerInvitation.accepted ||
-        ownerInvitation.instance_secret !==
-          verifyInvitation.invitation.instance_secret
-      ) {
+    if (!verifyInvitation && !verifyIntegrationToken) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: "ValidationError",
+            message: "Invitation must be verified before asset authorization.",
+          },
+          code: "VerifyUserAssetAuthorizedValuesNotPresent",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        403
+      );
+    }
+
+    if (verifyInvitation) {
+      const isSystem = await isSystemKey(
+        c.env,
+        verifyInvitation.invitation.user
+      );
+
+      const isSameInstance =
+        ownerInvitation &&
+        ownerInvitation.accepted &&
+        ownerInvitation.instance_secret ===
+          verifyInvitation.invitation.instance_secret;
+
+      if (!isSystem && !isSameInstance) {
         return c.json(
           {
             success: false,
@@ -627,41 +647,31 @@ export const verifyUserAssetAuthorized = createMiddleware<AppArgs>(
           403
         );
       }
-    } else if (verifyIntegrationToken) {
-      // Require bearer token owners to share an instance with the asset owner
-      if (verifyIntegrationToken.grantType === "bearer") {
-        if (
-          !ownerInvitation ||
-          !ownerInvitation.accepted ||
-          ownerInvitation.instance_secret !==
-            verifyIntegrationToken.invitation.instance_secret
-        ) {
-          return c.json(
-            {
-              success: false,
-              error: {
-                name: "ValidationError",
-                message:
-                  "Asset owner is not on the same instance as the requester.",
-              },
-              code: "VerifyUserAssetAuthorizedUserNotAuthorized",
-            } as const satisfies z.infer<typeof ErrorResponseSchema>,
-            403
-          );
-        }
+    }
+
+    if (verifyIntegrationToken) {
+      const isSystem = verifyIntegrationToken.grantType === "system";
+
+      const isSameInstance =
+        ownerInvitation &&
+        ownerInvitation.accepted &&
+        ownerInvitation.instance_secret ===
+          verifyIntegrationToken.invitation.instance_secret;
+
+      if (!isSystem && !isSameInstance) {
+        return c.json(
+          {
+            success: false,
+            error: {
+              name: "ValidationError",
+              message:
+                "Asset owner is not on the same instance as the requester.",
+            },
+            code: "VerifyUserAssetAuthorizedUserNotAuthorized",
+          } as const satisfies z.infer<typeof ErrorResponseSchema>,
+          403
+        );
       }
-    } else {
-      return c.json(
-        {
-          success: false,
-          error: {
-            name: "ValidationError",
-            message: "Invitation must be verified before asset authorization.",
-          },
-          code: "VerifyUserAssetAuthorizedValuesNotPresent",
-        } as const satisfies z.infer<typeof ErrorResponseSchema>,
-        400
-      );
     }
 
     const client = new Cloudflare({

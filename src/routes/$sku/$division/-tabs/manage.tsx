@@ -47,6 +47,23 @@ import { isWorldsBuild, WORLDS_EVENTS } from "~utils/data/state";
 import { Incident } from "~components/Incident";
 import { MenuButton } from "~components/MenuButton";
 import { OfflineNotice } from "~components/DisconnectedWarning";
+import { useEvent } from "~utils/hooks/robotevents";
+
+export type EventSummaryProps = {
+  event: EventData;
+};
+
+export const EventSummary: React.FC<EventSummaryProps> = ({ event }) => {
+  return (
+    <section className="bg-zinc-800 p-4 rounded-md mb-4">
+      <h2 className="text-xs font-mono text-emerald-400">{event.sku}</h2>
+      <h1>{event.name}</h1>
+      <div className="mt-2">
+        <p>{event.location.venue}</p>
+      </div>
+    </section>
+  );
+};
 
 export type ManageDialogProps = {
   open: boolean;
@@ -61,6 +78,8 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
 }) => {
   const [inviteCode, setInviteCode] = useState("");
   const [admin, setAdmin] = useState(false);
+
+  const { data: event } = useEvent(sku);
 
   const {
     data: response,
@@ -118,13 +137,13 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
       <DialogHeader onClose={onClose} title="Invite User" />
       <DialogBody className="px-2">
         <label>
-          <h1 className="font-bold">Invite Code</h1>
+          {event ? <EventSummary event={event} /> : null}
           <p>
             To invite a user to this share instance, enter their invite code.
           </p>
           <div className="relative">
             <Input
-              className={twMerge("w-full font-mono text-6xl text-center")}
+              className="w-full font-mono text-6xl text-center mt-4"
               value={inviteCode}
               onChange={(e) =>
                 setInviteCode(e.currentTarget.value.toUpperCase())
@@ -182,6 +201,8 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
   onClose,
   sku,
 }) => {
+  const { data: event } = useEvent(sku);
+
   // Request Code
   const { data: requestCode, isLoading: isLoadingRequestCode } = useQuery({
     queryKey: ["request_code", sku],
@@ -254,6 +275,7 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
     <Dialog open={open} onClose={onClose} mode="modal">
       <DialogHeader onClose={onClose} title="Join Request" />
       <DialogBody className="px-2">
+        {event ? <EventSummary event={event} /> : null}
         {!profile ? (
           <>
             <p>

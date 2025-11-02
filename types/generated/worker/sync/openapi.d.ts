@@ -619,6 +619,92 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/integration/v1/{sku}/scratchpads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Gets information about match scratchpads in a shared instance. */
+        get: {
+            parameters: {
+                query?: {
+                    token?: string;
+                    instance?: string;
+                };
+                header?: never;
+                path: {
+                    sku: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Successful verification */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetIntegrationV1ScratchpadsResponse"];
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/meta/location": {
         parameters: {
             query?: never;
@@ -2144,30 +2230,32 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @description Contains information about the associated session of a validation integration token. */
+        TokenIntrospectionData: {
+            /** @enum {boolean} */
+            valid: true;
+            /** @description The user associated with this integration token. */
+            user: {
+                key: string;
+                name: string;
+                /** @enum {string} */
+                role: "none" | "system";
+            };
+            /** @description The invitation associated with this integration token. */
+            invitation: {
+                id: string;
+                sku: string;
+                admin: boolean;
+                user: string;
+                accepted: boolean;
+                from: string;
+            };
+        };
         /** @description Indicates that the integration token is valid and the user is authenticated. */
         GetIntegrationV1VerifyResponse: {
             /** @enum {boolean} */
             success: true;
-            data: {
-                /** @enum {boolean} */
-                valid: true;
-                /** @description The user associated with this integration token. */
-                user: {
-                    key: string;
-                    name: string;
-                    /** @enum {string} */
-                    role: "none" | "system";
-                };
-                /** @description The invitation associated with this integration token. */
-                invitation: {
-                    id: string;
-                    sku: string;
-                    admin: boolean;
-                    user: string;
-                    accepted: boolean;
-                    from: string;
-                };
-            };
+            data: components["schemas"]["TokenIntrospectionData"];
         };
         /** @description Error response schema */
         ErrorResponse: {
@@ -2202,14 +2290,16 @@ export interface components {
             admin: boolean;
             user: components["schemas"]["User"];
         };
+        /** @description Information about the current users in a shared instance. */
+        InstanceUsers: {
+            invitations: components["schemas"]["InvitationListItem"][];
+            /** @description The list of users who are current connected to the instance websocket. */
+            active: components["schemas"]["User"][];
+        };
         GetIntegrationV1UsersResponse: {
             /** @enum {boolean} */
             success: true;
-            data: {
-                invitations: components["schemas"]["InvitationListItem"][];
-                /** @description The list of users who are current connected to the instance websocket. */
-                active: components["schemas"]["User"][];
-            };
+            data: components["schemas"]["InstanceUsers"];
         };
         IncidentMatchHeadToHead: {
             /**
@@ -2284,17 +2374,39 @@ export interface components {
         };
         /** @enum {string} */
         AssetType: "image";
+        AssetInformation: {
+            type: components["schemas"]["AssetType"];
+            owner: components["schemas"]["User"];
+            sku: string;
+            /** Format: uri */
+            url: string;
+            expires_at: string;
+        };
         GetIntegrationV1AssetResponse: {
             /** @enum {boolean} */
             success: true;
-            data: {
-                type: components["schemas"]["AssetType"];
-                owner: components["schemas"]["User"];
-                sku: string;
-                /** Format: uri */
-                url: string;
-                expires_at: string;
+            data: components["schemas"]["AssetInformation"];
+        };
+        /** @description Real-time information about a match recorded by a head referee. */
+        MatchScratchpad: {
+            id: string;
+            event: string;
+            match: components["schemas"]["IncidentMatchHeadToHead"];
+            notes?: string;
+            consistency: {
+                [key: string]: components["schemas"]["KeyRegister"];
             };
+        } & {
+            [key: string]: unknown;
+        };
+        /** @description Match scratchpads in a shared instance. */
+        InstanceScratchpads: {
+            scratchpads: components["schemas"]["MatchScratchpad"][];
+        };
+        GetIntegrationV1ScratchpadsResponse: {
+            /** @enum {boolean} */
+            success: true;
+            data: components["schemas"]["InstanceScratchpads"];
         };
         /** @description Response for the /api/meta/location endpoint */
         GetMetaLocationResponse: {
@@ -2430,15 +2542,7 @@ export interface components {
                 scratchpads: {
                     deleted: string[];
                     values: {
-                        [key: string]: {
-                            id: string;
-                            event: string;
-                            match: components["schemas"]["IncidentMatchHeadToHead"];
-                            notes?: string;
-                            consistency: {
-                                [key: string]: components["schemas"]["KeyRegister"];
-                            };
-                        };
+                        [key: string]: components["schemas"]["MatchScratchpad"];
                     };
                 };
                 users: {

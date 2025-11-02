@@ -231,7 +231,7 @@ export const AllianceTimeoutUsedScratchpad: React.FC<
     const timeouts: Record<string, IncidentMatchHeadToHead[]> = {};
 
     for (const scratchpad of matchScratchpads ?? []) {
-      if (!scratchpad) {
+      if (!scratchpad || !scratchpad.timeout) {
         continue;
       }
 

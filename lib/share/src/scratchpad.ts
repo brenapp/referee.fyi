@@ -48,6 +48,10 @@ export type MatchScratchpad =
 
 export const MatchScratchpadSchema = BaseMatchScratchpadSchema.extend({
   consistency: LastWriteWinsConsistencySchema(z.string()),
+}).meta({
+  id: "MatchScratchpad",
+  description:
+    "Real-time information about a match recorded by a head referee.",
 });
 
 export type Scratchpads = {

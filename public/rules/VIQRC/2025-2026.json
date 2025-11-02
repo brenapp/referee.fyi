@@ -48,7 +48,7 @@
                 },
                 {
                     "rule": "<SC7>",
-                    "description": "A Starting Pin is Cleared if no part of its Starting Pin Support is within the volume of the Pin at the end of the Match",
+                    "description": "A Starting Pin is Cleared if no part of its Starting Pin Support is within the volume of a Pin at the end of the Match",
                     "link": "https://www.robotevents.com/storage/game_manual/VEX_IQ_Robotics_Competition_2025-2026_Mix_Match/rules/SC7.html"
                 },
                 {
@@ -104,8 +104,13 @@
                 },
                 {
                     "rule": "<G4>",
-                    "description": "Each Student can only belong to one Team, and all work must represent the skill level of the Students on the Team",
+                    "description": "All work must represent the skill level of the Students on the Team",
                     "link": "https://www.robotevents.com/storage/game_manual/VEX_IQ_Robotics_Competition_2025-2026_Mix_Match/rules/G4.html"
+                },
+                {
+                    "rule": "<G5>",
+                    "description": "Each Student can only belong to one Team",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_IQ_Robotics_Competition_2025-2026_Mix_Match/rules/G5.html"
                 }
             ]
         },
@@ -372,7 +377,7 @@
             ]
         },
         {
-            "name": "",
+            "name": "Tournament Rules",
             "programs": [
                 "VIQRC"
             ],

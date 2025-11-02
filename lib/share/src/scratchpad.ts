@@ -6,7 +6,7 @@ import {
 } from "@referee-fyi/consistency";
 import { IncidentMatchHeadToHeadSchema } from "./incident.js";
 
-export const BaseMatchScratchpadSchema = z.object({
+export const BaseMatchScratchpadSchema = z.looseObject({
   id: z.string(),
   event: z.string(),
   match: IncidentMatchHeadToHeadSchema,

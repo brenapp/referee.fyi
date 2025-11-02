@@ -10,7 +10,7 @@ import {
   getDefaultScratchpad,
   getScratchpadKindForSeason,
   getMatchScratchpad,
-  getScratchpadID,
+  getScratchpadId,
   setMatchScratchpad,
 } from "~utils/data/scratchpad";
 import { useEvent } from "./robotevents";
@@ -32,7 +32,7 @@ export function useMatchScratchpad<T extends MatchScratchpad>(
         return null;
       }
 
-      const id = getScratchpadID(match);
+      const id = getScratchpadId(match);
       const scratchpad = await getMatchScratchpad<T>(id);
       return scratchpad ?? null;
     },
@@ -51,7 +51,7 @@ export function useMatchScratchpads<T extends MatchScratchpad>(
 
       const scratchpads = await Promise.all(
         matches.map(async (match) => {
-          const id = getScratchpadID(match);
+          const id = getScratchpadId(match);
           const scratchpad = await getMatchScratchpad<T>(id);
           return scratchpad ?? null;
         })
@@ -105,7 +105,7 @@ export function useUpdateMatchScratchpad<T extends MatchScratchpad>(
         return null;
       }
 
-      const id = getScratchpadID(match);
+      const id = getScratchpadId(match);
       const current = await getMatchScratchpad(id);
       if (!current) {
         const { key: peer } = await getShareProfile();

@@ -18,7 +18,7 @@ import {
   updateLWW,
 } from "@referee-fyi/consistency";
 
-export function getScratchpadID(match: MatchData) {
+export function getScratchpadId(match: MatchData) {
   return `scratchpad_${match.event.code}_${
     match.division.id
   }_${match.name.replace(/ /g, "")}`;
@@ -144,7 +144,7 @@ export function getDefaultScratchpad(
   peer: string
 ): MatchScratchpad {
   const base: BaseMatchScratchpad = {
-    id: getScratchpadID(match),
+    id: getScratchpadId(match),
     event: match.event.code ?? "",
     match: {
       type: "match",

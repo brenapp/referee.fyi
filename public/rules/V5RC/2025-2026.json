@@ -112,8 +112,13 @@
                 },
                 {
                     "rule": "<G4>",
-                    "description": "Each Student can only belong to one Team, and all work must represent the skill level of the Students on the Team",
+                    "description": "All work must represent the skill level of the Students on the Team",
                     "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/G4.html"
+                },
+                {
+                    "rule": "<G5>",
+                    "description": "Each Student can only belong to one Team",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/G5.html"
                 }
             ]
         },
@@ -207,7 +212,7 @@
                 },
                 {
                     "rule": "<GG17>",
-                    "description": "No Holding for more than a 5-count",
+                    "description": "No Holding for more than a 3-count",
                     "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/GG17.html"
                 },
                 {
@@ -637,7 +642,7 @@
             ]
         },
         {
-            "name": "VEX U Robotics Competition Skills Rules",
+            "name": "VEX U Robotics Competition Robot Skills Rules",
             "programs": [
                 "VURC",
                 "VAIRC"
@@ -768,7 +773,7 @@
                 },
                 {
                     "rule": "<VUR12>",
-                    "description": "There are no restrictions on Sensors, External Processors, and other Additional Electronics, except as follows:",
+                    "description": "There is no restriction on commercially available Sensors, External Processors, or Additional Electronics that Robots may use for sensing and processing, except as follows.",
                     "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VUR12.html"
                 },
                 {
@@ -785,6 +790,156 @@
                     "rule": "<VUR15>",
                     "description": "Teams may use commercially available bearings on their Robot",
                     "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VUR15.html"
+                }
+            ]
+        },
+        {
+            "name": "VEX AI Robotics Scoring Rules",
+            "programs": [
+                "VAIRC"
+            ],
+            "rules": [
+                {
+                    "rule": "<VAISC1>",
+                    "description": "A Team receives a Control Bonus if the outermost Block Scored in one end of a Long Goal and the nearest corresponding end of a Center Goal are the same color as the Team",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAISC1.html"
+                },
+                {
+                    "rule": "<VAISC2>",
+                    "description": "A VAIRC Robot is considered Parked at the end of the Match if it meets all of the following criteria:",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAISC2.html"
+                },
+                {
+                    "rule": "<VAISC3>",
+                    "description": "Scoring of the Isolation Bonus is evaluated immediately after the Isolation Period ends (i",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAISC3.html"
+                },
+                {
+                    "rule": "<VAISC4>",
+                    "description": "Isolation Win Point criteria",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAISC4.html"
+                }
+            ]
+        },
+        {
+            "name": "VEX AI Robotics Competition General Rules",
+            "programs": [
+                "VAIRC"
+            ],
+            "rules": [
+                {
+                    "rule": "<VAIG1>",
+                    "description": "Standard game rules apply",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIG1.html"
+                },
+                {
+                    "rule": "<VAIG2>",
+                    "description": "Autonomous means “no humans",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIG2.html"
+                },
+                {
+                    "rule": "<VAIG3>",
+                    "description": "Teams are responsible for the actions of their Robots",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIG3.html"
+                },
+                {
+                    "rule": "<VAIG4>",
+                    "description": "Different expansion",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIG4.html"
+                },
+                {
+                    "rule": "<VAIG5>",
+                    "description": "Different availability of Loaders",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIG5.html"
+                }
+            ]
+        },
+        {
+            "name": "VEX AI Robotics Competition Skills Rules",
+            "programs": [
+                "VAIRC"
+            ],
+            "rules": [
+                {
+                    "rule": "<VAIRS1>",
+                    "description": "Standard rules from the V5RC and VURC sections of the game manual apply in most cases, unless otherwise specified in this section or when V5RC rules are modified in the VURC section",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIRS1.html"
+                },
+                {
+                    "rule": "<VAIRS2>",
+                    "description": "Rule <VURS3> applies as written, and VAIRC Teams are permitted to use two Robots in their Robot Skills Matches",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIRS2.html"
+                },
+                {
+                    "rule": "<VAIRS3>",
+                    "description": "VAIRC Robot Skills Matches use the same tape lines as VAIRC and V5RC head-to-head Matches, but a revised Field layout as shown below",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIRS3.html"
+                },
+                {
+                    "rule": "<VAIRS4>",
+                    "description": "A 24” Robot in a VAIRC Robot Skills Match begins the Match in a Parked position in the blue Park Zone",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIRS4.html"
+                },
+                {
+                    "rule": "<VAIRS5>",
+                    "description": "In VAIRC Robot Skills Matches, Blocks can be added to Loaders by Robots",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIRS5.html"
+                },
+                {
+                    "rule": "<VAIRS6>",
+                    "description": "Blocks that leave the Field during a VAIRC Robot Skills Match must remain outside the Field for the remainder of the Match, and cannot be reintroduced",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIRS6.html"
+                },
+                {
+                    "rule": "<VAIRS7>",
+                    "description": "Scoring VAIRC Robot Skills Matches",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIRS7.html"
+                }
+            ]
+        },
+        {
+            "name": "VEX AI Robotics Competition Tournament Rules",
+            "programs": [
+                "VAIRC"
+            ],
+            "rules": [
+                {
+                    "rule": "<VAIT1>",
+                    "description": "The following VURC rules apply as written:",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIT1.html"
+                },
+                {
+                    "rule": "<VAIT2>",
+                    "description": "VEX AI Robotics Competition Teams may consist of Students that fall into one of the following categories",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIT2.html"
+                },
+                {
+                    "rule": "<VAIT3>",
+                    "description": "Each Student may only participate on one (1) VAIRC Team in a given season",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIT3.html"
+                }
+            ]
+        },
+        {
+            "name": "VEX AI Robotics Competition Robot Rules",
+            "programs": [
+                "VAIRC"
+            ],
+            "rules": [
+                {
+                    "rule": "<VAIRM1>",
+                    "description": "All <VURx> rules apply as written",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIRM1.html"
+                },
+                {
+                    "rule": "<VAIRM2>",
+                    "description": "Any components used for AI vision processing, such as those found in the VEX AI kit (276- 8983), are considered standard Additional Electronics and must abide by <VUR12> as written",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIRM2.html"
+                },
+                {
+                    "rule": "<VAIRM3>",
+                    "description": "VAIRC Teams may also participate in the V5RC or VURC programs",
+                    "link": "https://www.robotevents.com/storage/game_manual/VEX_V5_Robotics_Competition_2025-2026_Push_Back/rules/VAIRM3.html"
                 }
             ]
         }

@@ -29,6 +29,10 @@ jobs:
           VITE_LOGSERVER_TOKEN: ${{ secrets.VITE_LOGSERVER_TOKEN }}
           VITE_ROBOTEVENTS_TOKEN: ${{ secrets.VITE_ROBOTEVENTS_TOKEN }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      - name: npm run lib:test
+        run: npm run lib:test
+        env:
+          CI: true
       - name: Preview Alias
         id: preview_alias
         run: |
@@ -40,6 +44,7 @@ jobs:
           URL="https://${SAFE_REF}-${WORKER}.bren.workers.dev"
           echo "URL=$URL"
           echo "preview_alias=$SAFE_REF" >> $GITHUB_OUTPUT
+
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

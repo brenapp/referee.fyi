@@ -62,3 +62,11 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: "worker/events"
           environment: "staging"
+      - name: e2e
+        uses: cypress-io/github-action@v6
+        env:
+          COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
+          COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
+          CYPRESS_BASE_URL: ${{ steps.preview_alias.outputs.URL }}
+        with:
+          browser: chrome

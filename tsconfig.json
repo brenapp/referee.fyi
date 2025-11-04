@@ -50,6 +50,7 @@
     "types"
   ],
   "exclude": [
-    "backend/**/*"
+    "backend/**/*",
+    "vitest.config.ts"
   ]
 }

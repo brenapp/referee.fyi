@@ -70,3 +70,15 @@ https://referee.fyi/api/
 
 - OpenAPI Specification: `https://referee.fyi/api/integration/openapi`
 - Swagger Documentation: `https://referee.fyi/api/integration/swagger`
+
+## Staging Environment
+
+Feel free to use the following staging environment to test your application
+prior to connecting to the production instance.
+
+```
+https://main-referee-fyi.bren.workers.dev
+```
+
+- OpenAPI Specification: `https://staging.share.referee.fyi/api/integration/openapi`
+- Swagger Documentation: `https://staging.share.referee.fyi/api/integration/swagger`

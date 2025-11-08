@@ -42,7 +42,7 @@ export async function registerUser(
     .bind(user.key, user.name, version)
     .run();
 
-  log("setUser", response);
+  log("registerUser", response);
 }
 
 export async function getUser(env: Env, key: string): Promise<UserRow | null> {

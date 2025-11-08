@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+/// <reference path="./commands.d.ts" />
 
 Cypress.Commands.addAll({
   configureUser() {

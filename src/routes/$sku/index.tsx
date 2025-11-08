@@ -26,7 +26,7 @@ export const EventDivisionPickerPage: React.FC = () => {
 
   return (
     <section className="mt-4 flex flex-col gap-4 overflow-auto max-h-screen">
-      <ol className="contents">
+      <ol className="contents" data-cy="division-list">
         {event.divisions
           ?.sort((a, b) => a.order! - b.order!)
           .map((division) => (

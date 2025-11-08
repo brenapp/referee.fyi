@@ -6,7 +6,7 @@
     "dev": "wrangler dev --ip 0.0.0.0 --env development",
     "dev:env:production": "wrangler dev --ip 0.0.0.0 --env production",
     "dev:remote": "wrangler dev --remote --env development",
-    "dev:secure": "wrangler dev --ip 0.0.0.0 --env development --local-protocol https --https-key-path ../../.certs/privkey.pem --https-cert-path ../../.certs/cert.pem",
+    "dev:secure": "wrangler dev --ip 0.0.0.0 --env development --local-protocol https --https-key-path ../../.certs/privkey.pem --https-cert-path ../../.certs/fullchain.pem",
     "build": "tsc --noEmit",
     "deploy": "wrangler deploy",
     "format": "prettier --write  '*.{json,js}' 'src/**/*.{js,ts}'",

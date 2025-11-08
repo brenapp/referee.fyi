@@ -6,9 +6,11 @@ import {
   VerifySignatureHeadersSchema,
 } from "../../utils/verify";
 import { UserSchema } from "@referee-fyi/share";
-import { getUser, isSystemKey, setUser } from "../../utils/data";
+import { getUser, isSystemKey, registerUser } from "../../utils/data";
+
 export const QuerySchema = z.object({
   name: z.string().min(1, "Name is required"),
+  version: z.string(),
 });
 
 export const SuccessResponseSchema = z
@@ -68,11 +70,16 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
 
   const key = signature.keyHex;
   const name = c.req.valid("query").name;
+  const version = c.req.valid("query").version;
 
-  await setUser(c.env, {
-    key,
-    name,
-  });
+  await registerUser(
+    c.env,
+    {
+      key,
+      name,
+    },
+    version
+  );
 
   const user = await getUser(c.env, key);
   if (!user) {

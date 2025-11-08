@@ -115,6 +115,7 @@ export async function registerUser(
 
   const url = new URL("/api/sync/register", URL_BASE);
   url.searchParams.set("name", profile.name);
+  url.searchParams.set("version", __REFEREE_FYI_VERSION__);
 
   const response = await signedFetch(url, {
     method: "POST",

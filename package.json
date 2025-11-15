@@ -71,6 +71,7 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-typescript": "^11.1.5",
     "@tanstack/router-plugin": "^1.120.10",
+    "@tauri-apps/cli": "^2.9.4",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@types/react-window": "^1.8.8",

@@ -45,6 +45,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { useSaveAssets } from "~utils/hooks/assets";
 import { useParams } from "@tanstack/react-router";
+import { programHasAutonomousPeriod } from "~utils/data/game";
 
 export type EventNewIncidentDialogProps = {
   open: boolean;
@@ -469,11 +470,25 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
           </div>
         ) : null}
         {incident.match && (
-          <MatchContext
-            match={incident.match}
-            className="mt-4 justify-between"
-            parts={{ alliance: { className: "w-full" } }}
-          />
+          <>
+            {programHasAutonomousPeriod(event?.program.id) ? (
+              <Checkbox
+                label="Autonomous Period"
+                labelProps={{
+                  className: "mt-2",
+                }}
+                bind={{
+                  value: incident.flags?.includes("auto") ?? false,
+                  onChange: (value) => onChangeFlag("auto", value),
+                }}
+              />
+            ) : null}
+            <MatchContext
+              match={incident.match}
+              className="mt-2 justify-between"
+              parts={{ alliance: { className: "w-full" } }}
+            />
+          </>
         )}
         <label>
           <p className="mt-4">Team</p>

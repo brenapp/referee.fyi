@@ -62,7 +62,7 @@ export const IncidentMatchSchema = z
 
 export type IncidentMatch = z.infer<typeof IncidentMatchSchema>;
 
-export const FLAGS = ["judge"] as const;
+export const FLAGS = ["judge", "auto"] as const;
 export const IncidentFlagSchema = z.enum(FLAGS).meta({
   id: "IncidentFlag",
   description: "Flags that can be applied to an incident.",

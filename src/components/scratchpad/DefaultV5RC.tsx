@@ -71,9 +71,22 @@ export type HighStakesScratchpadProps = {
 export const DefaultV5RCScratchpad: React.FC<HighStakesScratchpadProps> = ({
   match,
 }) => {
-  const { data } = useMatchScratchpad<DefaultV5RCMatchScratchpad>(match);
+  return (
+    <>
+      <AutonomousWinnerScratchpad match={match} />
+      {isMatchElimination(match) ? (
+        <AllianceTimeoutUsedScratchpad match={match} />
+      ) : (
+        <AutonomousWinPointScratchpad match={match} />
+      )}
+    </>
+  );
+};
 
-  // Bindings
+export const AutonomousWinnerScratchpad: React.FC<
+  HighStakesScratchpadProps
+> = ({ match }) => {
+  const { data } = useMatchScratchpad<DefaultV5RCMatchScratchpad>(match);
   const [auto, setAuto] = useScratchpadState<
     DefaultV5RCMatchScratchpad,
     "auto"
@@ -81,12 +94,6 @@ export const DefaultV5RCScratchpad: React.FC<HighStakesScratchpadProps> = ({
     match,
     key: "auto",
     fallback: "none",
-  });
-
-  const [awp, setAWP] = useScratchpadState<DefaultV5RCMatchScratchpad, "awp">({
-    match,
-    key: "awp",
-    fallback: { red: false, blue: false },
   });
 
   return (
@@ -147,54 +154,64 @@ export const DefaultV5RCScratchpad: React.FC<HighStakesScratchpadProps> = ({
           }}
         />
       </section>
-      <section
-        className="bg-zinc-800 p-4 mt-4 rounded-md"
-        aria-label="Auto Winner"
-      >
-        <div className="flex items-center gap-2">
-          <StarIcon height={20} />
-          <p>AWP</p>
-        </div>
-        <fieldset className="mt-2 flex gap-2" aria-label="Autonomous Win Point">
-          <Checkbox
-            label="Red"
-            bind={{
-              value: awp.red,
-              onChange: (value) => setAWP((awp) => ({ ...awp, red: value })),
-            }}
-            className="accent-red-400 mt-0"
-            aria-label="Red AWP"
-            labelProps={{
-              className: "has-[:checked]:bg-red-800 mt-0 flex-1 px-4",
-            }}
-          />
-          <Checkbox
-            label="Blue"
-            bind={{
-              value: awp.blue,
-              onChange: (value) => setAWP((awp) => ({ ...awp, blue: value })),
-            }}
-            aria-label="Blue AWP"
-            className="accent-blue-400 mt-0"
-            labelProps={{
-              className: "has-[:checked]:bg-blue-800 mt-0 flex-1 px-4",
-            }}
-          />
-        </fieldset>
-        <EditHistory
-          value={data}
-          valueKey="awp"
-          className="mt-4"
-          render={(value) =>
-            `${value.red ? "Red AWP" : ""} ${value.blue ? "Blue AWP" : ""}${
-              !value.blue && !value.red ? "No AWP" : ""
-            }`
-          }
+    </section>
+  );
+};
+
+export const AutonomousWinPointScratchpad: React.FC<
+  HighStakesScratchpadProps
+> = ({ match }) => {
+  const { data } = useMatchScratchpad<DefaultV5RCMatchScratchpad>(match);
+  const [awp, setAWP] = useScratchpadState<DefaultV5RCMatchScratchpad, "awp">({
+    match,
+    key: "awp",
+    fallback: { red: false, blue: false },
+  });
+  return (
+    <section
+      className="bg-zinc-800 p-4 mt-4 rounded-md"
+      aria-label="Auto Winner"
+    >
+      <div className="flex items-center gap-2">
+        <StarIcon height={20} />
+        <p>AWP</p>
+      </div>
+      <fieldset className="mt-2 flex gap-2" aria-label="Autonomous Win Point">
+        <Checkbox
+          label="Red"
+          bind={{
+            value: awp.red,
+            onChange: (value) => setAWP((awp) => ({ ...awp, red: value })),
+          }}
+          className="accent-red-400 mt-0"
+          aria-label="Red AWP"
+          labelProps={{
+            className: "has-[:checked]:bg-red-800 mt-0 flex-1 px-4",
+          }}
         />
-      </section>
-      {isMatchElimination(match) && (
-        <AllianceTimeoutUsedScratchpad match={match} />
-      )}
+        <Checkbox
+          label="Blue"
+          bind={{
+            value: awp.blue,
+            onChange: (value) => setAWP((awp) => ({ ...awp, blue: value })),
+          }}
+          aria-label="Blue AWP"
+          className="accent-blue-400 mt-0"
+          labelProps={{
+            className: "has-[:checked]:bg-blue-800 mt-0 flex-1 px-4",
+          }}
+        />
+      </fieldset>
+      <EditHistory
+        value={data}
+        valueKey="awp"
+        className="mt-4"
+        render={(value) =>
+          `${value.red ? "Red AWP" : ""} ${value.blue ? "Blue AWP" : ""}${
+            !value.blue && !value.red ? "No AWP" : ""
+          }`
+        }
+      />
     </section>
   );
 };

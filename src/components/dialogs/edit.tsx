@@ -28,6 +28,7 @@ import { EditHistory } from "~components/EditHistory";
 import { LWWKeys } from "@referee-fyi/consistency";
 import { AssetPreview } from "~components/Assets";
 import { TrashIcon } from "@heroicons/react/20/solid";
+import { programHasAutonomousPeriod } from "~utils/data/game";
 
 export type EditIncidentDialogProps = {
   open: boolean;
@@ -386,12 +387,26 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             />
           </div>
         ) : null}
+        {incident?.match?.type === "match" &&
+        programHasAutonomousPeriod(eventData?.program.id) ? (
+          <Checkbox
+            label="Autonomous Period"
+            labelProps={{
+              className: "mt-2",
+            }}
+            bind={{
+              value: incident?.flags?.includes("auto") ?? false,
+              onChange: (value) => onChangeFlag("auto", value),
+            }}
+          />
+        ) : null}
         <EditHistory
           value={incident}
           valueKey="match"
           dirty={dirty.match}
           render={(value) => (value ? matchToString(value) : "Non-Match")}
         />
+
         <label>
           <p className="mt-4">Outcome</p>
           <Select

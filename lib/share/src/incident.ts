@@ -44,7 +44,7 @@ export const IncidentMatchHeadToHeadPeriodDisplayNames: Record<
   IncidentMatchHeadToHeadPeriod,
   string
 > = {
-  auto: "Autonomous",
+  auto: "Auto",
   driver: "Driver",
   isolation: "Isolation",
   interaction: "Interaction",

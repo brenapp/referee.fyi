@@ -1,20 +1,23 @@
+import { IncidentMatchHeadToHeadPeriod } from "@referee-fyi/share";
 import { ProgramCode, programs } from "robotevents";
 
-export function programHasAutonomousPeriod(program?: ProgramCode | number) {
-  switch (program) {
+export function getHeadToHeadPeriodsForProgram(
+  programCode?: ProgramCode | number
+): IncidentMatchHeadToHeadPeriod[] {
+  switch (programCode) {
     case programs.V5RC:
     case programs.VURC:
-      return true;
-    default:
-      return false;
-  }
-}
+      return ["auto", "driver"];
 
-export function programHasIsolationPeriod(program: ProgramCode) {
-  switch (program) {
+    case programs.ADC:
+    case programs.VIQRC:
+      return ["driver"];
+
     case programs.VAIRC:
-      return true;
-    default:
-      return false;
+      return ["isolation", "interaction"];
+
+    default: {
+      return [];
+    }
   }
 }

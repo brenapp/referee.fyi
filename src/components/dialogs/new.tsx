@@ -13,7 +13,13 @@ import {
   Select,
   TextArea,
 } from "~components/Input";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Button, IconButton } from "~components/Button";
 import { MatchContext } from "~components/Context";
 import { useCurrentDivision, useCurrentEvent } from "~hooks/state";
@@ -35,7 +41,12 @@ import { toast } from "~components/Toast";
 import { Spinner } from "~components/Spinner";
 import { MatchData, programs } from "robotevents";
 import { queryClient } from "~utils/data/query";
-import { IncidentFlag, IncidentMatchSkills } from "@referee-fyi/share";
+import {
+  IncidentFlag,
+  IncidentMatchHeadToHeadPeriod,
+  IncidentMatchHeadToHeadPeriodDisplayNames,
+  IncidentMatchSkills,
+} from "@referee-fyi/share";
 import { AssetPicker, LocalAssetPreview } from "~components/Assets";
 import { LocalAsset } from "~utils/data/assets";
 import {
@@ -45,7 +56,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { useSaveAssets } from "~utils/hooks/assets";
 import { useParams } from "@tanstack/react-router";
-import { programHasAutonomousPeriod } from "~utils/data/game";
+import { getHeadToHeadPeriodsForProgram } from "~utils/data/game";
 
 export type EventNewIncidentDialogProps = {
   open: boolean;
@@ -145,6 +156,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     event: sku ?? "",
     team: teamData?.number,
     match: matchData,
+    period: undefined,
     rules: [],
     notes: "",
     outcome: "Minor",
@@ -203,8 +215,9 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
   );
 
   const onChangeIncidentMatch = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      if (e.target.value === "0") {
+    (dispatch: SetStateAction<string>) => {
+      const id = typeof dispatch === "function" ? dispatch("") : dispatch;
+      if (id === "0") {
         setIncidentField("match", undefined);
         setIncidentField("skills", {
           type: "skills",
@@ -215,17 +228,10 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         return;
       }
 
-      let matchPool = matches;
+      const matchPool = division ? matches : allTeamMatches;
+      const newMatch = matchPool?.find((m) => m.id.toString() === id);
 
-      if (!division) {
-        matchPool = allTeamMatches;
-      }
-
-      const newMatch = matchPool?.find(
-        (m) => m.id.toString() === e.target.value
-      );
-
-      if (e.target.value === "-1") {
+      if (id === "-1") {
         setMatch(undefined);
         setTeam(undefined);
         setIncidentField("skills", undefined);
@@ -235,9 +241,17 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 
       setIncidentField("match", newMatch);
       setIncidentField("skills", undefined);
+      setIncidentField("period", undefined);
       setMatch(newMatch.id);
     },
     [matches, allTeamMatches, division]
+  );
+
+  const onChangeIncidentMatchPeriod = useCallback(
+    (period: IncidentMatchHeadToHeadPeriod | "none") => {
+      setIncidentField("period", period === "none" ? undefined : period);
+    },
+    []
   );
 
   const onChangeIncidentSkillsType = useCallback(
@@ -342,6 +356,8 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
     [incident.flags]
   );
 
+  const periods = getHeadToHeadPeriodsForProgram(event?.program.id);
+
   const { mutateAsync: saveAssets } = useSaveAssets(incident.assets);
   const onSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement> | React.MouseEvent) => {
@@ -360,6 +376,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         setIncidentField("outcome", "Minor");
         setIncidentField("assets", []);
         setIncidentField("flags", []);
+        setIncidentField("period", undefined);
         addRecentRules(incident.rules);
 
         toast({ type: "info", message: "Created Entry" });
@@ -389,17 +406,21 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         <label>
           <p className="mt-4">Match</p>
           <Select
-            value={incident.skills ? 0 : (incident.match?.id ?? -1)}
-            onChange={onChangeIncidentMatch}
+            bind={{
+              value: incident.skills
+                ? "0"
+                : (incident.match?.id.toString() ?? "-1"),
+              onChange: onChangeIncidentMatch,
+            }}
             className="max-w-full w-full"
           >
-            <option value={-1}>Pick A Match</option>
-            <option value={0}>Skills</option>
+            <option value={"-1"}>Pick A Match</option>
+            <option value={"0"}>Skills</option>
             {team &&
               teamMatchesByDiv?.map(([name, matches]) => (
                 <optgroup label={name} key={name}>
                   {matches.map((match) => (
-                    <option value={match.id} key={match.id}>
+                    <option value={match.id.toString()} key={match.id}>
                       {match.name}
                     </option>
                   ))}
@@ -407,7 +428,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
               ))}
             {!team &&
               matches?.map((match) => (
-                <option value={match.id} key={match.id}>
+                <option value={match.id.toString()} key={match.id}>
                   {match.name}
                 </option>
               ))}
@@ -469,27 +490,41 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
             />
           </div>
         ) : null}
-        {incident.match && (
+        {incident.match && periods.length > 1 ? (
           <>
-            {programHasAutonomousPeriod(event?.program.id) ? (
-              <Checkbox
-                label="Autonomous Period"
-                labelProps={{
-                  className: "mt-2",
-                }}
+            <div
+              className="flex gap-2 mt-2"
+              role="radiogroup"
+              aria-label="Match Period"
+            >
+              <Radio
+                name="matchPeriod"
+                label={"None"}
                 bind={{
-                  value: incident.flags?.includes("auto") ?? false,
-                  onChange: (value) => onChangeFlag("auto", value),
+                  value: incident.period ?? "none",
+                  onChange: onChangeIncidentMatchPeriod,
+                  variant: "none",
                 }}
               />
-            ) : null}
+              {periods.map((period) => (
+                <Radio
+                  name="matchPeriod"
+                  label={IncidentMatchHeadToHeadPeriodDisplayNames[period]}
+                  bind={{
+                    value: incident.period ?? "none",
+                    onChange: onChangeIncidentMatchPeriod,
+                    variant: period,
+                  }}
+                />
+              ))}
+            </div>
             <MatchContext
               match={incident.match}
               className="mt-2 justify-between"
               parts={{ alliance: { className: "w-full" } }}
             />
           </>
-        )}
+        ) : null}
         <label>
           <p className="mt-4">Team</p>
           <Select

@@ -32,6 +32,25 @@ import { RulesSummary } from "~components/RulesSummary";
 import { Details, Summary } from "~components/Details";
 import { useNewIncidentDialogState } from "~utils/dialogs/new";
 
+function shouldDisplayIncidentInTeamSummary(incident: IncidentData) {
+  if (incident.outcome === "General") {
+    return false;
+  }
+
+  if (incident.match?.type === "skills") {
+    return false;
+  }
+
+  const isAuto =
+    incident.match?.period === "auto" || incident.match?.period === "isolation";
+
+  if (isAuto && incident.outcome !== "Major") {
+    return false;
+  }
+
+  return true;
+}
+
 type TeamSummaryProps = {
   number: string;
   match: Match;
@@ -70,7 +89,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
         </div>
         <RulesSummary
           incidents={incidents}
-          filter={(i) => i.outcome !== "General" && i.match?.type !== "skills"}
+          filter={shouldDisplayIncidentInTeamSummary}
         />
         <TeamFlagButton match={match} team={number} />
       </Summary>

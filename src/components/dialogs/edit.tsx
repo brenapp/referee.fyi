@@ -12,6 +12,8 @@ import {
 import { toast } from "~components/Toast";
 import {
   IncidentFlag,
+  IncidentMatchHeadToHeadPeriod,
+  IncidentMatchHeadToHeadPeriodDisplayNames,
   IncidentMatchSkills,
   OUTCOMES,
 } from "@referee-fyi/share";
@@ -167,6 +169,21 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
       });
     },
     [teamMatches, update]
+  );
+
+  const onChangeIncidentMatchPeriod = useCallback(
+    (period: IncidentMatchHeadToHeadPeriod | "none") => {
+      update({
+        match:
+          incident?.match?.type === "match"
+            ? {
+                ...incident.match,
+                period: period === "none" ? undefined : period,
+              }
+            : incident?.match,
+      });
+    },
+    [update, incident?.match]
   );
 
   const onChangeIncidentSkillsType = useCallback(
@@ -333,6 +350,39 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
             })}
           </Select>
         </label>
+        {incident?.match?.type === "match" && periods.length > 1 ? (
+          <>
+            <div
+              className="flex gap-2 mt-2"
+              role="radiogroup"
+              aria-label="Match Period"
+            >
+              <Radio
+                name="matchPeriod"
+                label={"None"}
+                bind={{
+                  value: incident.match.period ?? "none",
+                  onChange: onChangeIncidentMatchPeriod,
+                  variant: "none",
+                }}
+              />
+              {periods.map((period) => (
+                <Radio
+                  name="matchPeriod"
+                  label={IncidentMatchHeadToHeadPeriodDisplayNames[period]}
+                  bind={{
+                    value:
+                      incident.match?.type === "match"
+                        ? (incident.match.period ?? "none")
+                        : "none",
+                    onChange: onChangeIncidentMatchPeriod,
+                    variant: period,
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        ) : null}
         {incident?.match?.type === "skills" ? (
           <div
             className="flex gap-2 mt-2"

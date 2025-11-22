@@ -17,7 +17,7 @@ import {
 } from "~components/Dialog";
 import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
-import { Incident as IncidentData } from "~utils/data/incident";
+import { Incident as IncidentData, RichIncident } from "~utils/data/incident";
 import { Match } from "robotevents";
 import { MatchContext } from "~components/Context";
 import { Incident } from "~components/Incident";
@@ -30,6 +30,7 @@ import * as m from "motion/react-m";
 import useResizeObserver from "use-resize-observer";
 import { RulesSummary } from "~components/RulesSummary";
 import { Details, Summary } from "~components/Details";
+import { useNewIncidentDialogState } from "~utils/dialogs/new";
 
 type TeamSummaryProps = {
   number: string;
@@ -117,16 +118,22 @@ export const TeamFlagButton: React.FC<TeamFlagButtonProps> = ({
   team,
   ...props
 }) => {
-  const [open, setOpen] = useState(false);
+  const newIncidentDialog = useNewIncidentDialogState();
+  const openNewIncidentDialog = useCallback(
+    (initial: Partial<RichIncident> = {}) => {
+      newIncidentDialog.setOpen({
+        open: true,
+        initial: {
+          ...initial,
+        },
+      });
+    },
+    [newIncidentDialog]
+  );
 
   return (
     <>
-      <EventNewIncidentDialog
-        open={open}
-        setOpen={setOpen}
-        initial={{ match, team }}
-        key={match?.id + team}
-      />
+      <EventNewIncidentDialog state={newIncidentDialog} />
       <Button
         mode="primary"
         {...props}
@@ -134,7 +141,7 @@ export const TeamFlagButton: React.FC<TeamFlagButtonProps> = ({
           "flex items-center w-min flex-shrink-0 my-2",
           props.className
         )}
-        onClick={() => setOpen(true)}
+        onClick={() => openNewIncidentDialog({ team, match: match })}
         aria-label={`New entry for ${team}`}
       >
         <FlagIcon height={20} className="mr-2" />

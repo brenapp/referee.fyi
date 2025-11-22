@@ -18,6 +18,7 @@ import { EventNewIncidentDialog } from "~components/dialogs/new";
 import { MenuButton } from "~components/MenuButton";
 import { RulesSummary } from "~components/RulesSummary";
 import { DisconnectedWarning } from "~components/DisconnectedWarning";
+import { useNewIncidentDialogState } from "~utils/dialogs/new";
 
 export type EventTagProps = {
   event: EventData;
@@ -33,20 +34,19 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
   const { data: incidents } = useEventIncidents(event.sku);
   const [filter, setFilter] = useState("");
 
-  const [newIncidentDialogOpen, setNewIncidentDialogOpen] = useState(false);
-  const [newIncidentDialogInitial, setNewIncidentDialogInitial] = useState<
-    Partial<RichIncident>
-  >({});
-
+  const newIncidentDialog = useNewIncidentDialogState();
   const openNewIncidentDialog = useCallback(
     (initial: Partial<RichIncident> = {}) => {
-      setNewIncidentDialogInitial(initial);
-      setTimeout(() => {
-        setNewIncidentDialogOpen(true);
-      }, 0);
+      newIncidentDialog.setOpen({
+        open: true,
+        initial: {
+          ...initial,
+        },
+      });
     },
-    []
+    [newIncidentDialog]
   );
+
   const teams = useMemo(() => divisionTeams?.teams ?? [], [divisionTeams]);
 
   const majorIncidents = useMemo(() => {
@@ -96,11 +96,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
         />
       </IconLabel>
       <Spinner show={isLoading || isPaused} />
-      <EventNewIncidentDialog
-        open={newIncidentDialogOpen}
-        setOpen={setNewIncidentDialogOpen}
-        initial={newIncidentDialogInitial}
-      />
+      <EventNewIncidentDialog state={newIncidentDialog} />
       <VirtualizedList
         data={filteredTeams}
         options={{ estimateSize: () => 64 }}

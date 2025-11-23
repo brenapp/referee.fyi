@@ -23,12 +23,40 @@ export const IncidentOutcomeSchema = z.enum(OUTCOMES).meta({
 
 export type IncidentOutcome = z.infer<typeof IncidentOutcomeSchema>;
 
+export const IncidentMatchHeadToHeadPeriods = [
+  "auto",
+  "driver",
+  "isolation",
+  "interaction",
+] as const;
+
+export type IncidentMatchHeadToHeadPeriod =
+  (typeof IncidentMatchHeadToHeadPeriods)[number];
+
+export const IncidentMatchHeadToHeadPeriodSchema = z
+  .enum(IncidentMatchHeadToHeadPeriods)
+  .meta({
+    id: "IncidentMatchHeadToHeadPeriod",
+    description: "The period of the match when the incident occurred.",
+  });
+
+export const IncidentMatchHeadToHeadPeriodDisplayNames: Record<
+  IncidentMatchHeadToHeadPeriod,
+  string
+> = {
+  auto: "Auto",
+  driver: "Driver",
+  isolation: "Isolation",
+  interaction: "Interaction",
+};
+
 export const IncidentMatchHeadToHeadSchema = z
   .object({
     type: z.literal("match"),
     division: z.number(),
     name: z.string(),
     id: z.number(),
+    period: IncidentMatchHeadToHeadPeriodSchema.optional(),
   })
   .meta({
     id: "IncidentMatchHeadToHead",

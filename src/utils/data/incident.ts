@@ -10,6 +10,8 @@ import {
   EditIncident,
   INCIDENT_IGNORE,
   BaseIncident,
+  IncidentMatchHeadToHeadPeriod,
+  IncidentMatchHeadToHeadPeriodDisplayNames,
 } from "@referee-fyi/share";
 import { initLWW, isKeyLWW, updateLWW } from "@referee-fyi/consistency";
 import { getShareProfile } from "./share";
@@ -23,6 +25,7 @@ export type RichIncidentElements = {
   event: string;
 
   match?: Match | null;
+  period?: IncidentMatchHeadToHeadPeriod;
   skills?: IncidentMatchSkills;
   team?: string | null;
 
@@ -45,6 +48,7 @@ export function packIncident(incident: RichIncident): NewIncident {
           division: incident.match.division.id,
           id: incident.match.id,
           name: incident.match.name,
+          period: incident.period,
         }
       : incident.skills,
     team: incident.team!,
@@ -406,7 +410,11 @@ export async function getIncidentsByTeam(team: string): Promise<Incident[]> {
 export function matchToString(match: IncidentMatch) {
   switch (match.type) {
     case "match": {
-      return match.name;
+      const period = match.period
+        ? ` ${IncidentMatchHeadToHeadPeriodDisplayNames[match.period]}`
+        : "";
+
+      return match.name + period;
     }
     case "skills": {
       const display: Record<typeof match.skillsType, string> = {

@@ -326,6 +326,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
         setIncidentField("outcome", "Minor");
         setIncidentField("assets", []);
         setIncidentField("flags", []);
+        setIncidentField("match", undefined);
         setIncidentField("period", undefined);
         addRecentRules(incident.rules);
 

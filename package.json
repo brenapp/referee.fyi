@@ -65,7 +65,6 @@
     "@babel/preset-react": "^7.26.3",
     "@cloudflare/workers-types": "^4.20231121.0",
     "@referee-fyi/rules": "^1.0.0",
-    "@referee-fyi/worker-rules-indexer": "^0.0.0",
     "@referee-fyi/worker-sync": "^1.0.0",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-node-resolve": "^15.2.3",

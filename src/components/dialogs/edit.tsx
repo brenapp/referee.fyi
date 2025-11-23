@@ -369,6 +369,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
               {periods.map((period) => (
                 <Radio
                   name="matchPeriod"
+                  key={period}
                   label={IncidentMatchHeadToHeadPeriodDisplayNames[period]}
                   bind={{
                     value:

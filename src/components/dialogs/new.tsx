@@ -468,6 +468,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
               />
               {periods.map((period) => (
                 <Radio
+                  key={period}
                   name="matchPeriod"
                   label={IncidentMatchHeadToHeadPeriodDisplayNames[period]}
                   bind={{

@@ -38,7 +38,10 @@ function useScratchpadState<T extends MatchScratchpad, K extends keyof T>({
   const { data: defaultScratchpad } = useDefaultScratchpad<T>(match);
   const { mutate } = useUpdateMatchScratchpad<T>(match);
 
-  const value = useMemo(() => data?.[key] ?? fallback, [data, key, fallback]);
+  const value = useMemo(
+    () => (data as T)?.[key] ?? fallback,
+    [data, key, fallback]
+  );
 
   const dispatch: Dispatch<SetStateAction<T[K]>> = useCallback(
     (action: SetStateAction<T[K]>) => {

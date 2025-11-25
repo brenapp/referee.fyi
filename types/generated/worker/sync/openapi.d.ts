@@ -761,6 +761,7 @@ export interface paths {
             parameters: {
                 query: {
                     name: string;
+                    version: string;
                 };
                 header?: {
                     "X-Referee-Signature"?: string;

@@ -298,7 +298,9 @@ export default defineConfig(() => ({
       },
     }),
   ],
-
+  server: {
+    allowedHosts: ["mac.bren.haus"],
+  },
   base: "/",
   build: {
     sourcemap: true,

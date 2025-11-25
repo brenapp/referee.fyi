@@ -1,6 +1,5 @@
 import { getMany, isStoragePersisted, keys } from "~utils/data/keyval";
 import { KEY } from "./crypto";
-import { CACHE_PREFIX } from "./query";
 import { getShareProfile, getShareSessionID } from "./share";
 import { FallbackRender, sendFeedback } from "@sentry/react";
 
@@ -19,10 +18,9 @@ export type IssueReportResponse = {
   correlation: string;
 };
 
-const EXCLUDE_KEYS = [
-  (k) => k === KEY,
-  (k) => k.toString().startsWith(CACHE_PREFIX),
-] satisfies ((k: IDBValidKey) => boolean)[];
+const EXCLUDE_KEYS = [(k) => k === KEY] satisfies ((
+  k: IDBValidKey
+) => boolean)[];
 
 export async function reportIssue(
   sku: string | null,

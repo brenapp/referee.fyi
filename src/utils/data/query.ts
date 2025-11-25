@@ -1,30 +1,32 @@
 import { QueryClient } from "@tanstack/react-query";
 import {
+  AsyncStorage,
+  experimental_createQueryPersister,
   PersistedQuery,
-  experimental_createPersister,
 } from "@tanstack/react-query-persist-client";
-import { del, get, set } from "~utils/data/keyval";
+import { get, set, del, createStore } from "idb-keyval";
 
 // Cache buster key, used to forcibly invalidate queries
 export const CACHE_BUSTER = "v6";
 
-export const CACHE_PREFIX = "tanstack-query";
+const store = createStore("referee-fyi", "query-persister");
+
+const storage: AsyncStorage = {
+  getItem: (key: string) => get<string>(key, store),
+  setItem: (key: string, value: unknown) => set(key, value, store),
+  removeItem: (key: string) => del(key, store),
+};
+
+const persister = experimental_createQueryPersister({
+  buster: CACHE_BUSTER,
+  storage,
+});
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       gcTime: 1000 * 30,
-      persister: experimental_createPersister<PersistedQuery>({
-        buster: CACHE_BUSTER,
-        prefix: CACHE_PREFIX,
-        serialize: (query) => query,
-        deserialize: (query) => query,
-        storage: {
-          getItem: get,
-          setItem: set,
-          removeItem: del,
-        },
-      }),
+      persister: persister.persisterFn,
     },
   },
 });
@@ -48,15 +50,14 @@ export function createPersister<S, D>({
     return { ...query, state: { ...query.state, data } };
   };
 
-  return experimental_createPersister<PersistedQuery>({
+  return experimental_createQueryPersister({
     buster: CACHE_BUSTER,
-    prefix: CACHE_PREFIX,
     serialize,
     deserialize,
     storage: {
-      getItem: get,
-      setItem: set,
-      removeItem: del,
+      getItem: (key: string) => get<PersistedQuery>(key, store),
+      setItem: (key: string, value: unknown) => set(key, value, store),
+      removeItem: (key: string) => del(key, store),
     },
   });
 }

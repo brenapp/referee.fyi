@@ -1,6 +1,6 @@
 import { ArrowRightIcon, GlobeAmericasIcon } from "@heroicons/react/20/solid";
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import { Button, LinkButton } from "~components/Button";
 import { ClickToCopy } from "~components/ClickToCopy";
 import { ReportIssueDialog } from "~components/dialogs/report";
@@ -34,6 +34,9 @@ export const SettingsPage: React.FC = () => {
     window.location.reload();
   }, []);
 
+  const nameId = useId();
+  const publicKeyId = useId();
+
   return (
     <main className="mt-4 overflow-y-auto">
       {isWorldsBuild() ? (
@@ -46,17 +49,27 @@ export const SettingsPage: React.FC = () => {
         </p>
       ) : null}
       <section className="mt-4">
-        <h2 className="font-bold">Name</h2>
+        <label className="font-bold" htmlFor={nameId}>
+          Name
+        </label>
         <Input
           className="w-full mt-2"
+          id={nameId}
           value={localName}
           onChange={(e) => setLocalName(e.currentTarget.value)}
           onBlur={() => updateProfile({ name: localName })}
+          data-cy="settings-name-input"
         />
       </section>
       <section className="mt-4">
-        <h2 className="font-bold">Public Key</h2>
-        <ClickToCopy message={profile?.key ?? ""} />
+        <label className="font-bold" htmlFor={publicKeyId}>
+          Public Key
+        </label>
+        <ClickToCopy
+          message={profile?.key ?? ""}
+          id={publicKeyId}
+          data-cy="settings-key-button"
+        />
       </section>
       {userMetadata.isSystemKey ? (
         <Info message="System Key Enabled" className="mt-4" />

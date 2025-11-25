@@ -11,6 +11,7 @@ import {
 export type UserRow = {
   key: string;
   name: string;
+  version: string;
   role: UserRole;
   created_at: string;
   updated_at: string;
@@ -23,23 +24,25 @@ function log(label: string, response: D1Response) {
   console.log(`${label} success`, response.meta);
 }
 
-export async function setUser(
+export async function registerUser(
   env: Env,
-  user: Pick<User, "key" | "name">
+  user: Pick<User, "key" | "name">,
+  version: string
 ): Promise<void> {
   const response = await env.DB.prepare(
     `
-    INSERT INTO users (key, name)
-      VALUES (?, ?)
+    INSERT INTO users (key, name, version)
+      VALUES (?, ?, ?)
     ON CONFLICT(key) DO UPDATE SET
       name = excluded.name,
-      updated_at = CURRENT_TIMESTAMP
+      updated_at = CURRENT_TIMESTAMP,
+      version = excluded.version
     `
   )
-    .bind(user.key, user.name)
+    .bind(user.key, user.name, version)
     .run();
 
-  log("setUser", response);
+  log("registerUser", response);
 }
 
 export async function getUser(env: Env, key: string): Promise<UserRow | null> {

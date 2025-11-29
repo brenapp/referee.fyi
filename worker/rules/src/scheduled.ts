@@ -1,3 +1,4 @@
+import { fetchUpdatedQNAs } from "./jobs/fetchUpdatedQNAs.js";
 import { indexGameRules } from "./jobs/indexGameRules.js";
 
 export async function scheduled(
@@ -9,13 +10,14 @@ export async function scheduled(
 
   const rules = [
     "https://referee.fyi/rules/V5RC/2025-2026.json",
-    "https://referee.fyi/rules/VIQRC/2025-2026.json"
+    "https://referee.fyi/rules/VIQRC/2025-2026.json",
   ];
-    
+
   const result = await Promise.all(
     rules.map((url) => indexGameRules(env, url))
   );
 
+  await fetchUpdatedQNAs(env);
 
   console.log("Game rules indexed successfully:", result);
 }

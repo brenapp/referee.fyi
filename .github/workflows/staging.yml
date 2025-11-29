@@ -60,6 +60,7 @@ jobs:
           workingDirectory: "worker/events"
           environment: "staging"
       - uses: mshick/add-pr-comment@v2
+        if: github.event_name == 'pull_request' && steps.preview_alias.outputs.preview_alias != 'main'
         with:
           message: |
             # Staging Application Deployed!

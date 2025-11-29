@@ -3,6 +3,10 @@ name: Deploy Staging
 on:
   push:
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest

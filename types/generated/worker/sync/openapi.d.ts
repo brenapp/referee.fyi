@@ -761,6 +761,7 @@ export interface paths {
             parameters: {
                 query: {
                     name: string;
+                    version: string;
                 };
                 header?: {
                     "X-Referee-Signature"?: string;
@@ -2301,6 +2302,11 @@ export interface components {
             success: true;
             data: components["schemas"]["InstanceUsers"];
         };
+        /**
+         * @description The period of the match when the incident occurred.
+         * @enum {string}
+         */
+        IncidentMatchHeadToHeadPeriod: "auto" | "driver" | "isolation" | "interaction";
         IncidentMatchHeadToHead: {
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -2310,6 +2316,7 @@ export interface components {
             division: number;
             name: string;
             id: number;
+            period?: components["schemas"]["IncidentMatchHeadToHeadPeriod"];
         };
         IncidentMatchSkills: {
             /**

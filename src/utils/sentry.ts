@@ -4,7 +4,7 @@ import {
   setUser,
   setMeasurement,
 } from "@sentry/react";
-import type { MeasurementUnit, User } from "@sentry/types";
+import type { MeasurementUnit, User } from "@sentry/core";
 import { queryClient } from "./data/query";
 import { getShareProfile } from "./data/share";
 import { getGeolocation } from "./data/meta";

@@ -334,7 +334,7 @@ export function getUseEventMatchesQueryParams<T = Match[]>(
       return matches.data.sort(logicalMatchComparison);
     },
     staleTime: 1000 * 60,
-    persister: matchPersister,
+    persister: matchPersister.persisterFn,
     ...options,
   };
 }
@@ -380,7 +380,7 @@ export function getUseEventMatchesForTeamQueryParams(
       return matches.sort(logicalMatchComparison);
     },
     staleTime: 1000 * 60,
-    persister: matchPersister,
+    persister: matchPersister.persisterFn,
     ...options,
   };
 }

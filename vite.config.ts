@@ -6,7 +6,7 @@ import { VitePWA } from "vite-plugin-pwa";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { plugin as markdown, Mode } from "vite-plugin-markdown";
 import { exec } from "node:child_process";
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
+import tanstackRouter from "@tanstack/router-plugin/vite";
 import { z } from "zod/v4";
 import openApiTypescript, { astToString, OpenAPI3 } from "openapi-typescript";
 import fs from "fs/promises";
@@ -144,7 +144,7 @@ const generateOpenApiTypes: (options: OpenApiTypesGeneration) => Plugin = ({
     generateTypings(output.sync, getSyncDoc() as OpenAPI3);
     generateTypings(output.rules, getRulesDoc() as OpenAPI3);
 
-    this.info(`Wrote OpenAPI types to ${output}`);
+    this.info(`Wrote OpenAPI types to ${output.rules} and ${output.sync}`);
   },
 });
 
@@ -163,7 +163,7 @@ export default defineConfig(() => ({
       "VITE_LOGSERVER_TOKEN",
       "SENTRY_AUTH_TOKEN",
     ]),
-    TanStackRouterVite({
+    tanstackRouter({
       target: "react",
       autoCodeSplitting: true,
     }),
@@ -298,7 +298,9 @@ export default defineConfig(() => ({
       },
     }),
   ],
-
+  server: {
+    allowedHosts: ["mac.bren.haus"],
+  },
   base: "/",
   build: {
     sourcemap: true,

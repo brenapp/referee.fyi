@@ -24,10 +24,11 @@ import { Cog8ToothIcon as ManageIconSolid } from "@heroicons/react/24/solid";
 import { VirtualizedList } from "~components/VirtualizedList";
 import { filterTeams } from "~utils/filterteams";
 import { MenuButton } from "~components/MenuButton";
-import { RichIncident } from "~utils/data/incident";
 import { useEventIncidents } from "~utils/hooks/incident";
 import { RulesSummary } from "~components/RulesSummary";
 import { createFileRoute } from "@tanstack/react-router";
+import { useNewIncidentDialogState } from "~utils/dialogs/new";
+import { RichIncident } from "~utils/data/incident";
 
 type TeamSkillsTabProps = {
   event: EventData;
@@ -39,19 +40,17 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
   const { data: skills, isLoading: isLoadingSkills } = useEventSkills(event);
   const [filter, setFilter] = useState("");
 
-  const [newIncidentDialogOpen, setNewIncidentDialogOpen] = useState(false);
-  const [newIncidentDialogInitial, setNewIncidentDialogInitial] = useState<
-    Partial<RichIncident>
-  >({});
-
+  const newIncidentDialog = useNewIncidentDialogState();
   const openNewIncidentDialog = useCallback(
     (initial: Partial<RichIncident> = {}) => {
-      setNewIncidentDialogInitial(initial);
-      setTimeout(() => {
-        setNewIncidentDialogOpen(true);
-      }, 0);
+      newIncidentDialog.setOpen({
+        open: true,
+        initial: {
+          ...initial,
+        },
+      });
     },
-    []
+    [newIncidentDialog]
   );
 
   const skillsByTeam = useMemo(() => {
@@ -91,11 +90,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
             onChange={(e) => setFilter(e.currentTarget.value.toUpperCase())}
           />
         </IconLabel>
-        <EventNewIncidentDialog
-          open={newIncidentDialogOpen}
-          setOpen={setNewIncidentDialogOpen}
-          initial={newIncidentDialogInitial}
-        />
+        <EventNewIncidentDialog state={newIncidentDialog} />
         <Spinner show={isLoading} />
         <VirtualizedList
           className="flex-1"
@@ -166,6 +161,8 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
                       onClick={() =>
                         openNewIncidentDialog({
                           team: team.number,
+                          match: undefined,
+                          skills: undefined,
                           outcome: "Inspection",
                         })
                       }

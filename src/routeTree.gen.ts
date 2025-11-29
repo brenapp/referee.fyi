@@ -8,212 +8,80 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-// Import Routes
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as SkuRouteRouteImport } from './routes/$sku/route'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as SkuIndexRouteImport } from './routes/$sku/index'
+import { Route as SkuSummaryRouteImport } from './routes/$sku/summary'
+import { Route as SkuSkillsRouteImport } from './routes/$sku/skills'
+import { Route as SkuDevtoolsRouteImport } from './routes/$sku/devtools'
+import { Route as SkuDeletedRouteImport } from './routes/$sku/deleted'
+import { Route as SkuDivisionIndexRouteImport } from './routes/$sku/$division/index'
+import { Route as RulesProgramYearRouteImport } from './routes/rules/$program/$year'
+import { Route as SkuTeamTeamRouteImport } from './routes/$sku/team/$team'
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as SettingsImport } from './routes/settings'
-import { Route as PrivacyImport } from './routes/privacy'
-import { Route as SkuRouteImport } from './routes/$sku/route'
-import { Route as IndexImport } from './routes/index'
-import { Route as SkuIndexImport } from './routes/$sku/index'
-import { Route as SkuSummaryImport } from './routes/$sku/summary'
-import { Route as SkuSkillsImport } from './routes/$sku/skills'
-import { Route as SkuDevtoolsImport } from './routes/$sku/devtools'
-import { Route as SkuDeletedImport } from './routes/$sku/deleted'
-import { Route as SkuDivisionIndexImport } from './routes/$sku/$division/index'
-import { Route as RulesProgramYearImport } from './routes/rules/$program/$year'
-import { Route as SkuTeamTeamImport } from './routes/$sku/team/$team'
-
-// Create/Update Routes
-
-const SettingsRoute = SettingsImport.update({
+const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const PrivacyRoute = PrivacyImport.update({
+const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const SkuRouteRoute = SkuRouteImport.update({
+const SkuRouteRoute = SkuRouteRouteImport.update({
   id: '/$sku',
   path: '/$sku',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const IndexRoute = IndexImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const SkuIndexRoute = SkuIndexImport.update({
+const SkuIndexRoute = SkuIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => SkuRouteRoute,
 } as any)
-
-const SkuSummaryRoute = SkuSummaryImport.update({
+const SkuSummaryRoute = SkuSummaryRouteImport.update({
   id: '/summary',
   path: '/summary',
   getParentRoute: () => SkuRouteRoute,
 } as any)
-
-const SkuSkillsRoute = SkuSkillsImport.update({
+const SkuSkillsRoute = SkuSkillsRouteImport.update({
   id: '/skills',
   path: '/skills',
   getParentRoute: () => SkuRouteRoute,
 } as any)
-
-const SkuDevtoolsRoute = SkuDevtoolsImport.update({
+const SkuDevtoolsRoute = SkuDevtoolsRouteImport.update({
   id: '/devtools',
   path: '/devtools',
   getParentRoute: () => SkuRouteRoute,
 } as any)
-
-const SkuDeletedRoute = SkuDeletedImport.update({
+const SkuDeletedRoute = SkuDeletedRouteImport.update({
   id: '/deleted',
   path: '/deleted',
   getParentRoute: () => SkuRouteRoute,
 } as any)
-
-const SkuDivisionIndexRoute = SkuDivisionIndexImport.update({
+const SkuDivisionIndexRoute = SkuDivisionIndexRouteImport.update({
   id: '/$division/',
   path: '/$division/',
   getParentRoute: () => SkuRouteRoute,
 } as any)
-
-const RulesProgramYearRoute = RulesProgramYearImport.update({
+const RulesProgramYearRoute = RulesProgramYearRouteImport.update({
   id: '/rules/$program/$year',
   path: '/rules/$program/$year',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const SkuTeamTeamRoute = SkuTeamTeamImport.update({
+const SkuTeamTeamRoute = SkuTeamTeamRouteImport.update({
   id: '/team/$team',
   path: '/team/$team',
   getParentRoute: () => SkuRouteRoute,
 } as any)
-
-// Populate the FileRoutesByPath interface
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/$sku': {
-      id: '/$sku'
-      path: '/$sku'
-      fullPath: '/$sku'
-      preLoaderRoute: typeof SkuRouteImport
-      parentRoute: typeof rootRoute
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyImport
-      parentRoute: typeof rootRoute
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsImport
-      parentRoute: typeof rootRoute
-    }
-    '/$sku/deleted': {
-      id: '/$sku/deleted'
-      path: '/deleted'
-      fullPath: '/$sku/deleted'
-      preLoaderRoute: typeof SkuDeletedImport
-      parentRoute: typeof SkuRouteImport
-    }
-    '/$sku/devtools': {
-      id: '/$sku/devtools'
-      path: '/devtools'
-      fullPath: '/$sku/devtools'
-      preLoaderRoute: typeof SkuDevtoolsImport
-      parentRoute: typeof SkuRouteImport
-    }
-    '/$sku/skills': {
-      id: '/$sku/skills'
-      path: '/skills'
-      fullPath: '/$sku/skills'
-      preLoaderRoute: typeof SkuSkillsImport
-      parentRoute: typeof SkuRouteImport
-    }
-    '/$sku/summary': {
-      id: '/$sku/summary'
-      path: '/summary'
-      fullPath: '/$sku/summary'
-      preLoaderRoute: typeof SkuSummaryImport
-      parentRoute: typeof SkuRouteImport
-    }
-    '/$sku/': {
-      id: '/$sku/'
-      path: '/'
-      fullPath: '/$sku/'
-      preLoaderRoute: typeof SkuIndexImport
-      parentRoute: typeof SkuRouteImport
-    }
-    '/$sku/team/$team': {
-      id: '/$sku/team/$team'
-      path: '/team/$team'
-      fullPath: '/$sku/team/$team'
-      preLoaderRoute: typeof SkuTeamTeamImport
-      parentRoute: typeof SkuRouteImport
-    }
-    '/rules/$program/$year': {
-      id: '/rules/$program/$year'
-      path: '/rules/$program/$year'
-      fullPath: '/rules/$program/$year'
-      preLoaderRoute: typeof RulesProgramYearImport
-      parentRoute: typeof rootRoute
-    }
-    '/$sku/$division/': {
-      id: '/$sku/$division/'
-      path: '/$division'
-      fullPath: '/$sku/$division'
-      preLoaderRoute: typeof SkuDivisionIndexImport
-      parentRoute: typeof SkuRouteImport
-    }
-  }
-}
-
-// Create and export the route tree
-
-interface SkuRouteRouteChildren {
-  SkuDeletedRoute: typeof SkuDeletedRoute
-  SkuDevtoolsRoute: typeof SkuDevtoolsRoute
-  SkuSkillsRoute: typeof SkuSkillsRoute
-  SkuSummaryRoute: typeof SkuSummaryRoute
-  SkuIndexRoute: typeof SkuIndexRoute
-  SkuTeamTeamRoute: typeof SkuTeamTeamRoute
-  SkuDivisionIndexRoute: typeof SkuDivisionIndexRoute
-}
-
-const SkuRouteRouteChildren: SkuRouteRouteChildren = {
-  SkuDeletedRoute: SkuDeletedRoute,
-  SkuDevtoolsRoute: SkuDevtoolsRoute,
-  SkuSkillsRoute: SkuSkillsRoute,
-  SkuSummaryRoute: SkuSummaryRoute,
-  SkuIndexRoute: SkuIndexRoute,
-  SkuTeamTeamRoute: SkuTeamTeamRoute,
-  SkuDivisionIndexRoute: SkuDivisionIndexRoute,
-}
-
-const SkuRouteRouteWithChildren = SkuRouteRoute._addFileChildren(
-  SkuRouteRouteChildren,
-)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -229,7 +97,6 @@ export interface FileRoutesByFullPath {
   '/rules/$program/$year': typeof RulesProgramYearRoute
   '/$sku/$division': typeof SkuDivisionIndexRoute
 }
-
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
@@ -243,9 +110,8 @@ export interface FileRoutesByTo {
   '/rules/$program/$year': typeof RulesProgramYearRoute
   '/$sku/$division': typeof SkuDivisionIndexRoute
 }
-
 export interface FileRoutesById {
-  __root__: typeof rootRoute
+  __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$sku': typeof SkuRouteRouteWithChildren
   '/privacy': typeof PrivacyRoute
@@ -259,7 +125,6 @@ export interface FileRoutesById {
   '/rules/$program/$year': typeof RulesProgramYearRoute
   '/$sku/$division/': typeof SkuDivisionIndexRoute
 }
-
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
@@ -304,7 +169,6 @@ export interface FileRouteTypes {
     | '/$sku/$division/'
   fileRoutesById: FileRoutesById
 }
-
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SkuRouteRoute: typeof SkuRouteRouteWithChildren
@@ -313,6 +177,119 @@ export interface RootRouteChildren {
   RulesProgramYearRoute: typeof RulesProgramYearRoute
 }
 
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$sku': {
+      id: '/$sku'
+      path: '/$sku'
+      fullPath: '/$sku'
+      preLoaderRoute: typeof SkuRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$sku/': {
+      id: '/$sku/'
+      path: '/'
+      fullPath: '/$sku/'
+      preLoaderRoute: typeof SkuIndexRouteImport
+      parentRoute: typeof SkuRouteRoute
+    }
+    '/$sku/summary': {
+      id: '/$sku/summary'
+      path: '/summary'
+      fullPath: '/$sku/summary'
+      preLoaderRoute: typeof SkuSummaryRouteImport
+      parentRoute: typeof SkuRouteRoute
+    }
+    '/$sku/skills': {
+      id: '/$sku/skills'
+      path: '/skills'
+      fullPath: '/$sku/skills'
+      preLoaderRoute: typeof SkuSkillsRouteImport
+      parentRoute: typeof SkuRouteRoute
+    }
+    '/$sku/devtools': {
+      id: '/$sku/devtools'
+      path: '/devtools'
+      fullPath: '/$sku/devtools'
+      preLoaderRoute: typeof SkuDevtoolsRouteImport
+      parentRoute: typeof SkuRouteRoute
+    }
+    '/$sku/deleted': {
+      id: '/$sku/deleted'
+      path: '/deleted'
+      fullPath: '/$sku/deleted'
+      preLoaderRoute: typeof SkuDeletedRouteImport
+      parentRoute: typeof SkuRouteRoute
+    }
+    '/$sku/$division/': {
+      id: '/$sku/$division/'
+      path: '/$division'
+      fullPath: '/$sku/$division'
+      preLoaderRoute: typeof SkuDivisionIndexRouteImport
+      parentRoute: typeof SkuRouteRoute
+    }
+    '/rules/$program/$year': {
+      id: '/rules/$program/$year'
+      path: '/rules/$program/$year'
+      fullPath: '/rules/$program/$year'
+      preLoaderRoute: typeof RulesProgramYearRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$sku/team/$team': {
+      id: '/$sku/team/$team'
+      path: '/team/$team'
+      fullPath: '/$sku/team/$team'
+      preLoaderRoute: typeof SkuTeamTeamRouteImport
+      parentRoute: typeof SkuRouteRoute
+    }
+  }
+}
+
+interface SkuRouteRouteChildren {
+  SkuDeletedRoute: typeof SkuDeletedRoute
+  SkuDevtoolsRoute: typeof SkuDevtoolsRoute
+  SkuSkillsRoute: typeof SkuSkillsRoute
+  SkuSummaryRoute: typeof SkuSummaryRoute
+  SkuIndexRoute: typeof SkuIndexRoute
+  SkuTeamTeamRoute: typeof SkuTeamTeamRoute
+  SkuDivisionIndexRoute: typeof SkuDivisionIndexRoute
+}
+
+const SkuRouteRouteChildren: SkuRouteRouteChildren = {
+  SkuDeletedRoute: SkuDeletedRoute,
+  SkuDevtoolsRoute: SkuDevtoolsRoute,
+  SkuSkillsRoute: SkuSkillsRoute,
+  SkuSummaryRoute: SkuSummaryRoute,
+  SkuIndexRoute: SkuIndexRoute,
+  SkuTeamTeamRoute: SkuTeamTeamRoute,
+  SkuDivisionIndexRoute: SkuDivisionIndexRoute,
+}
+
+const SkuRouteRouteWithChildren = SkuRouteRoute._addFileChildren(
+  SkuRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SkuRouteRoute: SkuRouteRouteWithChildren,
@@ -320,76 +297,6 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   RulesProgramYearRoute: RulesProgramYearRoute,
 }
-
-export const routeTree = rootRoute
+export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "__root.tsx",
-      "children": [
-        "/",
-        "/$sku",
-        "/privacy",
-        "/settings",
-        "/rules/$program/$year"
-      ]
-    },
-    "/": {
-      "filePath": "index.tsx"
-    },
-    "/$sku": {
-      "filePath": "$sku/route.tsx",
-      "children": [
-        "/$sku/deleted",
-        "/$sku/devtools",
-        "/$sku/skills",
-        "/$sku/summary",
-        "/$sku/",
-        "/$sku/team/$team",
-        "/$sku/$division/"
-      ]
-    },
-    "/privacy": {
-      "filePath": "privacy.tsx"
-    },
-    "/settings": {
-      "filePath": "settings.tsx"
-    },
-    "/$sku/deleted": {
-      "filePath": "$sku/deleted.tsx",
-      "parent": "/$sku"
-    },
-    "/$sku/devtools": {
-      "filePath": "$sku/devtools.tsx",
-      "parent": "/$sku"
-    },
-    "/$sku/skills": {
-      "filePath": "$sku/skills.tsx",
-      "parent": "/$sku"
-    },
-    "/$sku/summary": {
-      "filePath": "$sku/summary.tsx",
-      "parent": "/$sku"
-    },
-    "/$sku/": {
-      "filePath": "$sku/index.tsx",
-      "parent": "/$sku"
-    },
-    "/$sku/team/$team": {
-      "filePath": "$sku/team/$team.tsx",
-      "parent": "/$sku"
-    },
-    "/rules/$program/$year": {
-      "filePath": "rules/$program/$year.tsx"
-    },
-    "/$sku/$division/": {
-      "filePath": "$sku/$division/index.tsx",
-      "parent": "/$sku"
-    }
-  }
-}
-ROUTE_MANIFEST_END */

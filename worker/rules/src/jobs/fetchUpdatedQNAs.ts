@@ -99,11 +99,11 @@ export async function fetchUpdatedQNAs(env: Env) {
   });
 
   if (result.error) {
-    return;
+    return null;
   }
 
   if (!result.data?.outdated) {
-    return;
+    return null;
   }
 
   for (const question of result.data.questions ?? []) {
@@ -113,4 +113,6 @@ export async function fetchUpdatedQNAs(env: Env) {
   if (result.data?.version) {
     await setCurrentQNAPlusVersion(env, result.data.version);
   }
+
+  return result.data.version ?? null;
 }

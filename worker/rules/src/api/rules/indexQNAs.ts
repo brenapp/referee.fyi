@@ -14,7 +14,7 @@ export const SuccessfulResponseSchema = z
     }),
   })
   .meta({
-    id: "UpdateQuestionsSuccessResponse",
+    id: "IndexQNAsSuccessResponse",
   });
 
 export const route = createRoute({

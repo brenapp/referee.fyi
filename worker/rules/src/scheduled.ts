@@ -6,18 +6,18 @@ export async function scheduled(
   env: Env,
   ctx: ExecutionContext
 ) {
-  console.log("Scheduled event triggered:", event.cron, env, ctx);
+  // console.log("Scheduled event triggered:", event.cron, env, ctx);
 
-  const rules = [
-    "https://referee.fyi/rules/V5RC/2025-2026.json",
-    "https://referee.fyi/rules/VIQRC/2025-2026.json",
-  ];
+  // const rules = [
+  //   "https://referee.fyi/rules/V5RC/2025-2026.json",
+  //   "https://referee.fyi/rules/VIQRC/2025-2026.json",
+  // ];
 
-  const result = await Promise.all(
-    rules.map((url) => indexGameRules(env, url))
-  );
+  // const result = await Promise.all(
+  //   rules.map((url) => indexGameRules(env, url))
+  // );
 
   await fetchUpdatedQNAs(env);
 
-  console.log("Game rules indexed successfully:", result);
+  console.log("QNAs indexed successfully");
 }

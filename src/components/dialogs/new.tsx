@@ -158,6 +158,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
       if (e.target.value === "-1") {
         setIncidentField("team", undefined);
         setIncidentField("match", undefined);
+        setIncidentField("period", undefined);
       }
 
       setIncidentField("team", newTeam?.number);

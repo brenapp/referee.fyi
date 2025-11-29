@@ -42,9 +42,7 @@ export async function indexGameRules(env: Env, url: string) {
     return;
   }
 
-  // @ts-expect-error fetch nonsense from Cloudflare Workers Runtime
-  const browser = await puppeteer.launch(env.BROWSER);
-
+  const browser = await puppeteer.launch(env.browser);
   const cache: Record<string, string> = {};
 
   for (const rule of rules.rules) {

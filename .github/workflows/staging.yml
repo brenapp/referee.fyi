@@ -55,3 +55,21 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: "worker/events"
           environment: "staging"
+      - uses: mshick/add-pr-comment@v2
+        with:
+          message: |
+            # Staging Application Deployed!
+
+            https://${{ steps.preview_alias.outputs.preview_alias }}-referee-fyi.bren.workers.dev
+
+            ```
+            CI: true
+            VITE_REFEREE_FYI_BUILD_MODE: ${{vars.VITE_REFEREE_FYI_BUILD_MODE}}
+            VITE_REFEREE_FYI_ENABLE_SENTRY: ${{vars.VITE_REFEREE_FYI_ENABLE_SENTRY}}
+            VITE_REFEREE_FYI_RULES_SERVER: ${{vars.VITE_REFEREE_FYI_RULES_SERVER}}
+            VITE_REFEREE_FYI_SHARE_SERVER: ${{vars.VITE_REFEREE_FYI_SHARE_SERVER}}
+            VITE_REFEREE_FYI_ROBOTEVENTS_SERVER: ${{vars.VITE_REFEREE_FYI_ROBOTEVENTS_SERVER}}
+            VITE_LOGSERVER_TOKEN: ${{ secrets.VITE_LOGSERVER_TOKEN }}
+            VITE_ROBOTEVENTS_TOKEN: ${{ secrets.VITE_ROBOTEVENTS_TOKEN }}
+            SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+            ```

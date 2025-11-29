@@ -446,11 +446,6 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
           dirty={dirty.match}
           render={(value) => (value ? matchToString(value) : "Non-Match")}
         />
-
-        {incident?.match?.type === "match" && periods.length > 0 ? (
-          <>{incident.match.period}</>
-        ) : null}
-
         <label>
           <p className="mt-4">Outcome</p>
           <Select

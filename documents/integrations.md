@@ -68,8 +68,8 @@ The main base URL for the production integration API is:
 https://referee.fyi/api/
 ```
 
-- OpenAPI Specification: `https://referee.fyi/api/integration/openapi`
-- Swagger Documentation: `https://referee.fyi/api/integration/swagger`
+- OpenAPI Specification: [`https://referee.fyi/api/integration/openapi`](https://referee.fyi/api/integration/openapi)
+- Swagger Documentation: [`https://referee.fyi/api/integration/swagger`](https://referee.fyi/api/integration/swagger)
 
 ## Staging Environment
 
@@ -80,5 +80,5 @@ prior to connecting to the production instance.
 https://main-referee-fyi.bren.workers.dev
 ```
 
-- OpenAPI Specification: `https://staging.share.referee.fyi/api/integration/openapi`
-- Swagger Documentation: `https://staging.share.referee.fyi/api/integration/swagger`
+- OpenAPI Specification: [`https://main-referee-fyi.bren.workers.dev/api/integration/openapi`](https://main-referee-fyi.bren.workers.dev/api/integration/openapi)
+- Swagger Documentation: [`https://main-referee-fyi.bren.workers.dev/api/integration/swagger`](https://main-referee-fyi.bren.workers.dev/api/integration/swagger)

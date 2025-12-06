@@ -323,8 +323,10 @@ export class ShareInstance extends DurableObject {
         typeof message === "string"
           ? message
           : new TextDecoder().decode(message);
-      const result = WebSocketMessageSchema.safeParse(JSON.parse(string));
+      const rawMessageData = JSON.parse(string);
+      const result = WebSocketMessageSchema.safeParse(rawMessageData);
 
+      let data = result.data as WebSocketPeerMessage;
       if (!result.success) {
         const payload = this.createPayload(
           {
@@ -333,8 +335,9 @@ export class ShareInstance extends DurableObject {
           },
           { type: "server" }
         );
+        console.error(`Invalid message format from client`, result.error);
         ws.send(JSON.stringify(payload));
-        return;
+        data = rawMessageData as WebSocketPeerMessage;
       }
 
       const session = this.sessions.get(ws);
@@ -351,7 +354,6 @@ export class ShareInstance extends DurableObject {
         return;
       }
 
-      const data = result.data as WebSocketPeerMessage;
       switch (data.type) {
         case "add_incident": {
           const incident = data.incident as Incident;

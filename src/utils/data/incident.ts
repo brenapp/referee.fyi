@@ -40,7 +40,6 @@ export type RichIncident = Omit<NewIncident, keyof RichIncidentElements> &
 
 export function packIncident(incident: RichIncident): NewIncident {
   return {
-    ...incident,
     time: incident.time.toISOString(),
     match: incident.match
       ? {
@@ -54,6 +53,10 @@ export function packIncident(incident: RichIncident): NewIncident {
     team: incident.team!,
     rules: incident.rules.map((rule) => rule.rule),
     assets: incident.assets.map((asset) => asset.id),
+    event: incident.event,
+    outcome: "General",
+    notes: incident.notes,
+    flags: [],
   };
 }
 

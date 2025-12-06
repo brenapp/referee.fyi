@@ -1,8 +1,29 @@
 import { AppArgs } from "../../router.js";
 import { z, createRoute, RouteHandler } from "@hono/zod-openapi";
 
+export const ProgramCode = z.enum([
+  "V5RC",
+  "VIQRC",
+  "VURC",
+  "VAIRC",
+  "judging",
+]);
+
+export const SeasonYear = z.enum([
+  "2019-2020",
+  "2020-2021",
+  "2021-2022",
+  "2022-2023",
+  "2023-2024",
+  "2024-2025",
+  "2025-2026",
+  "2026-2027",
+]);
+
 export const QuerySchema = z.object({
   query: z.string().min(4),
+  program: ProgramCode,
+  season: SeasonYear,
 });
 
 export const AutoRagSearchResponseSchema = z
@@ -64,7 +85,9 @@ export const route = createRoute({
 });
 
 export const handler: RouteHandler<typeof route, AppArgs> = async (c) => {
-  const { query } = c.req.valid("query");
+  const { query, program, season } = c.req.valid("query");
+  const folder = `${program}_${season}/`;
+
   const data = await c.env.ai.autorag("referee-fyi-rules-rag").search({
     query,
     rewrite_query: true,
@@ -74,7 +97,7 @@ export const handler: RouteHandler<typeof route, AppArgs> = async (c) => {
         {
           type: "eq",
           key: "folder",
-          value: "V5RC_2024-2025/",
+          value: folder,
         },
       ],
     },

@@ -20,7 +20,7 @@
     "vitest": "^2.0.3"
   },
   "dependencies": {
-    "@referee-fyi/consistency": "^1.0.0",
+    "@referee-fyi/consistency": "*",
     "zod": "^4.0.14"
   }
 }

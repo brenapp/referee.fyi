@@ -28,7 +28,7 @@
 		"@hono/standard-validator": "^0.1.4",
 		"@hono/swagger-ui": "^0.5.2",
 		"@hono/zod-openapi": "^1.1.5",
-		"@referee-fyi/rules": "^1.0.0",
+		"@referee-fyi/rules": "*",
 		"hono": "^4.10.7",
 		"openapi-fetch": "^0.14.0",
 		"zod": "^4.0.14"

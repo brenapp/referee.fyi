@@ -39,7 +39,7 @@ function isValidSKU(sku: string) {
   );
 }
 
-const EventPicker: React.FC = () => {
+export const EventPicker: React.FC = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -399,10 +399,17 @@ const MigrationManager: React.FC = () => {
   return null;
 };
 
+const emptyShell = ["/wrapped"];
+
 export const AppShell: React.FC = () => {
   const { isLoading } = useCurrentEvent();
   const navigate = useNavigate();
   const router = useRouter();
+  const location = useLocation();
+
+  if (emptyShell.some((x) => location.pathname.startsWith(x))) {
+    return <Outlet />;
+  }
 
   return (
     <main

@@ -2,7 +2,11 @@ import { Button, LinkButton } from "~components/Button";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Dialog, DialogHeader, DialogBody } from "~components/Dialog";
 
-import { Cog8ToothIcon, UserGroupIcon } from "@heroicons/react/20/solid";
+import {
+  ArrowRightIcon,
+  Cog8ToothIcon,
+  UserGroupIcon,
+} from "@heroicons/react/20/solid";
 import { useEventSearch } from "~utils/hooks/robotevents";
 import { useRecentEvents } from "~utils/hooks/history";
 import { isWorldsBuild, WORLDS_EVENTS } from "~utils/data/state";
@@ -21,6 +25,7 @@ import "./markdown.css";
 import { version } from "../../package.json";
 
 import { createFileRoute } from "@tanstack/react-router";
+import { Sparkle } from "./wrapped/route";
 
 const UserWelcome: React.FC = () => {
   return (
@@ -31,6 +36,36 @@ const UserWelcome: React.FC = () => {
         started, pick your event from the dropdown above.
       </p>
     </section>
+  );
+};
+
+const WrappedPrompt: React.FC = () => {
+  const sparkles = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, i) => ({
+        id: i,
+        delay: Math.random() * 3,
+        x: `${15 + Math.random() * 70}%`,
+        y: `${15 + Math.random() * 70}%`,
+        isPurple: Math.random() < 0.15,
+      })),
+    []
+  );
+
+  return (
+    <LinkButton
+      to="/wrapped"
+      className="mt-4 bg-zinc-900 p-4 rounded-md w-full justify-center relative"
+    >
+      {sparkles.map((sparkle) => (
+        <Sparkle key={sparkle.id} {...sparkle} />
+      ))}
+      <h1 className="text-lg font-bold">
+        Referee FYI Wrapped
+        <ArrowRightIcon className="w-5 h-5 inline-block ml-2 text-emerald-400" />
+      </h1>
+      <p className="text-zinc-300">See an overview of your season so far.</p>
+    </LinkButton>
   );
 };
 
@@ -167,6 +202,7 @@ export const HomePage: React.FC = () => {
           ))}
           {events?.length === 0 ? <UserWelcome /> : null}
           <InstallPrompt />
+          <WrappedPrompt />
         </section>
       </div>
       <Dialog

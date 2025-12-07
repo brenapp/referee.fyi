@@ -1,6 +1,8 @@
 import { m } from "motion/react";
 import { Link, type LinkProps } from "@tanstack/react-router";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { getAllIncidents, Incident } from "~utils/data/incident";
+import { getShareProfile } from "~utils/data/share";
 
 export type WrappedNavProps = {
   backTo: LinkProps["to"];
@@ -46,3 +48,27 @@ export const WrappedNav: React.FC<WrappedNavProps> = ({
     </m.nav>
   );
 };
+
+export const Period2025_2026 = {
+  startDate: new Date("2025-05-15T00:00:00.000Z"),
+  endDate: new Date("2026-05-15T00:00:00.000Z"),
+};
+
+export async function getAuthoredIncidentsForPeriod(period: {
+  startDate: Date;
+  endDate: Date;
+}): Promise<{ authored: Incident[]; authoredThisSeason: Incident[] }> {
+  const profile = await getShareProfile();
+  const incidents = await getAllIncidents();
+
+  const authored = incidents.filter(
+    (i) => i.consistency.outcome.peer == profile.key
+  );
+
+  const authoredThisSeason = authored.filter((i) => {
+    const incidentDate = new Date(i.time);
+    return incidentDate >= period.startDate && incidentDate < period.endDate;
+  });
+
+  return { authored, authoredThisSeason };
+}

@@ -1,10 +1,13 @@
 import { m, AnimatePresence } from "motion/react";
 import { createFileRoute } from "@tanstack/react-router";
 import { CameraIcon } from "@heroicons/react/24/solid";
-import { getAllIncidents, Incident } from "~utils/data/incident";
-import { getShareProfile } from "~utils/data/share";
+import { Incident } from "~utils/data/incident";
 import { getLocalAsset, LocalAsset } from "~utils/data/assets";
-import { WrappedNav } from "../-components";
+import {
+  WrappedNav,
+  getAuthoredIncidentsForPeriod,
+  Period2025_2026,
+} from "../-components";
 import { LocalAssetPreview, PhotoFallback } from "~components/Assets";
 import { useEvent } from "~utils/hooks/robotevents";
 
@@ -193,19 +196,8 @@ export const Three: React.FC = () => {
 export const Route = createFileRoute("/wrapped/2025-2026/3")({
   component: Three,
   loader: async () => {
-    const profile = await getShareProfile();
-    const incidents = await getAllIncidents();
-
-    const authored = incidents.filter(
-      (i) => i.consistency.outcome.peer == profile.key
-    );
-
-    const seasonStartDate = new Date("2025-05-15T00:00:00.000Z");
-
-    const authoredThisSeason = authored.filter((i) => {
-      const incidentDate = new Date(i.time);
-      return incidentDate >= seasonStartDate;
-    });
+    const { authoredThisSeason } =
+      await getAuthoredIncidentsForPeriod(Period2025_2026);
 
     const { totalAssets, incidentsWithAssets, eventStats, allAssetIds } =
       computeAssetStats(authoredThisSeason);

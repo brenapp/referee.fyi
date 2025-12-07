@@ -1,10 +1,13 @@
 import { m, AnimatePresence } from "motion/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { getAllIncidents, Incident } from "~utils/data/incident";
-import { getShareProfile } from "~utils/data/share";
+import { Incident } from "~utils/data/incident";
 import { IncidentOutcome, OUTCOMES } from "@referee-fyi/share";
 import { twMerge } from "tailwind-merge";
-import { WrappedNav } from "../-components";
+import {
+  WrappedNav,
+  getAuthoredIncidentsForPeriod,
+  Period2025_2026,
+} from "../-components";
 
 const OutcomeBackgroundClasses: Record<IncidentOutcome, string> = {
   Minor: "bg-yellow-400/20 border-yellow-400/50 text-yellow-300",
@@ -197,19 +200,8 @@ export const One: React.FC = () => {
 export const Route = createFileRoute("/wrapped/2025-2026/1")({
   component: One,
   loader: async () => {
-    const profile = await getShareProfile();
-    const incidents = await getAllIncidents();
-
-    const authored = incidents.filter(
-      (i) => i.consistency.outcome.peer == profile.key
-    );
-
-    const seasonStartDate = new Date("2025-05-15T00:00:00.000Z");
-
-    const authoredThisSeason = authored.filter((i) => {
-      const incidentDate = new Date(i.time);
-      return incidentDate >= seasonStartDate;
-    });
+    const { authored, authoredThisSeason } =
+      await getAuthoredIncidentsForPeriod(Period2025_2026);
 
     const outcomeStats = computeOutcomeStats(authoredThisSeason);
     const ruleStats = computeRuleStats(authoredThisSeason);

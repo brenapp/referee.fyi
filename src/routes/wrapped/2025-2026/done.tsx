@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { WrappedNav } from "../-components";
 import { ScaleIcon } from "@heroicons/react/24/solid";
 
-export const Four: React.FC = () => {
+export const Done: React.FC = () => {
   return (
     <AnimatePresence>
       <div className="relative z-10 flex flex-col items-center justify-center gap-8 px-6 pt-16 pb-8 w-full min-h-screen">
@@ -52,6 +52,6 @@ export const Four: React.FC = () => {
   );
 };
 
-export const Route = createFileRoute("/wrapped/2025-2026/4")({
-  component: Four,
+export const Route = createFileRoute("/wrapped/2025-2026/done")({
+  component: Done,
 });

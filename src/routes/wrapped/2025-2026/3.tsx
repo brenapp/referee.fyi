@@ -88,7 +88,7 @@ export const Three: React.FC = () => {
       <div className="relative z-10 flex flex-col gap-6 px-6 pt-16 pb-8 w-full">
         <WrappedNav
           backTo="/wrapped/2025-2026/2"
-          nextTo="/wrapped/2025-2026/4"
+          nextTo="/wrapped/2025-2026/done"
           current={3}
           total={4}
         />

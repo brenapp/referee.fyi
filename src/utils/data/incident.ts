@@ -54,9 +54,9 @@ export function packIncident(incident: RichIncident): NewIncident {
     rules: incident.rules.map((rule) => rule.rule),
     assets: incident.assets.map((asset) => asset.id),
     event: incident.event,
-    outcome: "General",
+    outcome: incident.outcome,
     notes: incident.notes,
-    flags: [],
+    flags: incident.flags,
   };
 }
 

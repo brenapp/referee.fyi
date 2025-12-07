@@ -4,8 +4,7 @@ import { getAllIncidents, Incident } from "~utils/data/incident";
 import { getShareProfile } from "~utils/data/share";
 import { IncidentOutcome, OUTCOMES } from "@referee-fyi/share";
 import { twMerge } from "tailwind-merge";
-import { LinkButton } from "~components/Button";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { WrappedNav } from "../-components";
 
 const OutcomeBackgroundClasses: Record<IncidentOutcome, string> = {
   Minor: "bg-yellow-400/20 border-yellow-400/50 text-yellow-300",
@@ -107,28 +106,12 @@ export const One: React.FC = () => {
   return (
     <AnimatePresence>
       <div className="relative z-10 flex flex-col gap-6 px-6 pt-16 pb-8 w-full">
-        <m.nav
-          className="fixed top-0 left-0 right-0 z-20 flex justify-between items-center px-4 py-3"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <LinkButton
-            to="/wrapped"
-            className="flex items-center gap-1 bg-transparent hover:bg-zinc-700/50 px-2 py-1"
-          >
-            <ChevronLeftIcon className="w-5 h-5" />
-            <span className="text-sm">Back</span>
-          </LinkButton>
-          <span className="text-zinc-500 text-sm">1 / 2</span>
-          <LinkButton
-            to="/wrapped/2025-2026/2"
-            className="flex items-center gap-1 bg-emerald-600/80 hover:bg-emerald-500 px-2 py-1"
-          >
-            <span className="text-sm">Next</span>
-            <ChevronRightIcon className="w-5 h-5" />
-          </LinkButton>
-        </m.nav>
+        <WrappedNav
+          backTo="/wrapped"
+          nextTo="/wrapped/2025-2026/2"
+          current={1}
+          total={4}
+        />
         <m.div
           className="text-center"
           initial={{ opacity: 0, y: 20 }}

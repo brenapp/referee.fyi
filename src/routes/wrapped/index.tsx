@@ -106,7 +106,7 @@ export const WrappedIndexPage: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1, duration: 0.8 }}
       >
-        Get an overview of your refereeing this season.
+        See an overview of your referee season so far.
       </m.p>
       <LinkButton
         className="flex items-center p-4 mt-8 w-full justify-center bg-emerald-900/40 border-2 border-emerald-500 hover:bg-emerald-500/10 focus:bg-emerald-500/10 transition-colors"

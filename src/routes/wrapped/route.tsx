@@ -18,7 +18,7 @@ export const FloatingParticle: React.FC<{
 }> = ({ delay, duration, size, initialX, initialY }) => {
   return (
     <m.div
-      className="absolute rounded-full bg-gradient-to-br from-emerald-400/30 to-purple-400/20 blur-sm"
+      className="absolute rounded-full bg-gradient-to-br from-emerald-500/15 to-emerald-400/5 blur-md"
       style={{
         width: size,
         height: size,
@@ -26,10 +26,10 @@ export const FloatingParticle: React.FC<{
         top: `${initialY}%`,
       }}
       animate={{
-        y: [0, -30, 0],
-        x: [0, 15, -15, 0],
-        scale: [1, 1.2, 0.9, 1],
-        opacity: [0.3, 0.6, 0.3],
+        y: [0, -40, 0],
+        x: [0, 20, -20, 0],
+        scale: [1, 1.3, 0.8, 1],
+        opacity: [0.1, 0.3, 0.1],
       }}
       transition={{
         duration,
@@ -44,11 +44,11 @@ export const FloatingParticle: React.FC<{
 export const AnimatedBackground: React.FC = () => {
   const particles = useMemo(
     () =>
-      Array.from({ length: 20 }, (_, i) => ({
+      Array.from({ length: 12 }, (_, i) => ({
         id: i,
-        delay: Math.random() * 2,
-        duration: 4 + Math.random() * 3,
-        size: 10 + Math.random() * 40,
+        delay: Math.random() * 4,
+        duration: 8 + Math.random() * 6,
+        size: 40 + Math.random() * 80,
         initialX: Math.random() * 100,
         initialY: Math.random() * 100,
       })),
@@ -57,38 +57,63 @@ export const AnimatedBackground: React.FC = () => {
 
   return (
     <div className="absolute inset-0 overflow-hidden">
+      {/* Base dark background */}
+      <div className="absolute inset-0 bg-zinc-900" />
+
+      {/* Aurora effect - slow sweeping gradient at the top */}
       <m.div
-        className="absolute inset-0 bg-zinc-800"
+        className="absolute inset-0"
         animate={{
           background: [
-            "linear-gradient(135deg, rgb(39, 39, 42) 0%, rgb(39, 39, 42) 50%, rgb(39, 39, 42) 100%)",
-            "linear-gradient(135deg, rgb(39, 39, 42) 0%, rgb(6, 78, 59) 50%, rgb(39, 39, 42) 100%)",
-            "linear-gradient(135deg, rgb(39, 39, 42) 0%, rgb(39, 39, 42) 50%, rgb(39, 39, 42) 100%)",
+            "linear-gradient(180deg, rgba(16, 185, 129, 0.03) 0%, transparent 30%, transparent 100%)",
+            "linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(6, 78, 59, 0.04) 25%, transparent 50%, transparent 100%)",
+            "linear-gradient(180deg, rgba(16, 185, 129, 0.05) 0%, transparent 20%, transparent 100%)",
+            "linear-gradient(180deg, rgba(16, 185, 129, 0.03) 0%, transparent 30%, transparent 100%)",
           ],
         }}
         transition={{
-          duration: 8,
+          duration: 12,
           repeat: Infinity,
           ease: "easeInOut",
         }}
       />
 
+      {/* Secondary aurora wave */}
+      <m.div
+        className="absolute inset-0"
+        animate={{
+          background: [
+            "linear-gradient(160deg, transparent 0%, transparent 60%, rgba(16, 185, 129, 0.02) 80%, transparent 100%)",
+            "linear-gradient(160deg, transparent 0%, rgba(6, 78, 59, 0.05) 40%, rgba(16, 185, 129, 0.06) 60%, transparent 100%)",
+            "linear-gradient(160deg, transparent 0%, transparent 50%, rgba(16, 185, 129, 0.03) 70%, transparent 100%)",
+            "linear-gradient(160deg, transparent 0%, transparent 60%, rgba(16, 185, 129, 0.02) 80%, transparent 100%)",
+          ],
+        }}
+        transition={{
+          duration: 15,
+          delay: 3,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
+      {/* Floating particles - subtle glowing orbs */}
       {particles.map((particle) => (
         <FloatingParticle key={particle.id} {...particle} />
       ))}
 
+      {/* Subtle center glow */}
       <m.div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.1) 0%, transparent 50%)",
+            "radial-gradient(ellipse at 50% 30%, rgba(16, 185, 129, 0.04) 0%, transparent 40%)",
         }}
         animate={{
-          opacity: [0.5, 1, 0.5],
-          scale: [1, 1.1, 1],
+          opacity: [0.3, 0.6, 0.3],
         }}
         transition={{
-          duration: 4,
+          duration: 8,
           repeat: Infinity,
           ease: "easeInOut",
         }}

@@ -8,6 +8,7 @@ import {
 import { m } from "motion/react";
 import { useMemo } from "react";
 import { IconButton } from "~components/Button";
+import { Sparkle } from "~components/WrappedPrompt";
 
 export const FloatingParticle: React.FC<{
   delay: number;
@@ -119,30 +120,6 @@ export const AnimatedBackground: React.FC = () => {
         }}
       />
     </div>
-  );
-};
-
-export const Sparkle: React.FC<{
-  delay: number;
-  x: string;
-  y: string;
-  isPurple?: boolean;
-}> = ({ delay, x, y, isPurple = false }) => {
-  return (
-    <m.div
-      className={`absolute w-1 h-1 rounded-full ${isPurple ? "bg-purple-400" : "bg-emerald-400"}`}
-      style={{ left: x, top: y }}
-      animate={{
-        scale: [0, 1, 0],
-        opacity: [0, 1, 0],
-      }}
-      transition={{
-        duration: 2,
-        delay,
-        repeat: Infinity,
-        ease: "easeInOut",
-      }}
-    />
   );
 };
 

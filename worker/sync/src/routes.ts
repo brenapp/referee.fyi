@@ -30,6 +30,7 @@ import * as api_sync_$sku_incident_patch from "./api/sync/$sku/incident/patch";
 import * as api_sync_$sku_incident_delete from "./api/sync/$sku/incident/delete";
 import * as api_sync_$sku_data from "./api/sync/$sku/data";
 import * as api_sync_$sku_join from "./api/sync/$sku/join";
+import * as api_sync_invitations from "./api/sync/invitations";
 
 const app = new OpenAPIHono<AppArgs>();
 
@@ -102,7 +103,8 @@ const routes = app
     api_sync_$sku_incident_delete.handler
   )
   .openapi(api_sync_$sku_data.route, api_sync_$sku_data.handler)
-  .openapi(api_sync_$sku_join.route, api_sync_$sku_join.handler);
+  .openapi(api_sync_$sku_join.route, api_sync_$sku_join.handler)
+  .openapi(api_sync_invitations.route, api_sync_invitations.handler);
 
 //#endregion
 

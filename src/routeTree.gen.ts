@@ -11,14 +11,20 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as WrappedRouteRouteImport } from './routes/wrapped/route'
 import { Route as SkuRouteRouteImport } from './routes/$sku/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WrappedIndexRouteImport } from './routes/wrapped/index'
 import { Route as SkuIndexRouteImport } from './routes/$sku/index'
 import { Route as SkuSummaryRouteImport } from './routes/$sku/summary'
 import { Route as SkuSkillsRouteImport } from './routes/$sku/skills'
 import { Route as SkuDevtoolsRouteImport } from './routes/$sku/devtools'
 import { Route as SkuDeletedRouteImport } from './routes/$sku/deleted'
 import { Route as SkuDivisionIndexRouteImport } from './routes/$sku/$division/index'
+import { Route as Wrapped20252026DoneRouteImport } from './routes/wrapped/2025-2026/done'
+import { Route as Wrapped202520263RouteImport } from './routes/wrapped/2025-2026/3'
+import { Route as Wrapped202520262RouteImport } from './routes/wrapped/2025-2026/2'
+import { Route as Wrapped202520261RouteImport } from './routes/wrapped/2025-2026/1'
 import { Route as RulesProgramYearRouteImport } from './routes/rules/$program/$year'
 import { Route as SkuTeamTeamRouteImport } from './routes/$sku/team/$team'
 
@@ -32,6 +38,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WrappedRouteRoute = WrappedRouteRouteImport.update({
+  id: '/wrapped',
+  path: '/wrapped',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SkuRouteRoute = SkuRouteRouteImport.update({
   id: '/$sku',
   path: '/$sku',
@@ -41,6 +52,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const WrappedIndexRoute = WrappedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => WrappedRouteRoute,
 } as any)
 const SkuIndexRoute = SkuIndexRouteImport.update({
   id: '/',
@@ -72,6 +88,26 @@ const SkuDivisionIndexRoute = SkuDivisionIndexRouteImport.update({
   path: '/$division/',
   getParentRoute: () => SkuRouteRoute,
 } as any)
+const Wrapped20252026DoneRoute = Wrapped20252026DoneRouteImport.update({
+  id: '/2025-2026/done',
+  path: '/2025-2026/done',
+  getParentRoute: () => WrappedRouteRoute,
+} as any)
+const Wrapped202520263Route = Wrapped202520263RouteImport.update({
+  id: '/2025-2026/3',
+  path: '/2025-2026/3',
+  getParentRoute: () => WrappedRouteRoute,
+} as any)
+const Wrapped202520262Route = Wrapped202520262RouteImport.update({
+  id: '/2025-2026/2',
+  path: '/2025-2026/2',
+  getParentRoute: () => WrappedRouteRoute,
+} as any)
+const Wrapped202520261Route = Wrapped202520261RouteImport.update({
+  id: '/2025-2026/1',
+  path: '/2025-2026/1',
+  getParentRoute: () => WrappedRouteRoute,
+} as any)
 const RulesProgramYearRoute = RulesProgramYearRouteImport.update({
   id: '/rules/$program/$year',
   path: '/rules/$program/$year',
@@ -86,6 +122,7 @@ const SkuTeamTeamRoute = SkuTeamTeamRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$sku': typeof SkuRouteRouteWithChildren
+  '/wrapped': typeof WrappedRouteRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/$sku/deleted': typeof SkuDeletedRoute
@@ -93,8 +130,13 @@ export interface FileRoutesByFullPath {
   '/$sku/skills': typeof SkuSkillsRoute
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku/': typeof SkuIndexRoute
+  '/wrapped/': typeof WrappedIndexRoute
   '/$sku/team/$team': typeof SkuTeamTeamRoute
   '/rules/$program/$year': typeof RulesProgramYearRoute
+  '/wrapped/2025-2026/1': typeof Wrapped202520261Route
+  '/wrapped/2025-2026/2': typeof Wrapped202520262Route
+  '/wrapped/2025-2026/3': typeof Wrapped202520263Route
+  '/wrapped/2025-2026/done': typeof Wrapped20252026DoneRoute
   '/$sku/$division': typeof SkuDivisionIndexRoute
 }
 export interface FileRoutesByTo {
@@ -106,14 +148,20 @@ export interface FileRoutesByTo {
   '/$sku/skills': typeof SkuSkillsRoute
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku': typeof SkuIndexRoute
+  '/wrapped': typeof WrappedIndexRoute
   '/$sku/team/$team': typeof SkuTeamTeamRoute
   '/rules/$program/$year': typeof RulesProgramYearRoute
+  '/wrapped/2025-2026/1': typeof Wrapped202520261Route
+  '/wrapped/2025-2026/2': typeof Wrapped202520262Route
+  '/wrapped/2025-2026/3': typeof Wrapped202520263Route
+  '/wrapped/2025-2026/done': typeof Wrapped20252026DoneRoute
   '/$sku/$division': typeof SkuDivisionIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$sku': typeof SkuRouteRouteWithChildren
+  '/wrapped': typeof WrappedRouteRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
   '/$sku/deleted': typeof SkuDeletedRoute
@@ -121,8 +169,13 @@ export interface FileRoutesById {
   '/$sku/skills': typeof SkuSkillsRoute
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku/': typeof SkuIndexRoute
+  '/wrapped/': typeof WrappedIndexRoute
   '/$sku/team/$team': typeof SkuTeamTeamRoute
   '/rules/$program/$year': typeof RulesProgramYearRoute
+  '/wrapped/2025-2026/1': typeof Wrapped202520261Route
+  '/wrapped/2025-2026/2': typeof Wrapped202520262Route
+  '/wrapped/2025-2026/3': typeof Wrapped202520263Route
+  '/wrapped/2025-2026/done': typeof Wrapped20252026DoneRoute
   '/$sku/$division/': typeof SkuDivisionIndexRoute
 }
 export interface FileRouteTypes {
@@ -130,6 +183,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$sku'
+    | '/wrapped'
     | '/privacy'
     | '/settings'
     | '/$sku/deleted'
@@ -137,8 +191,13 @@ export interface FileRouteTypes {
     | '/$sku/skills'
     | '/$sku/summary'
     | '/$sku/'
+    | '/wrapped/'
     | '/$sku/team/$team'
     | '/rules/$program/$year'
+    | '/wrapped/2025-2026/1'
+    | '/wrapped/2025-2026/2'
+    | '/wrapped/2025-2026/3'
+    | '/wrapped/2025-2026/done'
     | '/$sku/$division'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -150,13 +209,19 @@ export interface FileRouteTypes {
     | '/$sku/skills'
     | '/$sku/summary'
     | '/$sku'
+    | '/wrapped'
     | '/$sku/team/$team'
     | '/rules/$program/$year'
+    | '/wrapped/2025-2026/1'
+    | '/wrapped/2025-2026/2'
+    | '/wrapped/2025-2026/3'
+    | '/wrapped/2025-2026/done'
     | '/$sku/$division'
   id:
     | '__root__'
     | '/'
     | '/$sku'
+    | '/wrapped'
     | '/privacy'
     | '/settings'
     | '/$sku/deleted'
@@ -164,14 +229,20 @@ export interface FileRouteTypes {
     | '/$sku/skills'
     | '/$sku/summary'
     | '/$sku/'
+    | '/wrapped/'
     | '/$sku/team/$team'
     | '/rules/$program/$year'
+    | '/wrapped/2025-2026/1'
+    | '/wrapped/2025-2026/2'
+    | '/wrapped/2025-2026/3'
+    | '/wrapped/2025-2026/done'
     | '/$sku/$division/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SkuRouteRoute: typeof SkuRouteRouteWithChildren
+  WrappedRouteRoute: typeof WrappedRouteRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   SettingsRoute: typeof SettingsRoute
   RulesProgramYearRoute: typeof RulesProgramYearRoute
@@ -193,6 +264,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/wrapped': {
+      id: '/wrapped'
+      path: '/wrapped'
+      fullPath: '/wrapped'
+      preLoaderRoute: typeof WrappedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/$sku': {
       id: '/$sku'
       path: '/$sku'
@@ -206,6 +284,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/wrapped/': {
+      id: '/wrapped/'
+      path: '/'
+      fullPath: '/wrapped/'
+      preLoaderRoute: typeof WrappedIndexRouteImport
+      parentRoute: typeof WrappedRouteRoute
     }
     '/$sku/': {
       id: '/$sku/'
@@ -249,6 +334,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SkuDivisionIndexRouteImport
       parentRoute: typeof SkuRouteRoute
     }
+    '/wrapped/2025-2026/done': {
+      id: '/wrapped/2025-2026/done'
+      path: '/2025-2026/done'
+      fullPath: '/wrapped/2025-2026/done'
+      preLoaderRoute: typeof Wrapped20252026DoneRouteImport
+      parentRoute: typeof WrappedRouteRoute
+    }
+    '/wrapped/2025-2026/3': {
+      id: '/wrapped/2025-2026/3'
+      path: '/2025-2026/3'
+      fullPath: '/wrapped/2025-2026/3'
+      preLoaderRoute: typeof Wrapped202520263RouteImport
+      parentRoute: typeof WrappedRouteRoute
+    }
+    '/wrapped/2025-2026/2': {
+      id: '/wrapped/2025-2026/2'
+      path: '/2025-2026/2'
+      fullPath: '/wrapped/2025-2026/2'
+      preLoaderRoute: typeof Wrapped202520262RouteImport
+      parentRoute: typeof WrappedRouteRoute
+    }
+    '/wrapped/2025-2026/1': {
+      id: '/wrapped/2025-2026/1'
+      path: '/2025-2026/1'
+      fullPath: '/wrapped/2025-2026/1'
+      preLoaderRoute: typeof Wrapped202520261RouteImport
+      parentRoute: typeof WrappedRouteRoute
+    }
     '/rules/$program/$year': {
       id: '/rules/$program/$year'
       path: '/rules/$program/$year'
@@ -290,9 +403,30 @@ const SkuRouteRouteWithChildren = SkuRouteRoute._addFileChildren(
   SkuRouteRouteChildren,
 )
 
+interface WrappedRouteRouteChildren {
+  WrappedIndexRoute: typeof WrappedIndexRoute
+  Wrapped202520261Route: typeof Wrapped202520261Route
+  Wrapped202520262Route: typeof Wrapped202520262Route
+  Wrapped202520263Route: typeof Wrapped202520263Route
+  Wrapped20252026DoneRoute: typeof Wrapped20252026DoneRoute
+}
+
+const WrappedRouteRouteChildren: WrappedRouteRouteChildren = {
+  WrappedIndexRoute: WrappedIndexRoute,
+  Wrapped202520261Route: Wrapped202520261Route,
+  Wrapped202520262Route: Wrapped202520262Route,
+  Wrapped202520263Route: Wrapped202520263Route,
+  Wrapped20252026DoneRoute: Wrapped20252026DoneRoute,
+}
+
+const WrappedRouteRouteWithChildren = WrappedRouteRoute._addFileChildren(
+  WrappedRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SkuRouteRoute: SkuRouteRouteWithChildren,
+  WrappedRouteRoute: WrappedRouteRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   SettingsRoute: SettingsRoute,
   RulesProgramYearRoute: RulesProgramYearRoute,

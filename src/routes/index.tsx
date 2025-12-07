@@ -11,6 +11,7 @@ import { getEventInvitation } from "~utils/data/share";
 import { ClickToCopy } from "~components/ClickToCopy";
 import { UpdatePrompt } from "~components/UpdatePrompt";
 import { useDisplayMode, useInstallPrompt } from "~utils/hooks/pwa";
+import { WrappedPrompt } from "~components/WrappedPrompt";
 
 import AppIcon from "/icons/referee-fyi.svg?url";
 import { ReactComponent as UpdateNotes } from "../../documents/updateNotes.md";
@@ -167,6 +168,7 @@ export const HomePage: React.FC = () => {
           ))}
           {events?.length === 0 ? <UserWelcome /> : null}
           <InstallPrompt />
+          <WrappedPrompt hasVisitedEvent={(events?.length ?? 0) > 0} />
         </section>
       </div>
       <Dialog

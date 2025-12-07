@@ -142,6 +142,49 @@ export async function getInvitation(
   } satisfies Invitation;
 }
 
+export type UserInvitationWithFrom = Omit<Invitation, "from"> & { from: User };
+
+export async function getAllInvitationsForUser(
+  env: Env,
+  userKey: string
+): Promise<UserInvitationWithFrom[]> {
+  const response = await env.DB.prepare(
+    `
+    SELECT invitations.*, users.key as from_key, users.name as from_name, users.role as from_role
+    FROM invitations
+    JOIN users ON invitations.inviter = users.key
+    WHERE invitee = ?
+    `
+  )
+    .bind(userKey)
+    .run<
+      InvitationRow & {
+        from_key: string;
+        from_name: string;
+        from_role: UserRole;
+      }
+    >();
+  log("getAllInvitationsForUser", response);
+
+  if (!response.success) {
+    return [];
+  }
+
+  return response.results.map((result) => ({
+    id: result.id,
+    sku: result.sku,
+    instance_secret: result.instance,
+    user: result.invitee,
+    from: {
+      key: result.from_key,
+      name: result.from_name,
+      role: result.from_role,
+    } satisfies User,
+    admin: result.role === "admin",
+    accepted: !!result.accepted,
+  }));
+}
+
 export async function deleteInvitation(env: Env, userKey: string, sku: string) {
   const response = await env.DB.prepare(
     `

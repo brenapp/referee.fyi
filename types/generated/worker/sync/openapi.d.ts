@@ -2227,6 +2227,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/sync/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Gets all invitations for the current user across all events. */
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    "X-Referee-Signature"?: string;
+                    "X-Referee-Public-Key"?: string;
+                    "X-Referee-Date"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description All invitations for the user. */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetAllUserInvitationsResponse"];
+                    };
+                };
+                /** @description Bad request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Forbidden */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+                /** @description Internal server error */
+                500: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ErrorResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2556,6 +2641,22 @@ export interface components {
                     active: components["schemas"]["User"][];
                     invitations: components["schemas"]["InvitationListItem"][];
                 };
+            };
+        };
+        /** @description A user invitation with details about all users in the instance. */
+        UserInvitationWithUsers: {
+            sku: string;
+            admin: boolean;
+            accepted: boolean;
+            from: components["schemas"]["User"];
+            users: components["schemas"]["InvitationListItem"][];
+        };
+        /** @description All invitations for the current user across all events. */
+        GetAllUserInvitationsResponse: {
+            /** @enum {boolean} */
+            success: true;
+            data: {
+                invitations: components["schemas"]["UserInvitationWithUsers"][];
             };
         };
     };

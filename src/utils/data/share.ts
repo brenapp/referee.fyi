@@ -366,6 +366,14 @@ export async function getInstancesForEvent(
   return response.json();
 }
 
+export async function getAllInvitationsForUser(): Promise<
+  Routes["/api/sync/invitations"]["get"]
+> {
+  const url = new URL(`/api/sync/invitations`, URL_BASE);
+  const response = await signedFetch(url, { method: "GET" });
+  return response.json();
+}
+
 export type IntegrationAPICredentials = {
   token: string;
   instance?: string;

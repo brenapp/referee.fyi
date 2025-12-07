@@ -145,6 +145,7 @@ export const One: React.FC = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.5 }}
+          className="max-w-screen-lg mx-auto w-full flex flex-col gap-4"
         >
           <m.h2
             className="text-lg font-semibold text-zinc-300 mb-3"
@@ -170,6 +171,7 @@ export const One: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.2, duration: 0.5 }}
+            className="max-w-screen-lg mx-auto w-full flex flex-col gap-4"
           >
             <m.h2
               className="text-lg font-semibold text-zinc-300 mb-3"

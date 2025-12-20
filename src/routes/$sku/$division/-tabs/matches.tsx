@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState } from "react";
-import { EventData } from "robotevents";
 import { useEventMatches } from "~utils/hooks/robotevents";
 import { useCurrentDivision } from "~utils/hooks/state";
 import { EventMatchDialog } from "~components/dialogs/match";
@@ -9,11 +8,46 @@ import { Button } from "~components/Button";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { VirtualizedList } from "~components/VirtualizedList";
 import { DisconnectedWarning } from "~components/DisconnectedWarning";
+import type { EventData, Match } from "robotevents";
 
 export type UpcomingMatchProps = {
   event: EventData;
   onClickMatch: (e: React.MouseEvent<HTMLButtonElement>) => void;
 };
+
+/**
+ * Computes the next upcoming match from a list of matches. RobotEvents has a
+ * bug where it will incorrectly report some matches are not started when they
+ * have a zero score, even if they have been played. We can work around this by
+ * checking for the next match in the list as well.
+ *
+ * @param matches List of matches in a single division (technically fieldset)
+ * @returns The first unplayed match, or null if all matches have been played
+ **/
+function getUpcomingMatch(matches: Match[]): Match | null {
+  for (let i = 0; i < matches.length; i++) {
+    const match = matches[i];
+
+    if (match.started) {
+      continue;
+    }
+
+    if (match.alliances.some((a) => a.score !== 0)) {
+      continue;
+    }
+
+    const nextMatch = i < matches.length - 1 ? matches[i + 1] : null;
+    if (!nextMatch) {
+      return match;
+    }
+
+    if (!nextMatch.started && nextMatch.alliances.some((a) => a.score === 0)) {
+      return match;
+    }
+  }
+
+  return null;
+}
 
 export const UpcomingMatch: React.FC<UpcomingMatchProps> = ({
   event,
@@ -22,14 +56,7 @@ export const UpcomingMatch: React.FC<UpcomingMatchProps> = ({
   const division = useCurrentDivision();
   const { data: matches } = useEventMatches(event, division);
 
-  const match = useMemo(
-    () =>
-      matches?.find(
-        (m) => !m.started && m.alliances.every((a) => a.score === 0)
-      ),
-    [matches]
-  );
-
+  const match = useMemo(() => getUpcomingMatch(matches ?? []), [matches]);
   if (!match) {
     return null;
   }

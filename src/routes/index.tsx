@@ -149,6 +149,7 @@ export const HomePage: React.FC = () => {
           </LinkButton>
         </nav>
         <UpdatePrompt />
+        <WrappedPrompt hasVisitedEvent={(events?.length ?? 0) > 0} />
         <section className="max-w-full mb-4">
           {events?.map((event) => (
             <LinkButton
@@ -168,7 +169,6 @@ export const HomePage: React.FC = () => {
           ))}
           {events?.length === 0 ? <UserWelcome /> : null}
           <InstallPrompt />
-          <WrappedPrompt hasVisitedEvent={(events?.length ?? 0) > 0} />
         </section>
       </div>
       <Dialog

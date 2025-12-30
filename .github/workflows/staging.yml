@@ -29,6 +29,10 @@ jobs:
           VITE_LOGSERVER_TOKEN: ${{ secrets.VITE_LOGSERVER_TOKEN }}
           VITE_ROBOTEVENTS_TOKEN: ${{ secrets.VITE_ROBOTEVENTS_TOKEN }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      - name: npm run lib:test
+        run: npm run lib:test
+        env:
+          CI: true
       - name: Preview Alias
         id: preview_alias
         run: |
@@ -40,6 +44,7 @@ jobs:
           URL="https://${SAFE_REF}-${WORKER}.bren.workers.dev"
           echo "URL=$URL"
           echo "preview_alias=$SAFE_REF" >> $GITHUB_OUTPUT
+
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -74,3 +79,11 @@ jobs:
             VITE_REFEREE_FYI_SHARE_SERVER: ${{vars.VITE_REFEREE_FYI_SHARE_SERVER}}
             VITE_REFEREE_FYI_ROBOTEVENTS_SERVER: ${{vars.VITE_REFEREE_FYI_ROBOTEVENTS_SERVER}}
             ```
+      - name: End to End Tests
+        uses: cypress-io/github-action@v6
+        env:
+          COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
+          COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
+          CYPRESS_BASE_URL: ${{ steps.preview_alias.outputs.URL }}
+        with:
+          browser: chrome

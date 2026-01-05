@@ -14,7 +14,7 @@ import { useDisplayMode, useInstallPrompt } from "~utils/hooks/pwa";
 import { WrappedPrompt } from "~components/WrappedPrompt";
 
 import AppIcon from "/icons/referee-fyi.svg?url";
-import { ReactComponent as UpdateNotes } from "../../documents/updateNotes.md";
+import { ReactComponent as UpdateNotes } from "../../../../documents/updateNotes.md";
 
 import "./markdown.css";
 

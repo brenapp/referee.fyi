@@ -1,5 +1,6 @@
 import { z } from "zod/v4";
 import { ProgramAbbr, programs, years } from "robotevents";
+export * from "./programs.js";
 
 export const ProgramAbbrSchema = z
   .enum(Object.keys(programs) as ProgramAbbr[])

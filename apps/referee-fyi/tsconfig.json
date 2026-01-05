@@ -45,7 +45,7 @@
   },
   "include": [
     "src",
-    "node_modules/vite-plugin-pwa/client.d.ts",
+    "../../node_modules/vite-plugin-pwa/client.d.ts",
     "src/types/barcode.d.ts",
     "types"
   ],

@@ -124,13 +124,11 @@ const generateOpenApiTypes: (options: OpenApiTypesGeneration) => Plugin = ({
   apply: "build",
   async buildStart() {
     this.info("Generating OpenAPI document");
-    const { getOpenApiDocument: getSyncDoc } = await import(
-      "./worker/sync/src/routes"
-    );
+    const { getOpenApiDocument: getSyncDoc } =
+      await import("../../worker/sync/src/routes");
 
-    const { getOpenApiDocument: getRulesDoc } = await import(
-      "./worker/rules/src/routes"
-    );
+    const { getOpenApiDocument: getRulesDoc } =
+      await import("../../worker/rules/src/routes");
 
     async function generateTypings(path: string, doc: OpenAPI3) {
       const ast = await openApiTypescript(doc, {

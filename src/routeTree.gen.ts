@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as WrappedIndexRouteImport } from './routes/wrapped/index'
 import { Route as SkuIndexRouteImport } from './routes/$sku/index'
 import { Route as SkuSummaryRouteImport } from './routes/$sku/summary'
+import { Route as SkuStatsRouteImport } from './routes/$sku/stats'
 import { Route as SkuSkillsRouteImport } from './routes/$sku/skills'
 import { Route as SkuDevtoolsRouteImport } from './routes/$sku/devtools'
 import { Route as SkuDeletedRouteImport } from './routes/$sku/deleted'
@@ -66,6 +67,11 @@ const SkuIndexRoute = SkuIndexRouteImport.update({
 const SkuSummaryRoute = SkuSummaryRouteImport.update({
   id: '/summary',
   path: '/summary',
+  getParentRoute: () => SkuRouteRoute,
+} as any)
+const SkuStatsRoute = SkuStatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
   getParentRoute: () => SkuRouteRoute,
 } as any)
 const SkuSkillsRoute = SkuSkillsRouteImport.update({
@@ -128,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/$sku/deleted': typeof SkuDeletedRoute
   '/$sku/devtools': typeof SkuDevtoolsRoute
   '/$sku/skills': typeof SkuSkillsRoute
+  '/$sku/stats': typeof SkuStatsRoute
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku/': typeof SkuIndexRoute
   '/wrapped/': typeof WrappedIndexRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/$sku/deleted': typeof SkuDeletedRoute
   '/$sku/devtools': typeof SkuDevtoolsRoute
   '/$sku/skills': typeof SkuSkillsRoute
+  '/$sku/stats': typeof SkuStatsRoute
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku': typeof SkuIndexRoute
   '/wrapped': typeof WrappedIndexRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/$sku/deleted': typeof SkuDeletedRoute
   '/$sku/devtools': typeof SkuDevtoolsRoute
   '/$sku/skills': typeof SkuSkillsRoute
+  '/$sku/stats': typeof SkuStatsRoute
   '/$sku/summary': typeof SkuSummaryRoute
   '/$sku/': typeof SkuIndexRoute
   '/wrapped/': typeof WrappedIndexRoute
@@ -189,6 +198,7 @@ export interface FileRouteTypes {
     | '/$sku/deleted'
     | '/$sku/devtools'
     | '/$sku/skills'
+    | '/$sku/stats'
     | '/$sku/summary'
     | '/$sku/'
     | '/wrapped/'
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/$sku/deleted'
     | '/$sku/devtools'
     | '/$sku/skills'
+    | '/$sku/stats'
     | '/$sku/summary'
     | '/$sku'
     | '/wrapped'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/$sku/deleted'
     | '/$sku/devtools'
     | '/$sku/skills'
+    | '/$sku/stats'
     | '/$sku/summary'
     | '/$sku/'
     | '/wrapped/'
@@ -306,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SkuSummaryRouteImport
       parentRoute: typeof SkuRouteRoute
     }
+    '/$sku/stats': {
+      id: '/$sku/stats'
+      path: '/stats'
+      fullPath: '/$sku/stats'
+      preLoaderRoute: typeof SkuStatsRouteImport
+      parentRoute: typeof SkuRouteRoute
+    }
     '/$sku/skills': {
       id: '/$sku/skills'
       path: '/skills'
@@ -383,6 +402,7 @@ interface SkuRouteRouteChildren {
   SkuDeletedRoute: typeof SkuDeletedRoute
   SkuDevtoolsRoute: typeof SkuDevtoolsRoute
   SkuSkillsRoute: typeof SkuSkillsRoute
+  SkuStatsRoute: typeof SkuStatsRoute
   SkuSummaryRoute: typeof SkuSummaryRoute
   SkuIndexRoute: typeof SkuIndexRoute
   SkuTeamTeamRoute: typeof SkuTeamTeamRoute
@@ -393,6 +413,7 @@ const SkuRouteRouteChildren: SkuRouteRouteChildren = {
   SkuDeletedRoute: SkuDeletedRoute,
   SkuDevtoolsRoute: SkuDevtoolsRoute,
   SkuSkillsRoute: SkuSkillsRoute,
+  SkuStatsRoute: SkuStatsRoute,
   SkuSummaryRoute: SkuSummaryRoute,
   SkuIndexRoute: SkuIndexRoute,
   SkuTeamTeamRoute: SkuTeamTeamRoute,

@@ -28,6 +28,7 @@ import {
   createRootRoute,
   Outlet,
   useLocation,
+  useMatchRoute,
   useNavigate,
   useParams,
   useRouter,
@@ -399,15 +400,18 @@ const MigrationManager: React.FC = () => {
   return null;
 };
 
-const emptyShell = ["/wrapped"];
+/**
+ * Routes that should have an empty shell (no nav, no spinner, etc)
+ **/
+const emptyShell = ["/wrapped", "/$sku/stats"] as const;
 
 export const AppShell: React.FC = () => {
   const { isLoading } = useCurrentEvent();
   const navigate = useNavigate();
   const router = useRouter();
-  const location = useLocation();
+  const matchRoute = useMatchRoute();
 
-  if (emptyShell.some((x) => location.pathname.startsWith(x))) {
+  if (emptyShell.some((path) => matchRoute({ to: path, fuzzy: true }))) {
     return <Outlet />;
   }
 

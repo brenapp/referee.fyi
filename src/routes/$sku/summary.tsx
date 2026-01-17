@@ -13,7 +13,7 @@ import { useEventIncidents } from "~utils/hooks/incident";
 import { Incident } from "~components/Incident";
 import { Rule, useRulesForEvent } from "~utils/hooks/rules";
 import { Dialog, DialogBody } from "~components/Dialog";
-import { XMarkIcon } from "@heroicons/react/20/solid";
+import { ChartBarSquareIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Checkbox, RulesMultiSelect, Select } from "~components/Input";
 import { twMerge } from "tailwind-merge";
 import { useMutation } from "@tanstack/react-query";
@@ -261,6 +261,20 @@ export const ExportButton: React.FC = () => {
   ) : null;
 };
 
+export const StatsButton: React.FC = () => {
+  const { data: event } = useCurrentEvent();
+
+  return (
+    <LinkButton
+      to="/$sku/stats"
+      params={{ sku: event?.sku ?? "" }}
+      className="bg-transparent p-0 rounded-md"
+    >
+      <ChartBarSquareIcon height={24} />
+    </LinkButton>
+  );
+};
+
 export const EventSummaryPage: React.FC = () => {
   const { data: event } = useCurrentEvent();
   const { data: game } = useRulesForEvent(event);
@@ -364,7 +378,6 @@ export const EventSummaryPage: React.FC = () => {
       />
       <section className="mt-4 flex flex-col max-h-full">
         <nav className="flex gap-4 p-2 rounded-md">
-          <p className="flex-1">{incidents?.length} Incidents</p>
           <ForceSyncButton />
           <ExportButton />
           <IconButton
@@ -373,6 +386,7 @@ export const EventSummaryPage: React.FC = () => {
             aria-label="Filter Incidents"
             icon={<AdjustmentsHorizontalIcon height={24} />}
           />
+          <StatsButton />
         </nav>
         <section className="flex gap-1 flex-wrap">
           {commonRules.slice(0, 5).map(([rule, count]) => (

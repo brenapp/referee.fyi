@@ -558,11 +558,13 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
               </Button>
             ))}
           </div>
-          <RulesMultiSelect
-            game={rules!}
-            value={incident.rules}
-            onChange={onChangeIncidentRules}
-          />
+          <div className="mt-2">
+            <RulesMultiSelect
+              game={rules!}
+              value={incident.rules}
+              onChange={onChangeIncidentRules}
+            />
+          </div>
         </div>
         <div>
           <p className="mt-4">Images</p>

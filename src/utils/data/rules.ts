@@ -1,5 +1,5 @@
 import { ProgramAbbr, Year } from "robotevents";
-import { Game } from "~utils/hooks/rules";
+import { Game, Rule, RuleGroup } from "~utils/hooks/rules";
 
 import PushBack from "/rules/V5RC/2025-2026.json?url";
 import MixAndMatch from "/rules/VIQRC/2025-2026.json?url";
@@ -58,6 +58,59 @@ export const GAME_FETCHERS: Partial<
   ["VAIRC_2023-2024"]: OverUnderRules,
   ["VIQRC_2023-2024"]: FullVolumeRules,
 };
+
+/**
+ * Usable order for rule groups based on user feedback.
+ **/
+export const RULEGROUP_ORDER = [
+  // Specific Game
+  "Specific Game Rules",
+  "General Game Rules",
+
+  // General Game
+  "General Rules",
+  "VEX U Robotics Competition Game Rules",
+
+  // Safety
+  "Safety Rules",
+
+  // Tournament
+  "Tournament Rules",
+  "VEX AI Robotics Competition Tournament Rules",
+  "VEX U Robotics Competition Tournament Rules",
+
+  // Scoring
+  "Scoring Rules",
+  "VEX AI Robotics Scoring Rules",
+
+  // Robot Rules
+  "Robot Rules",
+  "VEX AI Robotics Competition Robot Rules",
+  "VEX U Robotics Competition Robot Rules",
+
+  // Robot Skills
+  "Robot Skills Challenge Rules",
+  "VEX AI Robotics Competition Skills Rules",
+  "VEX U Robotics Competition Robot Skills Rules",
+
+  "VEX AI Robotics Competition General Rules",
+];
+
+export function sortRuleGroups(a: RuleGroup, b: RuleGroup) {
+  const aIndex = RULEGROUP_ORDER.indexOf(a.name);
+  const bIndex = RULEGROUP_ORDER.indexOf(b.name);
+
+  if (aIndex === -1 && bIndex === -1) {
+    return a.name.localeCompare(b.name);
+  } else if (aIndex === -1) {
+    return 1;
+  } else if (bIndex === -1) {
+    return -1;
+  } else {
+    return aIndex - bIndex;
+  }
+}
+
 export function isRuleMatch(ruleGroup: RuleGroup, rule: Rule, query: string) {
   return query
     ? rule.description.toLowerCase().includes(query.toLowerCase()) ||

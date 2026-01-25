@@ -8,18 +8,21 @@ import React, {
   useCallback,
   useId,
   useMemo,
+  useState,
 } from "react";
-import { IconButton } from "./Button";
+import { Button, IconButton } from "./Button";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import { LocalAsset } from "~utils/data/assets";
+import { MenuButton } from "./MenuButton";
+import { isRuleMatch, sortRuleGroups } from "~utils/data/rules";
 
 export type CheckboxBinding = {
   value: boolean;
   onChange: Dispatch<boolean>;
 };
 
-export type CheckboxProps = React.HTMLProps<HTMLInputElement> & {
-  label: string;
+export type CheckboxProps = Omit<React.HTMLProps<HTMLInputElement>, "label"> & {
+  label: React.ReactNode;
   labelProps?: React.HTMLProps<HTMLLabelElement>;
   bind?: CheckboxBinding;
 };
@@ -312,12 +315,86 @@ export const RulesDisplay: React.FC<RulesDisplayProps> = ({
     <div className="flex items-center gap-x-1">
       <strong className="font-mono mr-2">{rule.rule}</strong>
       {rule.icon && (
-        <img src={rule.icon} alt={`Icon`} className="max-h-6 w-auto" />
+        <img src={rule.icon} alt="Icon" className="max-h-6 w-auto" />
       )}
     </div>
     <span>{rule.description}</span>
   </div>
 );
+
+export type RulesDisplayMenuProps = {
+  game: Game;
+  value: Rule[];
+  onChange: (rules: Rule[]) => void;
+};
+
+export const RulesDisplayMenu: React.FC<RulesDisplayMenuProps> = ({
+  game,
+  value: selected,
+  onChange,
+}) => {
+  const [query, setQuery] = useState("");
+
+  return (
+    <>
+      <fieldset
+        className="max-h-[80svh] max-w-[100svw] overflow-y-auto"
+        aria-label="Select rules"
+      >
+        {game.ruleGroups.toSorted(sortRuleGroups).map((group) => {
+          const selectedRuleSet = new Set(selected.map((r) => r.rule));
+
+          return (
+            <div key={group.name} className="mb-4">
+              <h3 className="font-bold">{group.name}</h3>
+              {group.rules
+                .filter((rule) => isRuleMatch(group, rule, query))
+                .map((rule) => (
+                  <div>
+                    <Checkbox
+                      className="h-4 w-4 mt-[3px]"
+                      labelProps={{
+                        className: "p-2 mt-1 bg-transparent",
+                      }}
+                      bind={{
+                        value: selectedRuleSet.has(rule.rule),
+                        onChange: (checked) => {
+                          if (checked) {
+                            onChange([...selected, rule]);
+                          } else {
+                            onChange(
+                              selected.filter((r) => r.rule !== rule.rule)
+                            );
+                          }
+                        }
+                      }}
+                      label={
+                        <p>
+                          <span className="text-sm font-mono mr-1 font-bold text-emerald-400">
+                            {rule.rule}
+                          </span>
+                          {rule.description}
+                        </p>
+                      }
+                    />
+                  </div>
+                ))}
+            </div>
+          );
+        })}
+      </fieldset>
+      <div>
+        <Input
+          placeholder="Search rule..."
+          aria-label="Search rules"
+          value={query}
+          onChange={(e) => setQuery(e.currentTarget.value)}
+          className="w-full mt-4"
+        />
+      </div>
+    </>
+  );
+};
 
 export type RulesMultiSelectProps = {
   game: Game;
@@ -331,28 +408,6 @@ export const RulesMultiSelect: React.FC<RulesMultiSelectProps> = ({
   onChange,
 }) => {
   const value = useMemo(() => rules.map((r) => r.rule), [rules]);
-
-  const onPickRule = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const rules: Rule[] = [];
-
-      for (let i = 0; i < e.currentTarget.selectedOptions.length; i++) {
-        const option = e.currentTarget.selectedOptions[i];
-        const group = option.dataset.rulegroup;
-
-        const rule = game?.ruleGroups
-          .find((g) => g.name === group)
-          ?.rules.find((r) => r.rule === option.value);
-
-        if (!rule) continue;
-        rules.push(rule);
-      }
-
-      onChange(rules);
-    },
-    [onChange, game]
-  );
-
   const onRemoveRule = useCallback(
     (rule: Rule) => {
       onChange(rules.filter((r) => r.rule !== rule.rule));
@@ -362,26 +417,25 @@ export const RulesMultiSelect: React.FC<RulesMultiSelectProps> = ({
 
   return (
     <>
-      <Select
-        className="max-w-full w-full mt-2"
-        multiple
-        value={value}
-        onChange={onPickRule}
+      <MenuButton
+        menu={
+          <RulesDisplayMenu game={game} value={rules} onChange={onChange} />
+        }
+        menuProps={{
+          persistence: {
+            type: "persistent",
+            closer: ({ close }) => (
+              <section className="mt-2">
+                <Button onClick={close}>Confirm</Button>
+              </section>
+            ),
+          },
+        }}
       >
-        {game?.ruleGroups.map((group) => (
-          <optgroup label={group.name} key={group.name}>
-            {group.rules.map((rule) => (
-              <option
-                value={rule.rule}
-                data-rulegroup={group.name}
-                key={rule.rule}
-              >
-                {rule.rule} {rule.description}
-              </option>
-            ))}
-          </optgroup>
-        ))}
-      </Select>
+        {value.length > 0
+          ? `${value.length} Rule${value.length > 1 ? "s" : ""} Selected`
+          : "Pick Rules"}
+      </MenuButton>
       <ul className="mt-4 flex flex-wrap gap-2">
         {rules
           .filter((rule) => rule)

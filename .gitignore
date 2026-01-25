@@ -45,3 +45,5 @@ key.json
 .certs
 
 *.js.map
+
+cypress/screenshots

@@ -8,6 +8,7 @@
     "frontend:build": "tsc && vite build",
     "lib:dev": "concurrently \"npm --prefix lib/share run dev\" \"npm --prefix lib/consistency run dev\" \"npm --prefix lib/pdf  run dev\" \"npm --prefix lib/rules run dev\"",
     "lib:build": "npm --prefix lib/rules run build && npm --prefix lib/consistency run build && npm --prefix lib/share run build && npm --prefix lib/pdf run build",
+    "lib:test": "npm run --workspaces --if-present test",
     "sync:dev": "npm --prefix worker/sync run dev",
     "sync:dev:secure": "npm --prefix worker/sync run dev:secure",
     "sync:build": "npm run lib:build && npm --prefix worker/sync run build",
@@ -59,6 +60,7 @@
     "tailwind-merge": "^2.0.0",
     "use-resize-observer": "^9.1.0",
     "uuid": "^9.0.1",
+    "vitest": "^4.0.7",
     "zustand": "^4.5.2"
   },
   "devDependencies": {
@@ -81,6 +83,7 @@
     "@vitejs/plugin-react-swc": "^3.0.0",
     "autoprefixer": "^10.4.14",
     "concurrently": "^8.2.2",
+    "cypress": "^15.5.0",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",

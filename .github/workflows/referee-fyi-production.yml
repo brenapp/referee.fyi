@@ -1,4 +1,4 @@
-name: Deploy Prod
+name: referee-fyi-production
 
 on:
   push:
@@ -6,10 +6,10 @@ on:
       - main
 
 jobs:
-  deploy:
+  referee-fyi:
     runs-on: ubuntu-latest
     environment: production
-    name: Deploy Main
+    name: production
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v4
@@ -29,6 +29,7 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       - uses: cloudflare/wrangler-action@v3
         with:
+          workingDirectory: "apps/referee-fyi"
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - uses: cloudflare/wrangler-action@v3
         with:

@@ -1,4 +1,4 @@
-name: Deploy Staging
+name: referee-fyi-staging
 
 on:
   push:
@@ -8,10 +8,10 @@ permissions:
   pull-requests: write
 
 jobs:
-  deploy:
+  referee-fyi:
     runs-on: ubuntu-latest
     environment: staging
-    name: Deploy Staging
+    name: deploy
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v4
@@ -42,6 +42,7 @@ jobs:
           echo "preview_alias=$SAFE_REF" >> $GITHUB_OUTPUT
       - uses: cloudflare/wrangler-action@v3
         with:
+          workingDirectory: "apps/referee-fyi"
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           command: versions upload --preview-alias ${{ steps.preview_alias.outputs.preview_alias }}
       - uses: cloudflare/wrangler-action@v3
@@ -62,7 +63,7 @@ jobs:
       - uses: mshick/add-pr-comment@v2
         with:
           message: |
-            # Staging Application Deployed!
+            **Staging Application Deployed**
 
             https://${{ steps.preview_alias.outputs.preview_alias }}-referee-fyi.bren.workers.dev
 

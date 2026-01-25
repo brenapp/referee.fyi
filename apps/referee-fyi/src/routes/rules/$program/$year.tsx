@@ -1,5 +1,5 @@
 import { Await, createFileRoute, redirect } from "@tanstack/react-router";
-import { Game } from "../../../../lib/rules/src/main";
+import type { Game } from "@referee-fyi/rules";
 import { queryClient } from "~utils/data/query";
 import { getUseRulesForSeasonQueryParams } from "~utils/hooks/rules";
 import { ExternalLinkButton } from "~components/Button";

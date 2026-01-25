@@ -17,6 +17,7 @@ import { useQuestionsForProgram } from "~utils/hooks/qna";
 import { Schemas } from "~types/worker/rules";
 import { MenuButton } from "~components/MenuButton";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/20/solid";
+import { isRuleMatch } from "~utils/data/rules";
 
 type Question = Schemas["Question"];
 
@@ -26,13 +27,9 @@ type RuleGroupProps = {
 };
 
 const RuleGroup: React.FC<RuleGroupProps> = ({ ruleGroup, query }) => {
-  const rules = ruleGroup.rules.filter((rule) => {
-    return query
-      ? rule.description.toLowerCase().includes(query.toLowerCase()) ||
-          rule.rule.toLowerCase().includes(query.toLowerCase()) ||
-          ruleGroup.name.toLowerCase().includes(query.toLowerCase())
-      : true;
-  });
+  const rules = ruleGroup.rules.filter((rule) =>
+    isRuleMatch(ruleGroup, rule, query ?? "")
+  );
 
   if (rules.length < 1) {
     return null;

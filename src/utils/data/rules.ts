@@ -58,3 +58,10 @@ export const GAME_FETCHERS: Partial<
   ["VAIRC_2023-2024"]: OverUnderRules,
   ["VIQRC_2023-2024"]: FullVolumeRules,
 };
+export function isRuleMatch(ruleGroup: RuleGroup, rule: Rule, query: string) {
+  return query
+    ? rule.description.toLowerCase().includes(query.toLowerCase()) ||
+        rule.rule.toLowerCase().includes(query.toLowerCase()) ||
+        ruleGroup.name.toLowerCase().includes(query.toLowerCase())
+    : true;
+}

@@ -32,7 +32,7 @@ export const EventTeamAssets: React.FC<EventTeamAssetsProps> = ({
 }) => {
   const assets = useEventAssetsForTeam(sku, team);
   return (
-    <div className="grid lg:grid-cols-6 grid-cols-2 md:grid-cols-3 mt-4 gap-2 overflow-y-auto">
+    <div className="grid lg:grid-cols-6 grid-cols-2 md:grid-cols-3 mt-4 gap-2 overflow-y-auto pb-24">
       {assets?.map((asset) => (asset ? <AssetPreview asset={asset} /> : null))}
     </div>
   );
@@ -70,7 +70,7 @@ export const EventTeamsMatches: React.FC<EventTeamsTabProps> = ({
         division={division}
       />
       <Spinner show={isLoading} />
-      <ul className="flex-1 overflow-y-auto">
+      <ul className="flex-1 overflow-y-auto pb-24">
         {matches?.map((match) => (
           <ClickableMatch
             match={match}
@@ -100,7 +100,12 @@ export const EventTeamsIncidents: React.FC<EventTeamsTabProps> = ({
   return (
     <ul className="contents">
       <Spinner show={isIncidentsLoading} />
-      <VirtualizedList data={incidents} options={{ estimateSize: () => 88 }}>
+      <VirtualizedList
+        data={incidents}
+        options={{ estimateSize: () => 88 }}
+        className="flex-1"
+        parts={{ list: { className: "mb-24" } }}
+      >
         {(incident) => (
           <Incident incident={incident} key={incident.id} className="h-20" />
         )}

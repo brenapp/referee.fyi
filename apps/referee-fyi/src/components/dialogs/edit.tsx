@@ -468,14 +468,12 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
         />
         {game ? (
           <>
-            <label>
-              <p className="mt-4">Associated Rules</p>
-              <RulesMultiSelect
-                game={game}
-                value={incidentRules}
-                onChange={onChangeIncidentRules}
-              />
-            </label>
+            <p className="mt-4">Associated Rules</p>
+            <RulesMultiSelect
+              game={game}
+              value={incidentRules}
+              onChange={onChangeIncidentRules}
+            />
             <EditHistory
               value={incident}
               valueKey="rules"

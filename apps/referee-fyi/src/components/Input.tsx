@@ -366,7 +366,7 @@ export const RulesDisplayMenu: React.FC<RulesDisplayMenuProps> = ({
                               selected.filter((r) => r.rule !== rule.rule)
                             );
                           }
-                        }
+                        },
                       }}
                       label={
                         <p>
@@ -426,7 +426,15 @@ export const RulesMultiSelect: React.FC<RulesMultiSelectProps> = ({
             type: "persistent",
             closer: ({ close }) => (
               <section className="mt-2">
-                <Button onClick={close}>Confirm</Button>
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    close();
+                  }}
+                >
+                  Confirm
+                </Button>
               </section>
             ),
           },

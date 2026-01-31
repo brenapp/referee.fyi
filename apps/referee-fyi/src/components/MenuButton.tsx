@@ -60,7 +60,6 @@ export type MenuButtonProps = ButtonProps & {
 export const MenuButton: React.FC<MenuButtonProps> = ({ menu, ...props }) => {
   const id = useId();
   const [show, setShow] = useState(false);
-
   const onButtonClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.currentTarget.blur();

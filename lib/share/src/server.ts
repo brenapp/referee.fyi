@@ -6,6 +6,7 @@ export const ShareInstanceMetaSchema = z
     admins: z.array(z.string()),
     invitations: z.array(z.string()),
     secret: z.string(),
+    allow_trusted: z.boolean().optional(),
   })
   .meta({
     id: "ShareInstanceMeta",

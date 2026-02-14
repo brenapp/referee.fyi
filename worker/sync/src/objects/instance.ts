@@ -38,9 +38,7 @@ export class ShareInstance extends DurableObject {
   sessions: Map<WebSocket, ClientSession> = new Map();
 
   state: DurableObjectState;
-
   env: Env;
-
   constructor(state: DurableObjectState, env: Env) {
     super(state, env);
     this.state = state;
@@ -63,6 +61,7 @@ export class ShareInstance extends DurableObject {
     scratchpad: (id: string) => `scratchpad#${id}`,
     sku: "meta#sku",
     secret: "meta#instance_secret",
+    allowTrusted: "meta#allow_trusted",
   };
 
   async setSKU(sku: string): Promise<void> {
@@ -78,6 +77,15 @@ export class ShareInstance extends DurableObject {
   }
   async getInstanceSecret(): Promise<string | undefined> {
     return this.state.storage.get<string>(this.KEYS.secret);
+  }
+
+  async getAllowTrusted(): Promise<boolean> {
+    const value = await this.state.storage.get<boolean>(this.KEYS.allowTrusted);
+    return value ?? false;
+  }
+
+  async setAllowTrusted(allow: boolean): Promise<void> {
+    return this.state.storage.put(this.KEYS.allowTrusted, allow);
   }
 
   async getScratchpad(id: string): Promise<MatchScratchpad | undefined> {

@@ -52,6 +52,11 @@
           "store_id": "8e1adb056fd34b4c95266f0a7e767fae",
           "binding": "ROBOTEVENTS_TOKEN",
           "secret_name": "ROBOTEVENTS_TOKEN"
+        },
+        {
+          "store_id": "8e1adb056fd34b4c95266f0a7e767fae",
+          "binding": "TRUSTED_INTEGRATION_SECRET",
+          "secret_name": "TRUSTED_INTEGRATION_SECRET"
         }
       ],
       "d1_databases": [
@@ -102,6 +107,11 @@
           "store_id": "8e1adb056fd34b4c95266f0a7e767fae",
           "binding": "ROBOTEVENTS_TOKEN",
           "secret_name": "ROBOTEVENTS_TOKEN"
+        },
+        {
+          "store_id": "8e1adb056fd34b4c95266f0a7e767fae",
+          "binding": "TRUSTED_INTEGRATION_SECRET",
+          "secret_name": "TRUSTED_INTEGRATION_SECRET"
         }
       ],
       "d1_databases": [
@@ -164,6 +174,11 @@
           "store_id": "8e1adb056fd34b4c95266f0a7e767fae",
           "binding": "ROBOTEVENTS_TOKEN",
           "secret_name": "ROBOTEVENTS_TOKEN"
+        },
+        {
+          "store_id": "8e1adb056fd34b4c95266f0a7e767fae",
+          "binding": "TRUSTED_INTEGRATION_SECRET",
+          "secret_name": "TRUSTED_INTEGRATION_SECRET"
         }
       ],
       "d1_databases": [

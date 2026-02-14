@@ -565,6 +565,11 @@ export const verifyIntegrationToken = createMiddleware<AppArgs>(
       );
     }
 
+    // Check if this is a JWT (trusted scoped token) - 3 dot-separated base64url segments
+    if (token.split(".").length === 3) {
+      return await verifyTrustedScopedToken(c, next);
+    }
+
     if (typeof instanceSecret === "string") {
       return await verifySystemToken(c, next);
     }
@@ -741,6 +746,288 @@ export const verifyInvitationAdmin = createMiddleware<AppArgs>(
     }
 
     c.set("verifyInvitationAdmin", { admin: isAdmin, systemKey });
+    await next();
+  }
+);
+
+// --- Trusted Integration JWT Utilities ---
+
+/**
+ * Base64url encode a Uint8Array
+ */
+function base64urlEncode(data: Uint8Array): string {
+  let binary = "";
+  for (let i = 0; i < data.length; i++) {
+    binary += String.fromCharCode(data[i]);
+  }
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+/**
+ * Base64url decode to Uint8Array
+ */
+function base64urlDecode(str: string): Uint8Array {
+  let base64 = str.replace(/-/g, "+").replace(/_/g, "/");
+  while (base64.length % 4) {
+    base64 += "=";
+  }
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+/**
+ * Import the TRUSTED_INTEGRATION_SECRET as a CryptoKey for HMAC-SHA256
+ */
+async function importHmacKey(secret: string): Promise<CryptoKey> {
+  const encoder = new TextEncoder();
+  return crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign", "verify"]
+  );
+}
+
+/**
+ * Sign a JWT with HMAC-SHA256
+ */
+export async function signJWT(
+  payload: Record<string, unknown>,
+  secret: string
+): Promise<string> {
+  const header = { alg: "HS256", typ: "JWT" };
+  const encoder = new TextEncoder();
+
+  const headerB64 = base64urlEncode(encoder.encode(JSON.stringify(header)));
+  const payloadB64 = base64urlEncode(encoder.encode(JSON.stringify(payload)));
+  const signingInput = `${headerB64}.${payloadB64}`;
+
+  const key = await importHmacKey(secret);
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    encoder.encode(signingInput)
+  );
+
+  const signatureB64 = base64urlEncode(new Uint8Array(signature));
+  return `${signingInput}.${signatureB64}`;
+}
+
+/**
+ * Verify and decode a JWT signed with HMAC-SHA256.
+ * Returns the payload if valid, or null if invalid.
+ */
+export async function verifyJWT(
+  token: string,
+  secret: string
+): Promise<Record<string, unknown> | null> {
+  const parts = token.split(".");
+  if (parts.length !== 3) {
+    return null;
+  }
+
+  const [headerB64, payloadB64, signatureB64] = parts;
+  const signingInput = `${headerB64}.${payloadB64}`;
+
+  const encoder = new TextEncoder();
+  const key = await importHmacKey(secret);
+  const signatureBytes = base64urlDecode(signatureB64);
+
+  const valid = await crypto.subtle.verify(
+    "HMAC",
+    key,
+    signatureBytes,
+    encoder.encode(signingInput)
+  );
+
+  if (!valid) {
+    return null;
+  }
+
+  try {
+    const payloadJson = new TextDecoder().decode(base64urlDecode(payloadB64));
+    return JSON.parse(payloadJson) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Middleware to verify a trusted integration JWT from the Authorization header.
+ * Sets `verifyTrustedIntegration` on the context with `{ sub: string }`.
+ */
+export const verifyTrustedIntegrationJWT = createMiddleware<AppArgs>(
+  async (c, next) => {
+    const authHeader = c.req.header("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: "ValidationError",
+            message: "Authorization header with Bearer token is required.",
+          },
+          code: "VerifyTrustedIntegrationTokenValuesNotPresent",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        401
+      );
+    }
+
+    const token = authHeader.slice(7);
+    const secret = await c.env.TRUSTED_INTEGRATION_SECRET.get();
+    const payload = await verifyJWT(token, secret);
+
+    if (!payload) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: "ValidationError",
+            message: "Invalid trusted integration token.",
+          },
+          code: "VerifyTrustedIntegrationTokenInvalid",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        401
+      );
+    }
+
+    // Check expiration
+    if (typeof payload.exp === "number" && payload.exp < Math.floor(Date.now() / 1000)) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: "ValidationError",
+            message: "Trusted integration token has expired.",
+          },
+          code: "VerifyTrustedIntegrationTokenExpired",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        401
+      );
+    }
+
+    if (typeof payload.sub !== "string") {
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: "ValidationError",
+            message: "Trusted integration token missing subject.",
+          },
+          code: "VerifyTrustedIntegrationTokenInvalid",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        401
+      );
+    }
+
+    c.set("verifyTrustedIntegration", { sub: payload.sub });
+    await next();
+  }
+);
+
+/**
+ * Middleware to verify a trusted scoped token (issued by POST /api/integration/trusted/{sku}/token).
+ * This is used by the existing integration API routes.
+ * Scoped tokens have the structure: { instance, sku, exp, type: "trusted_scoped" }
+ */
+export const verifyTrustedScopedToken = createMiddleware<AppArgs>(
+  async (c, next) => {
+    const sku = c.req.param("sku");
+    const token =
+      c.req.query("token") ||
+      c.req.header("Authorization")?.replace("Bearer ", "");
+
+    // Only handle tokens that look like JWTs (3 dot-separated parts)
+    if (
+      typeof token !== "string" ||
+      typeof sku !== "string" ||
+      token.split(".").length !== 3
+    ) {
+      return await next();
+    }
+
+    const secret = await c.env.TRUSTED_INTEGRATION_SECRET.get();
+    const payload = await verifyJWT(token, secret);
+
+    if (!payload || payload.type !== "trusted_scoped") {
+      // Not a trusted scoped token, fall through to other middlewares
+      return await next();
+    }
+
+    // Check expiration
+    if (typeof payload.exp === "number" && payload.exp < Math.floor(Date.now() / 1000)) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: "ValidationError",
+            message: "Trusted scoped token has expired.",
+          },
+          code: "VerifyTrustedIntegrationTokenExpired",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        401
+      );
+    }
+
+    // Verify the SKU matches
+    if (payload.sku !== sku) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: "ValidationError",
+            message: "Token SKU does not match requested SKU.",
+          },
+          code: "VerifyTrustedIntegrationTokenInvalid",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        401
+      );
+    }
+
+    const instanceSecret = payload.instance as string;
+    const instance = await getInstance(c.env, instanceSecret, sku);
+
+    if (!instance) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            name: "ValidationError",
+            message: "Instance not found.",
+          },
+          code: "VerifyIntegrationTokenInvalidInstance",
+        } as const satisfies z.infer<typeof ErrorResponseSchema>,
+        404
+      );
+    }
+
+    // Create a synthetic invitation for the trusted integration
+    const invitation: Invitation = {
+      accepted: true,
+      admin: false,
+      from: "trusted:" + (payload.sub as string || "integration"),
+      id: "trusted:" + crypto.randomUUID(),
+      sku,
+      instance_secret: instanceSecret,
+      user: "trusted:" + (payload.sub as string || "integration"),
+    };
+
+    c.set("verifyIntegrationToken", {
+      grantType: "trusted" as const,
+      user: {
+        key: "trusted:" + (payload.sub as string || "integration"),
+        name: (payload.sub as string) || "Trusted Integration",
+        role: "none",
+      },
+      invitation,
+      instance,
+    });
+
     await next();
   }
 );

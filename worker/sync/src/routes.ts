@@ -31,6 +31,11 @@ import * as api_sync_$sku_incident_delete from "./api/sync/$sku/incident/delete"
 import * as api_sync_$sku_data from "./api/sync/$sku/data";
 import * as api_sync_$sku_join from "./api/sync/$sku/join";
 import * as api_sync_invitations from "./api/sync/invitations";
+import * as api_sync_trusted_issue from "./api/sync/trusted/issue";
+import * as api_sync_$sku_trusted_get from "./api/sync/$sku/trusted/get";
+import * as api_sync_$sku_trusted_put from "./api/sync/$sku/trusted/put";
+import * as api_integration_trusted_$sku_instances from "./api/integration/trusted/$sku/instances";
+import * as api_integration_trusted_$sku_token from "./api/integration/trusted/$sku/token";
 
 const app = new OpenAPIHono<AppArgs>();
 
@@ -104,7 +109,24 @@ const routes = app
   )
   .openapi(api_sync_$sku_data.route, api_sync_$sku_data.handler)
   .openapi(api_sync_$sku_join.route, api_sync_$sku_join.handler)
-  .openapi(api_sync_invitations.route, api_sync_invitations.handler);
+  .openapi(api_sync_invitations.route, api_sync_invitations.handler)
+  .openapi(api_sync_trusted_issue.route, api_sync_trusted_issue.handler)
+  .openapi(
+    api_sync_$sku_trusted_get.route,
+    api_sync_$sku_trusted_get.handler
+  )
+  .openapi(
+    api_sync_$sku_trusted_put.route,
+    api_sync_$sku_trusted_put.handler
+  )
+  .openapi(
+    api_integration_trusted_$sku_instances.route,
+    api_integration_trusted_$sku_instances.handler
+  )
+  .openapi(
+    api_integration_trusted_$sku_token.route,
+    api_integration_trusted_$sku_token.handler
+  );
 
 //#endregion
 

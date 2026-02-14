@@ -21,10 +21,13 @@ export type Variables = {
     instance: ShareInstanceMeta;
   };
   verifyIntegrationToken?: {
-    grantType: "bearer" | "system";
+    grantType: "bearer" | "system" | "trusted";
     user: User;
     invitation: Invitation;
     instance: ShareInstanceMeta;
+  };
+  verifyTrustedIntegration?: {
+    sub: string;
   };
   verifyUserAssetAuthorized?: {
     asset: AssetMeta;
@@ -76,6 +79,10 @@ export const ErrorCode = z.enum([
   "PatchIncidentDeleted",
   "PatchIncidentEditInvalid",
   "JoinInstanceMissingUpgradeHeader",
+  "VerifyTrustedIntegrationTokenValuesNotPresent",
+  "VerifyTrustedIntegrationTokenInvalid",
+  "VerifyTrustedIntegrationTokenExpired",
+  "TrustedIntegrationNotAllowed",
 ]);
 
 export const RequestFormatErrorDetails = z.object({

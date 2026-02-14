@@ -6,6 +6,8 @@ import {
   getEventInvitation,
   getIntegrationAPIIncidents,
   getIntegrationAPIUsers,
+  getTrustedIntegrationStatus,
+  setTrustedIntegration,
   IntegrationAPICredentials,
   IntegrationUsersResponse,
   inviteUser,
@@ -121,5 +123,21 @@ export function useIntegrationAPIDeleteIncident(
     ],
     mutationFn: (id: string) =>
       deleteIntegrationAPIIncident(sku, id, credentials),
+  });
+}
+
+export function useTrustedIntegrationStatus(sku: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ["@referee-fyi/trustedIntegrationStatus", sku],
+    queryFn: () => getTrustedIntegrationStatus(sku),
+    enabled,
+    staleTime: 1000 * 60,
+  });
+}
+
+export function useSetTrustedIntegration(sku: string) {
+  return useMutation({
+    mutationKey: ["@referee-fyi/setTrustedIntegration", sku],
+    mutationFn: (allow: boolean) => setTrustedIntegration(sku, allow),
   });
 }

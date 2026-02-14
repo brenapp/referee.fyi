@@ -573,6 +573,28 @@ export async function getAssetOriginalURL(
   return response.json();
 }
 
+export type TrustedIntegrationStatusResponse =
+  | { success: true; data: { allow_trusted: boolean } }
+  | { success: false; error: { name: string; message: string }; code?: string };
+
+export async function getTrustedIntegrationStatus(
+  sku: string
+): Promise<TrustedIntegrationStatusResponse> {
+  const url = new URL(`/api/sync/${sku}/trusted`, URL_BASE);
+  const response = await signedFetch(url, { method: "GET" });
+  return response.json();
+}
+
+export async function setTrustedIntegration(
+  sku: string,
+  allow: boolean
+): Promise<TrustedIntegrationStatusResponse> {
+  const url = new URL(`/api/sync/${sku}/trusted`, URL_BASE);
+  url.searchParams.set("allow", String(allow));
+  const response = await signedFetch(url, { method: "PUT" });
+  return response.json();
+}
+
 export function usePeerUserName(peer?: string) {
   const { profile, invitations } = useShareConnection([
     "invitations",

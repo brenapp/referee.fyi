@@ -890,7 +890,7 @@ const TrustedIntegrationToggle: React.FC<ManageTabProps> = ({ event }) => {
 
   const allowTrusted = useMemo(() => {
     if (!statusResponse?.success) return false;
-    return statusResponse.data.allow_trusted;
+    return statusResponse.data.allow;
   }, [statusResponse]);
 
   if (!isAdmin) {
@@ -899,7 +899,8 @@ const TrustedIntegrationToggle: React.FC<ManageTabProps> = ({ event }) => {
 
   return (
     <section className="mt-4">
-      <h2 className="font-bold">Enable Trusted Integrations</h2>
+      <h2 className="font-bold">Trusted Integrations</h2>
+      <p>Enable trusted integrations, which allows trusted applications to automatically pull data from this instance.</p>
       <Spinner show={isLoading || isPending} />
       {!isLoading ? (
         <Checkbox
@@ -943,10 +944,10 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
       <OfflineNotice />
       <UpdatePrompt />
       <ShareManager event={event} />
-      <TrustedIntegrationToggle event={event} />
       <EventSummaryLink event={event} />
       <IntegrationInfo event={event} />
       <SystemKeyInfo event={event} />
+      <TrustedIntegrationToggle event={event} />
     </section>
   );
 };

@@ -590,7 +590,7 @@ export async function setTrustedIntegration(
   allow: boolean
 ): Promise<TrustedIntegrationStatusResponse> {
   const url = new URL(`/api/sync/${sku}/trusted`, URL_BASE);
-  url.searchParams.set("allow", String(allow));
+  url.searchParams.set("action", allow ? "enable" : "disable");
   const response = await signedFetch(url, { method: "PUT" });
   return response.json();
 }

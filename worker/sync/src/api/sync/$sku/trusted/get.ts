@@ -21,7 +21,7 @@ export const SuccessResponseSchema = z
   .object({
     success: z.literal(true),
     data: z.object({
-      allow_trusted: z.boolean(),
+      allow: z.boolean(),
     }),
   })
   .meta({
@@ -81,7 +81,7 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
   return c.json(
     {
       success: true,
-      data: { allow_trusted: allowTrusted },
+      data: { allow: allowTrusted },
     } as const satisfies z.infer<typeof SuccessResponseSchema>,
     200
   );

@@ -17,13 +17,15 @@ export const ParamsSchema = z.object({
   sku: z.string(),
 });
 export const QuerySchema = z.object({
-  allow: z.coerce.boolean(),
+  action: z.enum(["enable", "disable"]).default("enable").describe("Whether to enable or disable trusted integrations."),
 });
 
 export const SuccessResponseSchema = z
   .object({
     success: z.literal(true),
-    data: z.object({}),
+    data: z.object({
+      allow: z.boolean(),
+    }),
   })
   .meta({
     id: "SetTrustedIntegrationStatusResponse",
@@ -77,7 +79,8 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
     );
   }
 
-  const { allow } = c.req.valid("query");
+  const {action} = c.req.valid("query");
+  const allow = action === "enable";
 
   const id = c.env.INCIDENTS.idFromString(
     verifyInvitation.instance.secret
@@ -88,7 +91,9 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
   return c.json(
     {
       success: true,
-      data: {},
+      data: {
+        allow
+      },
     } as const satisfies z.infer<typeof SuccessResponseSchema>,
     200
   );

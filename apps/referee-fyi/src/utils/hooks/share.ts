@@ -15,6 +15,7 @@ import {
 import { exportPublicKey, signMessage } from "~utils/data/crypto";
 import { HookQueryOptions } from "./robotevents";
 import type { Incident } from "@referee-fyi/share";
+import { queryClient } from "~utils/data/query";
 
 export type UseCreateShareOptions = {
   sku: string;
@@ -138,6 +139,9 @@ export function useTrustedIntegrationStatus(sku: string, enabled: boolean) {
 export function useSetTrustedIntegration(sku: string) {
   return useMutation({
     mutationKey: ["@referee-fyi/setTrustedIntegration", sku],
-    mutationFn: (allow: boolean) => setTrustedIntegration(sku, allow),
+    mutationFn: async (allow: boolean) => {
+      await setTrustedIntegration(sku, allow);
+      queryClient.invalidateQueries({queryKey: ["@referee-fyi/trustedIntegrationStatus", sku]});
+    },
   });
 }

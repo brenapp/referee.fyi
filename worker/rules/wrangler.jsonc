@@ -45,11 +45,23 @@
 			"compatibility_flags": [
 				"nodejs_compat_v2"
 			],
+			"secrets_store_secrets": [
+				{
+					"store_id": "8e1adb056fd34b4c95266f0a7e767fae",
+					"binding": "GOOGLE_SHEETS_API_KEY",
+					"secret_name": "GOOGLE_SHEETS_API_KEY"
+				}
+			],
 			"kv_namespaces": [
 				{
 					"binding": "qnaplus",
 					"id": "6afc92c2ed874a9cb7a1557681f19ea5",
 					"preview_id": "6afc92c2ed874a9cb7a1557681f19ea5"
+				},
+				{
+					"binding": "parts",
+					"id": "0e0125c1dc6a4bc0b13a2bc5f7a51b1a",
+					"preview_id": "0e0125c1dc6a4bc0b13a2bc5f7a51b1a"
 				}
 			]
 		},
@@ -73,6 +85,13 @@
 					"preview_bucket_name": "referee-fyi-game-rules"
 				}
 			],
+			"secrets_store_secrets": [
+				{
+					"store_id": "8e1adb056fd34b4c95266f0a7e767fae",
+					"binding": "GOOGLE_SHEETS_API_KEY",
+					"secret_name": "GOOGLE_SHEETS_API_KEY"
+				}
+			],
 			"browser": {
 				"binding": "browser"
 			},
@@ -84,6 +103,11 @@
 					"binding": "qnaplus",
 					"id": "6afc92c2ed874a9cb7a1557681f19ea5",
 					"preview_id": "6afc92c2ed874a9cb7a1557681f19ea5"
+				},
+				{
+					"binding": "parts",
+					"id": "0e0125c1dc6a4bc0b13a2bc5f7a51b1a",
+					"preview_id": "0e0125c1dc6a4bc0b13a2bc5f7a51b1a"
 				}
 			]
 		}

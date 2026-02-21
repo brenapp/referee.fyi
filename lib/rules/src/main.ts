@@ -77,36 +77,3 @@ export const GameSchema = z
   });
 
 export type Game = z.infer<typeof GameSchema>;
-
-export const LegalPartSchema = z
-  .object({
-    name: z.string().meta({ description: "The part name." }),
-    sku: z.string().meta({ description: "The part SKU." }),
-    url: z.string().nullable().meta({
-      description: "A link to the VEX Robotics product listing.",
-    }),
-  })
-  .meta({
-    id: "LegalPart",
-    description: "A legal VEX Robotics part for competition use.",
-  });
-
-export type LegalPart = z.infer<typeof LegalPartSchema>;
-
-export const LegalPartsListSchema = z
-  .object({
-    program: ProgramAbbrSchema,
-    season: YearSchema,
-    parts: z.array(LegalPartSchema).meta({
-      description: "The list of legal parts.",
-    }),
-    lastUpdated: z.string().meta({
-      description: "ISO 8601 timestamp of the last sync.",
-    }),
-  })
-  .meta({
-    id: "LegalPartsList",
-    description: "A list of legal parts for a specific program and season.",
-  });
-
-export type LegalPartsList = z.infer<typeof LegalPartsListSchema>;

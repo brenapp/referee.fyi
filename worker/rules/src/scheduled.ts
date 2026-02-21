@@ -1,6 +1,5 @@
 import { fetchUpdatedQNAs } from "./jobs/fetchUpdatedQNAs.js";
 import { indexGameRules } from "./jobs/indexGameRules.js";
-import { fetchLegalParts } from "./jobs/fetchLegalParts.js";
 
 export async function scheduled(
   event: ScheduledController,
@@ -19,7 +18,6 @@ export async function scheduled(
   // );
 
   await fetchUpdatedQNAs(env);
-  await fetchLegalParts(env);
 
-  console.log("QNAs indexed and legal parts synced successfully");
+  console.log("QNAs indexed successfully");
 }

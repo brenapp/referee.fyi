@@ -27,7 +27,9 @@ import {
   useIntegrationAPIUsers,
   useIntegrationBearer,
   useInviteUser,
+  useSetTrustedIntegration,
   useSystemKeyIntegrationBearer,
+  useTrustedIntegrationStatus,
 } from "~utils/hooks/share";
 import { Checkbox, Input } from "~components/Input";
 import { toast } from "~components/Toast";
@@ -873,6 +875,65 @@ const SystemKeyInfo: React.FC<ManageTabProps> = ({ event }) => {
   );
 };
 
+const TrustedIntegrationToggle: React.FC<ManageTabProps> = ({ event }) => {
+  const { data: invitation } = useEventInvitation(event.sku);
+
+  const isAdmin = !!invitation?.admin && !!invitation?.accepted;
+
+  const { data: statusResponse, isLoading } = useTrustedIntegrationStatus(
+    event.sku,
+    isAdmin
+  );
+
+  const { mutateAsync: setTrusted, isPending } =
+    useSetTrustedIntegration(event.sku);
+
+  const allowTrusted = useMemo(() => {
+    if (!statusResponse?.success) return false;
+    return statusResponse.data.allow;
+  }, [statusResponse]);
+
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <section className="mt-4">
+      <h2 className="font-bold">Trusted Integrations</h2>
+      <p>Enable trusted integrations, which allows trusted applications to automatically pull data from this instance.</p>
+      <Spinner show={isLoading || isPending} />
+      {!isLoading ? (
+        <Checkbox
+          label="Allow Trusted Integrations"
+          bind={{
+            value: allowTrusted,
+            onChange: (value) => {
+              setTrusted(value).then((res) => {
+                if (res.success) {
+                  queryClient.invalidateQueries({
+                    queryKey: [
+                      "@referee-fyi/trustedIntegrationStatus",
+                      event.sku,
+                    ],
+                  });
+                  toast({
+                    type: "info",
+                    message: value
+                      ? "Trusted integrations enabled."
+                      : "Trusted integrations disabled.",
+                  });
+                } else {
+                  toast({ type: "error", message: res.error.message });
+                }
+              });
+            },
+          }}
+        />
+      ) : null}
+    </section>
+  );
+};
+
 export type ManageTabProps = {
   event: EventData;
 };
@@ -886,6 +947,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
       <EventSummaryLink event={event} />
       <IntegrationInfo event={event} />
       <SystemKeyInfo event={event} />
+      <TrustedIntegrationToggle event={event} />
     </section>
   );
 };

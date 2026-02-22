@@ -18,6 +18,7 @@ jobs:
         with:
           node-version: "24.x"
       - run: npm ci
+      - run: npm run lint
       - run: npm run build
         env:
           CI: true

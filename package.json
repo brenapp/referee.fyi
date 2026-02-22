@@ -22,8 +22,10 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "build": "npm run --workspaces --if-present build"
+    "build": "npm run --workspaces --if-present build",
+    "lint": "biome ci"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {
+    "@biomejs/biome": "2.4.4"
+  }
 }

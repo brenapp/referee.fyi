@@ -1,25 +1,28 @@
 import {
   DefaultError,
   QueryKey,
+  useQuery,
   UseQueryOptions,
   UseQueryResult,
-  useQuery,
 } from "@tanstack/react-query";
+import { useMemo } from "react";
 import {
-  type MatchData,
-  Color,
+  Award,
   Client,
-  TeamData,
-  EventData,
-  ProgramCode,
+  Color,
   Event,
-  Team,
-  programs,
-  Skill,
-  Season,
-  operations,
-  rounds,
+  EventData,
+  Grade,
   Match,
+  type MatchData,
+  operations,
+  ProgramCode,
+  programs,
+  rounds,
+  Season,
+  Skill,
+  Team,
+  TeamData,
 } from "robotevents";
 import { createPersister } from "~utils/data/query";
 
@@ -56,7 +59,7 @@ const matchPersister = createPersister<
 
 export function getUseEventQueryParams(
   sku: string | null | undefined,
-  options?: HookQueryOptions<EventData | null | undefined>
+  options?: HookQueryOptions<EventData | null | undefined>,
 ): UseQueryOptions<EventData | null | undefined> {
   return {
     queryKey: ["event", sku],
@@ -81,14 +84,14 @@ export function getUseEventQueryParams(
 
 export function useEvent(
   sku: string | null | undefined,
-  options?: HookQueryOptions<EventData | null | undefined>
+  options?: HookQueryOptions<EventData | null | undefined>,
 ): UseQueryResult<EventData | null | undefined> {
   return useQuery(getUseEventQueryParams(sku, options));
 }
 
 export function getUseEventSearchQueryParams(
   query: operations["event_getEvents"]["parameters"]["query"],
-  options?: HookQueryOptions<EventData[] | null | undefined>
+  options?: HookQueryOptions<EventData[] | null | undefined>,
 ): UseQueryOptions<EventData[] | null | undefined> {
   return {
     queryKey: ["events_by_level", query],
@@ -109,7 +112,7 @@ export function getUseEventSearchQueryParams(
 
 export function useEventSearch(
   query: operations["event_getEvents"]["parameters"]["query"],
-  options?: HookQueryOptions<EventData[] | null | undefined>
+  options?: HookQueryOptions<EventData[] | null | undefined>,
 ) {
   return useQuery(getUseEventSearchQueryParams(query, options));
 }
@@ -117,7 +120,7 @@ export function useEventSearch(
 export function getUseTeamQueryParams(
   number: string | null | undefined,
   program?: ProgramCode | null,
-  options?: HookQueryOptions<TeamData | null | undefined>
+  options?: HookQueryOptions<TeamData | null | undefined>,
 ): UseQueryOptions<TeamData | null | undefined> {
   return {
     queryKey: ["team", number, program],
@@ -145,7 +148,7 @@ export function getUseTeamQueryParams(
 export function useTeam(
   number: string | null | undefined,
   program?: ProgramCode | null,
-  options?: HookQueryOptions<TeamData | null | undefined>
+  options?: HookQueryOptions<TeamData | null | undefined>,
 ): UseQueryResult<TeamData | null | undefined> {
   return useQuery(getUseTeamQueryParams(number, program, options));
 }
@@ -153,7 +156,7 @@ export function useTeam(
 export function getUseEventTeamsQueryParams<Select = TeamData[]>(
   eventData: EventData | null | undefined,
   options?: operations["event_getTeams"]["parameters"]["query"],
-  queryOptions?: HookQueryOptions<TeamData[], DefaultError, Select>
+  queryOptions?: HookQueryOptions<TeamData[], DefaultError, Select>,
 ): UseQueryOptions<TeamData[], DefaultError, Select> {
   return {
     queryKey: ["teams", eventData?.sku, options],
@@ -179,10 +182,10 @@ export function getUseEventTeamsQueryParams<Select = TeamData[]>(
 export function useEventTeams<Select = TeamData[]>(
   eventData: EventData | null | undefined,
   options?: operations["event_getTeams"]["parameters"]["query"],
-  queryOptions?: HookQueryOptions<TeamData[], DefaultError, Select>
+  queryOptions?: HookQueryOptions<TeamData[], DefaultError, Select>,
 ): UseQueryResult<Select> {
   return useQuery(
-    getUseEventTeamsQueryParams(eventData, options, queryOptions)
+    getUseEventTeamsQueryParams(eventData, options, queryOptions),
   );
 }
 
@@ -198,7 +201,7 @@ export function getUseDivisionTeamsQueryParams(
   matches: Match[] | undefined,
   isTeamsSuccess: boolean,
   isMatchesSuccess: boolean,
-  options?: HookQueryOptions<UseDivisionTeamsResult>
+  options?: HookQueryOptions<UseDivisionTeamsResult>,
 ): UseQueryOptions<UseDivisionTeamsResult> {
   return {
     queryKey: ["division_teams", eventData?.sku, division],
@@ -211,12 +214,11 @@ export function getUseDivisionTeamsQueryParams(
 
       // "Overall Finals" division IDs, which won't have rankings. Instead, get teams from the matches
       if (division > 10) {
-        const ids =
-          matches
-            ?.map((m) =>
-              m.alliances.flatMap((a) => a.teams.map((t) => t.team?.id))
-            )
-            .flat() ?? [];
+        const ids = matches
+          ?.map((m) =>
+            m.alliances.flatMap((a) => a.teams.map((t) => t.team?.id))
+          )
+          .flat() ?? [];
         const divisionTeams = teams?.filter((t) => ids.includes(t.id)) ?? [];
 
         return {
@@ -237,7 +239,7 @@ export function getUseDivisionTeamsQueryParams(
 
       const divisionTeams =
         teams?.filter((t) => rankings.data.some((r) => r.team?.id === t.id)) ??
-        [];
+          [];
 
       return {
         divisionOnly: true,
@@ -253,12 +255,12 @@ export function getUseDivisionTeamsQueryParams(
 export function useDivisionTeams(
   eventData: EventData | null | undefined,
   division: number | null | undefined,
-  options?: HookQueryOptions<UseDivisionTeamsResult>
+  options?: HookQueryOptions<UseDivisionTeamsResult>,
 ): UseQueryResult<UseDivisionTeamsResult> {
   const { data: teams, isSuccess: isTeamsSuccess } = useEventTeams(eventData);
   const { data: matches, isSuccess: isMatchesSuccess } = useEventMatches(
     eventData,
-    division
+    division,
   );
 
   return useQuery<UseDivisionTeamsResult>(
@@ -269,8 +271,8 @@ export function useDivisionTeams(
       matches,
       isTeamsSuccess,
       isMatchesSuccess,
-      options
-    )
+      options,
+    ),
   );
 }
 
@@ -315,7 +317,7 @@ export function getUseEventMatchesQueryParams<T = Match[]>(
   eventData: EventData | null | undefined,
   division: number | null | undefined,
   query?: operations["event_getDivisionMatches"]["parameters"]["query"],
-  options?: HookQueryOptions<Match[], Error, T>
+  options?: HookQueryOptions<Match[], Error, T>,
 ): UseQueryOptions<Match[], Error, T> {
   return {
     queryKey: ["matches", eventData?.sku, division, query],
@@ -343,10 +345,10 @@ export function useEventMatches<T = Match[]>(
   eventData: EventData | null | undefined,
   division: number | null | undefined,
   query?: operations["event_getDivisionMatches"]["parameters"]["query"],
-  options?: HookQueryOptions<Match[], Error, T>
+  options?: HookQueryOptions<Match[], Error, T>,
 ): UseQueryResult<T> {
   return useQuery(
-    getUseEventMatchesQueryParams(eventData, division, query, options)
+    getUseEventMatchesQueryParams(eventData, division, query, options),
   );
 }
 
@@ -354,7 +356,7 @@ export function getUseEventMatchesForTeamQueryParams(
   event: EventData | null | undefined,
   teamData: TeamData | null | undefined,
   color?: Color,
-  options?: HookQueryOptions<Match[]>
+  options?: HookQueryOptions<Match[]>,
 ): UseQueryOptions<Match[]> {
   return {
     queryKey: ["team_matches", event?.sku, teamData?.number],
@@ -389,16 +391,16 @@ export function useEventMatchesForTeam(
   event: EventData | null | undefined,
   teamData: TeamData | null | undefined,
   color?: Color,
-  options?: HookQueryOptions<Match[]>
+  options?: HookQueryOptions<Match[]>,
 ) {
   return useQuery(
-    getUseEventMatchesForTeamQueryParams(event, teamData, color, options)
+    getUseEventMatchesForTeamQueryParams(event, teamData, color, options),
   );
 }
 
 export function useMatchTeams(
   event?: EventData | null,
-  match?: MatchData | null
+  match?: MatchData | null,
 ) {
   const { data: teams } = useEventTeams(event);
 
@@ -414,7 +416,7 @@ export function useMatchTeams(
 export function useEventMatch(
   event: EventData | null | undefined,
   division: number | null | undefined,
-  match: number | null | undefined
+  match: number | null | undefined,
 ): UseQueryResult<Match | undefined> {
   return useEventMatches(
     event,
@@ -422,13 +424,13 @@ export function useEventMatch(
     {},
     {
       select: (matches) => matches?.find((m) => m.id === match),
-    }
+    },
   );
 }
 
 export function useEventTeam(
   event: EventData | null | undefined,
-  number: string | null | undefined
+  number: string | null | undefined,
 ) {
   return useEventTeams(event, undefined, {
     select: (teams) => teams.find((t) => t.number === number),
@@ -440,7 +442,7 @@ export const currentSeasons = (
 ).map((program) => client.seasons[program][CURRENT_YEAR]) as number[];
 
 export function getUseEventsTodayQueryParams(
-  options?: HookQueryOptions<EventData[]>
+  options?: HookQueryOptions<EventData[]>,
 ): UseQueryOptions<EventData[]> {
   return {
     queryKey: ["events_today"],
@@ -472,7 +474,7 @@ export function getUseEventsTodayQueryParams(
 }
 
 export function useEventsToday(
-  options?: HookQueryOptions<EventData[]>
+  options?: HookQueryOptions<EventData[]>,
 ): UseQueryResult<EventData[]> {
   return useQuery(getUseEventsTodayQueryParams(options));
 }
@@ -480,7 +482,7 @@ export function useEventsToday(
 export function getUseEventSkillsQueryParams(
   data: EventData | null | undefined,
   options?: operations["event_getSkills"]["parameters"]["query"],
-  queryOptions?: HookQueryOptions<Skill[]>
+  queryOptions?: HookQueryOptions<Skill[]>,
 ): UseQueryOptions<Skill[]> {
   return {
     queryKey: ["skills", data?.sku, options],
@@ -505,14 +507,14 @@ export function getUseEventSkillsQueryParams(
 export function useEventSkills(
   data: EventData | null | undefined,
   options?: operations["event_getSkills"]["parameters"]["query"],
-  queryOptions?: HookQueryOptions<Skill[]>
+  queryOptions?: HookQueryOptions<Skill[]>,
 ) {
   return useQuery(getUseEventSkillsQueryParams(data, options, queryOptions));
 }
 
 export function getUseSeasonQueryParams(
   id?: number,
-  queryOptions?: HookQueryOptions<Season | null>
+  queryOptions?: HookQueryOptions<Season | null>,
 ): UseQueryOptions<Season | null> {
   return {
     queryKey: ["season", id],
@@ -534,7 +536,7 @@ export function getUseSeasonQueryParams(
 
 export function useSeason(
   id?: number,
-  queryOptions?: HookQueryOptions<Season | null>
+  queryOptions?: HookQueryOptions<Season | null>,
 ) {
   return useQuery(getUseSeasonQueryParams(id, queryOptions));
 }
@@ -543,4 +545,75 @@ export function useCurrentSeason(program?: ProgramCode | null) {
   // @ts-expect-error fix for as const - if program doesn't have a year just return undefined
   const id = program ? client.seasons?.[program]?.[CURRENT_YEAR] : undefined;
   return useSeason(id);
+}
+
+export type GradeSeperated<T> = {
+  overall: T;
+  grades: Partial<Record<Grade, T>>;
+};
+
+export function byGrade<T>(
+  value: GradeSeperated<T>,
+  grade: Grade | "Overall",
+  def: T,
+): T {
+  return grade === "Overall" ? value.overall : value.grades[grade] ?? def;
+}
+
+export function useByGrade<T>(
+  value: GradeSeperated<T>,
+  grade: Grade | "Overall",
+  def: T,
+): T {
+  return useMemo(() => byGrade(value, grade, def), [value, grade, def]);
+}
+
+export type EventExcellenceAwards = {
+  grade: "Overall" | Grade;
+  award: Award;
+};
+
+export function useEventExcellenceAwards(
+  event: Event | null | undefined,
+): UseQueryResult<EventExcellenceAwards[] | null> {
+  return useQuery({
+    queryKey: ["@referee-fyi/useEventExcellenceAwards", event?.sku],
+    queryFn: async () => {
+      if (!event) {
+        return null;
+      }
+
+      const awards = await event.awards();
+
+      const excellenceAwards = (awards.data ?? []).filter((a) =>
+        a.title?.includes("Excellence Award")
+      );
+
+      if (excellenceAwards.length === 0) {
+        return [];
+      }
+
+      if (excellenceAwards.length < 2) {
+        return [
+          {
+            grade: "Overall" as Grade | "Overall",
+            award: excellenceAwards[0],
+          },
+        ];
+      }
+
+      const grades = [
+        "College",
+        "High School",
+        "Middle School",
+        "Elementary School",
+      ] as Grade[];
+
+      return excellenceAwards.map((award) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const grade = grades.find((g) => award.title?.includes(g))!;
+        return { grade, award };
+      });
+    },
+  });
 }

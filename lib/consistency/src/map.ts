@@ -93,7 +93,9 @@ export function mergeMap<T extends ConsistentMapElement>({
 		[...remoteOnlyIds].map((id) => [id, remote.values[id]!]),
 	);
 	const sharedValues = Object.fromEntries(
-		mergeResults.map((result) => [result.resolved?.id, result.resolved! as T]),
+		mergeResults.flatMap((result) =>
+			result.resolved ? [[result.resolved.id, result.resolved as T]] : [],
+		),
 	);
 
 	const resolved: ConsistentMap<T> = {

@@ -267,7 +267,7 @@ export const EventPicker: React.FC = () => {
 				mode="none"
 				className="flex-1 active:bg-zinc-600"
 				onClick={onClick}
-				aria-description={showDiv ? "Select Division" : "Select Event"}
+				aria-label={showDiv ? "Select Division" : "Select Event"}
 			>
 				<div
 					className="grid items-center gap-2"

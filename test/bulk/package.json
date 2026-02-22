@@ -8,9 +8,9 @@
     "puppeteer": "^21.7.0"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsgo",
     "run": "node main.js"
   },
   "author": "",
-  "license": "ISC"  
+  "license": "ISC"
 }

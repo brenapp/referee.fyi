@@ -2,7 +2,7 @@ import { z } from "zod/v4";
 import type { Color } from "robotevents";
 import {
   LastWriteWinsConsistencySchema,
-  WithLWWConsistency,
+  type WithLWWConsistency,
 } from "@referee-fyi/consistency";
 import { IncidentMatchHeadToHeadSchema } from "./incident.js";
 
@@ -25,8 +25,9 @@ export type DefaultV5RCMatchScratchpadProperties = {
   timeout: Record<Color, boolean>;
 };
 
-export type BaseDefaultV5RCMatchScratchpad = BaseMatchScratchpad &
-  DefaultV5RCMatchScratchpadProperties;
+export type BaseDefaultV5RCMatchScratchpad =
+  & BaseMatchScratchpad
+  & DefaultV5RCMatchScratchpadProperties;
 
 export type DefaultV5RCMatchScratchpad = WithLWWConsistency<
   BaseDefaultV5RCMatchScratchpad,
@@ -34,8 +35,9 @@ export type DefaultV5RCMatchScratchpad = WithLWWConsistency<
 >;
 
 export type DefaultVIQRCMatchScratchpadProperties = BaseMatchScratchpad;
-export type BaseDefaultVIQRCMatchScratchpad = BaseMatchScratchpad &
-  DefaultVIQRCMatchScratchpadProperties;
+export type BaseDefaultVIQRCMatchScratchpad =
+  & BaseMatchScratchpad
+  & DefaultVIQRCMatchScratchpadProperties;
 
 export type DefaultVIQRCMatchScratchpad = WithLWWConsistency<
   BaseDefaultVIQRCMatchScratchpad,

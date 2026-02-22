@@ -8,8 +8,8 @@
     "import": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc -w",
+    "build": "tsgo",
+    "dev": "tsgo -w",
     "test": "vitest"
   },
   "keywords": [],

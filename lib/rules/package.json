@@ -14,8 +14,8 @@
     }
   },
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc -w",
+    "build": "tsgo",
+    "dev": "tsgo -w",
     "typegen:qnaplus": "npx openapi-typescript https://api.qnapl.us/openapi -o ./generated/qnaplus.d.ts"
   },
   "author": "",

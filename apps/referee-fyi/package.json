@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "frontend:dev": "vite --host --port 3000",
-    "frontend:build": "tsc && vite build",
+    "frontend:build": "tsgo && vite build",
     "lib:dev": "concurrently \"npm --prefix ../../lib/share run dev\" \"npm --prefix ../../lib/consistency run dev\" \"npm --prefix ../../lib/pdf  run dev\" \"npm --prefix ../../lib/rules run dev\"",
     "lib:build": "npm --prefix ../../lib/rules run build && npm --prefix ../../lib/consistency run build && npm --prefix ../../lib/share run build && npm --prefix ../../lib/pdf run build",
     "sync:dev": "npm --prefix ../../worker/sync run dev",
@@ -70,6 +70,7 @@
     "@types/ua-parser-js": "^0.7.39",
     "@typescript-eslint/eslint-plugin": "^8.48.0",
     "@typescript-eslint/parser": "^8.48.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260222.1",
     "@vitejs/plugin-react": "^4.2.0",
     "@vitejs/plugin-react-swc": "^3.0.0",
     "autoprefixer": "^10.4.14",

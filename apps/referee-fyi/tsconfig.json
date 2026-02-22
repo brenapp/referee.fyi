@@ -9,7 +9,6 @@
     ],
     "module": "ESNext",
     "skipLibCheck": true,
-    "baseUrl": "./src",
     /* Bundler mode */
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
@@ -24,22 +23,22 @@
     "sourceMap": true,
     "paths": {
       "~utils/*": [
-        "./utils/*"
+        "./src/utils/*"
       ],
       "~hooks/*": [
-        "./utils/hooks/*"
+        "./src/utils/hooks/*"
       ],
       "~components/*": [
-        "./components/*"
+        "./src/components/*"
       ],
       "~models/*": [
-        "./models/*"
+        "./src/models/*"
       ],
       "~documents/*": [
-        "./documents/*"
+        "./src/documents/*"
       ],
       "~types/*": [
-        "../types/*"
+        "./types/*"
       ],
     }
   },

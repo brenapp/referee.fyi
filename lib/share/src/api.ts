@@ -1,6 +1,9 @@
-import { ConsistentMap, ConsistentMapSchema } from "@referee-fyi/consistency";
-import { IncidentSchema, type Incident } from "./incident.js";
-import { MatchScratchpadSchema, type MatchScratchpad } from "./index.js";
+import {
+  type ConsistentMap,
+  ConsistentMapSchema,
+} from "@referee-fyi/consistency";
+import { type Incident, IncidentSchema } from "./incident.js";
+import { type MatchScratchpad, MatchScratchpadSchema } from "./index.js";
 import { InvitationSchema } from "./server.js";
 import { z, ZodType } from "zod/v4";
 
@@ -66,7 +69,7 @@ export const InstanceIncidentsSchema = ConsistentMapSchema(IncidentSchema);
 export type InstanceIncidents = ConsistentMap<Incident>;
 
 export const InstanceScratchpadSchema = ConsistentMapSchema(
-  MatchScratchpadSchema
+  MatchScratchpadSchema,
 );
 export type InstanceScratchpads = ConsistentMap<MatchScratchpad>;
 
@@ -198,5 +201,6 @@ export type WebSocketPayloadAdditionalInfo = z.infer<
 
 export const WebSocketPayloadSchema = <T extends ZodType>(type: T) =>
   WebSocketPayloadAdditionalInfoSchema.extend(type);
-export type WebSocketPayload<T extends WebSocketMessage> = T &
-  WebSocketPayloadAdditionalInfo;
+export type WebSocketPayload<T extends WebSocketMessage> =
+  & T
+  & WebSocketPayloadAdditionalInfo;

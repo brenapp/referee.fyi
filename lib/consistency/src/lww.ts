@@ -50,7 +50,7 @@ export type LastWriteWinsConsistency<
 export const LastWriteWinsConsistencySchema = <
   T extends z.ZodRecord["keyType"],
 >(
-  key: T
+  key: T,
 ) => z.record(key, KeyRegisterSchema);
 
 export type WithLWWConsistency<
@@ -83,7 +83,7 @@ export type MergeResult<T extends BaseWithLWWConsistency> = {
 };
 
 export type MergeFunction<T extends BaseWithLWWConsistency> = (
-  options: MergeOptions<T>
+  options: MergeOptions<T>,
 ) => MergeResult<T>;
 
 /**
@@ -95,18 +95,18 @@ export type MergeFunction<T extends BaseWithLWWConsistency> = (
  * @returns The merged value, and a list of values that changed from local
  */
 export function mergeLWW<T extends BaseWithLWWConsistency>(
-  options: MergeOptions<T>
+  options: MergeOptions<T>,
 ): MergeResult<T> {
   if (!options.local && options.remote) {
     const changed = Object.keys(options.remote).filter(
-      (key) => key !== "consistency" && !options.ignore.includes(key)
+      (key) => key !== "consistency" && !options.ignore.includes(key),
     ) as LWWKeys<T>[];
     return { resolved: options.remote, changed, rejected: [] };
   }
 
   if (!options.remote && options.local) {
     const rejected = Object.keys(options.local).filter(
-      (key) => key !== "consistency" && !options.ignore.includes(key)
+      (key) => key !== "consistency" && !options.ignore.includes(key),
     ) as LWWKeys<T>[];
     return { resolved: options.local, changed: [], rejected };
   }
@@ -130,6 +130,10 @@ export function mergeLWW<T extends BaseWithLWWConsistency>(
     const localHistory = local.consistency[key];
     const remoteHistory = remote.consistency[key];
 
+    if (!localHistory || !remoteHistory) {
+      continue;
+    }
+
     // Local History is more advanced
     const shouldReject = localHistory.count > remoteHistory.count;
 
@@ -147,10 +151,10 @@ export function mergeLWW<T extends BaseWithLWWConsistency>(
     if (shouldOverride) {
       resolved[key] = remote[key];
       resolved.consistency[key] = {
-        count: remote.consistency[key].count,
-        peer: remote.consistency[key].peer,
-        history: remote.consistency[key].history,
-        instant: remote.consistency[key].instant,
+        count: remoteHistory.count,
+        peer: remoteHistory.peer,
+        history: remoteHistory.history,
+        instant: remoteHistory.instant,
       };
       changed.push(key);
     }
@@ -171,7 +175,7 @@ export function initLWW<T extends BaseWithLWWConsistency>({
   ignore,
 }: InitOptions<T>): T {
   const keys = Object.keys(value).filter(
-    (key) => !ignore.includes(key)
+    (key) => !ignore.includes(key),
   ) as LWWKeys<T>[];
 
   const consistency: Record<
@@ -181,7 +185,7 @@ export function initLWW<T extends BaseWithLWWConsistency>({
     keys.map((key) => [
       key,
       { count: 0, instant: new Date().toISOString(), peer, history: [] },
-    ])
+    ]),
   );
 
   return { ...value, consistency } as unknown as T;
@@ -210,6 +214,14 @@ export function equivalentLWW<T extends BaseWithLWWConsistency>({
     const leftConsistency = left.consistency[key];
     const rightConsistency = right.consistency[key];
 
+    if (!leftConsistency || !rightConsistency) {
+      if (leftConsistency !== rightConsistency) {
+        return false;
+      }
+
+      continue;
+    }
+
     if (
       leftConsistency.count !== rightConsistency.count ||
       leftConsistency.peer !== rightConsistency.peer
@@ -234,17 +246,18 @@ export function updateLWW<
   V = T[K],
 >(
   object: T,
-  { key, value, peer, instant = new Date().toISOString() }: UpdateOptions<K, V>
+  { key, value, peer, instant = new Date().toISOString() }: UpdateOptions<K, V>,
 ): T {
-  const current = object.consistency[key].history as History<T, K>[];
+  const existing = object.consistency[key]!;
+  const current = existing.history as History<T, K>[];
   const register: KeyRegister<T, K> = {
-    count: object.consistency[key].count + 1,
+    count: existing.count + 1,
     peer,
     instant,
     history: current.concat({
       prev: object[key],
       peer,
-      instant: object.consistency[key].instant,
+      instant: existing.instant,
     } as History<T, K>),
   };
   return {
@@ -256,7 +269,7 @@ export function updateLWW<
 
 export function isKeyLWW<T extends BaseWithLWWConsistency>(
   key: string | number | symbol,
-  ignore: readonly string[]
+  ignore: readonly string[],
 ): key is LWWKeys<T> {
   return !ignore.includes(key as string) && key !== "consistency";
 }

@@ -1,5 +1,10 @@
-import { initLWW, mergeLWW, updateLWW, WithLWWConsistency } from "./index.js";
-import { test, expect } from "vitest";
+import {
+  initLWW,
+  mergeLWW,
+  updateLWW,
+  type WithLWWConsistency,
+} from "./index.js";
+import { expect, test } from "vitest";
 
 type BaseObject = {
   a: string;

@@ -1,5 +1,9 @@
 import { z } from "zod/v4";
-import { MergeFunction, mergeLWW, WithLWWConsistency } from "./lww.js";
+import {
+  type MergeFunction,
+  mergeLWW,
+  type WithLWWConsistency,
+} from "./lww.js";
 import { mergeGrowSet } from "./gset.js";
 
 type ConsistentMapElement = WithLWWConsistency<
@@ -81,13 +85,13 @@ export function mergeMap<T extends ConsistentMapElement>({
   };
 
   const localOnlyValues = Object.fromEntries(
-    [...localOnlyIds].map((id) => [id, local.values[id]])
+    [...localOnlyIds].map((id) => [id, local.values[id]!]),
   );
   const remoteOnlyValues = Object.fromEntries(
-    [...remoteOnlyIds].map((id) => [id, remote.values[id]])
+    [...remoteOnlyIds].map((id) => [id, remote.values[id]!]),
   );
   const sharedValues = Object.fromEntries(
-    mergeResults.map((result) => [result.resolved!.id, result.resolved! as T])
+    mergeResults.map((result) => [result.resolved!.id, result.resolved! as T]),
   );
 
   const resolved: ConsistentMap<T> = {

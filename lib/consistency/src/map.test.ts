@@ -1,6 +1,6 @@
-import { test, expect } from "vitest";
-import { ConsistentMap, mergeMap } from "./map.js";
-import { initLWW, updateLWW, WithLWWConsistency } from "./lww.js";
+import { expect, test } from "vitest";
+import { type ConsistentMap, mergeMap } from "./map.js";
+import { initLWW, updateLWW, type WithLWWConsistency } from "./lww.js";
 
 type BaseIncident = {
   id: string;
@@ -102,7 +102,7 @@ test("local update handled", () => {
       }),
     },
   };
-  local.values["incident1"] = updateLWW(local.values["incident1"], {
+  local.values["incident1"] = updateLWW(local.values["incident1"]!, {
     key: "note",
     value: "Expansion BMM EDIT",
     peer: "LOCAL",
@@ -156,7 +156,7 @@ test("remote update handled", () => {
       }),
     },
   };
-  local.values["incident1"] = updateLWW(local.values["incident1"], {
+  local.values["incident1"] = updateLWW(local.values["incident1"]!, {
     key: "note",
     value: "Expansion BMM EDIT",
     peer: "LOCAL",
@@ -178,7 +178,7 @@ test("remote update handled", () => {
       }),
     },
   };
-  remote.values["incident1"] = updateLWW(remote.values["incident1"], {
+  remote.values["incident1"] = updateLWW(remote.values["incident1"]!, {
     key: "rule",
     value: "<SG8>",
     peer: "REMOTE",
@@ -193,8 +193,8 @@ test("remote update handled", () => {
     rule: "<SG8>",
     note: "Expansion BMM EDIT",
     consistency: {
-      rule: remote.values["incident1"].consistency.rule,
-      note: local.values["incident1"].consistency.note,
+      rule: remote.values["incident1"]!.consistency.rule,
+      note: local.values["incident1"]!.consistency.note,
     },
   });
 

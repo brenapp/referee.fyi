@@ -1,15 +1,15 @@
 .markdown h2 {
-  font-size: 1.5em;
-  font-weight: bold;
+	font-size: 1.5em;
+	font-weight: bold;
 }
 .markdown h3 {
-  font-size: 1.2em;
-  margin-bottom: 1rem;
+	font-size: 1.2em;
+	margin-bottom: 1rem;
 }
 
 .markdown ul {
-  list-style: unset;
-  padding-left: 1rem;
+	list-style: unset;
+	padding-left: 1rem;
 }
 
 .markdown h1,
@@ -18,9 +18,9 @@
 .markdown h4,
 .markdown h5,
 .markdown h6 {
-  margin-top: 1rem;
+	margin-top: 1rem;
 }
 
 .markdown p {
-  margin-bottom: 1rem;
+	margin-bottom: 1rem;
 }

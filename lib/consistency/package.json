@@ -1,25 +1,25 @@
 {
-  "name": "@referee-fyi/consistency",
-  "type": "module",
-  "private": true,
-  "version": "1.0.0",
-  "description": "Strong eventual-consistency guarantees using CRDTs",
-  "exports": {
-    "default": "./dist/index.js"
-  },
-  "scripts": {
-    "build": "tsc",
-    "dev": "tsc -w",
-    "test": "vitest"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@types/node": "^24.3.0",
-    "vitest": "^2.0.3"
-  },
-  "dependencies": {
-    "zod": "^4.0.14"
-  }
+	"name": "@referee-fyi/consistency",
+	"type": "module",
+	"private": true,
+	"version": "1.0.0",
+	"description": "Strong eventual-consistency guarantees using CRDTs",
+	"exports": {
+		"default": "./dist/index.js"
+	},
+	"scripts": {
+		"build": "tsgo",
+		"dev": "tsgo -w",
+		"test": "vitest"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@types/node": "^24.3.0",
+		"vitest": "^2.0.3"
+	},
+	"dependencies": {
+		"zod": "^4.0.14"
+	}
 }

@@ -1,41 +1,41 @@
 import {
-  ErrorBoundary as SentryErrorBoundary,
-  ErrorBoundaryProps,
-  FallbackRender,
+	type ErrorBoundaryProps,
+	type FallbackRender,
+	ErrorBoundary as SentryErrorBoundary,
 } from "@sentry/react";
-import { ReportIssueDialog } from "./dialogs/report";
 import { useCallback } from "react";
 import { clearCache } from "~utils/sentry";
+import { ReportIssueDialog } from "./dialogs/report";
 
 export const ErrorReportIssueDialog: FallbackRender = (props) => {
-  const setOpen = useCallback(
-    (value: boolean) => {
-      if (value) return;
+	const setOpen = useCallback(
+		(value: boolean) => {
+			if (value) return;
 
-      props.resetError();
+			props.resetError();
 
-      if (navigator.onLine) {
-        clearCache();
-      } else {
-        window.location.reload();
-      }
-    },
-    [props]
-  );
-  return (
-    <ReportIssueDialog
-      open={true}
-      setOpen={setOpen}
-      context={JSON.stringify(props)}
-      error={props}
-    />
-  );
+			if (navigator.onLine) {
+				clearCache();
+			} else {
+				window.location.reload();
+			}
+		},
+		[props],
+	);
+	return (
+		<ReportIssueDialog
+			open={true}
+			setOpen={setOpen}
+			context={JSON.stringify(props)}
+			error={props}
+		/>
+	);
 };
 
 export const ErrorBoundary: React.FC<ErrorBoundaryProps> = (props) => (
-  <SentryErrorBoundary
-    fallback={(props) => <ErrorReportIssueDialog {...props} />}
-  >
-    {props.children}
-  </SentryErrorBoundary>
+	<SentryErrorBoundary
+		fallback={(props) => <ErrorReportIssueDialog {...props} />}
+	>
+		{props.children}
+	</SentryErrorBoundary>
 );

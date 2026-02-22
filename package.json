@@ -1,29 +1,31 @@
 {
-  "name": "referee-fyi",
-  "version": "1.0.0",
-  "description": "Referee FYI is a digital anomaly log for Head Referees in robotics competitions. Referee FYI allows you to record violations quickly, see summaries before a match, and share your log with others. It designed to replace the paper entries referees would use before, and is meant to complement existing competition technology tooling.",
-  "homepage": "https://github.com/brenapp/referee.fyi#readme",
-  "bugs": {
-    "url": "https://github.com/brenapp/referee.fyi/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/brenapp/referee.fyi.git"
-  },
-  "workspaces": [
-    "lib/consistency",
-    "lib/share",
-    "lib/pdf",
-    "lib/rules",
-    "worker/*",
-    "apps/*"
-  ],
-  "author": "Brendan McGuire",
-  "type": "commonjs",
-  "main": "index.js",
-  "scripts": {
-    "build": "npm run --workspaces --if-present build"
-  },
-  "dependencies": {},
-  "devDependencies": {}
+	"name": "referee-fyi",
+	"version": "1.0.0",
+	"description": "Referee FYI is a digital anomaly log for Head Referees in robotics competitions. Referee FYI allows you to record violations quickly, see summaries before a match, and share your log with others. It designed to replace the paper entries referees would use before, and is meant to complement existing competition technology tooling.",
+	"homepage": "https://github.com/brenapp/referee.fyi#readme",
+	"bugs": {
+		"url": "https://github.com/brenapp/referee.fyi/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/brenapp/referee.fyi.git"
+	},
+	"workspaces": [
+		"lib/consistency",
+		"lib/share",
+		"lib/pdf",
+		"lib/rules",
+		"worker/*",
+		"apps/*"
+	],
+	"author": "Brendan McGuire",
+	"type": "commonjs",
+	"main": "index.js",
+	"scripts": {
+		"build": "npm run --workspaces --if-present build",
+		"lint": "biome ci"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.4"
+	}
 }

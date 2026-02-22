@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import config from "./config.json" assert { type: "json" };
-import fs from "fs/promises";
+import config from "./config.json"
+assert;
+type: "json";
+import fs from "node:fs/promises";
 
 const response = await fetch(
   `https://share.referee.fyi/api/integration/v1/${config.sku}/incidents.json?token=${config.bearer}`
@@ -20,24 +22,24 @@ const list = [];
 const redflags = [];
 
 for (const incident of data) {
-  const key =
-    incident.division +
-    (incident.match?.name ?? "<NM>") +
-    incident.team +
-    incident.rules.join(" ");
+	const key =
+		incident.division +
+		(incident.match?.name ?? "<NM>") +
+		incident.team +
+		incident.rules.join(" ");
 
-  if (map.has(key)) {
-    const a = map.get(key);
-    const b = incident;
+	if (map.has(key)) {
+		const a = map.get(key);
+		const b = incident;
 
-    const duplicate = { a, b };
-    list.push(duplicate);
-    redflags.push(
-      `${incident.division}\t${incident?.team}\t${incident.match?.name}\t${incident.revision.user.name}`
-    );
-  }
+		const duplicate = { a, b };
+		list.push(duplicate);
+		redflags.push(
+			`${incident.division}\t${incident?.team}\t${incident.match?.name}\t${incident.revision.user.name}`,
+		);
+	}
 
-  map.set(key, incident);
+	map.set(key, incident);
 }
 
 await fs.writeFile("duplicates.json", JSON.stringify(list, null, 4));

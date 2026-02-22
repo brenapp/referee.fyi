@@ -1,34 +1,23 @@
 {
-  "include": [
-    "src",
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "test"
-  ],
-  "compilerOptions": {
-    "incremental": true,
-    "target": "es2021",
-    "lib": [
-      "ESNext"
-    ],
-    "jsx": "react",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "resolveJsonModule": true,
-    "allowJs": true,
-    "checkJs": false,
-    "noEmit": true,
-    "isolatedModules": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "paths": {},
-    "types": [
-      "node",
-      "./worker-configuration.d.ts"
-    ],
-    "skipLibCheck": true
-  }
+	"include": ["src"],
+	"exclude": ["node_modules", "dist", "test"],
+	"compilerOptions": {
+		"incremental": true,
+		"target": "es2021",
+		"lib": ["ESNext"],
+		"jsx": "react",
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"resolveJsonModule": true,
+		"allowJs": true,
+		"checkJs": false,
+		"noEmit": true,
+		"isolatedModules": true,
+		"allowSyntheticDefaultImports": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"paths": {},
+		"types": ["node", "./worker-configuration.d.ts"],
+		"skipLibCheck": true
+	}
 }

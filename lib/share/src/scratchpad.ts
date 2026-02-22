@@ -1,67 +1,67 @@
-import { z } from "zod/v4";
-import type { Color } from "robotevents";
 import {
-  LastWriteWinsConsistencySchema,
-  WithLWWConsistency,
+	LastWriteWinsConsistencySchema,
+	type WithLWWConsistency,
 } from "@referee-fyi/consistency";
+import type { Color } from "robotevents";
+import { z } from "zod/v4";
 import { IncidentMatchHeadToHeadSchema } from "./incident.js";
 
 export const BaseMatchScratchpadSchema = z.looseObject({
-  id: z.string(),
-  event: z.string(),
-  match: IncidentMatchHeadToHeadSchema,
-  notes: z.string().optional(),
+	id: z.string(),
+	event: z.string(),
+	match: IncidentMatchHeadToHeadSchema,
+	notes: z.string().optional(),
 });
 
 export type BaseMatchScratchpad = z.infer<typeof BaseMatchScratchpadSchema>;
 
 export const SCRATCHPAD_IGNORE = ["event", "match", "notes", "id"] as const;
 export type ScratchpadUnchangeableProperties =
-  (typeof SCRATCHPAD_IGNORE)[number];
+	(typeof SCRATCHPAD_IGNORE)[number];
 
 export type DefaultV5RCMatchScratchpadProperties = {
-  awp: Record<Color, boolean>;
-  auto: Color | "tie" | "none";
-  timeout: Record<Color, boolean>;
+	awp: Record<Color, boolean>;
+	auto: Color | "tie" | "none";
+	timeout: Record<Color, boolean>;
 };
 
 export type BaseDefaultV5RCMatchScratchpad = BaseMatchScratchpad &
-  DefaultV5RCMatchScratchpadProperties;
+	DefaultV5RCMatchScratchpadProperties;
 
 export type DefaultV5RCMatchScratchpad = WithLWWConsistency<
-  BaseDefaultV5RCMatchScratchpad,
-  ScratchpadUnchangeableProperties
+	BaseDefaultV5RCMatchScratchpad,
+	ScratchpadUnchangeableProperties
 >;
 
 export type DefaultVIQRCMatchScratchpadProperties = BaseMatchScratchpad;
 export type BaseDefaultVIQRCMatchScratchpad = BaseMatchScratchpad &
-  DefaultVIQRCMatchScratchpadProperties;
+	DefaultVIQRCMatchScratchpadProperties;
 
 export type DefaultVIQRCMatchScratchpad = WithLWWConsistency<
-  BaseDefaultVIQRCMatchScratchpad,
-  ScratchpadUnchangeableProperties
+	BaseDefaultVIQRCMatchScratchpad,
+	ScratchpadUnchangeableProperties
 >;
 
 export type MatchScratchpad =
-  | DefaultV5RCMatchScratchpad
-  | DefaultVIQRCMatchScratchpad;
+	| DefaultV5RCMatchScratchpad
+	| DefaultVIQRCMatchScratchpad;
 
 export const MatchScratchpadSchema = BaseMatchScratchpadSchema.extend({
-  consistency: LastWriteWinsConsistencySchema(z.string()),
+	consistency: LastWriteWinsConsistencySchema(z.string()),
 }).meta({
-  id: "MatchScratchpad",
-  description:
-    "Real-time information about a match recorded by a head referee.",
+	id: "MatchScratchpad",
+	description:
+		"Real-time information about a match recorded by a head referee.",
 });
 
 export type Scratchpads = {
-  DefaultV5RC: DefaultV5RCMatchScratchpad;
-  DefaultVIQRC: DefaultVIQRCMatchScratchpad;
+	DefaultV5RC: DefaultV5RCMatchScratchpad;
+	DefaultVIQRC: DefaultVIQRCMatchScratchpad;
 };
 
 export type ScratchpadKind = keyof Scratchpads;
 
 export type EditScratchpad<T extends MatchScratchpad> = Omit<
-  T,
-  ScratchpadUnchangeableProperties
+	T,
+	ScratchpadUnchangeableProperties
 >;

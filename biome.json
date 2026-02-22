@@ -11,7 +11,8 @@
 			"!!**/dist",
 			"!**/worker-configuration.d.ts",
 			"!**/routeTree.gen.ts",
-			"!utils"
+			"!utils",
+			"!apps/referee-fyi/types/generated"
 		]
 	},
 	"formatter": {

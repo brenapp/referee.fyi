@@ -4,7 +4,7 @@ import { twMerge } from "tailwind-merge";
 import { IconButton } from "./Button";
 import { ReportIssueDialog } from "./dialogs/report";
 import type { ToastArguments } from "./Toast";
-import { Error } from "./Warning";
+import { ErrorMessage } from "./Warning";
 
 export type ErrorToastProps = Omit<ToastArguments, "type"> &
 	React.HTMLProps<HTMLDivElement>;
@@ -21,7 +21,7 @@ export const ErrorToast: React.FC<ErrorToastProps> = ({
 			{...props}
 			className={twMerge("flex gap-2 items-center", props.className)}
 		>
-			<Error message={message + "\n" + context} />
+			<ErrorMessage message={`${message}\n${context}`} />
 			<ReportIssueDialog
 				open={open}
 				setOpen={setOpen}

@@ -1,9 +1,9 @@
 import { exec } from "node:child_process";
+import fs from "node:fs/promises";
 import { GameSchema } from "@referee-fyi/rules";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import tanstackRouter from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react-swc";
-import fs from "fs/promises";
 import openApiTypescript, {
 	astToString,
 	type OpenAPI3,

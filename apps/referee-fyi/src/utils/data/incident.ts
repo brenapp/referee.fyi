@@ -267,7 +267,7 @@ export async function newIncident({
 	await bulkIndexInsert({
 		[`event_${incident.event}_idx`]: [incident],
 		[`team_${incident.team}_idx`]: [incident],
-		["incidents"]: [incident],
+		incidents: [incident],
 	});
 
 	return incident;
@@ -304,7 +304,7 @@ export async function addIncident(incident: Incident) {
 	await bulkIndexInsert({
 		[`event_${incident.event}_idx`]: [incident],
 		[`team_${incident.team}_idx`]: [incident],
-		["incidents"]: [incident],
+		incidents: [incident],
 	});
 }
 
@@ -331,7 +331,7 @@ export async function editIncident(id: string, incident: EditIncident) {
 
 		const newValue = incident[key as keyof EditIncident];
 
-		if (JSON.stringify(currentValue) != JSON.stringify(newValue)) {
+		if (JSON.stringify(currentValue) !== JSON.stringify(newValue)) {
 			updated = updateLWW(updated, {
 				key: key as keyof EditIncident,
 				value: newValue,

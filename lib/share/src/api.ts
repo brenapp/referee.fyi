@@ -4,7 +4,7 @@ import {
 } from "@referee-fyi/consistency";
 import { type ZodType, z } from "zod/v4";
 import { type Incident, IncidentSchema } from "./incident.js";
-import { type MatchScratchpad, MatchScratchpadSchema } from "./index.js";
+import { type MatchScratchpad, MatchScratchpadSchema } from "./scratchpad.js";
 import { InvitationSchema } from "./server.js";
 
 export const UserRole = ["none", "system"] as const;

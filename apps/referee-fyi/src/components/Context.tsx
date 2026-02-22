@@ -45,12 +45,7 @@ export const AllianceList: React.FC<AllianceListProps> = ({
 					</li>
 				))}
 			</ul>
-			<p
-				className={twMerge("font-mono text-xl")}
-				aria-label={`${color} score ${score}`}
-			>
-				{score}
-			</p>
+			<p className={twMerge("font-mono text-xl")}>{score}</p>
 		</div>
 	);
 };
@@ -72,6 +67,7 @@ export const SingleAllianceMatchContext: React.FC<MatchContextProps> = ({
 	const teams = match.teams();
 
 	return (
+		// biome-ignore lint/a11y/useAriaPropsSupportedByRole: match context is a presentational div with descriptive label
 		<div {...props} aria-label={match.name}>
 			<AllianceList
 				teams={teams}
@@ -106,13 +102,13 @@ export const MatchContext: React.FC<MatchContextProps> = ({
 	return (
 		<div {...props} className={twMerge("flex gap-2", props.className)}>
 			<AllianceList
-				teams={red.teams.map((t) => t.team!)}
+				teams={red.teams.map((t) => t.team).filter((t) => !!t)}
 				color="red"
 				score={red.score}
 				{...parts?.alliance}
 			/>
 			<AllianceList
-				teams={blue.teams.map((t) => t.team!)}
+				teams={blue.teams.map((t) => t.team).filter((t) => !!t)}
 				color="blue"
 				reverse
 				score={blue.score}

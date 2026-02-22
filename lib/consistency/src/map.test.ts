@@ -102,7 +102,7 @@ test("local update handled", () => {
 			}),
 		},
 	};
-	local.values["incident1"] = updateLWW(local.values["incident1"]!, {
+	local.values.incident1 = updateLWW(local.values.incident1!, {
 		key: "note",
 		value: "Expansion BMM EDIT",
 		peer: "LOCAL",
@@ -156,7 +156,7 @@ test("remote update handled", () => {
 			}),
 		},
 	};
-	local.values["incident1"] = updateLWW(local.values["incident1"]!, {
+	local.values.incident1 = updateLWW(local.values.incident1!, {
 		key: "note",
 		value: "Expansion BMM EDIT",
 		peer: "LOCAL",
@@ -178,7 +178,7 @@ test("remote update handled", () => {
 			}),
 		},
 	};
-	remote.values["incident1"] = updateLWW(remote.values["incident1"]!, {
+	remote.values.incident1 = updateLWW(remote.values.incident1!, {
 		key: "rule",
 		value: "<SG8>",
 		peer: "REMOTE",
@@ -186,15 +186,15 @@ test("remote update handled", () => {
 
 	const result = mergeMap({ local, remote, ignore });
 	expect(result.resolved.deleted).toEqual(["incident12"]);
-	expect(result.resolved.values["incident1"]).toEqual({
+	expect(result.resolved.values.incident1).toEqual({
 		id: "incident1",
 		event: "RE-VRC-23-3690",
 		team: "3796B",
 		rule: "<SG8>",
 		note: "Expansion BMM EDIT",
 		consistency: {
-			rule: remote.values["incident1"]!.consistency.rule,
-			note: local.values["incident1"]!.consistency.note,
+			rule: remote.values.incident1?.consistency.rule,
+			note: local.values.incident1?.consistency.note,
 		},
 	});
 

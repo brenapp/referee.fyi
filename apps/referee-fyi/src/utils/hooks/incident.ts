@@ -248,7 +248,9 @@ export function useTeamIncidentsByMatch(
 			const match = new Match(matchData);
 			const alliances = [match.alliance("red"), match.alliance("blue")];
 			const teams =
-				alliances.flatMap((a) => a.teams.map((t) => t.team!.name)) ?? [];
+				alliances
+					.flatMap((a) => a.teams.map((t) => t.team?.name))
+					.filter((name): name is string => name !== undefined) ?? [];
 
 			const incidentsByTeam: TeamIncidentsByMatch = [];
 

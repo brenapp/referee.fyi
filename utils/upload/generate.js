@@ -2,8 +2,8 @@
 import config from "./config.json"
 assert;
 type: "json";
-import crypto from "crypto";
-import fs from "fs/promises";
+import crypto from "node:crypto";
+import fs from "node:fs/promises";
 
 const values = await fs
   .readFile("./headreferees.tsv")

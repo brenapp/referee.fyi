@@ -9,7 +9,7 @@ import {
 	IncidentMatchHeadToHeadPeriodDisplayNames,
 	type IncidentMatchSkills,
 } from "@referee-fyi/share";
-import { type SetStateAction, useCallback, useMemo } from "react";
+import { type SetStateAction, useCallback, useId, useMemo } from "react";
 import { type MatchData, programs } from "robotevents";
 import { twMerge } from "tailwind-merge";
 import { AssetPicker, LocalAssetPreview } from "~components/Assets";
@@ -55,6 +55,7 @@ export type EventNewIncidentDialogProps = {
 export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 	state: { incident, open, setIncidentField, setOpen },
 }) => {
+	const formId = useId();
 	const { mutateAsync: createIncident } = useNewIncident();
 
 	const { data: event, isLoading: isLoadingEvent } = useCurrentEvent();
@@ -365,37 +366,38 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 			/>
 			<DialogBody>
 				<Spinner show={isLoadingMetaData} />
-				<label>
+				<label htmlFor={`${formId}-match`}>
 					<p className="mt-4">Match</p>
-					<Select
-						bind={{
-							value: incident.skills
-								? "0"
-								: (incident.match?.id.toString() ?? "-1"),
-							onChange: onChangeIncidentMatch,
-						}}
-						className="max-w-full w-full"
-					>
-						<option value={"-1"}>Pick A Match</option>
-						<option value={"0"}>Skills</option>
-						{incident.team &&
-							teamMatchesByDiv?.map(([name, matches]) => (
-								<optgroup label={name} key={name}>
-									{matches.map((match) => (
-										<option value={match.id.toString()} key={match.id}>
-											{match.name}
-										</option>
-									))}
-								</optgroup>
-							))}
-						{!incident.team &&
-							matches?.map((match) => (
-								<option value={match.id.toString()} key={match.id}>
-									{match.name}
-								</option>
-							))}
-					</Select>
 				</label>
+				<Select
+					id={`${formId}-match`}
+					bind={{
+						value: incident.skills
+							? "0"
+							: (incident.match?.id.toString() ?? "-1"),
+						onChange: onChangeIncidentMatch,
+					}}
+					className="max-w-full w-full"
+				>
+					<option value={"-1"}>Pick A Match</option>
+					<option value={"0"}>Skills</option>
+					{incident.team &&
+						teamMatchesByDiv?.map(([name, matches]) => (
+							<optgroup label={name} key={name}>
+								{matches.map((match) => (
+									<option value={match.id.toString()} key={match.id}>
+										{match.name}
+									</option>
+								))}
+							</optgroup>
+						))}
+					{!incident.team &&
+						matches?.map((match) => (
+							<option value={match.id.toString()} key={match.id}>
+								{match.name}
+							</option>
+						))}
+				</Select>
 				{incident.skills ? (
 					<div
 						className="flex gap-2 mt-2"
@@ -488,48 +490,50 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 						/>
 					</>
 				) : null}
-				<label>
+				<label htmlFor={`${formId}-team`}>
 					<p className="mt-4">Team</p>
-					<Select
-						value={incident.team ?? -1}
-						onChange={onChangeIncidentTeam}
-						className="max-w-full w-full"
-					>
-						<option value={-1}>Pick A Team</option>
-						{matchData?.alliances.map((alliance) => (
-							<optgroup
-								key={alliance.color.toUpperCase()}
-								label={alliance.color.toUpperCase()}
-							>
-								{alliance.teams.map(({ team }) => (
-									<option value={team?.name} key={team?.id}>
-										{team?.name}
-									</option>
-								))}
-							</optgroup>
-						))}
-						{!incident.match &&
-							teams?.map((team) => (
-								<option value={team.number} key={team.id}>
-									{team.number}
+				</label>
+				<Select
+					id={`${formId}-team`}
+					value={incident.team ?? -1}
+					onChange={onChangeIncidentTeam}
+					className="max-w-full w-full"
+				>
+					<option value={-1}>Pick A Team</option>
+					{matchData?.alliances.map((alliance) => (
+						<optgroup
+							key={alliance.color.toUpperCase()}
+							label={alliance.color.toUpperCase()}
+						>
+							{alliance.teams.map(({ team }) => (
+								<option value={team?.name} key={team?.id}>
+									{team?.name}
 								</option>
 							))}
-					</Select>
-				</label>
-				<label>
+						</optgroup>
+					))}
+					{!incident.match &&
+						teams?.map((team) => (
+							<option value={team.number} key={team.id}>
+								{team.number}
+							</option>
+						))}
+				</Select>
+				<label htmlFor={`${formId}-outcome`}>
 					<p className="mt-4">Outcome</p>
-					<Select
-						value={incident.outcome}
-						onChange={onChangeIncidentOutcome}
-						className="max-w-full w-full"
-					>
-						<option value="General">General</option>
-						<option value="Inspection">Inspection</option>
-						<option value="Minor">Minor</option>
-						<option value="Major">Major</option>
-						<option value="Disabled">Disabled</option>
-					</Select>
 				</label>
+				<Select
+					id={`${formId}-outcome`}
+					value={incident.outcome}
+					onChange={onChangeIncidentOutcome}
+					className="max-w-full w-full"
+				>
+					<option value="General">General</option>
+					<option value="Inspection">Inspection</option>
+					<option value="Minor">Minor</option>
+					<option value="Major">Major</option>
+					<option value="Disabled">Disabled</option>
+				</Select>
 				<div>
 					<p className="mt-4">Associated Rules</p>
 					<div className="flex mt-2 gap-2 flex-wrap md:flex-nowrap">
@@ -580,10 +584,14 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 							</div>
 						))}
 					</section>
-					<label className="bg-zinc-700 rounded-md flex gap-2 items-center justify-center active:bg-zinc-800 focus-within:bg-zinc-800 focus-within:ring-2 ring-zinc-200 cursor-pointer px-3 py-2 mt-4">
+					<label
+						htmlFor={`${formId}-capture`}
+						className="bg-zinc-700 rounded-md flex gap-2 items-center justify-center active:bg-zinc-800 focus-within:bg-zinc-800 focus-within:ring-2 ring-zinc-200 cursor-pointer px-3 py-2 mt-4"
+					>
 						<CameraIcon className="w-8 h-8 text-zinc-50" />
 						<span>Capture</span>
 						<AssetPicker
+							id={`${formId}-capture`}
 							capture="environment"
 							accept="image/*"
 							className="sr-only"
@@ -591,10 +599,14 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 							onPick={onPickAsset}
 						/>
 					</label>
-					<label className="bg-zinc-700 rounded-md flex gap-2 items-center justify-center active:bg-zinc-800 focus-within:bg-zinc-800 focus-within:ring-2 ring-zinc-200 cursor-pointer px-3 py-2 mt-4">
+					<label
+						htmlFor={`${formId}-upload`}
+						className="bg-zinc-700 rounded-md flex gap-2 items-center justify-center active:bg-zinc-800 focus-within:bg-zinc-800 focus-within:ring-2 ring-zinc-200 cursor-pointer px-3 py-2 mt-4"
+					>
 						<ArrowUpTrayIcon className="w-8 h-8 text-zinc-50" />
 						<span>Upload</span>
 						<AssetPicker
+							id={`${formId}-upload`}
 							accept="image/*"
 							className="sr-only"
 							fields={{ type: "image" }}
@@ -602,15 +614,16 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 						/>
 					</label>
 				</div>
-				<label>
+				<label htmlFor={`${formId}-notes`}>
 					<p className="mt-4">Notes</p>
-					<TextArea
-						className="w-full mt-2 h-32"
-						value={incident.notes}
-						onChange={onChangeIncidentNotes}
-					/>
 				</label>
-				<label>
+				<TextArea
+					id={`${formId}-notes`}
+					className="w-full mt-2 h-32"
+					value={incident.notes}
+					onChange={onChangeIncidentNotes}
+				/>
+				<div>
 					<p className="mt-4">Flag For Review</p>
 					<Checkbox
 						label="Judging"
@@ -619,7 +632,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 							onChange: (value) => onChangeFlag("judge", value),
 						}}
 					/>
-				</label>
+				</div>
 			</DialogBody>
 			<DialogFooter>
 				<Button

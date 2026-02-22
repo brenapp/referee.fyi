@@ -72,14 +72,11 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
 }) => {
 	const [open, setOpen] = useState(false);
 
-	const onClick = useCallback(
-		(e: React.MouseEvent) => {
-			e.stopPropagation();
-			e.preventDefault();
-			setOpen(true);
-		},
-		[setOpen],
-	);
+	const onClick = useCallback((e: React.MouseEvent) => {
+		e.stopPropagation();
+		e.preventDefault();
+		setOpen(true);
+	}, []);
 
 	return (
 		<>
@@ -95,18 +92,25 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
 						<img
 							className="max-w-full max-h-full object-cover rounded-md z-10"
 							src={originalUrl ?? previewUrl}
+							alt="Full size preview"
 							{...props}
 						/>
 						<PhotoFallback className="absolute w-full h-full" />
 					</div>
 				</DialogBody>
 			</Dialog>
-			<img
-				className="w-full h-full object-cover aspect-square z-10 rounded-md bg-zinc-700"
+			<button
+				type="button"
+				className="w-full h-full p-0 border-0 bg-transparent cursor-pointer"
 				onClick={onClick}
-				src={previewUrl}
-				{...props}
-			/>
+			>
+				<img
+					className="w-full h-full object-cover aspect-square z-10 rounded-md bg-zinc-700"
+					src={previewUrl}
+					alt="Asset preview"
+					{...props}
+				/>
+			</button>
 		</>
 	);
 };

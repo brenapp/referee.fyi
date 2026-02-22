@@ -186,7 +186,9 @@ const EventMatchView: React.FC<EventMatchViewProps> = ({ match }) => {
 
 			const alliances = [match.alliance("red"), match.alliance("blue")];
 			const teams =
-				alliances.flatMap((a) => a.teams.map((t) => t.team!.name)) ?? [];
+				alliances
+					.flatMap((a) => a.teams.map((t) => t.team?.name))
+					.filter((name): name is string => name !== undefined) ?? [];
 
 			return teams.map((team) => ({ team, incidents: [] }));
 		},
@@ -244,7 +246,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
 		if (index !== -1) {
 			setMatchIndex([index, false]);
 		}
-	}, [initialMatchId, setMatchIndex, matches]);
+	}, [initialMatchId, matches]);
 
 	const match = useMemo(() => matches?.[matchIndex], [matchIndex, matches]);
 
@@ -300,7 +302,7 @@ export const EventMatchDialog: React.FC<EventMatchDialogProps> = ({
 		}
 		const controls = animate(x, calculateNewX(), transition);
 		return controls.stop;
-	}, [matchIndex, calculateNewX, x, animateMatchTransition]);
+	}, [calculateNewX, x, animateMatchTransition]);
 
 	return (
 		<Dialog

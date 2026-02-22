@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { type ReactNode, useCallback, useRef, useState } from "react";
+import { type ReactNode, useCallback, useId, useRef, useState } from "react";
 import { Button } from "~components/Button";
 import { Input, Select } from "~components/Input";
 import { Spinner } from "~components/Spinner";
@@ -27,6 +27,7 @@ export const EventDevTools: React.FC = () => {
 	});
 
 	const fileInputRef = useRef<HTMLInputElement | null>(null);
+	const formId = useId();
 	const importIncidents = useCallback(async () => {
 		const file = fileInputRef.current?.files?.[0];
 		if (!file) return;
@@ -49,7 +50,7 @@ export const EventDevTools: React.FC = () => {
 				context: JSON.stringify(e),
 			});
 		}
-	}, [fileInputRef]);
+	}, []);
 
 	const [generateIssueNumber, setGenerateIssueNumber] = useState(1000);
 	const [generateIssuesDivision, setGenerateIssuesDivision] = useState(
@@ -77,8 +78,8 @@ export const EventDevTools: React.FC = () => {
 
 				for (let i = 0; i < generateIssueNumber; i++) {
 					const team =
-						teamsInDivision!.teams[
-							Math.floor(Math.random() * teamsInDivision!.teams.length)
+						teamsInDivision?.teams[
+							Math.floor(Math.random() * teamsInDivision?.teams.length)
 						];
 
 					const match =
@@ -99,8 +100,8 @@ export const EventDevTools: React.FC = () => {
 
 					const incident: NewIncidentOptions = {
 						data: {
-							event: event!.sku,
-							team: team?.number,
+							event: event?.sku ?? "",
+							team: team?.number ?? "",
 							match: match
 								? {
 										type: "match",
@@ -135,7 +136,7 @@ export const EventDevTools: React.FC = () => {
 	const [incidentsToDelete, setIncidentsToDelete] = useState(10);
 	const { mutate: deleteIncidents, isPending: isDeletePending } = useMutation({
 		mutationFn: async () => {
-			const incidents = await getIncidentsForEvent(event!.sku);
+			const incidents = await getIncidentsForEvent(event?.sku ?? "");
 			const toDelete = [...incidents]
 				.sort(() => Math.random() - 0.5)
 				.slice(0, incidentsToDelete);
@@ -172,32 +173,37 @@ export const EventDevTools: React.FC = () => {
 					random rules. Note will include the time generated.
 				</p>
 				<fieldset className="flex mt-2 gap-2">
-					<label className="mt-2 flex-1">
+					<label htmlFor={`${formId}-generate-count`} className="mt-2 flex-1">
 						<p>Number to Generate</p>
-						<Input
-							type="number"
-							step={1}
-							className="w-full"
-							value={generateIssueNumber}
-							onChange={(e) => {
-								setGenerateIssueNumber(parseInt(e.currentTarget.value, 10));
-							}}
-						></Input>
 					</label>
-					<label className="mt-2 flex-1">
+					<Input
+						id={`${formId}-generate-count`}
+						type="number"
+						step={1}
+						className="w-full"
+						value={generateIssueNumber}
+						onChange={(e) => {
+							setGenerateIssueNumber(parseInt(e.currentTarget.value, 10));
+						}}
+					/>
+					<label
+						htmlFor={`${formId}-generate-division`}
+						className="mt-2 flex-1"
+					>
 						<p>Division</p>
-						<Select
-							className="w-full"
-							value={generateIssuesDivision}
-							onChange={(e) => setGenerateIssuesDivision(+e.target.value)}
-						>
-							{event?.divisions?.map((division) => (
-								<option key={division.id} value={division.id}>
-									{division.name}
-								</option>
-							))}
-						</Select>
 					</label>
+					<Select
+						id={`${formId}-generate-division`}
+						className="w-full"
+						value={generateIssuesDivision}
+						onChange={(e) => setGenerateIssuesDivision(+e.target.value)}
+					>
+						{event?.divisions?.map((division) => (
+							<option key={division.id} value={division.id}>
+								{division.name}
+							</option>
+						))}
+					</Select>
 				</fieldset>
 				<Button
 					className="mt-2"
@@ -212,18 +218,19 @@ export const EventDevTools: React.FC = () => {
 				<h2 className="font-bold">Delete Random Incidents</h2>
 				<p>Delete up to this many incidents, randomly</p>
 				<fieldset className="flex mt-2 gap-2">
-					<label className="mt-2 flex-1">
+					<label htmlFor={`${formId}-delete-count`} className="mt-2 flex-1">
 						<p>Number to Delete</p>
-						<Input
-							type="number"
-							step={1}
-							className="w-full"
-							value={incidentsToDelete}
-							onChange={(e) => {
-								setIncidentsToDelete(parseInt(e.currentTarget.value, 10));
-							}}
-						></Input>
 					</label>
+					<Input
+						id={`${formId}-delete-count`}
+						type="number"
+						step={1}
+						className="w-full"
+						value={incidentsToDelete}
+						onChange={(e) => {
+							setIncidentsToDelete(parseInt(e.currentTarget.value, 10));
+						}}
+					/>
 				</fieldset>
 				<Button
 					className="mt-2"

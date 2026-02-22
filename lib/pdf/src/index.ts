@@ -30,10 +30,10 @@ export function teamComparison(a: string, b: string): number {
 	const baseB = b.slice(0, -1);
 
 	if (baseA !== baseB) {
-		const numA = parseInt(baseA);
-		const numB = parseInt(baseB);
+		const numA = parseInt(baseA, 10);
+		const numB = parseInt(baseB, 10);
 
-		if (isNaN(numA) || isNaN(numB)) {
+		if (Number.isNaN(numA) || Number.isNaN(numB)) {
 			return baseA.localeCompare(baseB);
 		}
 
@@ -107,8 +107,8 @@ export function matchComparison(
 			return roundA - roundB;
 		}
 
-		const instanceA = parseInt(a.name.match(/\d+$/)?.[0] ?? "0");
-		const instanceB = parseInt(b.name.match(/\d+$/)?.[0] ?? "0");
+		const instanceA = parseInt(a.name.match(/\d+$/)?.[0] ?? "0", 10);
+		const instanceB = parseInt(b.name.match(/\d+$/)?.[0] ?? "0", 10);
 
 		if (instanceA !== instanceB) {
 			return instanceA - instanceB;
@@ -192,7 +192,7 @@ export async function generateIncidentReportPDF({
 		data.push({
 			team,
 			match: incidentMatchNameToString(incident.match),
-			rule: incident.outcome + " " + incident.rules.join(", "),
+			rule: `${incident.outcome} ${incident.rules.join(", ")}`,
 			contact: contact?.name ?? "",
 			notes: incident.notes ?? "None",
 		});

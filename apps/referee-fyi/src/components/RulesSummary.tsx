@@ -37,10 +37,10 @@ export const RulesSummary: React.FC<RulesSummaryProps> = ({
 			}
 
 			if (incident.rules.length < 1) {
-				if (rules["NA"]) {
-					rules["NA"].push(incident);
+				if (rules.NA) {
+					rules.NA.push(incident);
 				} else {
-					rules["NA"] = [incident];
+					rules.NA = [incident];
 				}
 			}
 

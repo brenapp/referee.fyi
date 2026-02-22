@@ -8,7 +8,7 @@ import {
 import { TrashIcon } from "@heroicons/react/24/outline";
 import type { InvitationListItem } from "@referee-fyi/share";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import type { EventData } from "robotevents";
 import { twMerge } from "tailwind-merge";
 import { Button, IconButton, LinkButton } from "~components/Button";
@@ -21,7 +21,7 @@ import { MenuButton } from "~components/MenuButton";
 import { Spinner } from "~components/Spinner";
 import { toast } from "~components/Toast";
 import { UpdatePrompt } from "~components/UpdatePrompt";
-import { Error, Info, Success, Warning } from "~components/Warning";
+import { ErrorMessage, Info, Success, Warning } from "~components/Warning";
 import { ReadyState, useShareConnection } from "~models/ShareConnection";
 import { tryPersistStorage } from "~utils/data/keyval";
 import { queryClient } from "~utils/data/query";
@@ -78,6 +78,7 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
 }) => {
 	const [inviteCode, setInviteCode] = useState("");
 	const [admin, setAdmin] = useState(false);
+	const formId = useId();
 
 	const { data: event } = useEvent(sku);
 
@@ -136,21 +137,20 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
 		<Dialog open={open} onClose={onClose} mode="modal" aria-label="Invite User">
 			<DialogHeader onClose={onClose} title="Invite User" />
 			<DialogBody className="px-2">
-				<label>
+				<label htmlFor={`${formId}-invite-code`}>
 					{event ? <EventSummary event={event} /> : null}
 					<p>
 						To invite a user to this share instance, enter their invite code.
 					</p>
-					<div className="relative">
-						<Input
-							className="w-full font-mono text-6xl text-center mt-4"
-							value={inviteCode}
-							onChange={(e) =>
-								setInviteCode(e.currentTarget.value.toUpperCase())
-							}
-						/>
-					</div>
 				</label>
+				<div className="relative">
+					<Input
+						id={`${formId}-invite-code`}
+						className="w-full font-mono text-6xl text-center mt-4"
+						value={inviteCode}
+						onChange={(e) => setInviteCode(e.currentTarget.value.toUpperCase())}
+					/>
+				</div>
 				<Spinner show={isLoadingRequestCode} />
 				{user ? (
 					<div className="mt-4">
@@ -184,10 +184,12 @@ export const InviteDialog: React.FC<ManageDialogProps> = ({
 					</div>
 				) : null}
 				{!user && !isGetInvitePending ? (
-					<Error message="Invalid Code" className="mt-4" />
+					<ErrorMessage message="Invalid Code" className="mt-4" />
 				) : null}
 				<Spinner show={isInvitePending} className="mt-4" />
-				{inviteError ? <Error message={inviteError} className="mt-4" /> : null}
+				{inviteError ? (
+					<ErrorMessage message={inviteError} className="mt-4" />
+				) : null}
 				{inviteResponse?.success ? (
 					<Success message="Sent Invitation!" className="mt-4 bg-emerald-600" />
 				) : null}
@@ -223,6 +225,7 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
 	]);
 
 	const [localName, setLocalName] = useState("");
+	const joinFormId = useId();
 	const name = profile?.name;
 
 	useEffect(() => {
@@ -242,7 +245,7 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
 		}
 		updateProfile({ name });
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [open, name]);
+	}, [open, name, updateProfile]);
 
 	// Invitation
 	const { data: invitation } = useQuery({
@@ -282,14 +285,15 @@ export const JoinCodeDialog: React.FC<ManageDialogProps> = ({
 							Enter your name to continue. This name will be visible to other
 							participants.
 						</p>
-						<label>
+						<label htmlFor={`${joinFormId}-name`}>
 							<h1 className="font-bold mt-4">Name</h1>
-							<Input
-								className="w-full"
-								value={localName}
-								onChange={(e) => setLocalName(e.currentTarget.value)}
-							/>
 						</label>
+						<Input
+							id={`${joinFormId}-name`}
+							className="w-full"
+							value={localName}
+							onChange={(e) => setLocalName(e.currentTarget.value)}
+						/>
 						<Button
 							className={twMerge("mt-4", !localName ? "opacity-50" : "")}
 							mode="primary"
@@ -396,6 +400,7 @@ export const ProfilePrompt: React.FC = () => {
 	} = useShareConnection(["profile", "updateProfile"]);
 
 	const [localName, setLocalName] = useState("");
+	const profileFormId = useId();
 	useEffect(() => {
 		if (name) {
 			setLocalName(name);
@@ -414,14 +419,15 @@ export const ProfilePrompt: React.FC = () => {
 				Enter your name to continue. This name will be visible to other
 				participants.
 			</p>
-			<label>
+			<label htmlFor={`${profileFormId}-name`}>
 				<h1 className="font-bold mt-4">Name</h1>
-				<Input
-					className="w-full"
-					value={localName}
-					onChange={(e) => setLocalName(e.currentTarget.value.trim())}
-				/>
 			</label>
+			<Input
+				id={`${profileFormId}-name`}
+				className="w-full"
+				value={localName}
+				onChange={(e) => setLocalName(e.currentTarget.value.trim())}
+			/>
 			<Button
 				className={twMerge("mt-4", !localName ? "opacity-50" : "")}
 				mode="primary"

@@ -58,10 +58,10 @@ import {
 import { reportMeasurement, setTracingProfile } from "~utils/sentry";
 
 export enum ReadyState {
-	Closed = WebSocket.CLOSED,
-	Closing = WebSocket.CLOSING,
-	Connecting = WebSocket.CONNECTING,
-	Open = WebSocket.OPEN,
+	Closed = 3,
+	Closing = 2,
+	Connecting = 0,
+	Open = 1,
 }
 
 export type UserMetadata = Omit<
@@ -552,17 +552,17 @@ export function useShareConnection<const T extends (keyof ShareConnection)[]>(
 /// <reference types="vite/client" />
 
 if (import.meta.hot) {
-	import.meta.hot.dispose(() => {
-		import.meta.hot!.data.websocket =
-			useShareConnectionInternal.getState().websocket;
+	const hot = import.meta.hot;
+	hot.dispose(() => {
+		hot.data.websocket = useShareConnectionInternal.getState().websocket;
 	});
-	import.meta.hot.accept((mod) => {
+	hot.accept((mod) => {
 		if (!mod) {
-			import.meta.hot!.data.websocket.close();
-			import.meta.hot!.data.websocket = null;
+			hot.data.websocket.close();
+			hot.data.websocket = null;
 		}
 		useShareConnectionInternal.setState({
-			websocket: import.meta.hot!.data.websocket,
+			websocket: hot.data.websocket,
 		});
 	});
 }

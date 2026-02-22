@@ -29,7 +29,7 @@ const { SKU, CODE } = process.env;
 	console.log(`OK`);
 
 	const text = "Your Name";
-	const selector = "xpath/" + `//label[text()='${text}']`;
+	const selector = `xpath///label[text()='${text}']`;
 
 	const input = await page.waitForSelector(selector);
 	await input?.click();

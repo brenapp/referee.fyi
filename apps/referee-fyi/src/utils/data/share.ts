@@ -89,7 +89,9 @@ export async function signedFetch(
 		headers = new Headers();
 	}
 
-	signatureHeaders.forEach((value, key) => headers.set(key, value));
+	for (const [key, value] of signatureHeaders.entries()) {
+		headers.set(key, value);
+	}
 
 	const id = await getShareSessionID();
 	headers.set("X-Referee-FYI-Session", id);
@@ -161,7 +163,7 @@ export async function fetchInvitation(sku: string) {
 		}
 
 		return body;
-	} catch (e) {
+	} catch (_e) {
 		return null;
 	}
 }
@@ -171,7 +173,7 @@ export async function getEventInvitation(
 ): Promise<UserInvitation | null> {
 	const current = await get<UserInvitation>(`invitation_${sku}`);
 
-	if (current && current.accepted) {
+	if (current?.accepted) {
 		return current;
 	}
 

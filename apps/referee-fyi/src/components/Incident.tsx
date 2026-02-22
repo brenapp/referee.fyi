@@ -209,15 +209,13 @@ export const IncidentMenu: React.FC<IncidentMenuProps> = ({
 				</div>
 			</div>
 			{readonly ? null : (
-				<>
-					<Button
-						mode="primary"
-						onClick={() => setEditIncidentOpen?.(true)}
-						className="w-full mt-4"
-					>
-						Edit + Delete
-					</Button>
-				</>
+				<Button
+					mode="primary"
+					onClick={() => setEditIncidentOpen?.(true)}
+					className="w-full mt-4"
+				>
+					Edit + Delete
+				</Button>
 			)}
 			{props.children}
 		</div>

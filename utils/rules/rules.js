@@ -57,7 +57,7 @@ const games = [
 			}
 
 			const link = new URL(base);
-			link.pathname += rule + ".html";
+			link.pathname += `${rule}.html`;
 
 			await rulePage.goto(link);
 

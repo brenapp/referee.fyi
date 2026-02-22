@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { LinkButton } from "~components/Button";
-import { Error } from "~components/Warning";
+import { ErrorMessage } from "~components/Warning";
 import { queryClient } from "~utils/data/query";
 import { isRestrictedSKU, isValidSKU } from "~utils/data/robotevents";
 import { getUseEventQueryParams } from "~utils/hooks/robotevents";
@@ -11,14 +11,14 @@ const RouteComponent: React.FC = () => {
 	if (!event && isRestricted) {
 		return (
 			<div className="mt-4">
-				<Error message="This event is not currently supported.">
+				<ErrorMessage message="This event is not currently supported.">
 					<p className="mt-2">
 						Unfortunately, this event is not currently supported in Referee FYI
 						due to changes in RobotEvents. We are working to integrate with the
 						new competition portal, and will update this page when it is
 						available.
 					</p>
-				</Error>
+				</ErrorMessage>
 				<LinkButton to="/" className="mt-4 w-full text-center">
 					Return Home
 				</LinkButton>

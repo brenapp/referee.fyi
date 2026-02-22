@@ -31,7 +31,7 @@ export async function applyMigration(
 ): Promise<MigrationResult & { preapplied: boolean }> {
 	const result = await get<MigrationResult>(`migration_${migration.name}`);
 
-	if (result && result.success) {
+	if (result?.success) {
 		return { ...result, preapplied: true };
 	}
 

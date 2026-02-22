@@ -48,6 +48,7 @@ export const VirtualizedList = <T,>({
 			className={twMerge(props.className, "overflow-auto")}
 			ref={parentRef}
 		>
+			{/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: aria-setsize communicates total virtual list size for accessibility */}
 			<ol
 				style={{ width: "100%", height: totalSize, position: "relative" }}
 				aria-setsize={data?.length ?? 0}

@@ -36,7 +36,7 @@ export function useDisplayMode() {
 		return () => {
 			match.removeEventListener("change", handler);
 		};
-	}, [ref]);
+	}, []);
 
 	return mode;
 }

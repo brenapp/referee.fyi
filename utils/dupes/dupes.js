@@ -2,7 +2,7 @@
 import config from "./config.json"
 assert;
 type: "json";
-import fs from "fs/promises";
+import fs from "node:fs/promises";
 
 const response = await fetch(
   `https://share.referee.fyi/api/integration/v1/${config.sku}/incidents.json?token=${config.bearer}`

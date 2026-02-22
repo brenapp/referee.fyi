@@ -9,21 +9,14 @@
 		"dev:secure": "wrangler dev --ip 0.0.0.0 --env development --local-protocol https --https-key-path ../../.certs/privkey.pem --https-cert-path ../../.certs/fullchain.pem",
 		"build": "tsgo --noEmit",
 		"deploy": "wrangler deploy",
-		"format": "prettier --write  '*.{json,js}' 'src/**/*.{js,ts}'",
-		"lint": "eslint --max-warnings=0 src && prettier --check '*.{json,js}' 'src/**/*.{js,ts}'",
+		"format": "biome check --write '*.{json,js}' 'src/**/*.{js,ts}'",
+		"lint": "biome check src",
 		"cf-typegen": "wrangler types --env development"
 	},
 	"exports": {
 		"types": "./src/routes.ts"
 	},
 	"author": "Brendan McGuire",
-	"eslintConfig": {
-		"root": true,
-		"extends": [
-			"typescript",
-			"prettier"
-		]
-	},
 	"dependencies": {
 		"@cloudflare/workers-types": "^4.0.0",
 		"@hono/standard-validator": "^0.1.4",
@@ -43,13 +36,7 @@
 		"@rollup/plugin-node-resolve": "^15.2.3",
 		"@rollup/plugin-typescript": "^11.1.6",
 		"@types/node": "^24.3.0",
-		"@typescript-eslint/eslint-plugin": "^5.31.0",
-		"@typescript-eslint/parser": "^5.31.0",
 		"cloudflare": "^5.2.0",
-		"eslint": "^8.20.0",
-		"eslint-config-prettier": "^8.5.0",
-		"eslint-config-typescript": "^3.0.0",
-		"prettier": "^2.7.1",
 		"rollup": "^2.79.1",
 		"rollup-plugin-terser": "^7.0.2",
 		"tslib": "^2.6.2",

@@ -13,7 +13,7 @@ import {
 } from "@referee-fyi/share";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { Button, IconButton, LinkButton } from "~components/Button";
 import { Dialog, DialogBody } from "~components/Dialog";
@@ -65,6 +65,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
 	const divisions = useMemo(() => event?.divisions ?? [], [event]);
 	const { data: game } = useRulesForEvent(event);
 	const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+	const formId = useId();
 	const setFiltersField = useCallback(
 		<T extends keyof Filters>(key: T, value: Filters[T]) => {
 			setFilters((filters) => ({ ...filters, [key]: value }));
@@ -99,14 +100,16 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
 						icon={<XMarkIcon height={24} />}
 					/>
 				</nav>
-				<label>
-					<p className="mt-4">Include Rules</p>
+				<div>
+					<p className="mt-4" id={`${formId}-rules-label`}>
+						Include Rules
+					</p>
 					<RulesMultiSelect
 						game={game}
 						value={filters.rules}
 						onChange={(rules) => setFiltersField("rules", rules)}
 					/>
-				</label>
+				</div>
 				<p>Outcomes</p>
 				{OUTCOMES.map((outcome) => (
 					<Checkbox
@@ -122,16 +125,19 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
 					/>
 				))}
 				{divisions.length > 0 ? (
-					<label>
-						<p className="mt-4">Division</p>
+					<>
+						<label htmlFor={`${formId}-division`}>
+							<p className="mt-4">Division</p>
+						</label>
 						<Select
+							id={`${formId}-division`}
 							value={filters.division}
 							onChange={(e) =>
 								setFiltersField(
 									"division",
-									isNaN(Number.parseInt(e.currentTarget.value))
+									Number.isNaN(Number.parseInt(e.currentTarget.value, 10))
 										? undefined
-										: Number.parseInt(e.currentTarget.value),
+										: Number.parseInt(e.currentTarget.value, 10),
 								)
 							}
 							className="w-full"
@@ -145,9 +151,9 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
 									</option>
 								))}
 						</Select>
-					</label>
+					</>
 				) : null}
-				<label>
+				<div>
 					<p className="mt-4">Flags</p>
 					<Checkbox
 						label={"Judging"}
@@ -159,9 +165,9 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
 							})
 						}
 					/>
-				</label>
+				</div>
 				{invitations.length > 0 ? (
-					<label>
+					<div>
 						<p className="mt-4">User Created/Modified</p>
 						<fieldset>
 							{invitations.map((inv) => (
@@ -184,7 +190,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
 								/>
 							))}
 						</fieldset>
-					</label>
+					</div>
 				) : null}
 			</DialogBody>
 			<Button mode="primary" onClick={onClickApply}>

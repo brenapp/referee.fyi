@@ -114,11 +114,7 @@ export const AutonomousWinnerScratchpad: React.FC<
 					<CodeBracketSquareIcon height={20} />
 					<p>Auto Winner</p>
 				</div>
-				<fieldset
-					className="mt-2 flex gap-2"
-					role="radiogroup"
-					aria-label="Auto Winner"
-				>
+				<fieldset className="mt-2 flex gap-2" aria-label="Auto Winner">
 					<Radio
 						name="autoWinner"
 						label="Red"
@@ -267,7 +263,7 @@ export const AllianceTimeoutUsedScratchpad: React.FC<
 			if (scratchpad.timeout.red) {
 				const teams = match
 					?.alliance("red")
-					.teams.map((t) => t.team!.name)
+					.teams.map((t) => t.team?.name)
 					?.join("-");
 
 				if (teams && timeouts[teams]) {
@@ -280,7 +276,7 @@ export const AllianceTimeoutUsedScratchpad: React.FC<
 			if (scratchpad.timeout.blue) {
 				const teams = match
 					?.alliance("blue")
-					.teams.map((t) => t.team!.name)
+					.teams.map((t) => t.team?.name)
 					?.join("-");
 
 				if (teams && timeouts[teams]) {
@@ -298,7 +294,7 @@ export const AllianceTimeoutUsedScratchpad: React.FC<
 		() =>
 			match.alliances
 				.find((a) => a.color === "red")
-				?.teams.map((t) => t.team!.name)
+				?.teams.map((t) => t.team?.name)
 				?.join("-"),
 		[match],
 	);
@@ -311,7 +307,7 @@ export const AllianceTimeoutUsedScratchpad: React.FC<
 		() =>
 			match.alliances
 				.find((a) => a.color === "blue")
-				?.teams.map((t) => t.team!.name)
+				?.teams.map((t) => t.team?.name)
 				?.join("-"),
 		[match],
 	);
@@ -331,9 +327,7 @@ export const AllianceTimeoutUsedScratchpad: React.FC<
 			</div>
 			<fieldset className="mt-2 flex gap-2" aria-label="Autonomous Win Point">
 				<Checkbox
-					label={
-						"Red " + (redTimeouts?.length > 0 ? `(${redTimeouts[0].name})` : "")
-					}
+					label={`Red ${redTimeouts?.length > 0 ? `(${redTimeouts[0].name})` : ""}`}
 					bind={{
 						value: currentMatchTimeouts.red,
 						onChange: (value) =>

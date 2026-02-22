@@ -158,7 +158,8 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
 			const [division, name] = e.target.value.split("@");
 			const match = teamMatches?.find((match) => {
 				return (
-					match.division.id === Number.parseInt(division) && match.name === name
+					match.division.id === Number.parseInt(division, 10) &&
+					match.name === name
 				);
 			});
 
@@ -324,70 +325,69 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
 					<p>Team</p>
 					<p className="font-mono">{incident?.team}</p>
 				</div>
-				<label>
+				<label htmlFor={`edit-match-${id}`}>
 					<p className="mt-4">Match</p>
-					<Select
-						className="w-full"
-						onChange={onChangeIncidentMatch}
-						value={
-							incident?.match
-								? incident.match.type === "match"
-									? `${incident.match.division}@${incident.match.name}`
-									: "Skills"
-								: undefined
-						}
-					>
-						<option value={undefined}>Non-Match</option>
-						<option value="Skills">Skills</option>
-						{teamMatchesByDivision.map(([name, matches]) => {
-							return (
-								<optgroup key={name} label={name}>
-									{matches.map((match) => (
-										<option
-											key={match.id}
-											value={match.division.id + "@" + match.name}
-										>
-											{match.name}
-										</option>
-									))}
-								</optgroup>
-							);
-						})}
-					</Select>
 				</label>
+				<Select
+					id={`edit-match-${id}`}
+					className="w-full"
+					onChange={onChangeIncidentMatch}
+					value={
+						incident?.match
+							? incident.match.type === "match"
+								? `${incident.match.division}@${incident.match.name}`
+								: "Skills"
+							: undefined
+					}
+				>
+					<option value={undefined}>Non-Match</option>
+					<option value="Skills">Skills</option>
+					{teamMatchesByDivision.map(([name, matches]) => {
+						return (
+							<optgroup key={name} label={name}>
+								{matches.map((match) => (
+									<option
+										key={match.id}
+										value={`${match.division.id}@${match.name}`}
+									>
+										{match.name}
+									</option>
+								))}
+							</optgroup>
+						);
+					})}
+				</Select>
 				{incident?.match?.type === "match" && periods.length > 1 ? (
-					<>
-						<div
-							className="flex gap-2 mt-2"
-							role="radiogroup"
-							aria-label="Match Period"
-						>
+					<div
+						className="flex gap-2 mt-2"
+						role="radiogroup"
+						aria-label="Match Period"
+					>
+						<Radio
+							name="matchPeriod"
+							label={"None"}
+							bind={{
+								value: incident.match.period ?? "none",
+								onChange: onChangeIncidentMatchPeriod,
+								variant: "none",
+							}}
+						/>
+						{periods.map((period) => (
 							<Radio
 								name="matchPeriod"
-								label={"None"}
+								key={period}
+								label={IncidentMatchHeadToHeadPeriodDisplayNames[period]}
 								bind={{
-									value: incident.match.period ?? "none",
+									value:
+										incident.match?.type === "match"
+											? (incident.match.period ?? "none")
+											: "none",
 									onChange: onChangeIncidentMatchPeriod,
-									variant: "none",
+									variant: period,
 								}}
 							/>
-							{periods.map((period) => (
-								<Radio
-									name="matchPeriod"
-									key={period}
-									label={IncidentMatchHeadToHeadPeriodDisplayNames[period]}
-									bind={{
-										value:
-											incident.match?.type === "match"
-												? (incident.match.period ?? "none")
-												: "none",
-										onChange: onChangeIncidentMatchPeriod,
-										variant: period,
-									}}
-								/>
-							))}
-						</div>
-					</>
+						))}
+					</div>
 				) : null}
 				{incident?.match?.type === "skills" ? (
 					<div
@@ -451,20 +451,21 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
 					dirty={dirty.match}
 					render={(value) => (value ? matchToString(value) : "Non-Match")}
 				/>
-				<label>
+				<label htmlFor={`edit-outcome-${id}`}>
 					<p className="mt-4">Outcome</p>
-					<Select
-						value={incident?.outcome}
-						onChange={onChangeIncidentOutcome}
-						className="max-w-full w-full"
-					>
-						{OUTCOMES.map((outcome) => (
-							<option key={outcome} value={outcome}>
-								{outcome}
-							</option>
-						))}
-					</Select>
 				</label>
+				<Select
+					id={`edit-outcome-${id}`}
+					value={incident?.outcome}
+					onChange={onChangeIncidentOutcome}
+					className="max-w-full w-full"
+				>
+					{OUTCOMES.map((outcome) => (
+						<option key={outcome} value={outcome}>
+							{outcome}
+						</option>
+					))}
+				</Select>
 				<EditHistory
 					value={incident}
 					valueKey="outcome"
@@ -489,21 +490,22 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
 						/>
 					</>
 				) : null}
-				<label>
+				<label htmlFor={`edit-notes-${id}`}>
 					<p className="mt-4">Notes</p>
-					<TextArea
-						className="w-full mt-2 h-32"
-						value={incident?.notes}
-						onChange={onChangeIncidentNotes}
-					/>
 				</label>
+				<TextArea
+					id={`edit-notes-${id}`}
+					className="w-full mt-2 h-32"
+					value={incident?.notes}
+					onChange={onChangeIncidentNotes}
+				/>
 				<EditHistory
 					value={incident}
 					valueKey="notes"
 					dirty={dirty.notes}
 					render={(value) => value}
 				/>
-				<label>
+				<div>
 					<p className="mt-4">Flag For Review</p>
 					<Checkbox
 						label="Judging"
@@ -512,7 +514,7 @@ export const EditIncidentDialog: React.FC<EditIncidentDialogProps> = ({
 							onChange: (value) => onChangeFlag("judge", value),
 						}}
 					/>
-				</label>
+				</div>
 				<EditHistory
 					value={incident}
 					valueKey="flags"

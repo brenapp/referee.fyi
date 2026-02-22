@@ -14,7 +14,10 @@ export const EventDivisionPickerPage: React.FC = () => {
 		return (
 			<Navigate
 				to="/$sku/$division"
-				params={{ sku: event.sku, division: event.divisions[0].id!.toString() }}
+				params={{
+					sku: event.sku,
+					division: event.divisions[0].id?.toString() ?? "",
+				}}
 				replace
 			/>
 		);
@@ -36,7 +39,7 @@ export const EventDivisionPickerPage: React.FC = () => {
 								to={"/$sku/$division"}
 								params={{
 									sku: event.sku,
-									division: division.id!.toString(),
+									division: division.id?.toString(),
 								}}
 							>
 								{division.name}

@@ -89,13 +89,13 @@ export const Tabs: React.FC<TabsProps> = ({
 	return (
 		<div {...props} className={twMerge("contents", props.className)}>
 			<nav
-				role="tablist"
 				{...parts?.tablist}
 				className={twMerge("flex max-w-full pt-2", parts?.tablist?.className)}
 			>
 				{buttonTabs.map((tab) => tab.content)}
 				{contentTabs.map((tab, index) => (
 					<button
+						type="button"
 						key={tab.id}
 						role="tab"
 						aria-selected={index === activeTab}

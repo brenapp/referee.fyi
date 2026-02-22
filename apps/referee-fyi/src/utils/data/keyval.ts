@@ -36,7 +36,9 @@ export function updateMany<T>(
 		);
 
 		const values = updater(oldValues.map((value, i) => [keys[i], value]));
-		values.forEach((entry) => store.put(entry[1], entry[0]));
+		for (const entry of values) {
+			store.put(entry[1], entry[0]);
+		}
 		return kv.promisifyRequest(store.transaction);
 	});
 }

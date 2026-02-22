@@ -17,7 +17,7 @@ export function useCurrentDivision(def?: number) {
 		return def;
 	}
 
-	const division = Number.parseInt(divisionParam);
+	const division = Number.parseInt(divisionParam, 10);
 	if (Number.isNaN(division)) {
 		return def;
 	}
@@ -45,7 +45,7 @@ export function useLatestAppVersion() {
 				}
 
 				return data.version as string;
-			} catch (error) {
+			} catch (_error) {
 				return __REFEREE_FYI_VERSION__;
 			}
 		},

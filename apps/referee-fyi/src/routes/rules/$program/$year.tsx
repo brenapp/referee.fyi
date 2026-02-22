@@ -96,6 +96,7 @@ export const QuestionMenu: React.FC<QuestionMenuProps> = ({
 				<article className="mt-4">
 					<section
 						className="qna-content"
+						// biome-ignore lint/security/noDangerouslySetInnerHtml: Q&A content from official API
 						dangerouslySetInnerHTML={{ __html: question.questionRaw }}
 					></section>
 				</article>
@@ -104,6 +105,7 @@ export const QuestionMenu: React.FC<QuestionMenuProps> = ({
 						<h2 className="text-emerald-400 font-bold">Answer by Committee</h2>
 						<section
 							className="mt-2 qna-content "
+							// biome-ignore lint/security/noDangerouslySetInnerHtml: Q&A content from official API
 							dangerouslySetInnerHTML={{ __html: question.answerRaw ?? "" }}
 						></section>
 					</section>

@@ -75,6 +75,7 @@ export const RadioButton: React.FC<{ checked: boolean; fill: string }> = ({
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
 		>
+			<title>Radio button {checked ? "checked" : "unchecked"}</title>
 			<circle cx="7" cy="7" r="6.5" stroke={fill} />
 			{checked ? <circle cx="7" cy="7" r="4" fill={fill} /> : null}
 		</svg>
@@ -118,6 +119,7 @@ export const Radio = <T extends string | number | symbol>({
 	);
 
 	return (
+		// biome-ignore lint/a11y/useSemanticElements: custom radio component with full keyboard support
 		<div
 			{...props}
 			className={twMerge(
@@ -351,7 +353,7 @@ export const RulesDisplayMenu: React.FC<RulesDisplayMenuProps> = ({
 							{group.rules
 								.filter((rule) => isRuleMatch(group, rule, query))
 								.map((rule) => (
-									<div>
+									<div key={rule.rule}>
 										<Checkbox
 											className="h-4 w-4 mt-[3px]"
 											labelProps={{
@@ -476,6 +478,7 @@ export const IconLabel: React.FC<LabelSymbolProps> = ({
 	...props
 }) => {
 	return (
+		// biome-ignore lint/a11y/noLabelWithoutControl: htmlFor is passed via props spread
 		<label
 			{...props}
 			className={twMerge(

@@ -1,8 +1,8 @@
-import fs from "fs/promises";
+import fs from "node:fs/promises";
 
 console.log("Reading system key from `key.json`...");
 const jwk = JSON.parse(await fs.readFile("key.json", "utf-8"));
-const key = crypto.subtle.importKey(
+const _key = crypto.subtle.importKey(
 	"jwk",
 	jwk,
 	{ name: "ECDSA", namedCurve: "P-384" },

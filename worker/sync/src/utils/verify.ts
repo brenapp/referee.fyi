@@ -400,7 +400,7 @@ export const verifySystemToken = createMiddleware<AppArgs>(async (c, next) => {
 		accepted: true,
 		admin: true,
 		from: keyHex,
-		id: "system:" + crypto.randomUUID(),
+		id: `system:${crypto.randomUUID()}`,
 		sku,
 		instance_secret: instanceSecret,
 		user: keyHex,
@@ -628,8 +628,7 @@ export const verifyUserAssetAuthorized = createMiddleware<AppArgs>(
 			);
 
 			const isSameInstance =
-				ownerInvitation &&
-				ownerInvitation.accepted &&
+				ownerInvitation?.accepted &&
 				ownerInvitation.instance_secret ===
 					verifyInvitation.invitation.instance_secret;
 
@@ -653,8 +652,7 @@ export const verifyUserAssetAuthorized = createMiddleware<AppArgs>(
 			const isSystem = verifyIntegrationToken.grantType === "system";
 
 			const isSameInstance =
-				ownerInvitation &&
-				ownerInvitation.accepted &&
+				ownerInvitation?.accepted &&
 				ownerInvitation.instance_secret ===
 					verifyIntegrationToken.invitation.instance_secret;
 

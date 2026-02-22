@@ -1,4 +1,4 @@
-import fs from "fs/promises";
+import fs from "node:fs/promises";
 
 console.log("Generating system key...");
 
@@ -19,7 +19,7 @@ const privateKey = await crypto.subtle.exportKey("jwk", key.privateKey);
 
 await fs.writeFile("key.json", JSON.stringify(privateKey, null, 2));
 
-console.log("\nPUBLIC KEY\n" + publicKey);
+console.log(`\nPUBLIC KEY\n${publicKey}`);
 console.log(
 	"\n\nPlace the public key in .env.vars under SYSTEM_KEY, and run the following command to upload it to the Worker:",
 );

@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Button } from "~components/Button";
 import { ClickToCopy } from "~components/ClickToCopy";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { Input, Select, TextArea } from "~components/Input";
 import { Spinner } from "~components/Spinner";
-import { Error } from "~components/Warning";
+import { ErrorMessage } from "~components/Warning";
 import type { ErrorReport } from "~utils/data/report";
 import { useRecentEvents } from "~utils/hooks/history";
 import { useReportIssue } from "~utils/hooks/report";
@@ -25,6 +25,7 @@ export const ReportIssueDialog: React.FC<ReportIssueDialogProps> = ({
 	context,
 	error: causedError,
 }) => {
+	const formId = useId();
 	const [email, setEmail] = useState("");
 	const [comment, setComment] = useState(initComment ?? "");
 
@@ -69,14 +70,14 @@ export const ReportIssueDialog: React.FC<ReportIssueDialogProps> = ({
 			<DialogBody className="px-2">
 				{causedError ? (
 					<section className="mb-4">
-						<Error message="Referee FYI encountered a fatal error!">
+						<ErrorMessage message="Referee FYI encountered a fatal error!">
 							{import.meta.env.DEV ? (
 								<div className="mt-4">
 									<p className="font-mono text-sm">{`${causedError.error}`}</p>
 									<pre className="font-mono text-sm">{`${causedError.componentStack}`}</pre>
 								</div>
 							) : null}
-						</Error>
+						</ErrorMessage>
 					</section>
 				) : null}
 				<p>
@@ -85,41 +86,44 @@ export const ReportIssueDialog: React.FC<ReportIssueDialogProps> = ({
 					Information about your device and your session will be included with
 					your report, including the contents of incidents.
 				</p>
-				<label>
+				<label htmlFor={`${formId}-event`}>
 					<h2 className="font-bold mt-4">Event</h2>
-					<Select
-						value={sku ?? ""}
-						className="w-full"
-						onChange={(e) => setSKU(e.currentTarget.value)}
-					>
-						<option value="">Pick An Event</option>
-						{currentEvent &&
-						recentEvents?.every((e) => e.sku !== currentEvent.sku) ? (
-							<option value={currentEvent.sku}>{}</option>
-						) : null}
-						{recentEvents?.map((event) => (
-							<option value={event.sku} key={event.id}>
-								{event.name} [{event.sku}]
-							</option>
-						))}
-					</Select>
 				</label>
-				<label>
+				<Select
+					id={`${formId}-event`}
+					value={sku ?? ""}
+					className="w-full"
+					onChange={(e) => setSKU(e.currentTarget.value)}
+				>
+					<option value="">Pick An Event</option>
+					{currentEvent &&
+					recentEvents?.every((e) => e.sku !== currentEvent.sku) ? (
+						<option value={currentEvent.sku}>{}</option>
+					) : null}
+					{recentEvents?.map((event) => (
+						<option value={event.sku} key={event.id}>
+							{event.name} [{event.sku}]
+						</option>
+					))}
+				</Select>
+				<label htmlFor={`${formId}-email`}>
 					<h2 className="font-bold mt-4">Email</h2>
-					<Input
-						className="w-full mt-2"
-						value={email}
-						onChange={(e) => setEmail(e.currentTarget.value)}
-					/>
 				</label>
-				<label>
+				<Input
+					id={`${formId}-email`}
+					className="w-full mt-2"
+					value={email}
+					onChange={(e) => setEmail(e.currentTarget.value)}
+				/>
+				<label htmlFor={`${formId}-comment`}>
 					<h2 className="font-bold mt-4">Comment</h2>
-					<TextArea
-						className="w-full mt-2"
-						value={comment}
-						onChange={(e) => setComment(e.currentTarget.value)}
-					/>
 				</label>
+				<TextArea
+					id={`${formId}-comment`}
+					className="w-full mt-2"
+					value={comment}
+					onChange={(e) => setComment(e.currentTarget.value)}
+				/>
 				<Button mode="primary" className="mt-4" onClick={() => reportIssue()}>
 					Report Issue
 				</Button>
@@ -138,7 +142,7 @@ export const ReportIssueDialog: React.FC<ReportIssueDialogProps> = ({
 					</section>
 				) : null}
 				{isError ? (
-					<Error message={`Could Not Submit Report! ${error}`} />
+					<ErrorMessage message={`Could Not Submit Report! ${error}`} />
 				) : null}
 			</DialogBody>
 		</Dialog>

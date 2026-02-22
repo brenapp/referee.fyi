@@ -19,7 +19,7 @@ export const QRCode: React.FC<QRCodeProps> = ({ config, ...props }) => {
 		const { width } = ref.current.getBoundingClientRect();
 
 		QrCreator.render({ size: width, ...config }, ref.current);
-	}, [config, ref]);
+	}, [config]);
 
 	return (
 		<div className={twMerge("bg-white p-4 rounded-md", props.className)}>

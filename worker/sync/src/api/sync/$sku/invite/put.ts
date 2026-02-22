@@ -96,7 +96,7 @@ export const handler: RouteHandler<Route, AppArgs> = async (c) => {
 		sku,
 	);
 
-	if (currentInvitation && currentInvitation.accepted) {
+	if (currentInvitation?.accepted) {
 		return c.json(
 			{
 				success: false,

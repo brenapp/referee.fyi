@@ -120,7 +120,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
 								<RulesSummary
 									className="break-all"
 									incidents={incidents ?? []}
-									filter={(i) => i.team == team.number}
+									filter={(i) => i.team === team.number}
 								/>
 								<LinkButton
 									to={"/$sku/team/$team"}
@@ -199,7 +199,7 @@ export const EventTeamsTab: React.FC<EventTagProps> = ({ event }) => {
 							</p>
 						</div>
 						<div className="absolute right-0 bg-zinc-800 h-full w-32 px-2 flex items-center justify-between">
-							<span className="text-red-400 mr-4" aria-label={``}>
+							<span className="text-red-400 mr-4">
 								<FlagIcon height={20} className="inline" />
 								<span className="font-mono ml-2">
 									{majorIncidents.get(team.number) ?? 0}

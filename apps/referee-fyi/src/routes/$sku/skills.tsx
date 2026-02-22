@@ -79,166 +79,161 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
 	);
 
 	return (
-		<>
-			<section className="contents mb-12">
-				<IconLabel icon={<MagnifyingGlassIcon height={24} />}>
-					<Input
-						placeholder="Search teams..."
-						className="flex-1"
-						value={filter}
-						onChange={(e) => setFilter(e.currentTarget.value.toUpperCase())}
-					/>
-				</IconLabel>
-				<EventNewIncidentDialog state={newIncidentDialog} />
-				<Spinner show={isLoading} />
-				<VirtualizedList
+		<section className="contents mb-12">
+			<IconLabel icon={<MagnifyingGlassIcon height={24} />}>
+				<Input
+					placeholder="Search teams..."
 					className="flex-1"
-					data={filteredTeams}
-					options={{ estimateSize: () => 64 }}
-					parts={{ list: { className: "mb-12" } }}
-				>
-					{(team) => {
-						if (!team) {
-							return null;
-						}
+					value={filter}
+					onChange={(e) => setFilter(e.currentTarget.value.toUpperCase())}
+				/>
+			</IconLabel>
+			<EventNewIncidentDialog state={newIncidentDialog} />
+			<Spinner show={isLoading} />
+			<VirtualizedList
+				className="flex-1"
+				data={filteredTeams}
+				options={{ estimateSize: () => 64 }}
+				parts={{ list: { className: "mb-12" } }}
+			>
+				{(team) => {
+					if (!team) {
+						return null;
+					}
 
-						const programming = skillsByTeam[team.number]?.find(
-							(skill) => skill.type === "programming",
-						);
+					const programming = skillsByTeam[team.number]?.find(
+						(skill) => skill.type === "programming",
+					);
 
-						const driver = skillsByTeam[team.number]?.find(
-							(skill) => skill.type === "driver",
-						);
+					const driver = skillsByTeam[team.number]?.find(
+						(skill) => skill.type === "driver",
+					);
 
-						return (
-							<MenuButton
-								menu={
-									<nav className="mt-2">
-										<div className="flex items-center gap-4 mb-4">
-											<p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-full flex-1">
-												<span className="font-mono text-emerald-400">
-													{team.number}
-												</span>
-												{" • "}
-												<span>{team.team_name}</span>
-											</p>
-											<span className="mr-4">
-												<PlayIcon height={20} className="inline" />
-												<span className="font-mono ml-2">
-													{driver?.attempts ?? 0}
-												</span>
+					return (
+						<MenuButton
+							menu={
+								<nav className="mt-2">
+									<div className="flex items-center gap-4 mb-4">
+										<p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-full flex-1">
+											<span className="font-mono text-emerald-400">
+												{team.number}
 											</span>
-											<span className="">
-												<CodeBracketIcon height={20} className="inline" />
-												<span className="font-mono ml-2">
-													{programming?.attempts ?? 0}
-												</span>
+											{" • "}
+											<span>{team.team_name}</span>
+										</p>
+										<span className="mr-4">
+											<PlayIcon height={20} className="inline" />
+											<span className="font-mono ml-2">
+												{driver?.attempts ?? 0}
 											</span>
-										</div>
-										<RulesSummary
-											className="break-all"
-											incidents={incidents ?? []}
-											filter={(i) =>
-												i.team == team.number && i.match?.type !== "match"
-											}
-										/>
-										<LinkButton
-											to={"/$sku/team/$team"}
-											params={{ sku: event.sku, team: team.number }}
-											className="w-full mt-4 flex items-center"
-										>
-											<span className="flex-1">Details</span>
-											<ArrowRightIcon
-												height={20}
-												className="text-emerald-400"
-											/>
-										</LinkButton>
-										<hr className="mt-4 border-zinc-600" />
-										<Button
-											mode="normal"
-											className="mt-4"
-											onClick={() =>
-												openNewIncidentDialog({
-													team: team.number,
-													match: undefined,
-													skills: undefined,
-													outcome: "Inspection",
-												})
-											}
-										>
-											<FlagIcon height={20} className="inline mr-2 " />
-											Inspection
-										</Button>
-										<Button
-											mode="normal"
-											className="mt-4"
-											onClick={() =>
-												openNewIncidentDialog({
-													team: team.number,
-													skills: {
-														type: "skills",
-														skillsType: "driver",
-														attempt: Math.min(3, (driver?.attempts ?? 0) + 1),
-													},
-													outcome: "Minor",
-												})
-											}
-										>
-											<FlagIcon height={20} className="inline mr-2 " />
-											Driver Skills
-										</Button>
-										<Button
-											mode="normal"
-											className="mt-4"
-											onClick={() =>
-												openNewIncidentDialog({
-													team: team.number,
-													skills: {
-														type: "skills",
-														skillsType: "programming",
-														attempt: Math.min(
-															3,
-															(programming?.attempts ?? 0) + 1,
-														),
-													},
-													outcome: "Minor",
-												})
-											}
-										>
-											<FlagIcon height={20} className="inline mr-2 " />
-											Auto Skills
-										</Button>
-									</nav>
-								}
-								mode="transparent"
-								className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
-							>
-								<div className="flex-1">
-									<p className="text-emerald-400 font-mono">{team.number}</p>
-									<p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose">
-										{team.team_name}
-									</p>
-								</div>
-								<div className="absolute right-0 bg-zinc-800 h-full pl-2 flex items-center">
-									<span className="mr-4">
-										<PlayIcon height={20} className="inline" />
-										<span className="font-mono ml-2">
-											{driver?.attempts ?? 0}
 										</span>
-									</span>
-									<span className="">
-										<CodeBracketIcon height={20} className="inline" />
-										<span className="font-mono ml-2">
-											{programming?.attempts ?? 0}
+										<span className="">
+											<CodeBracketIcon height={20} className="inline" />
+											<span className="font-mono ml-2">
+												{programming?.attempts ?? 0}
+											</span>
 										</span>
+									</div>
+									<RulesSummary
+										className="break-all"
+										incidents={incidents ?? []}
+										filter={(i) =>
+											i.team === team.number && i.match?.type !== "match"
+										}
+									/>
+									<LinkButton
+										to={"/$sku/team/$team"}
+										params={{ sku: event.sku, team: team.number }}
+										className="w-full mt-4 flex items-center"
+									>
+										<span className="flex-1">Details</span>
+										<ArrowRightIcon height={20} className="text-emerald-400" />
+									</LinkButton>
+									<hr className="mt-4 border-zinc-600" />
+									<Button
+										mode="normal"
+										className="mt-4"
+										onClick={() =>
+											openNewIncidentDialog({
+												team: team.number,
+												match: undefined,
+												skills: undefined,
+												outcome: "Inspection",
+											})
+										}
+									>
+										<FlagIcon height={20} className="inline mr-2 " />
+										Inspection
+									</Button>
+									<Button
+										mode="normal"
+										className="mt-4"
+										onClick={() =>
+											openNewIncidentDialog({
+												team: team.number,
+												skills: {
+													type: "skills",
+													skillsType: "driver",
+													attempt: Math.min(3, (driver?.attempts ?? 0) + 1),
+												},
+												outcome: "Minor",
+											})
+										}
+									>
+										<FlagIcon height={20} className="inline mr-2 " />
+										Driver Skills
+									</Button>
+									<Button
+										mode="normal"
+										className="mt-4"
+										onClick={() =>
+											openNewIncidentDialog({
+												team: team.number,
+												skills: {
+													type: "skills",
+													skillsType: "programming",
+													attempt: Math.min(
+														3,
+														(programming?.attempts ?? 0) + 1,
+													),
+												},
+												outcome: "Minor",
+											})
+										}
+									>
+										<FlagIcon height={20} className="inline mr-2 " />
+										Auto Skills
+									</Button>
+								</nav>
+							}
+							mode="transparent"
+							className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
+						>
+							<div className="flex-1">
+								<p className="text-emerald-400 font-mono">{team.number}</p>
+								<p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose">
+									{team.team_name}
+								</p>
+							</div>
+							<div className="absolute right-0 bg-zinc-800 h-full pl-2 flex items-center">
+								<span className="mr-4">
+									<PlayIcon height={20} className="inline" />
+									<span className="font-mono ml-2">
+										{driver?.attempts ?? 0}
 									</span>
-								</div>
-							</MenuButton>
-						);
-					}}
-				</VirtualizedList>
-			</section>
-		</>
+								</span>
+								<span className="">
+									<CodeBracketIcon height={20} className="inline" />
+									<span className="font-mono ml-2">
+										{programming?.attempts ?? 0}
+									</span>
+								</span>
+							</div>
+						</MenuButton>
+					);
+				}}
+			</VirtualizedList>
+		</section>
 	);
 };
 

@@ -62,7 +62,7 @@ export async function getAuthoredIncidentsForPeriod(period: {
 	const incidents = await getAllIncidents();
 
 	const authored = incidents.filter(
-		(i) => i.consistency.outcome.peer == profile.key,
+		(i) => i.consistency.outcome.peer === profile.key,
 	);
 
 	const authoredThisSeason = authored.filter((i) => {

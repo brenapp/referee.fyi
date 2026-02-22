@@ -38,7 +38,7 @@ export async function importKey(hexKey: string): Promise<CryptoKey | null> {
 		key = await crypto.subtle.importKey("raw", keyBuffer, KEY_ALGORITHM, true, [
 			"verify",
 		]);
-	} catch (e) {
+	} catch (_e) {
 		return null;
 	}
 

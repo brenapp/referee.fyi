@@ -1,10 +1,9 @@
 import { fetchUpdatedQNAs } from "./jobs/fetchUpdatedQNAs.js";
-import { indexGameRules } from "./jobs/indexGameRules.js";
 
 export async function scheduled(
-	event: ScheduledController,
+	_event: ScheduledController,
 	env: Env,
-	ctx: ExecutionContext,
+	_ctx: ExecutionContext,
 ) {
 	// console.log("Scheduled event triggered:", event.cron, env, ctx);
 

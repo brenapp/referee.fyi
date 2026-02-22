@@ -61,7 +61,7 @@ export const EventPicker: React.FC = () => {
 	);
 	const onClickMore = useCallback(() => {
 		setEnd((end) => new Date(end.getTime() + 1000 * 60 * 60 * 24 * 31));
-	}, [setEnd]);
+	}, []);
 
 	const { data: events, isPending: isLoadingEvents } = useEventSearch(
 		{
@@ -99,6 +99,8 @@ export const EventPicker: React.FC = () => {
 				if (event.location.venue?.toUpperCase().includes(query)) {
 					return true;
 				}
+
+				return false;
 			}) ?? []
 		);
 	}, [query, events]);
@@ -265,9 +267,7 @@ export const EventPicker: React.FC = () => {
 				mode="none"
 				className="flex-1 active:bg-zinc-600"
 				onClick={onClick}
-				aria-description={
-					"Click to " + showDiv ? "Select Division" : "Select Event"
-				}
+				aria-description={showDiv ? "Select Division" : "Select Event"}
 			>
 				<div
 					className="grid items-center gap-2"

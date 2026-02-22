@@ -30,7 +30,9 @@ export const EventTeamAssets: React.FC<EventTeamAssetsProps> = ({
 	const assets = useEventAssetsForTeam(sku, team);
 	return (
 		<div className="grid lg:grid-cols-6 grid-cols-2 md:grid-cols-3 mt-4 gap-2 overflow-y-auto pb-24">
-			{assets?.map((asset) => (asset ? <AssetPreview asset={asset} /> : null))}
+			{assets?.map((asset) =>
+				asset ? <AssetPreview key={asset} asset={asset} /> : null,
+			)}
 		</div>
 	);
 };

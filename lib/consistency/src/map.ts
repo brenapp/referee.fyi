@@ -73,7 +73,8 @@ export function mergeMap<T extends ConsistentMapElement>({
 		remove: deleted.remoteOnly,
 		update: mergeResults
 			.filter((result) => result.changed.length > 0)
-			.map((result) => result.resolved!.id),
+			.map((result) => result.resolved?.id)
+			.filter((id): id is string => id !== undefined),
 	};
 
 	const remoteOutcome: ConsistentMapPeerOutcome = {
@@ -81,7 +82,8 @@ export function mergeMap<T extends ConsistentMapElement>({
 		remove: deleted.localOnly,
 		update: mergeResults
 			.filter((result) => result.rejected.length > 0)
-			.map((result) => result.resolved!.id),
+			.map((result) => result.resolved?.id)
+			.filter((id): id is string => id !== undefined),
 	};
 
 	const localOnlyValues = Object.fromEntries(
@@ -91,7 +93,7 @@ export function mergeMap<T extends ConsistentMapElement>({
 		[...remoteOnlyIds].map((id) => [id, remote.values[id]!]),
 	);
 	const sharedValues = Object.fromEntries(
-		mergeResults.map((result) => [result.resolved!.id, result.resolved! as T]),
+		mergeResults.map((result) => [result.resolved?.id, result.resolved! as T]),
 	);
 
 	const resolved: ConsistentMap<T> = {

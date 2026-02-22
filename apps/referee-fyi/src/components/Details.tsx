@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge";
 
 export const Details: React.FC<React.HTMLProps<HTMLDetailsElement>> = (
 	props,
-) => <details {...props} className={"group " + props.className} />;
+) => <details {...props} className={`group ${props.className}`} />;
 
 export const Summary: React.FC<React.HTMLProps<HTMLElement>> = (props) => (
 	<summary

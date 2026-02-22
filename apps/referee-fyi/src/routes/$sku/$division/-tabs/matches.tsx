@@ -99,8 +99,8 @@ export const EventMatchesTab: React.FC<MatchesTabProps> = ({ event }) => {
 	const [matchId, setMatchId] = useState<number>(0);
 
 	const onClickMatch = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-		const matchId = parseInt(e.currentTarget.dataset.matchid ?? "NaN");
-		if (isNaN(matchId)) return;
+		const matchId = parseInt(e.currentTarget.dataset.matchid ?? "NaN", 10);
+		if (Number.isNaN(matchId)) return;
 		setMatchId(matchId);
 		setTimeout(() => {
 			setOpen(true);

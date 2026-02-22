@@ -23,7 +23,9 @@ export function externalStore<T>(init: T): ExternalStore<T> {
 		},
 		set(value: T) {
 			STORES[symbol] = value;
-			callbacks.forEach((callback) => callback());
+			for (const callback of callbacks) {
+				callback();
+			}
 		},
 		subscribe(callback) {
 			const index = callbacks.push(callback);

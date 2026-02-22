@@ -80,7 +80,7 @@ export async function editScratchpad<T extends MatchScratchpad>(
 
 		const newValue = current[key as keyof T];
 
-		if (JSON.stringify(currentValue) != JSON.stringify(newValue)) {
+		if (JSON.stringify(currentValue) !== JSON.stringify(newValue)) {
 			updated = updateLWW(updated, {
 				key,
 				value: currentValue,

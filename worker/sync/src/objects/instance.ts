@@ -476,7 +476,7 @@ export class ShareInstance extends DurableObject {
 		for (const [key, socket] of this.sockets) {
 			try {
 				socket.send(JSON.stringify(payload));
-			} catch (err) {
+			} catch (_err) {
 				const session = this.sessions.get(socket);
 				if (session) {
 					clientLefts.push(session);

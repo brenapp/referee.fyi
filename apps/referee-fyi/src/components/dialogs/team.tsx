@@ -9,42 +9,42 @@ import { useTeamIncidentsByEvent } from "~utils/hooks/incident";
 import { useCurrentEvent } from "~utils/hooks/state";
 
 export type TeamIsolationDialogProps = {
-  team?: string;
-  open: boolean;
-  setOpen: (open: boolean) => void;
+	team?: string;
+	open: boolean;
+	setOpen: (open: boolean) => void;
 };
 
 export const TeamIsolationDialog: React.FC<TeamIsolationDialogProps> = ({
-  team,
-  open,
-  setOpen,
+	team,
+	open,
+	setOpen,
 }) => {
-  const { data: event } = useCurrentEvent();
-  const { data: incidents } = useTeamIncidentsByEvent(team, event?.sku);
+	const { data: event } = useCurrentEvent();
+	const { data: incidents } = useTeamIncidentsByEvent(team, event?.sku);
 
-  if (!team) {
-    return null;
-  }
+	if (!team) {
+		return null;
+	}
 
-  return (
-    <Dialog
-      open={open}
-      onClose={() => setOpen(false)}
-      mode="modal"
-      aria-label={`Violations for ${team}`}
-    >
-      <DialogHeader title={team} onClose={() => setOpen(false)} />
-      <DialogBody>
-        <VirtualizedList data={incidents} options={{ estimateSize: () => 64 }}>
-          {(incident) => (
-            <Incident
-              incident={incident}
-              className="h-14 overflow-hidden"
-              readonly
-            />
-          )}
-        </VirtualizedList>
-      </DialogBody>
-    </Dialog>
-  );
+	return (
+		<Dialog
+			open={open}
+			onClose={() => setOpen(false)}
+			mode="modal"
+			aria-label={`Violations for ${team}`}
+		>
+			<DialogHeader title={team} onClose={() => setOpen(false)} />
+			<DialogBody>
+				<VirtualizedList data={incidents} options={{ estimateSize: () => 64 }}>
+					{(incident) => (
+						<Incident
+							incident={incident}
+							className="h-14 overflow-hidden"
+							readonly
+						/>
+					)}
+				</VirtualizedList>
+			</DialogBody>
+		</Dialog>
+	);
 };

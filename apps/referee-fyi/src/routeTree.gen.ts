@@ -8,450 +8,450 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from './routes/__root'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as WrappedRouteRouteImport } from './routes/wrapped/route'
-import { Route as SkuRouteRouteImport } from './routes/$sku/route'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as WrappedIndexRouteImport } from './routes/wrapped/index'
-import { Route as SkuIndexRouteImport } from './routes/$sku/index'
-import { Route as SkuSummaryRouteImport } from './routes/$sku/summary'
-import { Route as SkuStatsRouteImport } from './routes/$sku/stats'
-import { Route as SkuSkillsRouteImport } from './routes/$sku/skills'
-import { Route as SkuDevtoolsRouteImport } from './routes/$sku/devtools'
-import { Route as SkuDeletedRouteImport } from './routes/$sku/deleted'
-import { Route as SkuDivisionIndexRouteImport } from './routes/$sku/$division/index'
-import { Route as Wrapped20252026DoneRouteImport } from './routes/wrapped/2025-2026/done'
-import { Route as Wrapped202520263RouteImport } from './routes/wrapped/2025-2026/3'
-import { Route as Wrapped202520262RouteImport } from './routes/wrapped/2025-2026/2'
-import { Route as Wrapped202520261RouteImport } from './routes/wrapped/2025-2026/1'
-import { Route as RulesProgramYearRouteImport } from './routes/rules/$program/$year'
-import { Route as SkuTeamTeamRouteImport } from './routes/$sku/team/$team'
+import { Route as rootRouteImport } from "./routes/__root";
+import { Route as SkuDivisionIndexRouteImport } from "./routes/$sku/$division/index";
+import { Route as SkuDeletedRouteImport } from "./routes/$sku/deleted";
+import { Route as SkuDevtoolsRouteImport } from "./routes/$sku/devtools";
+import { Route as SkuIndexRouteImport } from "./routes/$sku/index";
+import { Route as SkuRouteRouteImport } from "./routes/$sku/route";
+import { Route as SkuSkillsRouteImport } from "./routes/$sku/skills";
+import { Route as SkuStatsRouteImport } from "./routes/$sku/stats";
+import { Route as SkuSummaryRouteImport } from "./routes/$sku/summary";
+import { Route as SkuTeamTeamRouteImport } from "./routes/$sku/team/$team";
+import { Route as IndexRouteImport } from "./routes/index";
+import { Route as PrivacyRouteImport } from "./routes/privacy";
+import { Route as RulesProgramYearRouteImport } from "./routes/rules/$program/$year";
+import { Route as SettingsRouteImport } from "./routes/settings";
+import { Route as Wrapped202520261RouteImport } from "./routes/wrapped/2025-2026/1";
+import { Route as Wrapped202520262RouteImport } from "./routes/wrapped/2025-2026/2";
+import { Route as Wrapped202520263RouteImport } from "./routes/wrapped/2025-2026/3";
+import { Route as Wrapped20252026DoneRouteImport } from "./routes/wrapped/2025-2026/done";
+import { Route as WrappedIndexRouteImport } from "./routes/wrapped/index";
+import { Route as WrappedRouteRouteImport } from "./routes/wrapped/route";
 
 const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/settings",
+	path: "/settings",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/privacy",
+	path: "/privacy",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const WrappedRouteRoute = WrappedRouteRouteImport.update({
-  id: '/wrapped',
-  path: '/wrapped',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/wrapped",
+	path: "/wrapped",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const SkuRouteRoute = SkuRouteRouteImport.update({
-  id: '/$sku',
-  path: '/$sku',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/$sku",
+	path: "/$sku",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/",
+	path: "/",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const WrappedIndexRoute = WrappedIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => WrappedRouteRoute,
-} as any)
+	id: "/",
+	path: "/",
+	getParentRoute: () => WrappedRouteRoute,
+} as any);
 const SkuIndexRoute = SkuIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => SkuRouteRoute,
-} as any)
+	id: "/",
+	path: "/",
+	getParentRoute: () => SkuRouteRoute,
+} as any);
 const SkuSummaryRoute = SkuSummaryRouteImport.update({
-  id: '/summary',
-  path: '/summary',
-  getParentRoute: () => SkuRouteRoute,
-} as any)
+	id: "/summary",
+	path: "/summary",
+	getParentRoute: () => SkuRouteRoute,
+} as any);
 const SkuStatsRoute = SkuStatsRouteImport.update({
-  id: '/stats',
-  path: '/stats',
-  getParentRoute: () => SkuRouteRoute,
-} as any)
+	id: "/stats",
+	path: "/stats",
+	getParentRoute: () => SkuRouteRoute,
+} as any);
 const SkuSkillsRoute = SkuSkillsRouteImport.update({
-  id: '/skills',
-  path: '/skills',
-  getParentRoute: () => SkuRouteRoute,
-} as any)
+	id: "/skills",
+	path: "/skills",
+	getParentRoute: () => SkuRouteRoute,
+} as any);
 const SkuDevtoolsRoute = SkuDevtoolsRouteImport.update({
-  id: '/devtools',
-  path: '/devtools',
-  getParentRoute: () => SkuRouteRoute,
-} as any)
+	id: "/devtools",
+	path: "/devtools",
+	getParentRoute: () => SkuRouteRoute,
+} as any);
 const SkuDeletedRoute = SkuDeletedRouteImport.update({
-  id: '/deleted',
-  path: '/deleted',
-  getParentRoute: () => SkuRouteRoute,
-} as any)
+	id: "/deleted",
+	path: "/deleted",
+	getParentRoute: () => SkuRouteRoute,
+} as any);
 const SkuDivisionIndexRoute = SkuDivisionIndexRouteImport.update({
-  id: '/$division/',
-  path: '/$division/',
-  getParentRoute: () => SkuRouteRoute,
-} as any)
+	id: "/$division/",
+	path: "/$division/",
+	getParentRoute: () => SkuRouteRoute,
+} as any);
 const Wrapped20252026DoneRoute = Wrapped20252026DoneRouteImport.update({
-  id: '/2025-2026/done',
-  path: '/2025-2026/done',
-  getParentRoute: () => WrappedRouteRoute,
-} as any)
+	id: "/2025-2026/done",
+	path: "/2025-2026/done",
+	getParentRoute: () => WrappedRouteRoute,
+} as any);
 const Wrapped202520263Route = Wrapped202520263RouteImport.update({
-  id: '/2025-2026/3',
-  path: '/2025-2026/3',
-  getParentRoute: () => WrappedRouteRoute,
-} as any)
+	id: "/2025-2026/3",
+	path: "/2025-2026/3",
+	getParentRoute: () => WrappedRouteRoute,
+} as any);
 const Wrapped202520262Route = Wrapped202520262RouteImport.update({
-  id: '/2025-2026/2',
-  path: '/2025-2026/2',
-  getParentRoute: () => WrappedRouteRoute,
-} as any)
+	id: "/2025-2026/2",
+	path: "/2025-2026/2",
+	getParentRoute: () => WrappedRouteRoute,
+} as any);
 const Wrapped202520261Route = Wrapped202520261RouteImport.update({
-  id: '/2025-2026/1',
-  path: '/2025-2026/1',
-  getParentRoute: () => WrappedRouteRoute,
-} as any)
+	id: "/2025-2026/1",
+	path: "/2025-2026/1",
+	getParentRoute: () => WrappedRouteRoute,
+} as any);
 const RulesProgramYearRoute = RulesProgramYearRouteImport.update({
-  id: '/rules/$program/$year',
-  path: '/rules/$program/$year',
-  getParentRoute: () => rootRouteImport,
-} as any)
+	id: "/rules/$program/$year",
+	path: "/rules/$program/$year",
+	getParentRoute: () => rootRouteImport,
+} as any);
 const SkuTeamTeamRoute = SkuTeamTeamRouteImport.update({
-  id: '/team/$team',
-  path: '/team/$team',
-  getParentRoute: () => SkuRouteRoute,
-} as any)
+	id: "/team/$team",
+	path: "/team/$team",
+	getParentRoute: () => SkuRouteRoute,
+} as any);
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/$sku': typeof SkuRouteRouteWithChildren
-  '/wrapped': typeof WrappedRouteRouteWithChildren
-  '/privacy': typeof PrivacyRoute
-  '/settings': typeof SettingsRoute
-  '/$sku/deleted': typeof SkuDeletedRoute
-  '/$sku/devtools': typeof SkuDevtoolsRoute
-  '/$sku/skills': typeof SkuSkillsRoute
-  '/$sku/stats': typeof SkuStatsRoute
-  '/$sku/summary': typeof SkuSummaryRoute
-  '/$sku/': typeof SkuIndexRoute
-  '/wrapped/': typeof WrappedIndexRoute
-  '/$sku/team/$team': typeof SkuTeamTeamRoute
-  '/rules/$program/$year': typeof RulesProgramYearRoute
-  '/wrapped/2025-2026/1': typeof Wrapped202520261Route
-  '/wrapped/2025-2026/2': typeof Wrapped202520262Route
-  '/wrapped/2025-2026/3': typeof Wrapped202520263Route
-  '/wrapped/2025-2026/done': typeof Wrapped20252026DoneRoute
-  '/$sku/$division': typeof SkuDivisionIndexRoute
+	"/": typeof IndexRoute;
+	"/$sku": typeof SkuRouteRouteWithChildren;
+	"/wrapped": typeof WrappedRouteRouteWithChildren;
+	"/privacy": typeof PrivacyRoute;
+	"/settings": typeof SettingsRoute;
+	"/$sku/deleted": typeof SkuDeletedRoute;
+	"/$sku/devtools": typeof SkuDevtoolsRoute;
+	"/$sku/skills": typeof SkuSkillsRoute;
+	"/$sku/stats": typeof SkuStatsRoute;
+	"/$sku/summary": typeof SkuSummaryRoute;
+	"/$sku/": typeof SkuIndexRoute;
+	"/wrapped/": typeof WrappedIndexRoute;
+	"/$sku/team/$team": typeof SkuTeamTeamRoute;
+	"/rules/$program/$year": typeof RulesProgramYearRoute;
+	"/wrapped/2025-2026/1": typeof Wrapped202520261Route;
+	"/wrapped/2025-2026/2": typeof Wrapped202520262Route;
+	"/wrapped/2025-2026/3": typeof Wrapped202520263Route;
+	"/wrapped/2025-2026/done": typeof Wrapped20252026DoneRoute;
+	"/$sku/$division": typeof SkuDivisionIndexRoute;
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/privacy': typeof PrivacyRoute
-  '/settings': typeof SettingsRoute
-  '/$sku/deleted': typeof SkuDeletedRoute
-  '/$sku/devtools': typeof SkuDevtoolsRoute
-  '/$sku/skills': typeof SkuSkillsRoute
-  '/$sku/stats': typeof SkuStatsRoute
-  '/$sku/summary': typeof SkuSummaryRoute
-  '/$sku': typeof SkuIndexRoute
-  '/wrapped': typeof WrappedIndexRoute
-  '/$sku/team/$team': typeof SkuTeamTeamRoute
-  '/rules/$program/$year': typeof RulesProgramYearRoute
-  '/wrapped/2025-2026/1': typeof Wrapped202520261Route
-  '/wrapped/2025-2026/2': typeof Wrapped202520262Route
-  '/wrapped/2025-2026/3': typeof Wrapped202520263Route
-  '/wrapped/2025-2026/done': typeof Wrapped20252026DoneRoute
-  '/$sku/$division': typeof SkuDivisionIndexRoute
+	"/": typeof IndexRoute;
+	"/privacy": typeof PrivacyRoute;
+	"/settings": typeof SettingsRoute;
+	"/$sku/deleted": typeof SkuDeletedRoute;
+	"/$sku/devtools": typeof SkuDevtoolsRoute;
+	"/$sku/skills": typeof SkuSkillsRoute;
+	"/$sku/stats": typeof SkuStatsRoute;
+	"/$sku/summary": typeof SkuSummaryRoute;
+	"/$sku": typeof SkuIndexRoute;
+	"/wrapped": typeof WrappedIndexRoute;
+	"/$sku/team/$team": typeof SkuTeamTeamRoute;
+	"/rules/$program/$year": typeof RulesProgramYearRoute;
+	"/wrapped/2025-2026/1": typeof Wrapped202520261Route;
+	"/wrapped/2025-2026/2": typeof Wrapped202520262Route;
+	"/wrapped/2025-2026/3": typeof Wrapped202520263Route;
+	"/wrapped/2025-2026/done": typeof Wrapped20252026DoneRoute;
+	"/$sku/$division": typeof SkuDivisionIndexRoute;
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/$sku': typeof SkuRouteRouteWithChildren
-  '/wrapped': typeof WrappedRouteRouteWithChildren
-  '/privacy': typeof PrivacyRoute
-  '/settings': typeof SettingsRoute
-  '/$sku/deleted': typeof SkuDeletedRoute
-  '/$sku/devtools': typeof SkuDevtoolsRoute
-  '/$sku/skills': typeof SkuSkillsRoute
-  '/$sku/stats': typeof SkuStatsRoute
-  '/$sku/summary': typeof SkuSummaryRoute
-  '/$sku/': typeof SkuIndexRoute
-  '/wrapped/': typeof WrappedIndexRoute
-  '/$sku/team/$team': typeof SkuTeamTeamRoute
-  '/rules/$program/$year': typeof RulesProgramYearRoute
-  '/wrapped/2025-2026/1': typeof Wrapped202520261Route
-  '/wrapped/2025-2026/2': typeof Wrapped202520262Route
-  '/wrapped/2025-2026/3': typeof Wrapped202520263Route
-  '/wrapped/2025-2026/done': typeof Wrapped20252026DoneRoute
-  '/$sku/$division/': typeof SkuDivisionIndexRoute
+	__root__: typeof rootRouteImport;
+	"/": typeof IndexRoute;
+	"/$sku": typeof SkuRouteRouteWithChildren;
+	"/wrapped": typeof WrappedRouteRouteWithChildren;
+	"/privacy": typeof PrivacyRoute;
+	"/settings": typeof SettingsRoute;
+	"/$sku/deleted": typeof SkuDeletedRoute;
+	"/$sku/devtools": typeof SkuDevtoolsRoute;
+	"/$sku/skills": typeof SkuSkillsRoute;
+	"/$sku/stats": typeof SkuStatsRoute;
+	"/$sku/summary": typeof SkuSummaryRoute;
+	"/$sku/": typeof SkuIndexRoute;
+	"/wrapped/": typeof WrappedIndexRoute;
+	"/$sku/team/$team": typeof SkuTeamTeamRoute;
+	"/rules/$program/$year": typeof RulesProgramYearRoute;
+	"/wrapped/2025-2026/1": typeof Wrapped202520261Route;
+	"/wrapped/2025-2026/2": typeof Wrapped202520262Route;
+	"/wrapped/2025-2026/3": typeof Wrapped202520263Route;
+	"/wrapped/2025-2026/done": typeof Wrapped20252026DoneRoute;
+	"/$sku/$division/": typeof SkuDivisionIndexRoute;
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/$sku'
-    | '/wrapped'
-    | '/privacy'
-    | '/settings'
-    | '/$sku/deleted'
-    | '/$sku/devtools'
-    | '/$sku/skills'
-    | '/$sku/stats'
-    | '/$sku/summary'
-    | '/$sku/'
-    | '/wrapped/'
-    | '/$sku/team/$team'
-    | '/rules/$program/$year'
-    | '/wrapped/2025-2026/1'
-    | '/wrapped/2025-2026/2'
-    | '/wrapped/2025-2026/3'
-    | '/wrapped/2025-2026/done'
-    | '/$sku/$division'
-  fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/privacy'
-    | '/settings'
-    | '/$sku/deleted'
-    | '/$sku/devtools'
-    | '/$sku/skills'
-    | '/$sku/stats'
-    | '/$sku/summary'
-    | '/$sku'
-    | '/wrapped'
-    | '/$sku/team/$team'
-    | '/rules/$program/$year'
-    | '/wrapped/2025-2026/1'
-    | '/wrapped/2025-2026/2'
-    | '/wrapped/2025-2026/3'
-    | '/wrapped/2025-2026/done'
-    | '/$sku/$division'
-  id:
-    | '__root__'
-    | '/'
-    | '/$sku'
-    | '/wrapped'
-    | '/privacy'
-    | '/settings'
-    | '/$sku/deleted'
-    | '/$sku/devtools'
-    | '/$sku/skills'
-    | '/$sku/stats'
-    | '/$sku/summary'
-    | '/$sku/'
-    | '/wrapped/'
-    | '/$sku/team/$team'
-    | '/rules/$program/$year'
-    | '/wrapped/2025-2026/1'
-    | '/wrapped/2025-2026/2'
-    | '/wrapped/2025-2026/3'
-    | '/wrapped/2025-2026/done'
-    | '/$sku/$division/'
-  fileRoutesById: FileRoutesById
+	fileRoutesByFullPath: FileRoutesByFullPath;
+	fullPaths:
+		| "/"
+		| "/$sku"
+		| "/wrapped"
+		| "/privacy"
+		| "/settings"
+		| "/$sku/deleted"
+		| "/$sku/devtools"
+		| "/$sku/skills"
+		| "/$sku/stats"
+		| "/$sku/summary"
+		| "/$sku/"
+		| "/wrapped/"
+		| "/$sku/team/$team"
+		| "/rules/$program/$year"
+		| "/wrapped/2025-2026/1"
+		| "/wrapped/2025-2026/2"
+		| "/wrapped/2025-2026/3"
+		| "/wrapped/2025-2026/done"
+		| "/$sku/$division";
+	fileRoutesByTo: FileRoutesByTo;
+	to:
+		| "/"
+		| "/privacy"
+		| "/settings"
+		| "/$sku/deleted"
+		| "/$sku/devtools"
+		| "/$sku/skills"
+		| "/$sku/stats"
+		| "/$sku/summary"
+		| "/$sku"
+		| "/wrapped"
+		| "/$sku/team/$team"
+		| "/rules/$program/$year"
+		| "/wrapped/2025-2026/1"
+		| "/wrapped/2025-2026/2"
+		| "/wrapped/2025-2026/3"
+		| "/wrapped/2025-2026/done"
+		| "/$sku/$division";
+	id:
+		| "__root__"
+		| "/"
+		| "/$sku"
+		| "/wrapped"
+		| "/privacy"
+		| "/settings"
+		| "/$sku/deleted"
+		| "/$sku/devtools"
+		| "/$sku/skills"
+		| "/$sku/stats"
+		| "/$sku/summary"
+		| "/$sku/"
+		| "/wrapped/"
+		| "/$sku/team/$team"
+		| "/rules/$program/$year"
+		| "/wrapped/2025-2026/1"
+		| "/wrapped/2025-2026/2"
+		| "/wrapped/2025-2026/3"
+		| "/wrapped/2025-2026/done"
+		| "/$sku/$division/";
+	fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  SkuRouteRoute: typeof SkuRouteRouteWithChildren
-  WrappedRouteRoute: typeof WrappedRouteRouteWithChildren
-  PrivacyRoute: typeof PrivacyRoute
-  SettingsRoute: typeof SettingsRoute
-  RulesProgramYearRoute: typeof RulesProgramYearRoute
+	IndexRoute: typeof IndexRoute;
+	SkuRouteRoute: typeof SkuRouteRouteWithChildren;
+	WrappedRouteRoute: typeof WrappedRouteRouteWithChildren;
+	PrivacyRoute: typeof PrivacyRoute;
+	SettingsRoute: typeof SettingsRoute;
+	RulesProgramYearRoute: typeof RulesProgramYearRoute;
 }
 
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/wrapped': {
-      id: '/wrapped'
-      path: '/wrapped'
-      fullPath: '/wrapped'
-      preLoaderRoute: typeof WrappedRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/$sku': {
-      id: '/$sku'
-      path: '/$sku'
-      fullPath: '/$sku'
-      preLoaderRoute: typeof SkuRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/wrapped/': {
-      id: '/wrapped/'
-      path: '/'
-      fullPath: '/wrapped/'
-      preLoaderRoute: typeof WrappedIndexRouteImport
-      parentRoute: typeof WrappedRouteRoute
-    }
-    '/$sku/': {
-      id: '/$sku/'
-      path: '/'
-      fullPath: '/$sku/'
-      preLoaderRoute: typeof SkuIndexRouteImport
-      parentRoute: typeof SkuRouteRoute
-    }
-    '/$sku/summary': {
-      id: '/$sku/summary'
-      path: '/summary'
-      fullPath: '/$sku/summary'
-      preLoaderRoute: typeof SkuSummaryRouteImport
-      parentRoute: typeof SkuRouteRoute
-    }
-    '/$sku/stats': {
-      id: '/$sku/stats'
-      path: '/stats'
-      fullPath: '/$sku/stats'
-      preLoaderRoute: typeof SkuStatsRouteImport
-      parentRoute: typeof SkuRouteRoute
-    }
-    '/$sku/skills': {
-      id: '/$sku/skills'
-      path: '/skills'
-      fullPath: '/$sku/skills'
-      preLoaderRoute: typeof SkuSkillsRouteImport
-      parentRoute: typeof SkuRouteRoute
-    }
-    '/$sku/devtools': {
-      id: '/$sku/devtools'
-      path: '/devtools'
-      fullPath: '/$sku/devtools'
-      preLoaderRoute: typeof SkuDevtoolsRouteImport
-      parentRoute: typeof SkuRouteRoute
-    }
-    '/$sku/deleted': {
-      id: '/$sku/deleted'
-      path: '/deleted'
-      fullPath: '/$sku/deleted'
-      preLoaderRoute: typeof SkuDeletedRouteImport
-      parentRoute: typeof SkuRouteRoute
-    }
-    '/$sku/$division/': {
-      id: '/$sku/$division/'
-      path: '/$division'
-      fullPath: '/$sku/$division'
-      preLoaderRoute: typeof SkuDivisionIndexRouteImport
-      parentRoute: typeof SkuRouteRoute
-    }
-    '/wrapped/2025-2026/done': {
-      id: '/wrapped/2025-2026/done'
-      path: '/2025-2026/done'
-      fullPath: '/wrapped/2025-2026/done'
-      preLoaderRoute: typeof Wrapped20252026DoneRouteImport
-      parentRoute: typeof WrappedRouteRoute
-    }
-    '/wrapped/2025-2026/3': {
-      id: '/wrapped/2025-2026/3'
-      path: '/2025-2026/3'
-      fullPath: '/wrapped/2025-2026/3'
-      preLoaderRoute: typeof Wrapped202520263RouteImport
-      parentRoute: typeof WrappedRouteRoute
-    }
-    '/wrapped/2025-2026/2': {
-      id: '/wrapped/2025-2026/2'
-      path: '/2025-2026/2'
-      fullPath: '/wrapped/2025-2026/2'
-      preLoaderRoute: typeof Wrapped202520262RouteImport
-      parentRoute: typeof WrappedRouteRoute
-    }
-    '/wrapped/2025-2026/1': {
-      id: '/wrapped/2025-2026/1'
-      path: '/2025-2026/1'
-      fullPath: '/wrapped/2025-2026/1'
-      preLoaderRoute: typeof Wrapped202520261RouteImport
-      parentRoute: typeof WrappedRouteRoute
-    }
-    '/rules/$program/$year': {
-      id: '/rules/$program/$year'
-      path: '/rules/$program/$year'
-      fullPath: '/rules/$program/$year'
-      preLoaderRoute: typeof RulesProgramYearRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/$sku/team/$team': {
-      id: '/$sku/team/$team'
-      path: '/team/$team'
-      fullPath: '/$sku/team/$team'
-      preLoaderRoute: typeof SkuTeamTeamRouteImport
-      parentRoute: typeof SkuRouteRoute
-    }
-  }
+declare module "@tanstack/react-router" {
+	interface FileRoutesByPath {
+		"/settings": {
+			id: "/settings";
+			path: "/settings";
+			fullPath: "/settings";
+			preLoaderRoute: typeof SettingsRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/privacy": {
+			id: "/privacy";
+			path: "/privacy";
+			fullPath: "/privacy";
+			preLoaderRoute: typeof PrivacyRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/wrapped": {
+			id: "/wrapped";
+			path: "/wrapped";
+			fullPath: "/wrapped";
+			preLoaderRoute: typeof WrappedRouteRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/$sku": {
+			id: "/$sku";
+			path: "/$sku";
+			fullPath: "/$sku";
+			preLoaderRoute: typeof SkuRouteRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/": {
+			id: "/";
+			path: "/";
+			fullPath: "/";
+			preLoaderRoute: typeof IndexRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/wrapped/": {
+			id: "/wrapped/";
+			path: "/";
+			fullPath: "/wrapped/";
+			preLoaderRoute: typeof WrappedIndexRouteImport;
+			parentRoute: typeof WrappedRouteRoute;
+		};
+		"/$sku/": {
+			id: "/$sku/";
+			path: "/";
+			fullPath: "/$sku/";
+			preLoaderRoute: typeof SkuIndexRouteImport;
+			parentRoute: typeof SkuRouteRoute;
+		};
+		"/$sku/summary": {
+			id: "/$sku/summary";
+			path: "/summary";
+			fullPath: "/$sku/summary";
+			preLoaderRoute: typeof SkuSummaryRouteImport;
+			parentRoute: typeof SkuRouteRoute;
+		};
+		"/$sku/stats": {
+			id: "/$sku/stats";
+			path: "/stats";
+			fullPath: "/$sku/stats";
+			preLoaderRoute: typeof SkuStatsRouteImport;
+			parentRoute: typeof SkuRouteRoute;
+		};
+		"/$sku/skills": {
+			id: "/$sku/skills";
+			path: "/skills";
+			fullPath: "/$sku/skills";
+			preLoaderRoute: typeof SkuSkillsRouteImport;
+			parentRoute: typeof SkuRouteRoute;
+		};
+		"/$sku/devtools": {
+			id: "/$sku/devtools";
+			path: "/devtools";
+			fullPath: "/$sku/devtools";
+			preLoaderRoute: typeof SkuDevtoolsRouteImport;
+			parentRoute: typeof SkuRouteRoute;
+		};
+		"/$sku/deleted": {
+			id: "/$sku/deleted";
+			path: "/deleted";
+			fullPath: "/$sku/deleted";
+			preLoaderRoute: typeof SkuDeletedRouteImport;
+			parentRoute: typeof SkuRouteRoute;
+		};
+		"/$sku/$division/": {
+			id: "/$sku/$division/";
+			path: "/$division";
+			fullPath: "/$sku/$division";
+			preLoaderRoute: typeof SkuDivisionIndexRouteImport;
+			parentRoute: typeof SkuRouteRoute;
+		};
+		"/wrapped/2025-2026/done": {
+			id: "/wrapped/2025-2026/done";
+			path: "/2025-2026/done";
+			fullPath: "/wrapped/2025-2026/done";
+			preLoaderRoute: typeof Wrapped20252026DoneRouteImport;
+			parentRoute: typeof WrappedRouteRoute;
+		};
+		"/wrapped/2025-2026/3": {
+			id: "/wrapped/2025-2026/3";
+			path: "/2025-2026/3";
+			fullPath: "/wrapped/2025-2026/3";
+			preLoaderRoute: typeof Wrapped202520263RouteImport;
+			parentRoute: typeof WrappedRouteRoute;
+		};
+		"/wrapped/2025-2026/2": {
+			id: "/wrapped/2025-2026/2";
+			path: "/2025-2026/2";
+			fullPath: "/wrapped/2025-2026/2";
+			preLoaderRoute: typeof Wrapped202520262RouteImport;
+			parentRoute: typeof WrappedRouteRoute;
+		};
+		"/wrapped/2025-2026/1": {
+			id: "/wrapped/2025-2026/1";
+			path: "/2025-2026/1";
+			fullPath: "/wrapped/2025-2026/1";
+			preLoaderRoute: typeof Wrapped202520261RouteImport;
+			parentRoute: typeof WrappedRouteRoute;
+		};
+		"/rules/$program/$year": {
+			id: "/rules/$program/$year";
+			path: "/rules/$program/$year";
+			fullPath: "/rules/$program/$year";
+			preLoaderRoute: typeof RulesProgramYearRouteImport;
+			parentRoute: typeof rootRouteImport;
+		};
+		"/$sku/team/$team": {
+			id: "/$sku/team/$team";
+			path: "/team/$team";
+			fullPath: "/$sku/team/$team";
+			preLoaderRoute: typeof SkuTeamTeamRouteImport;
+			parentRoute: typeof SkuRouteRoute;
+		};
+	}
 }
 
 interface SkuRouteRouteChildren {
-  SkuDeletedRoute: typeof SkuDeletedRoute
-  SkuDevtoolsRoute: typeof SkuDevtoolsRoute
-  SkuSkillsRoute: typeof SkuSkillsRoute
-  SkuStatsRoute: typeof SkuStatsRoute
-  SkuSummaryRoute: typeof SkuSummaryRoute
-  SkuIndexRoute: typeof SkuIndexRoute
-  SkuTeamTeamRoute: typeof SkuTeamTeamRoute
-  SkuDivisionIndexRoute: typeof SkuDivisionIndexRoute
+	SkuDeletedRoute: typeof SkuDeletedRoute;
+	SkuDevtoolsRoute: typeof SkuDevtoolsRoute;
+	SkuSkillsRoute: typeof SkuSkillsRoute;
+	SkuStatsRoute: typeof SkuStatsRoute;
+	SkuSummaryRoute: typeof SkuSummaryRoute;
+	SkuIndexRoute: typeof SkuIndexRoute;
+	SkuTeamTeamRoute: typeof SkuTeamTeamRoute;
+	SkuDivisionIndexRoute: typeof SkuDivisionIndexRoute;
 }
 
 const SkuRouteRouteChildren: SkuRouteRouteChildren = {
-  SkuDeletedRoute: SkuDeletedRoute,
-  SkuDevtoolsRoute: SkuDevtoolsRoute,
-  SkuSkillsRoute: SkuSkillsRoute,
-  SkuStatsRoute: SkuStatsRoute,
-  SkuSummaryRoute: SkuSummaryRoute,
-  SkuIndexRoute: SkuIndexRoute,
-  SkuTeamTeamRoute: SkuTeamTeamRoute,
-  SkuDivisionIndexRoute: SkuDivisionIndexRoute,
-}
+	SkuDeletedRoute: SkuDeletedRoute,
+	SkuDevtoolsRoute: SkuDevtoolsRoute,
+	SkuSkillsRoute: SkuSkillsRoute,
+	SkuStatsRoute: SkuStatsRoute,
+	SkuSummaryRoute: SkuSummaryRoute,
+	SkuIndexRoute: SkuIndexRoute,
+	SkuTeamTeamRoute: SkuTeamTeamRoute,
+	SkuDivisionIndexRoute: SkuDivisionIndexRoute,
+};
 
 const SkuRouteRouteWithChildren = SkuRouteRoute._addFileChildren(
-  SkuRouteRouteChildren,
-)
+	SkuRouteRouteChildren,
+);
 
 interface WrappedRouteRouteChildren {
-  WrappedIndexRoute: typeof WrappedIndexRoute
-  Wrapped202520261Route: typeof Wrapped202520261Route
-  Wrapped202520262Route: typeof Wrapped202520262Route
-  Wrapped202520263Route: typeof Wrapped202520263Route
-  Wrapped20252026DoneRoute: typeof Wrapped20252026DoneRoute
+	WrappedIndexRoute: typeof WrappedIndexRoute;
+	Wrapped202520261Route: typeof Wrapped202520261Route;
+	Wrapped202520262Route: typeof Wrapped202520262Route;
+	Wrapped202520263Route: typeof Wrapped202520263Route;
+	Wrapped20252026DoneRoute: typeof Wrapped20252026DoneRoute;
 }
 
 const WrappedRouteRouteChildren: WrappedRouteRouteChildren = {
-  WrappedIndexRoute: WrappedIndexRoute,
-  Wrapped202520261Route: Wrapped202520261Route,
-  Wrapped202520262Route: Wrapped202520262Route,
-  Wrapped202520263Route: Wrapped202520263Route,
-  Wrapped20252026DoneRoute: Wrapped20252026DoneRoute,
-}
+	WrappedIndexRoute: WrappedIndexRoute,
+	Wrapped202520261Route: Wrapped202520261Route,
+	Wrapped202520262Route: Wrapped202520262Route,
+	Wrapped202520263Route: Wrapped202520263Route,
+	Wrapped20252026DoneRoute: Wrapped20252026DoneRoute,
+};
 
 const WrappedRouteRouteWithChildren = WrappedRouteRoute._addFileChildren(
-  WrappedRouteRouteChildren,
-)
+	WrappedRouteRouteChildren,
+);
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  SkuRouteRoute: SkuRouteRouteWithChildren,
-  WrappedRouteRoute: WrappedRouteRouteWithChildren,
-  PrivacyRoute: PrivacyRoute,
-  SettingsRoute: SettingsRoute,
-  RulesProgramYearRoute: RulesProgramYearRoute,
-}
+	IndexRoute: IndexRoute,
+	SkuRouteRoute: SkuRouteRouteWithChildren,
+	WrappedRouteRoute: WrappedRouteRouteWithChildren,
+	PrivacyRoute: PrivacyRoute,
+	SettingsRoute: SettingsRoute,
+	RulesProgramYearRoute: RulesProgramYearRoute,
+};
 export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+	._addFileChildren(rootRouteChildren)
+	._addFileTypes<FileRouteTypes>();

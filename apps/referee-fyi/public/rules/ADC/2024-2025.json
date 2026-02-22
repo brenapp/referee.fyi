@@ -1,496 +1,496 @@
 {
-  "$schema": "https://referee.fyi/rules/schema.json",
-  "title": "Mission 2025: Gravity",
-  "programs": ["ADC"],
-  "season": "2024-2025",
-  "ruleGroups": [
-    {
-      "name": "Teamwork Mission Rules",
-      "programs": ["ADC"],
-      "rules": [
-        {
-          "rule": "<TM1>",
-          "description": "Drop Zone Top Cleared.",
-          "link": "https://online.flippingbook.com/view/201482508/33/"
-        },
-        {
-          "rule": "<TM2>",
-          "description": "Bean Bag on Drop Zone",
-          "link": "https://online.flippingbook.com/view/201482508/33/"
-        },
-        {
-          "rule": "<TM3>",
-          "description": "Ball in Scoring Zone.",
-          "link": "https://online.flippingbook.com/view/201482508/35/"
-        },
-        {
-          "rule": "<TM4>",
-          "description": "Land on Small or Large Landing Cube.",
-          "link": "https://online.flippingbook.com/view/201482508/35/"
-        },
-        {
-          "rule": "<TM5>",
-          "description": "Land on a Landing Pad.",
-          "link": "https://online.flippingbook.com/view/201482508/36/"
-        },
-        {
-          "rule": "<TM6>",
-          "description": "Land on the bullseye.",
-          "link": "https://online.flippingbook.com/view/201482508/36/"
-        },
-        {
-          "rule": "<TM7>",
-          "description": "Drone starting position.",
-          "link": "https://online.flippingbook.com/view/201482508/37/"
-        },
-        {
-          "rule": "<TM8>",
-          "description": "Pilot Station.",
-          "link": "https://online.flippingbook.com/view/201482508/37/"
-        },
-        {
-          "rule": "<TM9>",
-          "description": "Visual Observer Station.",
-          "link": "https://online.flippingbook.com/view/201482508/37/"
-        },
-        {
-          "rule": "<TM10>",
-          "description": "Teams must clearly identify their Team color during a Match.",
-          "link": "https://online.flippingbook.com/view/201482508/37/"
-        },
-        {
-          "rule": "<TM11>",
-          "description": "Loading MatchLoad Balls at the Loading Station.",
-          "link": "https://online.flippingbook.com/view/201482508/38/"
-        },
-        {
-          "rule": "<TM12>",
-          "description": "Keep balls on the ramp and in the track.",
-          "link": "https://online.flippingbook.com/view/201482508/38/"
-        },
-        {
-          "rule": "<TM13>",
-          "description": "Only One Drone per Landing Field Element.",
-          "link": "https://online.flippingbook.com/view/201482508/39/"
-        },
-        {
-          "rule": "<TM14>",
-          "description": "Qualification will occur according to the official Match Schedule.",
-          "link": "https://online.flippingbook.com/view/201482508/39/"
-        },
-        {
-          "rule": "<TM15>",
-          "description": "Be at your Match on time.",
-          "link": "https://online.flippingbook.com/view/201482508/39/"
-        },
-        {
-          "rule": "<TM16>",
-          "description": "Each Team will be scheduled for at least 4 Qualification Matches.",
-          "link": "https://online.flippingbook.com/view/201482508/39/"
-        },
-        {
-          "rule": "<TM17>",
-          "description": "Teams are ranked by their average qualification Match scores.",
-          "link": "https://online.flippingbook.com/view/201482508/39/"
-        },
-        {
-          "rule": "<TM18>",
-          "description": "The Alliance Selection process forms 2-Team Alliances for the Elimination Matches.",
-          "link": "https://online.flippingbook.com/view/201482508/40/"
-        },
-        {
-          "rule": "<TM19>",
-          "description": "Send a Team representative to Alliance Selection.",
-          "link": "https://online.flippingbook.com/view/201482508/40/"
-        },
-        {
-          "rule": "<TM20>",
-          "description": "Each Team may only be invited once to join an Alliance.",
-          "link": "https://online.flippingbook.com/view/201482508/40/"
-        },
-        {
-          "rule": "<TM21>",
-          "description": "Number of Alliances for Elimination Matches.",
-          "link": "https://online.flippingbook.com/view/201482508/41/"
-        },
-        {
-          "rule": "<TM22>",
-          "description": "Elimination Matches are played sequentially in rounds.",
-          "link": "https://online.flippingbook.com/view/201482508/41/"
-        }
-      ]
-    },
-    {
-      "name": "Safety Rules",
-      "programs": ["ADC"],
-      "rules": [
-        {
-          "rule": "<S1>",
-          "description": "Teams may only fly their drone in a designated Flight Zone.",
-          "link": "https://online.flippingbook.com/view/201482508/62/"
-        },
-        {
-          "rule": "<S2>",
-          "description": "Teams must pass Flight Clearance Inspection and use Pre Flight Checklist at competitions.",
-          "link": "https://online.flippingbook.com/view/201482508/62/"
-        },
-        {
-          "rule": "<S3>",
-          "description": "Stay in the Pilot station or Visual Observer stations and out of the field during a Match.",
-          "link": "https://online.flippingbook.com/view/201482508/62/"
-        },
-        {
-          "rule": "<S4>",
-          "description": "Stay in control of your Drone.",
-          "link": "https://online.flippingbook.com/view/201482508/62/"
-        },
-        {
-          "rule": "<S5>",
-          "description": "Batteries must be charged before launch.",
-          "link": "https://online.flippingbook.com/view/201482508/63/"
-        },
-        {
-          "rule": "<S6>",
-          "description": "Wear safety glasses.",
-          "link": "https://online.flippingbook.com/view/201482508/63/"
-        },
-        {
-          "rule": "<S7>",
-          "description": "Students must be accompanied by an Adult.",
-          "link": "https://online.flippingbook.com/view/201482508/63/"
-        },
-        {
-          "rule": "<S8>",
-          "description": "Additional Safety Practices.",
-          "link": "https://online.flippingbook.com/view/201482508/63/"
-        }
-      ]
-    },
-    {
-      "name": "General Rules",
-      "programs": ["ADC"],
-      "rules": [
-        {
-          "rule": "<G1>",
-          "description": "Treat everyone with respect",
-          "link": "https://online.flippingbook.com/view/201482508/24/"
-        },
-        {
-          "rule": "<G2>",
-          "description": "The Aerial Drone Competition is a Student-centered program.",
-          "link": "https://online.flippingbook.com/view/201482508/24/"
-        },
-        {
-          "rule": "<G3>",
-          "description": "Use common sense",
-          "link": "https://online.flippingbook.com/view/201482508/26/"
-        },
-        {
-          "rule": "<G4>",
-          "description": "Piloting and Autonomous Flight skills must represent the skill level of the Team.",
-          "link": "https://online.flippingbook.com/view/201482508/26/"
-        },
-        {
-          "rule": "<G5>",
-          "description": "Drones at the field must be ready to fly.",
-          "link": "https://online.flippingbook.com/view/201482508/27/"
-        },
-        {
-          "rule": "<G7>",
-          "description": "During a Match, Flight Team Members may retrieve their Drone for troubleshooting if the Drone has not completed take off.",
-          "link": "https://online.flippingbook.com/view/201482508/27/"
-        },
-        {
-          "rule": "<G8>",
-          "description": "Be prepared for field minor variances.",
-          "link": "https://online.flippingbook.com/view/201482508/28/"
-        },
-        {
-          "rule": "<G9>",
-          "description": "Match replays are allowed, but rare.",
-          "link": "https://online.flippingbook.com/view/201482508/28/"
-        },
-        {
-          "rule": "<G10>",
-          "description": "No electronic communication devices allowed.",
-          "link": "https://online.flippingbook.com/view/201482508/28/"
-        },
-        {
-          "rule": "<G11>",
-          "description": "Flight Team Members may not stand on objects.",
-          "link": "https://online.flippingbook.com/view/201482508/28/"
-        },
-        {
-          "rule": "<G12>",
-          "description": "The Q&A system is an extension of this competition manual.",
-          "link": "https://online.flippingbook.com/view/201482508/28/"
-        },
-        {
-          "rule": "<G13>",
-          "description": "Only registered Teams may compete in an Aerial Drone Competition.",
-          "link": "https://online.flippingbook.com/view/201482508/28/"
-        }
-      ]
-    },
-    {
-      "name": "Tournament Rules",
-      "programs": ["ADC"],
-      "rules": [
-        {
-          "rule": "<T1>",
-          "description": "The Head Referee has ultimate authority on ruling decisions during the Matches.",
-          "link": "https://online.flippingbook.com/view/201482508/29/"
-        },
-        {
-          "rule": "<T2>",
-          "description": "Head Referees must be qualified.",
-          "link": "https://online.flippingbook.com/view/201482508/29/"
-        },
-        {
-          "rule": "<T3>",
-          "description": "The Flight Team Members are permitted to immediately appeal the Head Referee’s ruling.",
-          "link": "https://online.flippingbook.com/view/201482508/30/"
-        },
-        {
-          "rule": "<T4>",
-          "description": "It’s not over until it’s over.",
-          "link": "https://online.flippingbook.com/view/201482508/30/"
-        },
-        {
-          "rule": "<T5>",
-          "description": "Flooring must be the same.",
-          "link": "https://online.flippingbook.com/view/201482508/30/"
-        },
-        {
-          "rule": "<T6>",
-          "description": "Division Finals",
-          "link": "https://online.flippingbook.com/view/201482508/30/"
-        }
-      ]
-    },
-    {
-      "name": "Autonomous Flight Skills Rules",
-      "programs": ["ADC"],
-      "rules": [
-        {
-          "rule": "<AM1>",
-          "description": "Set up Color Mats.",
-          "link": "https://online.flippingbook.com/view/201482508/43/"
-        },
-        {
-          "rule": "<AM2>",
-          "description": "Take off.",
-          "link": "https://online.flippingbook.com/view/201482508/45/"
-        },
-        {
-          "rule": "<AM3>",
-          "description": "Identify the color of a Color Mat.",
-          "link": "https://online.flippingbook.com/view/201482508/45/"
-        },
-        {
-          "rule": "<AM4>",
-          "description": "Complete a figure 8.",
-          "link": "https://online.flippingbook.com/view/201482508/45/"
-        },
-        {
-          "rule": "<AM5>",
-          "description": "Fly under Arch Gate.",
-          "link": "https://online.flippingbook.com/view/201482508/47/"
-        },
-        {
-          "rule": "<AM6>",
-          "description": "Fly through the Small Hole.",
-          "link": "https://online.flippingbook.com/view/201482508/47/"
-        },
-        {
-          "rule": "<AM7>",
-          "description": "Fly through the Large Hole.",
-          "link": "https://online.flippingbook.com/view/201482508/48/"
-        },
-        {
-          "rule": "<AM8>",
-          "description": "Fly through the Keyhole Gate.",
-          "link": "https://online.flippingbook.com/view/201482508/48/"
-        },
-        {
-          "rule": "<AM9>",
-          "description": "Land on the Landing Pad.",
-          "link": "https://online.flippingbook.com/view/201482508/49/"
-        },
-        {
-          "rule": "<AM10>",
-          "description": "Land on Landing Cube.",
-          "link": "https://online.flippingbook.com/view/201482508/49/"
-        },
-        {
-          "rule": "<AM11>",
-          "description": "Autonomous means “no humans.”",
-          "link": "https://online.flippingbook.com/view/201482508/50/"
-        },
-        {
-          "rule": "<AM12>",
-          "description": "5 Minute Timer.",
-          "link": "https://online.flippingbook.com/view/201482508/50/"
-        },
-        {
-          "rule": "<AM13>",
-          "description": "Drone starting position.",
-          "link": "https://online.flippingbook.com/view/201482508/50/"
-        },
-        {
-          "rule": "<AM14>",
-          "description": "Pilot Station",
-          "link": "https://online.flippingbook.com/view/201482508/51/"
-        },
-        {
-          "rule": "<AM15>",
-          "description": "Visual Observer Station",
-          "link": "https://online.flippingbook.com/view/201482508/51/"
-        }
-      ]
-    },
-    {
-      "name": "Piloting Skills Rules",
-      "programs": ["ADC"],
-      "rules": [
-        {
-          "rule": "<PM1>",
-          "description": "Take off.",
-          "link": "https://online.flippingbook.com/view/201482508/55/"
-        },
-        {
-          "rule": "<PM2>",
-          "description": "Complete a figure 8.",
-          "link": "https://online.flippingbook.com/view/201482508/55/"
-        },
-        {
-          "rule": "<PM3>",
-          "description": "Fly through the Small Hole.",
-          "link": "https://online.flippingbook.com/view/201482508/55/"
-        },
-        {
-          "rule": "<PM4>",
-          "description": "Fly through the Large Hole.",
-          "link": "https://online.flippingbook.com/view/201482508/55/"
-        },
-        {
-          "rule": "<PM5>",
-          "description": "Fly through the Keyhole Gate.",
-          "link": "https://online.flippingbook.com/view/201482508/55/"
-        },
-        {
-          "rule": "<PM6>",
-          "description": "Land on the Landing Pad.",
-          "link": "https://online.flippingbook.com/view/201482508/55/"
-        },
-        {
-          "rule": "<PM7>",
-          "description": "Landing on the Landing Cube.",
-          "link": "https://online.flippingbook.com/view/201482508/55/"
-        },
-        {
-          "rule": "<PM8>",
-          "description": "Flight path.",
-          "link": "https://online.flippingbook.com/view/201482508/56/"
-        },
-        {
-          "rule": "<PM9>",
-          "description": "Drone starting position.",
-          "link": "https://online.flippingbook.com/view/201482508/57/"
-        },
-        {
-          "rule": "<PM10>",
-          "description": "Pilot station.",
-          "link": "https://online.flippingbook.com/view/201482508/57/"
-        },
-        {
-          "rule": "<PM11>",
-          "description": "Visual Observer Station.",
-          "link": "https://online.flippingbook.com/view/201482508/57/"
-        },
-        {
-          "rule": "<PM12>",
-          "description": "Piloting Skills Mission schedule.",
-          "link": "https://online.flippingbook.com/view/201482508/57/"
-        },
-        {
-          "rule": "<PM13>",
-          "description": "Autonomous Flight and Piloting Skills Mission rankings.",
-          "link": "https://online.flippingbook.com/view/201482508/57/"
-        },
-        {
-          "rule": "<PM14>",
-          "description": "Autonomous Flight and Piloting Skills Mission scores at leagues.",
-          "link": "https://online.flippingbook.com/view/201482508/57/"
-        },
-        {
-          "rule": "<PM15>",
-          "description": "Additional Flight and Piloting Skills Global rankings.",
-          "link": "https://online.flippingbook.com/view/201482508/57/"
-        }
-      ]
-    },
-    {
-      "name": "Specific Communication Mission Rules",
-      "programs": ["ADC"],
-      "rules": [
-        {
-          "rule": "<C1>",
-          "description": "All Teams must receive an interview",
-          "link": "https://online.flippingbook.com/view/201482508/59/"
-        },
-        {
-          "rule": "<C2>",
-          "description": "No Team may earn more than one judged award.",
-          "link": "https://online.flippingbook.com/view/201482508/59/"
-        },
-        {
-          "rule": "<C3>",
-          "description": "Judges must follow the criteria and award descriptions as presented in the Guide to Judging.",
-          "link": "https://online.flippingbook.com/view/201482508/59/"
-        }
-      ]
-    },
-    {
-      "name": "Drone Rules",
-      "programs": ["ADC"],
-      "rules": [
-        {
-          "rule": "<D1>",
-          "description": "Teams must use the CoDrone EDU, CoDrone EDU JROTC Edition or Parrot Mambo.",
-          "link": "https://online.flippingbook.com/view/201482508/60/"
-        },
-        {
-          "rule": "<D2>",
-          "description": "Drones must utilize stock Drone electronics.",
-          "link": "https://online.flippingbook.com/view/201482508/60/"
-        },
-        {
-          "rule": "<D3>",
-          "description": "Drones must utilize official motors, propellers and frames.",
-          "link": "https://online.flippingbook.com/view/201482508/60/"
-        },
-        {
-          "rule": "<D4>",
-          "description": "Drones must be running current firmware.",
-          "link": "https://online.flippingbook.com/view/201482508/60/"
-        },
-        {
-          "rule": "<D5>",
-          "description": "Decorations are allowed.",
-          "link": "https://online.flippingbook.com/view/201482508/60/"
-        },
-        {
-          "rule": "<D6>",
-          "description": "One Drone at the Field.",
-          "link": "https://online.flippingbook.com/view/201482508/60/"
-        },
-        {
-          "rule": "<D7>",
-          "description": "There is a difference between accidentally and willfully violating a Drone rule.",
-          "link": "https://online.flippingbook.com/view/201482508/60/"
-        }
-      ]
-    }
-  ]
+	"$schema": "https://referee.fyi/rules/schema.json",
+	"title": "Mission 2025: Gravity",
+	"programs": ["ADC"],
+	"season": "2024-2025",
+	"ruleGroups": [
+		{
+			"name": "Teamwork Mission Rules",
+			"programs": ["ADC"],
+			"rules": [
+				{
+					"rule": "<TM1>",
+					"description": "Drop Zone Top Cleared.",
+					"link": "https://online.flippingbook.com/view/201482508/33/"
+				},
+				{
+					"rule": "<TM2>",
+					"description": "Bean Bag on Drop Zone",
+					"link": "https://online.flippingbook.com/view/201482508/33/"
+				},
+				{
+					"rule": "<TM3>",
+					"description": "Ball in Scoring Zone.",
+					"link": "https://online.flippingbook.com/view/201482508/35/"
+				},
+				{
+					"rule": "<TM4>",
+					"description": "Land on Small or Large Landing Cube.",
+					"link": "https://online.flippingbook.com/view/201482508/35/"
+				},
+				{
+					"rule": "<TM5>",
+					"description": "Land on a Landing Pad.",
+					"link": "https://online.flippingbook.com/view/201482508/36/"
+				},
+				{
+					"rule": "<TM6>",
+					"description": "Land on the bullseye.",
+					"link": "https://online.flippingbook.com/view/201482508/36/"
+				},
+				{
+					"rule": "<TM7>",
+					"description": "Drone starting position.",
+					"link": "https://online.flippingbook.com/view/201482508/37/"
+				},
+				{
+					"rule": "<TM8>",
+					"description": "Pilot Station.",
+					"link": "https://online.flippingbook.com/view/201482508/37/"
+				},
+				{
+					"rule": "<TM9>",
+					"description": "Visual Observer Station.",
+					"link": "https://online.flippingbook.com/view/201482508/37/"
+				},
+				{
+					"rule": "<TM10>",
+					"description": "Teams must clearly identify their Team color during a Match.",
+					"link": "https://online.flippingbook.com/view/201482508/37/"
+				},
+				{
+					"rule": "<TM11>",
+					"description": "Loading MatchLoad Balls at the Loading Station.",
+					"link": "https://online.flippingbook.com/view/201482508/38/"
+				},
+				{
+					"rule": "<TM12>",
+					"description": "Keep balls on the ramp and in the track.",
+					"link": "https://online.flippingbook.com/view/201482508/38/"
+				},
+				{
+					"rule": "<TM13>",
+					"description": "Only One Drone per Landing Field Element.",
+					"link": "https://online.flippingbook.com/view/201482508/39/"
+				},
+				{
+					"rule": "<TM14>",
+					"description": "Qualification will occur according to the official Match Schedule.",
+					"link": "https://online.flippingbook.com/view/201482508/39/"
+				},
+				{
+					"rule": "<TM15>",
+					"description": "Be at your Match on time.",
+					"link": "https://online.flippingbook.com/view/201482508/39/"
+				},
+				{
+					"rule": "<TM16>",
+					"description": "Each Team will be scheduled for at least 4 Qualification Matches.",
+					"link": "https://online.flippingbook.com/view/201482508/39/"
+				},
+				{
+					"rule": "<TM17>",
+					"description": "Teams are ranked by their average qualification Match scores.",
+					"link": "https://online.flippingbook.com/view/201482508/39/"
+				},
+				{
+					"rule": "<TM18>",
+					"description": "The Alliance Selection process forms 2-Team Alliances for the Elimination Matches.",
+					"link": "https://online.flippingbook.com/view/201482508/40/"
+				},
+				{
+					"rule": "<TM19>",
+					"description": "Send a Team representative to Alliance Selection.",
+					"link": "https://online.flippingbook.com/view/201482508/40/"
+				},
+				{
+					"rule": "<TM20>",
+					"description": "Each Team may only be invited once to join an Alliance.",
+					"link": "https://online.flippingbook.com/view/201482508/40/"
+				},
+				{
+					"rule": "<TM21>",
+					"description": "Number of Alliances for Elimination Matches.",
+					"link": "https://online.flippingbook.com/view/201482508/41/"
+				},
+				{
+					"rule": "<TM22>",
+					"description": "Elimination Matches are played sequentially in rounds.",
+					"link": "https://online.flippingbook.com/view/201482508/41/"
+				}
+			]
+		},
+		{
+			"name": "Safety Rules",
+			"programs": ["ADC"],
+			"rules": [
+				{
+					"rule": "<S1>",
+					"description": "Teams may only fly their drone in a designated Flight Zone.",
+					"link": "https://online.flippingbook.com/view/201482508/62/"
+				},
+				{
+					"rule": "<S2>",
+					"description": "Teams must pass Flight Clearance Inspection and use Pre Flight Checklist at competitions.",
+					"link": "https://online.flippingbook.com/view/201482508/62/"
+				},
+				{
+					"rule": "<S3>",
+					"description": "Stay in the Pilot station or Visual Observer stations and out of the field during a Match.",
+					"link": "https://online.flippingbook.com/view/201482508/62/"
+				},
+				{
+					"rule": "<S4>",
+					"description": "Stay in control of your Drone.",
+					"link": "https://online.flippingbook.com/view/201482508/62/"
+				},
+				{
+					"rule": "<S5>",
+					"description": "Batteries must be charged before launch.",
+					"link": "https://online.flippingbook.com/view/201482508/63/"
+				},
+				{
+					"rule": "<S6>",
+					"description": "Wear safety glasses.",
+					"link": "https://online.flippingbook.com/view/201482508/63/"
+				},
+				{
+					"rule": "<S7>",
+					"description": "Students must be accompanied by an Adult.",
+					"link": "https://online.flippingbook.com/view/201482508/63/"
+				},
+				{
+					"rule": "<S8>",
+					"description": "Additional Safety Practices.",
+					"link": "https://online.flippingbook.com/view/201482508/63/"
+				}
+			]
+		},
+		{
+			"name": "General Rules",
+			"programs": ["ADC"],
+			"rules": [
+				{
+					"rule": "<G1>",
+					"description": "Treat everyone with respect",
+					"link": "https://online.flippingbook.com/view/201482508/24/"
+				},
+				{
+					"rule": "<G2>",
+					"description": "The Aerial Drone Competition is a Student-centered program.",
+					"link": "https://online.flippingbook.com/view/201482508/24/"
+				},
+				{
+					"rule": "<G3>",
+					"description": "Use common sense",
+					"link": "https://online.flippingbook.com/view/201482508/26/"
+				},
+				{
+					"rule": "<G4>",
+					"description": "Piloting and Autonomous Flight skills must represent the skill level of the Team.",
+					"link": "https://online.flippingbook.com/view/201482508/26/"
+				},
+				{
+					"rule": "<G5>",
+					"description": "Drones at the field must be ready to fly.",
+					"link": "https://online.flippingbook.com/view/201482508/27/"
+				},
+				{
+					"rule": "<G7>",
+					"description": "During a Match, Flight Team Members may retrieve their Drone for troubleshooting if the Drone has not completed take off.",
+					"link": "https://online.flippingbook.com/view/201482508/27/"
+				},
+				{
+					"rule": "<G8>",
+					"description": "Be prepared for field minor variances.",
+					"link": "https://online.flippingbook.com/view/201482508/28/"
+				},
+				{
+					"rule": "<G9>",
+					"description": "Match replays are allowed, but rare.",
+					"link": "https://online.flippingbook.com/view/201482508/28/"
+				},
+				{
+					"rule": "<G10>",
+					"description": "No electronic communication devices allowed.",
+					"link": "https://online.flippingbook.com/view/201482508/28/"
+				},
+				{
+					"rule": "<G11>",
+					"description": "Flight Team Members may not stand on objects.",
+					"link": "https://online.flippingbook.com/view/201482508/28/"
+				},
+				{
+					"rule": "<G12>",
+					"description": "The Q&A system is an extension of this competition manual.",
+					"link": "https://online.flippingbook.com/view/201482508/28/"
+				},
+				{
+					"rule": "<G13>",
+					"description": "Only registered Teams may compete in an Aerial Drone Competition.",
+					"link": "https://online.flippingbook.com/view/201482508/28/"
+				}
+			]
+		},
+		{
+			"name": "Tournament Rules",
+			"programs": ["ADC"],
+			"rules": [
+				{
+					"rule": "<T1>",
+					"description": "The Head Referee has ultimate authority on ruling decisions during the Matches.",
+					"link": "https://online.flippingbook.com/view/201482508/29/"
+				},
+				{
+					"rule": "<T2>",
+					"description": "Head Referees must be qualified.",
+					"link": "https://online.flippingbook.com/view/201482508/29/"
+				},
+				{
+					"rule": "<T3>",
+					"description": "The Flight Team Members are permitted to immediately appeal the Head Referee’s ruling.",
+					"link": "https://online.flippingbook.com/view/201482508/30/"
+				},
+				{
+					"rule": "<T4>",
+					"description": "It’s not over until it’s over.",
+					"link": "https://online.flippingbook.com/view/201482508/30/"
+				},
+				{
+					"rule": "<T5>",
+					"description": "Flooring must be the same.",
+					"link": "https://online.flippingbook.com/view/201482508/30/"
+				},
+				{
+					"rule": "<T6>",
+					"description": "Division Finals",
+					"link": "https://online.flippingbook.com/view/201482508/30/"
+				}
+			]
+		},
+		{
+			"name": "Autonomous Flight Skills Rules",
+			"programs": ["ADC"],
+			"rules": [
+				{
+					"rule": "<AM1>",
+					"description": "Set up Color Mats.",
+					"link": "https://online.flippingbook.com/view/201482508/43/"
+				},
+				{
+					"rule": "<AM2>",
+					"description": "Take off.",
+					"link": "https://online.flippingbook.com/view/201482508/45/"
+				},
+				{
+					"rule": "<AM3>",
+					"description": "Identify the color of a Color Mat.",
+					"link": "https://online.flippingbook.com/view/201482508/45/"
+				},
+				{
+					"rule": "<AM4>",
+					"description": "Complete a figure 8.",
+					"link": "https://online.flippingbook.com/view/201482508/45/"
+				},
+				{
+					"rule": "<AM5>",
+					"description": "Fly under Arch Gate.",
+					"link": "https://online.flippingbook.com/view/201482508/47/"
+				},
+				{
+					"rule": "<AM6>",
+					"description": "Fly through the Small Hole.",
+					"link": "https://online.flippingbook.com/view/201482508/47/"
+				},
+				{
+					"rule": "<AM7>",
+					"description": "Fly through the Large Hole.",
+					"link": "https://online.flippingbook.com/view/201482508/48/"
+				},
+				{
+					"rule": "<AM8>",
+					"description": "Fly through the Keyhole Gate.",
+					"link": "https://online.flippingbook.com/view/201482508/48/"
+				},
+				{
+					"rule": "<AM9>",
+					"description": "Land on the Landing Pad.",
+					"link": "https://online.flippingbook.com/view/201482508/49/"
+				},
+				{
+					"rule": "<AM10>",
+					"description": "Land on Landing Cube.",
+					"link": "https://online.flippingbook.com/view/201482508/49/"
+				},
+				{
+					"rule": "<AM11>",
+					"description": "Autonomous means “no humans.”",
+					"link": "https://online.flippingbook.com/view/201482508/50/"
+				},
+				{
+					"rule": "<AM12>",
+					"description": "5 Minute Timer.",
+					"link": "https://online.flippingbook.com/view/201482508/50/"
+				},
+				{
+					"rule": "<AM13>",
+					"description": "Drone starting position.",
+					"link": "https://online.flippingbook.com/view/201482508/50/"
+				},
+				{
+					"rule": "<AM14>",
+					"description": "Pilot Station",
+					"link": "https://online.flippingbook.com/view/201482508/51/"
+				},
+				{
+					"rule": "<AM15>",
+					"description": "Visual Observer Station",
+					"link": "https://online.flippingbook.com/view/201482508/51/"
+				}
+			]
+		},
+		{
+			"name": "Piloting Skills Rules",
+			"programs": ["ADC"],
+			"rules": [
+				{
+					"rule": "<PM1>",
+					"description": "Take off.",
+					"link": "https://online.flippingbook.com/view/201482508/55/"
+				},
+				{
+					"rule": "<PM2>",
+					"description": "Complete a figure 8.",
+					"link": "https://online.flippingbook.com/view/201482508/55/"
+				},
+				{
+					"rule": "<PM3>",
+					"description": "Fly through the Small Hole.",
+					"link": "https://online.flippingbook.com/view/201482508/55/"
+				},
+				{
+					"rule": "<PM4>",
+					"description": "Fly through the Large Hole.",
+					"link": "https://online.flippingbook.com/view/201482508/55/"
+				},
+				{
+					"rule": "<PM5>",
+					"description": "Fly through the Keyhole Gate.",
+					"link": "https://online.flippingbook.com/view/201482508/55/"
+				},
+				{
+					"rule": "<PM6>",
+					"description": "Land on the Landing Pad.",
+					"link": "https://online.flippingbook.com/view/201482508/55/"
+				},
+				{
+					"rule": "<PM7>",
+					"description": "Landing on the Landing Cube.",
+					"link": "https://online.flippingbook.com/view/201482508/55/"
+				},
+				{
+					"rule": "<PM8>",
+					"description": "Flight path.",
+					"link": "https://online.flippingbook.com/view/201482508/56/"
+				},
+				{
+					"rule": "<PM9>",
+					"description": "Drone starting position.",
+					"link": "https://online.flippingbook.com/view/201482508/57/"
+				},
+				{
+					"rule": "<PM10>",
+					"description": "Pilot station.",
+					"link": "https://online.flippingbook.com/view/201482508/57/"
+				},
+				{
+					"rule": "<PM11>",
+					"description": "Visual Observer Station.",
+					"link": "https://online.flippingbook.com/view/201482508/57/"
+				},
+				{
+					"rule": "<PM12>",
+					"description": "Piloting Skills Mission schedule.",
+					"link": "https://online.flippingbook.com/view/201482508/57/"
+				},
+				{
+					"rule": "<PM13>",
+					"description": "Autonomous Flight and Piloting Skills Mission rankings.",
+					"link": "https://online.flippingbook.com/view/201482508/57/"
+				},
+				{
+					"rule": "<PM14>",
+					"description": "Autonomous Flight and Piloting Skills Mission scores at leagues.",
+					"link": "https://online.flippingbook.com/view/201482508/57/"
+				},
+				{
+					"rule": "<PM15>",
+					"description": "Additional Flight and Piloting Skills Global rankings.",
+					"link": "https://online.flippingbook.com/view/201482508/57/"
+				}
+			]
+		},
+		{
+			"name": "Specific Communication Mission Rules",
+			"programs": ["ADC"],
+			"rules": [
+				{
+					"rule": "<C1>",
+					"description": "All Teams must receive an interview",
+					"link": "https://online.flippingbook.com/view/201482508/59/"
+				},
+				{
+					"rule": "<C2>",
+					"description": "No Team may earn more than one judged award.",
+					"link": "https://online.flippingbook.com/view/201482508/59/"
+				},
+				{
+					"rule": "<C3>",
+					"description": "Judges must follow the criteria and award descriptions as presented in the Guide to Judging.",
+					"link": "https://online.flippingbook.com/view/201482508/59/"
+				}
+			]
+		},
+		{
+			"name": "Drone Rules",
+			"programs": ["ADC"],
+			"rules": [
+				{
+					"rule": "<D1>",
+					"description": "Teams must use the CoDrone EDU, CoDrone EDU JROTC Edition or Parrot Mambo.",
+					"link": "https://online.flippingbook.com/view/201482508/60/"
+				},
+				{
+					"rule": "<D2>",
+					"description": "Drones must utilize stock Drone electronics.",
+					"link": "https://online.flippingbook.com/view/201482508/60/"
+				},
+				{
+					"rule": "<D3>",
+					"description": "Drones must utilize official motors, propellers and frames.",
+					"link": "https://online.flippingbook.com/view/201482508/60/"
+				},
+				{
+					"rule": "<D4>",
+					"description": "Drones must be running current firmware.",
+					"link": "https://online.flippingbook.com/view/201482508/60/"
+				},
+				{
+					"rule": "<D5>",
+					"description": "Decorations are allowed.",
+					"link": "https://online.flippingbook.com/view/201482508/60/"
+				},
+				{
+					"rule": "<D6>",
+					"description": "One Drone at the Field.",
+					"link": "https://online.flippingbook.com/view/201482508/60/"
+				},
+				{
+					"rule": "<D7>",
+					"description": "There is a difference between accidentally and willfully violating a Drone rule.",
+					"link": "https://online.flippingbook.com/view/201482508/60/"
+				}
+			]
+		}
+	]
 }

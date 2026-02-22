@@ -1,6 +1,6 @@
-import { paths } from "@referee-fyi/rules/qnaplus";
+import type { paths } from "@referee-fyi/rules/qnaplus";
 import createClient from "openapi-fetch";
 
 export const client = createClient<paths>({
-  baseUrl: "https://api.qnapl.us",
+	baseUrl: "https://api.qnapl.us",
 });

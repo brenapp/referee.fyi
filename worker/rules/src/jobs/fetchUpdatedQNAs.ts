@@ -1,45 +1,45 @@
+import { affiliatedPrograms } from "@referee-fyi/rules/programs";
 import type { operations } from "@referee-fyi/rules/qnaplus";
 import type { ProgramAbbr, Year } from "robotevents";
 import { client } from "../qnaplus.js";
-import { affiliatedPrograms } from "@referee-fyi/rules/programs";
 
 type Question = NonNullable<
-  operations["getInternalUpdate"]["responses"]["200"]["content"]["application/json"]["questions"]
+	operations["getInternalUpdate"]["responses"]["200"]["content"]["application/json"]["questions"]
 >[number];
 
 export type CurrentVersion = {
-  version: string;
-  date: string;
+	version: string;
+	date: string;
 };
 
 export async function getCurrentQNAPlusVersion(
-  env: Env
+	env: Env,
 ): Promise<CurrentVersion> {
-  const version = await env.qnaplus.get<CurrentVersion>(
-    "current-version",
-    "json"
-  );
+	const version = await env.qnaplus.get<CurrentVersion>(
+		"current-version",
+		"json",
+	);
 
-  return (
-    version ?? {
-      version: "",
-      date: new Date().toISOString(),
-    }
-  );
+	return (
+		version ?? {
+			version: "",
+			date: new Date().toISOString(),
+		}
+	);
 }
 
 export async function setCurrentQNAPlusVersion(
-  env: Env,
-  version: string
+	env: Env,
+	version: string,
 ): Promise<void> {
-  await env.qnaplus.put(
-    "current-version",
-    JSON.stringify({ version, date: new Date().toISOString() }, null, 2)
-  );
+	await env.qnaplus.put(
+		"current-version",
+		JSON.stringify({ version, date: new Date().toISOString() }, null, 2),
+	);
 }
 
 function getQuestionContent(question: Question): string {
-  return `
+	return `
 ---
 id: ${question.id}
 title: ${question.title}
@@ -62,55 +62,55 @@ ${question.answer ?? "Not answered yet."}
 }
 
 async function indexQuestion(env: Env, question: Question) {
-  const program = question.program as ProgramAbbr;
-  const year = question.season as Year;
-  const programsToIndex = affiliatedPrograms[program] ?? [program];
+	const program = question.program as ProgramAbbr;
+	const year = question.season as Year;
+	const programsToIndex = affiliatedPrograms[program] ?? [program];
 
-  const content = getQuestionContent(question);
-  for (const program of programsToIndex) {
-    const path = `${program}_${year}/qna_${question.id}.md`;
-    await env.rules.put(path, content, {
-      customMetadata: {
-        id: question.id,
-        program: program,
-        title: question.title,
-        author: question.author,
-        askedTimestampMs: new Date(question.askedTimestampMs).toISOString(),
-        answeredTimestampMs: question.answeredTimestampMs
-          ? new Date(question.answeredTimestampMs).toISOString()
-          : "",
-        tags: question.tags.join(", "),
-        url: question.url,
-      },
-    });
+	const content = getQuestionContent(question);
+	for (const program of programsToIndex) {
+		const path = `${program}_${year}/qna_${question.id}.md`;
+		await env.rules.put(path, content, {
+			customMetadata: {
+				id: question.id,
+				program: program,
+				title: question.title,
+				author: question.author,
+				askedTimestampMs: new Date(question.askedTimestampMs).toISOString(),
+				answeredTimestampMs: question.answeredTimestampMs
+					? new Date(question.answeredTimestampMs).toISOString()
+					: "",
+				tags: question.tags.join(", "),
+				url: question.url,
+			},
+		});
 
-    await env.qnaplus.put(
-      `qna_${question.id}`,
-      JSON.stringify(question, null, 2)
-    );
-  }
+		await env.qnaplus.put(
+			`qna_${question.id}`,
+			JSON.stringify(question, null, 2),
+		);
+	}
 }
 
 export async function fetchUpdatedQNAs(env: Env) {
-  const currentVersion = await getCurrentQNAPlusVersion(env);
+	const currentVersion = await getCurrentQNAPlusVersion(env);
 
-  const result = await client.GET("/internal/update", {
-    params: { query: { version: currentVersion.version } },
-  });
+	const result = await client.GET("/internal/update", {
+		params: { query: { version: currentVersion.version } },
+	});
 
-  if (result.error) {
-    return;
-  }
+	if (result.error) {
+		return;
+	}
 
-  if (!result.data?.outdated) {
-    return;
-  }
+	if (!result.data?.outdated) {
+		return;
+	}
 
-  for (const question of result.data.questions ?? []) {
-    await indexQuestion(env, question);
-  }
+	for (const question of result.data.questions ?? []) {
+		await indexQuestion(env, question);
+	}
 
-  if (result.data?.version) {
-    await setCurrentQNAPlusVersion(env, result.data.version);
-  }
+	if (result.data?.version) {
+		await setCurrentQNAPlusVersion(env, result.data.version);
+	}
 }

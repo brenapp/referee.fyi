@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import config from "./config.json" assert { type: "json" };
+import config from "./config.json"
+assert;
+type: "json";
 import crypto from "crypto";
 import fs from "fs/promises";
 
@@ -16,31 +18,31 @@ const invitations = [];
 const outputUsers = [];
 
 for (const user of users) {
-  const [adminRaw, emailRaw, name, publicKey, ...events] = user.split("\t");
-  if (!name) continue;
+	const [adminRaw, emailRaw, name, publicKey, ...events] = user.split("\t");
+	if (!name) continue;
 
-  console.log(name, emailRaw);
+	console.log(name, emailRaw);
 
-  for (let i = 0; i < skus.length; i++) {
-    if (events[i] !== "TRUE") {
-      continue;
-    }
+	for (let i = 0; i < skus.length; i++) {
+		if (events[i] !== "TRUE") {
+			continue;
+		}
 
-    invitations.push({
-      key: `${publicKey}#${skus[i]}`,
-      value: {
-        id: crypto.randomUUID(),
-        sku: skus[i],
-        instance_secret: secrets[i],
-        user: publicKey,
-        from: config.from.key,
-        admin: adminRaw === "TRUE",
-        accepted: true,
-      },
-    });
-  }
+		invitations.push({
+			key: `${publicKey}#${skus[i]}`,
+			value: {
+				id: crypto.randomUUID(),
+				sku: skus[i],
+				instance_secret: secrets[i],
+				user: publicKey,
+				from: config.from.key,
+				admin: adminRaw === "TRUE",
+				accepted: true,
+			},
+		});
+	}
 
-  outputUsers.push({ key: publicKey, value: { key: publicKey, name } });
+	outputUsers.push({ key: publicKey, value: { key: publicKey, name } });
 }
 
 await fs.writeFile(
@@ -70,25 +72,25 @@ await fs.writeFile(
 const shares = [];
 
 for (let i = 0; i < skus.length; i++) {
-  const sku = skus[i];
-  const secret = secrets[i];
+	const sku = skus[i];
+	const secret = secrets[i];
 
-  const admins = invitations
-    .filter((inv) => inv.value.admin && inv.value.sku === sku)
-    .map((i) => i.value.user);
-  const invs = invitations
-    .filter((inv) => inv.value.sku === sku)
-    .map((i) => i.value.user);
+	const admins = invitations
+		.filter((inv) => inv.value.admin && inv.value.sku === sku)
+		.map((i) => i.value.user);
+	const invs = invitations
+		.filter((inv) => inv.value.sku === sku)
+		.map((i) => i.value.user);
 
-  shares.push({
-    key: `${sku}#${secret}`,
-    value: {
-      sku,
-      admins,
-      invitations: invs,
-      secret,
-    },
-  });
+	shares.push({
+		key: `${sku}#${secret}`,
+		value: {
+			sku,
+			admins,
+			invitations: invs,
+			secret,
+		},
+	});
 }
 
 await fs.writeFile(

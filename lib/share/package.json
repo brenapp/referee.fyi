@@ -1,26 +1,26 @@
 {
-  "name": "@referee-fyi/share",
-  "type": "module",
-  "private": true,
-  "version": "1.0.0",
-  "description": "Share Instance Objects",
-  "exports": {
-    "import": "./dist/index.js"
-  },
-  "scripts": {
-    "build": "tsgo",
-    "dev": "tsgo -w",
-    "test": "vitest"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@types/node": "^24.3.0",
-    "vitest": "^2.0.3"
-  },
-  "dependencies": {
-    "@referee-fyi/consistency": "*",
-    "zod": "^4.0.14"
-  }
+	"name": "@referee-fyi/share",
+	"type": "module",
+	"private": true,
+	"version": "1.0.0",
+	"description": "Share Instance Objects",
+	"exports": {
+		"import": "./dist/index.js"
+	},
+	"scripts": {
+		"build": "tsgo",
+		"dev": "tsgo -w",
+		"test": "vitest"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@types/node": "^24.3.0",
+		"vitest": "^2.0.3"
+	},
+	"dependencies": {
+		"@referee-fyi/consistency": "*",
+		"zod": "^4.0.14"
+	}
 }

@@ -9,9 +9,9 @@ const key = await crypto.subtle.generateKey(
 );
 
 function base64(buffer) {
-  return Array.from(new Uint8Array(buffer), (x) =>
-    x.toString(16).padStart(2, "0")
-  ).join("");
+	return Array.from(new Uint8Array(buffer), (x) =>
+		x.toString(16).padStart(2, "0"),
+	).join("");
 }
 
 const publicKey = base64(await crypto.subtle.exportKey("raw", key.publicKey));
@@ -21,7 +21,7 @@ await fs.writeFile("key.json", JSON.stringify(privateKey, null, 2));
 
 console.log("\nPUBLIC KEY\n" + publicKey);
 console.log(
-  "\n\nPlace the public key in .env.vars under SYSTEM_KEY, and run the following command to upload it to the Worker:"
+	"\n\nPlace the public key in .env.vars under SYSTEM_KEY, and run the following command to upload it to the Worker:",
 );
 console.log(`\n\tnpx wrangler --name referee-fyi-share SYSTEM_KEY`);
 console.log("\nThe private key has been saved in JWK form to `key.json`. ");

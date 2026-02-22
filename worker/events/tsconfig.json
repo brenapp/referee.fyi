@@ -1,18 +1,10 @@
 {
-	"include": [
-		"src",
-	],
-	"exclude": [
-		"node_modules",
-		"dist",
-		"test"
-	],
+	"include": ["src"],
+	"exclude": ["node_modules", "dist", "test"],
 	"compilerOptions": {
 		"incremental": true,
 		"target": "es2021",
-		"lib": [
-			"ESNext"
-		],
+		"lib": ["ESNext"],
 		"jsx": "react",
 		"module": "ESNext",
 		"moduleResolution": "Bundler",
@@ -25,10 +17,7 @@
 		"forceConsistentCasingInFileNames": true,
 		"strict": true,
 		"paths": {},
-		"types": [
-			"node",
-			"./worker-configuration.d.ts"
-		],
+		"types": ["node", "./worker-configuration.d.ts"],
 		"skipLibCheck": true
 	}
 }

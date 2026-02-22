@@ -1,67 +1,67 @@
 import {
-  type ConsistentMap,
-  ConsistentMapSchema,
+	type ConsistentMap,
+	ConsistentMapSchema,
 } from "@referee-fyi/consistency";
+import { type ZodType, z } from "zod/v4";
 import { type Incident, IncidentSchema } from "./incident.js";
 import { type MatchScratchpad, MatchScratchpadSchema } from "./index.js";
 import { InvitationSchema } from "./server.js";
-import { z, ZodType } from "zod/v4";
 
 export const UserRole = ["none", "system"] as const;
 
 export type UserRole = (typeof UserRole)[number];
 
 export const UserSchema = z
-  .object({
-    key: z.string(),
-    name: z.string(),
-    role: z.enum(UserRole),
-  })
-  .meta({
-    id: "User",
-    description: "A registered user",
-  });
+	.object({
+		key: z.string(),
+		name: z.string(),
+		role: z.enum(UserRole),
+	})
+	.meta({
+		id: "User",
+		description: "A registered user",
+	});
 
 export type User = z.infer<typeof UserSchema>;
 
 export type ShareResponseSuccess<T> = {
-  success: true;
-  data: T;
+	success: true;
+	data: T;
 };
 
 export type ShareResponseFailureReason =
-  | "bad_request"
-  | "server_error"
-  | "incorrect_code";
+	| "bad_request"
+	| "server_error"
+	| "incorrect_code";
 
 export type ShareResponseFailure = {
-  success: false;
-  reason: ShareResponseFailureReason;
-  details: string;
+	success: false;
+	reason: ShareResponseFailureReason;
+	details: string;
 };
 
 export type ShareResponse<T> = ShareResponseSuccess<T> | ShareResponseFailure;
 
 export const UserInvitationSchema = InvitationSchema.pick({
-  id: true,
-  admin: true,
-  accepted: true,
-  sku: true,
+	id: true,
+	admin: true,
+	accepted: true,
+	sku: true,
 }).extend({
-  from: UserSchema,
+	from: UserSchema,
 });
 
 export type UserInvitation = z.infer<typeof UserInvitationSchema>;
 
 export const InvitationListItemSchema = z
-  .object({
-    admin: z.boolean(),
-    user: UserSchema,
-  })
-  .meta({
-    id: "InvitationListItem",
-    description: "Represents a user who has access to a shared instance.",
-  });
+	.object({
+		admin: z.boolean(),
+		user: UserSchema,
+	})
+	.meta({
+		id: "InvitationListItem",
+		description: "Represents a user who has access to a shared instance.",
+	});
 
 export type InvitationListItem = z.infer<typeof InvitationListItemSchema>;
 
@@ -69,138 +69,137 @@ export const InstanceIncidentsSchema = ConsistentMapSchema(IncidentSchema);
 export type InstanceIncidents = ConsistentMap<Incident>;
 
 export const InstanceScratchpadSchema = ConsistentMapSchema(
-  MatchScratchpadSchema,
+	MatchScratchpadSchema,
 );
 export type InstanceScratchpads = ConsistentMap<MatchScratchpad>;
 
 // WebSocket communications
 
 export const WebSocketAddIncidentMessageSchema = z.object({
-  type: z.literal("add_incident"),
-  incident: IncidentSchema,
+	type: z.literal("add_incident"),
+	incident: IncidentSchema,
 });
 
 export const WebSocketUpdateIncidentMessageSchema = z.object({
-  type: z.literal("update_incident"),
-  incident: IncidentSchema,
+	type: z.literal("update_incident"),
+	incident: IncidentSchema,
 });
 
 export const WebSocketRemoveIncidentMessageSchema = z.object({
-  type: z.literal("remove_incident"),
-  id: z.string(),
+	type: z.literal("remove_incident"),
+	id: z.string(),
 });
 
 export const WebSocketUpdateScratchpadMessageSchema = z.object({
-  type: z.literal("scratchpad_update"),
-  id: z.string(),
-  scratchpad: MatchScratchpadSchema,
+	type: z.literal("scratchpad_update"),
+	id: z.string(),
+	scratchpad: MatchScratchpadSchema,
 });
 
 export const WebSocketBroadcastMessageSchema = z.object({
-  type: z.literal("message"),
-  message: z.string(),
+	type: z.literal("message"),
+	message: z.string(),
 });
 
 export const WebSocketPeerMessageSchema = z.discriminatedUnion("type", [
-  WebSocketAddIncidentMessageSchema,
-  WebSocketUpdateIncidentMessageSchema,
-  WebSocketRemoveIncidentMessageSchema,
-  WebSocketUpdateScratchpadMessageSchema,
-  WebSocketBroadcastMessageSchema,
+	WebSocketAddIncidentMessageSchema,
+	WebSocketUpdateIncidentMessageSchema,
+	WebSocketRemoveIncidentMessageSchema,
+	WebSocketUpdateScratchpadMessageSchema,
+	WebSocketBroadcastMessageSchema,
 ]);
 
 export type WebSocketAddIncidentMessage = z.infer<
-  typeof WebSocketAddIncidentMessageSchema
+	typeof WebSocketAddIncidentMessageSchema
 >;
 export type WebSocketUpdateIncidentMessage = z.infer<
-  typeof WebSocketUpdateIncidentMessageSchema
+	typeof WebSocketUpdateIncidentMessageSchema
 >;
 export type WebSocketRemoveIncidentMessage = z.infer<
-  typeof WebSocketRemoveIncidentMessageSchema
+	typeof WebSocketRemoveIncidentMessageSchema
 >;
 export type WebSocketUpdateScratchpadMessage = z.infer<
-  typeof WebSocketUpdateScratchpadMessageSchema
+	typeof WebSocketUpdateScratchpadMessageSchema
 >;
 export type WebSocketBroadcastMessage = z.infer<
-  typeof WebSocketBroadcastMessageSchema
+	typeof WebSocketBroadcastMessageSchema
 >;
 export type WebSocketPeerMessage = z.infer<typeof WebSocketPeerMessageSchema>;
 
 export const WebSocketServerShareInfoMessageSchema = z.object({
-  type: z.literal("server_share_info"),
-  sku: z.string(),
-  incidents: InstanceIncidentsSchema,
-  scratchpads: InstanceScratchpadSchema,
-  users: z.object({
-    active: z.array(UserSchema),
-    invitations: z.array(InvitationListItemSchema),
-  }),
+	type: z.literal("server_share_info"),
+	sku: z.string(),
+	incidents: InstanceIncidentsSchema,
+	scratchpads: InstanceScratchpadSchema,
+	users: z.object({
+		active: z.array(UserSchema),
+		invitations: z.array(InvitationListItemSchema),
+	}),
 });
 export type WebSocketServerShareInfoMessage = z.infer<
-  typeof WebSocketServerShareInfoMessageSchema
+	typeof WebSocketServerShareInfoMessageSchema
 >;
 
 export const WebsocketServerUserAddMessageSchema = z.object({
-  type: z.literal("server_user_add"),
-  user: UserSchema,
-  activeUsers: z.array(UserSchema),
-  invitations: z.array(InvitationListItemSchema),
+	type: z.literal("server_user_add"),
+	user: UserSchema,
+	activeUsers: z.array(UserSchema),
+	invitations: z.array(InvitationListItemSchema),
 });
 export type WebsocketServerUserAddMessage = z.infer<
-  typeof WebsocketServerUserAddMessageSchema
+	typeof WebsocketServerUserAddMessageSchema
 >;
 
 export const WebsocketServerUserRemoveMessageSchema = z.object({
-  type: z.literal("server_user_remove"),
-  user: UserSchema,
-  activeUsers: z.array(UserSchema),
-  invitations: z.array(InvitationListItemSchema),
+	type: z.literal("server_user_remove"),
+	user: UserSchema,
+	activeUsers: z.array(UserSchema),
+	invitations: z.array(InvitationListItemSchema),
 });
 export type WebsocketServerUserRemoveMessage = z.infer<
-  typeof WebsocketServerUserRemoveMessageSchema
+	typeof WebsocketServerUserRemoveMessageSchema
 >;
 
 export const WebSocketServerErrorMessageSchema = z.object({
-  type: z.literal("server_error"),
-  error: z.string(),
+	type: z.literal("server_error"),
+	error: z.string(),
 });
 export type WebSocketServerErrorMessage = z.infer<
-  typeof WebSocketServerErrorMessageSchema
+	typeof WebSocketServerErrorMessageSchema
 >;
 
 export const WebSocketServerMessageSchema = z.discriminatedUnion("type", [
-  WebSocketServerShareInfoMessageSchema,
-  WebsocketServerUserAddMessageSchema,
-  WebsocketServerUserRemoveMessageSchema,
-  WebSocketServerErrorMessageSchema,
+	WebSocketServerShareInfoMessageSchema,
+	WebsocketServerUserAddMessageSchema,
+	WebsocketServerUserRemoveMessageSchema,
+	WebSocketServerErrorMessageSchema,
 ]);
 export type WebSocketServerMessage = z.infer<
-  typeof WebSocketServerMessageSchema
+	typeof WebSocketServerMessageSchema
 >;
 
 export const WebSocketMessageSchema = z.union([
-  WebSocketPeerMessageSchema,
-  WebSocketServerMessageSchema,
+	WebSocketPeerMessageSchema,
+	WebSocketServerMessageSchema,
 ]);
 export type WebSocketMessage = z.infer<typeof WebSocketMessageSchema>;
 
 export const WebSocketSenderSchema = z.union([
-  z.object({ type: z.literal("server") }),
-  z.object({ type: z.literal("client"), name: z.string(), id: z.string() }),
+	z.object({ type: z.literal("server") }),
+	z.object({ type: z.literal("client"), name: z.string(), id: z.string() }),
 ]);
 export type WebSocketSender = z.infer<typeof WebSocketSenderSchema>;
 
 export const WebSocketPayloadAdditionalInfoSchema = z.object({
-  date: z.string().meta({ description: "ISO-8601 String" }), // ISO string
-  sender: WebSocketSenderSchema,
+	date: z.string().meta({ description: "ISO-8601 String" }), // ISO string
+	sender: WebSocketSenderSchema,
 });
 
 export type WebSocketPayloadAdditionalInfo = z.infer<
-  typeof WebSocketPayloadAdditionalInfoSchema
+	typeof WebSocketPayloadAdditionalInfoSchema
 >;
 
 export const WebSocketPayloadSchema = <T extends ZodType>(type: T) =>
-  WebSocketPayloadAdditionalInfoSchema.extend(type);
-export type WebSocketPayload<T extends WebSocketMessage> =
-  & T
-  & WebSocketPayloadAdditionalInfo;
+	WebSocketPayloadAdditionalInfoSchema.extend(type);
+export type WebSocketPayload<T extends WebSocketMessage> = T &
+	WebSocketPayloadAdditionalInfo;

@@ -6,18 +6,14 @@
 	"observability": {
 		"enabled": true
 	},
-	"compatibility_flags": [
-		"nodejs_compat_v2"
-	],
+	"compatibility_flags": ["nodejs_compat_v2"],
 	"env": {
 		"production": {
 			"vars": {
 				"ENVIRONMENT": "production"
 			},
 			"triggers": {
-				"crons": [
-					"*/30 * * * *"
-				]
+				"crons": ["*/30 * * * *"]
 			},
 			"routes": [
 				{
@@ -42,9 +38,7 @@
 			"browser": {
 				"binding": "browser"
 			},
-			"compatibility_flags": [
-				"nodejs_compat_v2"
-			],
+			"compatibility_flags": ["nodejs_compat_v2"],
 			"kv_namespaces": [
 				{
 					"binding": "qnaplus",
@@ -76,9 +70,7 @@
 			"browser": {
 				"binding": "browser"
 			},
-			"compatibility_flags": [
-				"nodejs_compat_v2"
-			],
+			"compatibility_flags": ["nodejs_compat_v2"],
 			"kv_namespaces": [
 				{
 					"binding": "qnaplus",

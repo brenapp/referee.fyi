@@ -1,113 +1,113 @@
 import {
-  initLWW,
-  updateLWW,
-  type WithLWWConsistency,
+	initLWW,
+	updateLWW,
+	type WithLWWConsistency,
 } from "@referee-fyi/consistency";
-import { type NewIncident as OldIncident } from "./2024_05_07_matchSkills";
-import { queueMigration } from "./utils";
 import { getAllIncidents, setManyIncidents } from "~utils/data/incident";
 import { getShareProfile } from "~utils/data/share";
+import type { NewIncident as OldIncident } from "./2024_05_07_matchSkills";
+import { queueMigration } from "./utils";
 
 export type IncidentOutcome = "Minor" | "Major" | "Disabled" | "General";
 
 export type IncidentMatchHeadToHead = {
-  type: "match";
-  division: number;
-  name: string;
-  id: number;
+	type: "match";
+	division: number;
+	name: string;
+	id: number;
 };
 
 export type IncidentMatchSkills = {
-  type: "skills";
-  skillsType: "driver" | "programming";
-  attempt: number;
+	type: "skills";
+	skillsType: "driver" | "programming";
+	attempt: number;
 };
 
 export type IncidentMatch = IncidentMatchHeadToHead | IncidentMatchSkills;
 
 export type BaseIncident = {
-  id: string;
+	id: string;
 
-  time: Date;
+	time: Date;
 
-  event: string; // SKU
+	event: string; // SKU
 
-  match?: IncidentMatch;
-  team: string; // team number
+	match?: IncidentMatch;
+	team: string; // team number
 
-  outcome: IncidentOutcome;
-  rules: string[];
-  notes: string;
+	outcome: IncidentOutcome;
+	rules: string[];
+	notes: string;
 };
 
 export const INCIDENT_IGNORE = ["id", "time", "event", "team"] as const;
 export type IncidentUnchangeableProperties = (typeof INCIDENT_IGNORE)[number];
 
 export type Incident = WithLWWConsistency<
-  BaseIncident,
-  IncidentUnchangeableProperties
+	BaseIncident,
+	IncidentUnchangeableProperties
 >;
 
 function hasIncidentBeenMigrated(
-  value: Incident | OldIncident
+	value: Incident | OldIncident,
 ): value is Incident {
-  return "consistency" in value;
+	return "consistency" in value;
 }
 
 queueMigration({
-  name: `2024_07_24_consistency`,
-  run_order: 1,
-  dependencies: ["2024_05_07_matchSkills"],
-  apply: async () => {
-    const incidents = (await getAllIncidents()) as unknown as (
-      | OldIncident
-      | Incident
-    )[];
+	name: `2024_07_24_consistency`,
+	run_order: 1,
+	dependencies: ["2024_05_07_matchSkills"],
+	apply: async () => {
+		const incidents = (await getAllIncidents()) as unknown as (
+			| OldIncident
+			| Incident
+		)[];
 
-    const { key: peer } = await getShareProfile();
-    const output: Incident[] = [];
-    for (const incident of incidents) {
-      if (hasIncidentBeenMigrated(incident)) {
-        continue;
-      }
+		const { key: peer } = await getShareProfile();
+		const output: Incident[] = [];
+		for (const incident of incidents) {
+			if (hasIncidentBeenMigrated(incident)) {
+				continue;
+			}
 
-      if (!incident.match) {
-        incident.match = undefined;
-      }
+			if (!incident.match) {
+				incident.match = undefined;
+			}
 
-      let consistentIncident: Incident = initLWW({
-        value: incident,
-        ignore: INCIDENT_IGNORE,
-        peer:
-          incident.revision?.user.type === "client"
-            ? incident.revision?.user.id
-            : peer,
-      });
+			let consistentIncident: Incident = initLWW({
+				value: incident,
+				ignore: INCIDENT_IGNORE,
+				peer:
+					incident.revision?.user.type === "client"
+						? incident.revision?.user.id
+						: peer,
+			});
 
-      const history = incident?.revision?.history ?? [];
-      for (const entry of history) {
-        for (const change of entry.changes) {
-          if (!consistentIncident.consistency[change.property]) continue;
-          consistentIncident = updateLWW(consistentIncident, {
-            key: change.property,
-            value: change.new,
-            // @ts-expect-error WebSocketSender id => key
-            peer: entry.user.key ?? entry.user.id ?? peer,
-            instant: new Date(entry.date).toISOString(),
-          });
-        }
-      }
+			const history = incident?.revision?.history ?? [];
+			for (const entry of history) {
+				for (const change of entry.changes) {
+					if (!consistentIncident.consistency[change.property]) continue;
+					consistentIncident = updateLWW(consistentIncident, {
+						key: change.property,
+						value: change.new,
+						// @ts-expect-error WebSocketSender id => key
+						peer: entry.user.key ?? entry.user.id ?? peer,
+						instant: new Date(entry.date).toISOString(),
+					});
+				}
+			}
 
-      const newIncident: Incident = {
-        ...incident,
-        consistency: consistentIncident.consistency,
-      };
-      output.push(newIncident);
-    }
+			const newIncident: Incident = {
+				...incident,
+				consistency: consistentIncident.consistency,
+			};
+			output.push(newIncident);
+		}
 
-    //@ts-expect-error assets
-    await setManyIncidents(output);
+		//@ts-expect-error assets
+		await setManyIncidents(output);
 
-    return { success: true, details: `Migrated ${output.length} incidents` };
-  },
+		return { success: true, details: `Migrated ${output.length} incidents` };
+	},
 });

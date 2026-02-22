@@ -1,21 +1,21 @@
 {
-  "name": "@referee-fyi/pdf-export",
-  "version": "1.0.0",
-  "description": "Export a list of incidents to a human-readable PDF report of the anomaly log",
-  "main": "index.js",
-  "type": "module",
-  "exports": {
-    "default": "./dist/index.js"
-  },
-  "scripts": {
-    "build": "tsgo",
-    "dev": "tsgo -w"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@referee-fyi/share": "*",
-    "jspdf": "^2.5.2",
-    "robotevents": "^6.0.3"
-  }
+	"name": "@referee-fyi/pdf-export",
+	"version": "1.0.0",
+	"description": "Export a list of incidents to a human-readable PDF report of the anomaly log",
+	"main": "index.js",
+	"type": "module",
+	"exports": {
+		"default": "./dist/index.js"
+	},
+	"scripts": {
+		"build": "tsgo",
+		"dev": "tsgo -w"
+	},
+	"author": "",
+	"license": "ISC",
+	"dependencies": {
+		"@referee-fyi/share": "*",
+		"jspdf": "^2.5.2",
+		"robotevents": "^6.0.3"
+	}
 }

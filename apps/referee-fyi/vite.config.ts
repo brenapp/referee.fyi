@@ -1,39 +1,39 @@
-import { sentryVitePlugin } from "@sentry/vite-plugin";
-import react from "@vitejs/plugin-react-swc";
-import { defineConfig } from "vite";
-import { vitePluginVersionMark } from "vite-plugin-version-mark";
-import { VitePWA } from "vite-plugin-pwa";
-import tsconfigPaths from "vite-tsconfig-paths";
-import { plugin as markdown, Mode } from "vite-plugin-markdown";
 import { exec } from "node:child_process";
-import tanstackRouter from "@tanstack/router-plugin/vite";
-import { z } from "zod/v4";
-import openApiTypescript, { astToString, OpenAPI3 } from "openapi-typescript";
-import fs from "fs/promises";
-
 import { GameSchema } from "@referee-fyi/rules";
-
-import { type Plugin } from "vite";
+import { sentryVitePlugin } from "@sentry/vite-plugin";
+import tanstackRouter from "@tanstack/router-plugin/vite";
+import react from "@vitejs/plugin-react-swc";
+import fs from "fs/promises";
+import openApiTypescript, {
+	astToString,
+	type OpenAPI3,
+} from "openapi-typescript";
+import { defineConfig, type Plugin } from "vite";
+import { Mode, plugin as markdown } from "vite-plugin-markdown";
+import { VitePWA } from "vite-plugin-pwa";
+import { vitePluginVersionMark } from "vite-plugin-version-mark";
+import tsconfigPaths from "vite-tsconfig-paths";
+import { z } from "zod/v4";
 
 //#region Require Environment Variables
 
 const requiredEnvVars = (vars: string[]): Plugin => {
-  return {
-    name: "require-env-vars",
-    apply: "build",
-    config() {
-      if (!process.env.CI) {
-        return;
-      }
+	return {
+		name: "require-env-vars",
+		apply: "build",
+		config() {
+			if (!process.env.CI) {
+				return;
+			}
 
-      const missingVars = vars.filter((v) => !process.env[v]);
-      if (missingVars.length > 0) {
-        throw new Error(
-          `Missing required environment variables: ${missingVars.join(", ")}`
-        );
-      }
-    },
-  };
+			const missingVars = vars.filter((v) => !process.env[v]);
+			if (missingVars.length > 0) {
+				throw new Error(
+					`Missing required environment variables: ${missingVars.join(", ")}`,
+				);
+			}
+		},
+	};
 };
 
 // #endregion
@@ -41,61 +41,61 @@ const requiredEnvVars = (vars: string[]): Plugin => {
 //#region Generate version.json
 
 const execCommand = (command: string) => {
-  return new Promise<string>((resolve, reject) => {
-    exec(command, (error, stdout) => {
-      if (error) {
-        reject(error);
-      } else {
-        const output = stdout.toString()?.replace("\n", "");
-        resolve(output);
-      }
-    });
-  });
+	return new Promise<string>((resolve, reject) => {
+		exec(command, (error, stdout) => {
+			if (error) {
+				reject(error);
+			} else {
+				const output = stdout.toString()?.replace("\n", "");
+				resolve(output);
+			}
+		});
+	});
 };
 
 const generateVersionJson: Plugin = {
-  name: "generate-version-json",
-  apply: "build",
-  async buildStart() {
-    const output = await execCommand("git rev-parse --short HEAD");
-    const version = output.toString().trim();
-    this.emitFile({
-      type: "asset",
-      fileName: "version.json",
-      source: JSON.stringify({
-        version,
-      }),
-    });
-  },
+	name: "generate-version-json",
+	apply: "build",
+	async buildStart() {
+		const output = await execCommand("git rev-parse --short HEAD");
+		const version = output.toString().trim();
+		this.emitFile({
+			type: "asset",
+			fileName: "version.json",
+			source: JSON.stringify({
+				version,
+			}),
+		});
+	},
 };
 //#endregion
 
 //#region JSON Schema Generation
 
 type SchemaGeneration = {
-  fileName: string;
-  schema: z.core.$ZodType;
+	fileName: string;
+	schema: z.core.$ZodType;
 };
 
 const generateJsonSchema: (schemas: SchemaGeneration[]) => Plugin = (
-  schemas
+	schemas,
 ) => ({
-  name: "generate-json-schema",
-  apply: "build",
-  async buildStart() {
-    for (const generation of schemas) {
-      const output = z.toJSONSchema(generation.schema, {
-        cycles: "ref",
-        reused: "ref",
-      });
+	name: "generate-json-schema",
+	apply: "build",
+	async buildStart() {
+		for (const generation of schemas) {
+			const output = z.toJSONSchema(generation.schema, {
+				cycles: "ref",
+				reused: "ref",
+			});
 
-      this.emitFile({
-        type: "asset",
-        fileName: generation.fileName,
-        source: JSON.stringify(output, null, 2),
-      });
-    }
-  },
+			this.emitFile({
+				type: "asset",
+				fileName: generation.fileName,
+				source: JSON.stringify(output, null, 2),
+			});
+		}
+	},
 });
 
 //#endregion
@@ -103,10 +103,10 @@ const generateJsonSchema: (schemas: SchemaGeneration[]) => Plugin = (
 //#region OpenAPI Types
 
 type OpenApiTypesGeneration = {
-  output: {
-    sync: string;
-    rules: string;
-  };
+	output: {
+		sync: string;
+		rules: string;
+	};
 };
 
 const PREAMBLE = `
@@ -118,192 +118,194 @@ const PREAMBLE = `
 `;
 
 const generateOpenApiTypes: (options: OpenApiTypesGeneration) => Plugin = ({
-  output,
+	output,
 }) => ({
-  name: "generate-openapi-types",
-  apply: "build",
-  async buildStart() {
-    this.info("Generating OpenAPI document");
-    const { getOpenApiDocument: getSyncDoc } =
-      await import("../../worker/sync/src/routes");
+	name: "generate-openapi-types",
+	apply: "build",
+	async buildStart() {
+		this.info("Generating OpenAPI document");
+		const { getOpenApiDocument: getSyncDoc } = await import(
+			"../../worker/sync/src/routes"
+		);
 
-    const { getOpenApiDocument: getRulesDoc } =
-      await import("../../worker/rules/src/routes");
+		const { getOpenApiDocument: getRulesDoc } = await import(
+			"../../worker/rules/src/routes"
+		);
 
-    async function generateTypings(path: string, doc: OpenAPI3) {
-      const ast = await openApiTypescript(doc, {
-        propertiesRequiredByDefault: true,
-        defaultNonNullable: true,
-      });
-      const definition = astToString(ast);
-      await fs.writeFile(path, PREAMBLE + definition);
-    }
+		async function generateTypings(path: string, doc: OpenAPI3) {
+			const ast = await openApiTypescript(doc, {
+				propertiesRequiredByDefault: true,
+				defaultNonNullable: true,
+			});
+			const definition = astToString(ast);
+			await fs.writeFile(path, PREAMBLE + definition);
+		}
 
-    generateTypings(output.sync, getSyncDoc() as OpenAPI3);
-    generateTypings(output.rules, getRulesDoc() as OpenAPI3);
+		generateTypings(output.sync, getSyncDoc() as OpenAPI3);
+		generateTypings(output.rules, getRulesDoc() as OpenAPI3);
 
-    this.info(`Wrote OpenAPI types to ${output.rules} and ${output.sync}`);
-  },
+		this.info(`Wrote OpenAPI types to ${output.rules} and ${output.sync}`);
+	},
 });
 
 // #endregion
 
 // https://vitejs.dev/config/
 export default defineConfig(() => ({
-  plugins: [
-    requiredEnvVars([
-      "VITE_REFEREE_FYI_BUILD_MODE",
-      "VITE_REFEREE_FYI_SHARE_SERVER",
-      "VITE_REFEREE_FYI_RULES_SERVER",
-      "VITE_REFEREE_FYI_ROBOTEVENTS_SERVER",
-      "VITE_REFEREE_FYI_ENABLE_SENTRY",
-      "VITE_ROBOTEVENTS_TOKEN",
-      "VITE_LOGSERVER_TOKEN",
-      "SENTRY_AUTH_TOKEN",
-    ]),
-    tanstackRouter({
-      target: "react",
-      autoCodeSplitting: true,
-    }),
-    react(),
-    markdown({
-      mode: [Mode.REACT],
-    }),
-    vitePluginVersionMark({
-      name: "Referee FYI",
-      ifGitSHA: true,
-      version: `${process.env.GITHUB_SHA}`,
-    }),
-    generateVersionJson,
-    generateJsonSchema([
-      {
-        schema: GameSchema,
-        fileName: "rules/schema.json",
-      },
-    ]),
-    generateOpenApiTypes({
-      output: {
-        sync: "./types/generated/worker/sync/openapi.d.ts",
-        rules: "./types/generated/worker/rules/openapi.d.ts",
-      },
-    }),
-    tsconfigPaths({}),
-    VitePWA({
-      registerType: "autoUpdate",
-      injectRegister: "inline",
-      includeAssets: ["./rules/**/*.json", "updateNotes.md"],
-      manifest: {
-        id: "app.bren.kv.v1",
-        name: "Referee FYI",
-        short_name: "Referee",
-        start_url: "/",
-        display: "standalone",
-        background_color: "#27272A",
-        theme_color: "#27272A",
-        description:
-          "Digital anomaly log for Head Referees in VRC, VIQRC, and VEX U. Referee FYI allows you to quickly record violations, see summaries before a match, and share your log with others.",
-        orientation: "portrait-primary",
+	plugins: [
+		requiredEnvVars([
+			"VITE_REFEREE_FYI_BUILD_MODE",
+			"VITE_REFEREE_FYI_SHARE_SERVER",
+			"VITE_REFEREE_FYI_RULES_SERVER",
+			"VITE_REFEREE_FYI_ROBOTEVENTS_SERVER",
+			"VITE_REFEREE_FYI_ENABLE_SENTRY",
+			"VITE_ROBOTEVENTS_TOKEN",
+			"VITE_LOGSERVER_TOKEN",
+			"SENTRY_AUTH_TOKEN",
+		]),
+		tanstackRouter({
+			target: "react",
+			autoCodeSplitting: true,
+		}),
+		react(),
+		markdown({
+			mode: [Mode.REACT],
+		}),
+		vitePluginVersionMark({
+			name: "Referee FYI",
+			ifGitSHA: true,
+			version: `${process.env.GITHUB_SHA}`,
+		}),
+		generateVersionJson,
+		generateJsonSchema([
+			{
+				schema: GameSchema,
+				fileName: "rules/schema.json",
+			},
+		]),
+		generateOpenApiTypes({
+			output: {
+				sync: "./types/generated/worker/sync/openapi.d.ts",
+				rules: "./types/generated/worker/rules/openapi.d.ts",
+			},
+		}),
+		tsconfigPaths({}),
+		VitePWA({
+			registerType: "autoUpdate",
+			injectRegister: "inline",
+			includeAssets: ["./rules/**/*.json", "updateNotes.md"],
+			manifest: {
+				id: "app.bren.kv.v1",
+				name: "Referee FYI",
+				short_name: "Referee",
+				start_url: "/",
+				display: "standalone",
+				background_color: "#27272A",
+				theme_color: "#27272A",
+				description:
+					"Digital anomaly log for Head Referees in VRC, VIQRC, and VEX U. Referee FYI allows you to quickly record violations, see summaries before a match, and share your log with others.",
+				orientation: "portrait-primary",
 
-        launch_handler: {
-          client_mode: ["navigate-existing", "auto"],
-        },
-        icons: [
-          {
-            src: "/icons/referee-fyi-48x48.png",
-            sizes: "48x48",
-            type: "image/png",
-          },
-          {
-            src: "/icons/referee-fyi-72x72.png",
-            sizes: "72x72",
-            type: "image/png",
-          },
-          {
-            src: "/icons/referee-fyi-96x96.png",
-            sizes: "96x96",
-            type: "image/png",
-          },
-          {
-            src: "/icons/referee-fyi-144x144.png",
-            sizes: "144x144",
-            type: "image/png",
-          },
-          {
-            src: "/icons/referee-fyi-168x168.png",
-            sizes: "168x168",
-            type: "image/png",
-          },
-          {
-            src: "/icons/referee-fyi-192x192.png",
-            sizes: "192x192",
-            type: "image/png",
-          },
-          {
-            src: "/icons/referee-fyi-256x256.png",
-            sizes: "256x256",
-            type: "image/png",
-          },
-          {
-            src: "/icons/referee-fyi-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-          },
-          {
-            src: "/icons/referee-fyi.svg",
-            sizes: "512x512",
-            type: "image/svg",
-          },
-        ],
-        screenshots: [
-          {
-            src: "/screenshots/screenshot1.png",
-            sizes: "1080x2400",
-            label:
-              "The match list view for the 2023 VEX Robotics World Championship High School Division.",
-          },
-          {
-            src: "/screenshots/screenshot2.png",
-            sizes: "1080x2400",
-            label:
-              "The match dialog, containing a general note and a major violation on a team.",
-          },
-          {
-            src: "/screenshots/screenshot3.png",
-            sizes: "1080x2400",
-            label:
-              "The manage tab, which allows you to share the anomaly log with others.",
-          },
-          {
-            src: "/screenshots/screenshot4.png",
-            sizes: "1080x2400",
-            label: "The home screen, where you select relevant events.",
-          },
-        ],
-      },
-      workbox: {
-        // All /api/* routes should always go to the server
-        navigateFallbackDenylist: [/^\/api/],
-      },
-    }),
-    sentryVitePlugin({
-      org: "referee-fyi",
-      project: "referee-fyi",
-      bundleSizeOptimizations: {
-        excludeDebugStatements: true,
-        excludeReplayIframe: true,
-        excludeReplayShadowDom: true,
-        excludeReplayWorker: true,
-      },
-    }),
-  ],
-  server: {
-    allowedHosts: ["mac.bren.haus"],
-  },
-  base: "/",
-  build: {
-    sourcemap: true,
-  },
-  resolve: {
-    dedupe: ["zod"],
-  },
+				launch_handler: {
+					client_mode: ["navigate-existing", "auto"],
+				},
+				icons: [
+					{
+						src: "/icons/referee-fyi-48x48.png",
+						sizes: "48x48",
+						type: "image/png",
+					},
+					{
+						src: "/icons/referee-fyi-72x72.png",
+						sizes: "72x72",
+						type: "image/png",
+					},
+					{
+						src: "/icons/referee-fyi-96x96.png",
+						sizes: "96x96",
+						type: "image/png",
+					},
+					{
+						src: "/icons/referee-fyi-144x144.png",
+						sizes: "144x144",
+						type: "image/png",
+					},
+					{
+						src: "/icons/referee-fyi-168x168.png",
+						sizes: "168x168",
+						type: "image/png",
+					},
+					{
+						src: "/icons/referee-fyi-192x192.png",
+						sizes: "192x192",
+						type: "image/png",
+					},
+					{
+						src: "/icons/referee-fyi-256x256.png",
+						sizes: "256x256",
+						type: "image/png",
+					},
+					{
+						src: "/icons/referee-fyi-512x512.png",
+						sizes: "512x512",
+						type: "image/png",
+					},
+					{
+						src: "/icons/referee-fyi.svg",
+						sizes: "512x512",
+						type: "image/svg",
+					},
+				],
+				screenshots: [
+					{
+						src: "/screenshots/screenshot1.png",
+						sizes: "1080x2400",
+						label:
+							"The match list view for the 2023 VEX Robotics World Championship High School Division.",
+					},
+					{
+						src: "/screenshots/screenshot2.png",
+						sizes: "1080x2400",
+						label:
+							"The match dialog, containing a general note and a major violation on a team.",
+					},
+					{
+						src: "/screenshots/screenshot3.png",
+						sizes: "1080x2400",
+						label:
+							"The manage tab, which allows you to share the anomaly log with others.",
+					},
+					{
+						src: "/screenshots/screenshot4.png",
+						sizes: "1080x2400",
+						label: "The home screen, where you select relevant events.",
+					},
+				],
+			},
+			workbox: {
+				// All /api/* routes should always go to the server
+				navigateFallbackDenylist: [/^\/api/],
+			},
+		}),
+		sentryVitePlugin({
+			org: "referee-fyi",
+			project: "referee-fyi",
+			bundleSizeOptimizations: {
+				excludeDebugStatements: true,
+				excludeReplayIframe: true,
+				excludeReplayShadowDom: true,
+				excludeReplayWorker: true,
+			},
+		}),
+	],
+	server: {
+		allowedHosts: ["mac.bren.haus"],
+	},
+	base: "/",
+	build: {
+		sourcemap: true,
+	},
+	resolve: {
+		dedupe: ["zod"],
+	},
 }));

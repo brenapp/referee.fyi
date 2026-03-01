@@ -158,12 +158,27 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
 												team: team.number,
 												match: undefined,
 												skills: undefined,
-												outcome: "Inspection",
+												outcome: "InspectionPassed",
 											})
 										}
 									>
 										<FlagIcon height={20} className="inline mr-2 " />
-										Inspection
+										Inspection Passed
+									</Button>
+									<Button
+										mode="normal"
+										className="mt-4"
+										onClick={() =>
+											openNewIncidentDialog({
+												team: team.number,
+												match: undefined,
+												skills: undefined,
+												outcome: "InspectionFailed",
+											})
+										}
+									>
+										<FlagIcon height={20} className="inline mr-2 " />
+										Inspection Failed
 									</Button>
 									<Button
 										mode="normal"

@@ -12,7 +12,8 @@ export const OUTCOMES = [
 	"General",
 	"Minor",
 	"Major",
-	"Inspection",
+	"InspectionPassed",
+	"InspectionFailed",
 	"Disabled",
 ] as const;
 

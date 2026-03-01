@@ -2419,7 +2419,7 @@ export interface components {
          * @description The referee determined outcome of the incident.
          * @enum {string}
          */
-        IncidentOutcome: "General" | "Minor" | "Major" | "Inspection" | "Disabled";
+        IncidentOutcome: "General" | "Minor" | "Major" | "InspectionPassed" | "InspectionFailed" | "Disabled";
         /**
          * @description Flags that can be applied to an incident.
          * @enum {string}

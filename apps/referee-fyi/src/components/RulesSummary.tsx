@@ -8,7 +8,8 @@ const highlights: Record<IncidentOutcome, string> = {
 	Disabled: "text-blue-300",
 	Major: "text-red-300",
 	General: "text-zinc-300",
-	Inspection: "text-zinc-300",
+	InspectionPassed: "text-zinc-300",
+	InspectionFailed: "text-zinc-300",
 };
 
 const OUTCOME_PRIORITY: IncidentOutcome[] = [

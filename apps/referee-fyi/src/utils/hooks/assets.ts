@@ -7,6 +7,7 @@ import {
 	type LocalAsset,
 	saveLocalAsset,
 } from "~utils/data/assets";
+import { getIncidentsByEvent } from "~utils/data/incident";
 import { getAssetOriginalURL, getAssetPreviewURL } from "~utils/data/share";
 import { useEventIncidents, useTeamIncidentsByEvent } from "./incident";
 import type { HookQueryOptions } from "./robotevents";
@@ -42,11 +43,11 @@ export function useLocalAssetUploadStatus(assetIds?: string[]) {
 	return useQuery({
 		queryKey: ["assets", "upload-status", assetIds],
 		queryFn: async () => {
-			const statuses: Record<string, AssetUploadStatus> = {};
-
 			if (!assetIds || assetIds.length === 0) {
-				return statuses;
+				return {};
 			}
+
+			const statuses: Record<string, AssetUploadStatus> = {};
 			const uploadStatuses = await getManyAssetUploadStatus(assetIds);
 
 			for (let i = 0; i < assetIds.length; i++) {
@@ -74,16 +75,34 @@ export function useLocalAssetIdsForEvent(sku?: string) {
 }
 
 export function useLocalAssetIdsToUploadForEvent(sku?: string) {
-	const { data: incidents } = useEventIncidents(sku);
-	const assets = useMemo(
-		() => incidents?.flatMap((incident) => incident.assets ?? []) ?? [],
-		[incidents],
-	);
-	const { data: statuses } = useLocalAssetUploadStatus(assets);
+	return useQuery({
+		queryKey: ["assets", "to-upload", sku],
+		queryFn: async () => {
+			if (!sku) {
+				return [];
+			}
 
-	return assets.filter((assetId) => {
-		const status = statuses?.[assetId];
-		return status?.step !== "complete" || !status.success;
+			const incidents = await getIncidentsByEvent(sku);
+			const assetIds = incidents.flatMap((incident) => incident.assets ?? []);
+
+			if (assetIds.length === 0) {
+				return [];
+			}
+
+			const uploadStatuses = await getManyAssetUploadStatus(assetIds);
+
+			return assetIds.filter((_, index) => {
+				const status = uploadStatuses[index];
+				if (!status) {
+					return false;
+				}
+
+				return !status.success;
+			});
+		},
+		enabled: !!sku,
+		refetchOnMount: true,
+		refetchOnReconnect: true,
 	});
 }
 

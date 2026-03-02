@@ -42,7 +42,9 @@ function useLocalAssetBulkUpload(ids: string[]) {
 
 export const EventAssets: React.FC = () => {
 	const { data: event } = useCurrentEvent();
-	const assetIdsToUpload = useLocalAssetIdsToUploadForEvent(event?.sku);
+	const { data: assetIdsToUpload } = useLocalAssetIdsToUploadForEvent(
+		event?.sku,
+	);
 	const {
 		mutate,
 		isPending: isPendingUpload,

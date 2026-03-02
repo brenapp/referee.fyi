@@ -356,7 +356,10 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
 				date: new Date().toISOString(),
 				step: "get_upload_url",
 			};
-			setAssetUploadStatus(asset.id, status);
+			await setAssetUploadStatus(asset.id, status);
+			queryClient.invalidateQueries({
+				queryKey: ["assets", "upload-status"],
+			});
 			return status;
 		}
 
@@ -379,11 +382,12 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
 				date: new Date().toISOString(),
 				step: "upload",
 			};
-			setAssetUploadStatus(asset.id, status);
+			await setAssetUploadStatus(asset.id, status);
+			queryClient.invalidateQueries({
+				queryKey: ["assets", "upload-status"],
+			});
 			return status;
 		}
-
-		toast({ type: "info", message: `Saved asset to server.` });
 
 		const status: AssetUploadStatus = {
 			success: true,
@@ -391,7 +395,16 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
 			step: "complete",
 		};
 
-		setAssetUploadStatus(asset.id, status);
+		await setAssetUploadStatus(asset.id, status);
+
+		queryClient.invalidateQueries({
+			queryKey: ["assets", "to-upload", sku],
+		});
+		queryClient.invalidateQueries({
+			queryKey: ["assets", "upload-status"],
+		});
+		toast({ type: "info", message: `Saved asset to server.` });
+
 		return status;
 	},
 

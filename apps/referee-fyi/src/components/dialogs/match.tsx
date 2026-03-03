@@ -21,6 +21,7 @@ import {
 	DialogCustomHeader,
 } from "~components/Dialog";
 import { Incident } from "~components/Incident";
+import { InspectionStatusDot } from "~components/Inspection";
 import { MatchTime } from "~components/Match";
 import { RulesSummary } from "~components/RulesSummary";
 import { Spinner } from "~components/Spinner";
@@ -32,7 +33,10 @@ import type {
 	RichIncident,
 } from "~utils/data/incident";
 import { useNewIncidentDialogState } from "~utils/dialogs/new";
-import { useTeamIncidentsByMatch } from "~utils/hooks/incident";
+import {
+	getInspectionStatus,
+	useTeamIncidentsByMatch,
+} from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
 import { TeamIsolationDialog } from "./team";
 
@@ -77,15 +81,21 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
 		return incidents.some((incident) => incident.outcome === "General");
 	}, [incidents]);
 
+	const inspectionStatus = useMemo(
+		() => getInspectionStatus(incidents, number),
+		[incidents, number],
+	);
+
 	return (
 		<Details open={open} onToggle={(e) => setOpen(e.currentTarget.open)}>
 			<Summary className="flex gap-2 items-center active:bg-zinc-700 max-w-full mt-0 sticky top-0 bg-zinc-900 h-16 z-10">
 				<div
 					className={twMerge(
-						"py-1 px-2 rounded-md font-mono flex-shrink-0",
+						"py-1 px-2 rounded-md font-mono flex-shrink-0 flex items-center gap-2",
 						teamAlliance?.color === "red" ? "text-red-400" : "text-blue-400",
 					)}
 				>
+					<InspectionStatusDot status={inspectionStatus.status} />
 					<p>
 						{number}
 						<span className="text-zinc-300">{hasGeneral ? "*" : ""}</span>

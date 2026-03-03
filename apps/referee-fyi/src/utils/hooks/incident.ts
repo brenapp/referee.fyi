@@ -229,6 +229,60 @@ export function useTeamIncidentsByEvent(
 	});
 }
 
+export type InspectionStatus = "passed" | "failed" | "unknown";
+
+export type InspectionResult = {
+	status: InspectionStatus;
+	incident: Incident | null;
+};
+
+export function getInspectionStatus(
+	incidents: Incident[],
+	team: string,
+): InspectionResult {
+	const inspectionIncidents = incidents
+		.filter(
+			(i) =>
+				i.team === team &&
+				(i.outcome === "InspectionPassed" || i.outcome === "InspectionFailed"),
+		)
+		.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+	if (inspectionIncidents.length === 0) {
+		return { status: "unknown", incident: null };
+	}
+
+	const latest = inspectionIncidents[0];
+	return {
+		status: latest.outcome === "InspectionPassed" ? "passed" : "failed",
+		incident: latest,
+	};
+}
+
+export function useTeamInspectionStatus(
+	team: string | undefined | null,
+	sku: string | undefined | null,
+	options?: HookQueryOptions<InspectionResult>,
+) {
+	return useQuery<InspectionResult>({
+		queryKey: ["incidents", "team", team, "event", sku, "inspectionStatus"],
+		queryFn: async () => {
+			if (!team || !sku) {
+				return { status: "unknown", incident: null } satisfies InspectionResult;
+			}
+
+			const incidents = await getIncidentsByTeam(team);
+			return getInspectionStatus(
+				incidents.filter((i) => i.event === sku),
+				team,
+			);
+		},
+		staleTime: 0,
+		refetchOnMount: "always",
+		...options,
+	});
+}
+
 export type TeamIncidentsByMatch = {
 	team: string;
 	incidents: Incident[];

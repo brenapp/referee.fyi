@@ -444,9 +444,7 @@ export const ProfilePrompt: React.FC = () => {
 
 export const AssetReconciliation: React.FC<ManageTabProps> = ({ event }) => {
 	const { data: invitation } = useEventInvitation(event.sku);
-	const { data: assetIdsToUpload } = useLocalAssetIdsToUploadForEvent(
-		event?.sku,
-	);
+	const assetIdsToUpload = useLocalAssetIdsToUploadForEvent(event?.sku);
 
 	if (!invitation?.accepted) {
 		return null;

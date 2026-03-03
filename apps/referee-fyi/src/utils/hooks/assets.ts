@@ -7,7 +7,6 @@ import {
 	type LocalAsset,
 	saveLocalAsset,
 } from "~utils/data/assets";
-import { getIncidentsByEvent } from "~utils/data/incident";
 import { getAssetOriginalURL, getAssetPreviewURL } from "~utils/data/share";
 import { useEventIncidents, useTeamIncidentsByEvent } from "./incident";
 import type { HookQueryOptions } from "./robotevents";
@@ -75,34 +74,20 @@ export function useLocalAssetIdsForEvent(sku?: string) {
 }
 
 export function useLocalAssetIdsToUploadForEvent(sku?: string) {
-	return useQuery({
-		queryKey: ["assets", "to-upload", sku],
-		queryFn: async () => {
-			if (!sku) {
-				return [];
-			}
+	const { data: incidents } = useEventIncidents(sku);
+	const assets = useMemo(
+		() => incidents?.flatMap((incident) => incident.assets ?? []) ?? [],
+		[incidents],
+	);
+	const { data: statuses } = useLocalAssetUploadStatus(assets);
 
-			const incidents = await getIncidentsByEvent(sku);
-			const assetIds = incidents.flatMap((incident) => incident.assets ?? []);
+	return assets.filter((assetId) => {
+		const status = statuses?.[assetId];
+		if (!status) {
+			return false;
+		}
 
-			if (assetIds.length === 0) {
-				return [];
-			}
-
-			const uploadStatuses = await getManyAssetUploadStatus(assetIds);
-
-			return assetIds.filter((_, index) => {
-				const status = uploadStatuses[index];
-				if (!status) {
-					return false;
-				}
-
-				return !status.success;
-			});
-		},
-		enabled: !!sku,
-		refetchOnMount: true,
-		refetchOnReconnect: true,
+		return !status.success;
 	});
 }
 

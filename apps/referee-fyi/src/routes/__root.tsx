@@ -357,21 +357,25 @@ const ConnectionManager: React.FC = () => {
 	useEffect(() => {
 		const controller = new AbortController();
 
-		document.addEventListener("visibilitychange", async () => {
-			if (!event?.sku) {
-				return;
-			}
+		document.addEventListener(
+			"visibilitychange",
+			async () => {
+				if (!event?.sku) {
+					return;
+				}
 
-			if (document.visibilityState !== "visible") {
-				return;
-			}
+				if (document.visibilityState !== "visible") {
+					return;
+				}
 
-			const invitation = await getEventInvitation(event.sku);
-			if (invitation) {
-				toast({ message: "Reconnecting...", type: "info" });
-				connect(invitation);
-			}
-		});
+				const invitation = await getEventInvitation(event.sku);
+				if (invitation) {
+					toast({ message: "Reconnecting...", type: "info" });
+					connect(invitation);
+				}
+			},
+			{ signal: controller.signal },
+		);
 
 		return () => controller.abort();
 	}, [connect, event?.sku]);

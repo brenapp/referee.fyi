@@ -1,12 +1,14 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import {
+	type AssetUploadStatus,
 	getLocalAsset,
+	getManyAssetUploadStatus,
 	type LocalAsset,
 	saveLocalAsset,
 } from "~utils/data/assets";
 import { getAssetOriginalURL, getAssetPreviewURL } from "~utils/data/share";
-import { useTeamIncidentsByEvent } from "./incident";
+import { useEventIncidents, useTeamIncidentsByEvent } from "./incident";
 import type { HookQueryOptions } from "./robotevents";
 
 export function useLocalAsset(id?: string | null) {
@@ -33,6 +35,55 @@ export function useLocalAssets(
 			return assets;
 		},
 		...options,
+	});
+}
+
+export function useLocalAssetUploadStatus(assetIds?: string[]) {
+	return useQuery({
+		queryKey: ["assets", "upload-status", assetIds],
+		queryFn: async () => {
+			const statuses: Record<string, AssetUploadStatus> = {};
+
+			if (!assetIds || assetIds.length === 0) {
+				return statuses;
+			}
+			const uploadStatuses = await getManyAssetUploadStatus(assetIds);
+
+			for (let i = 0; i < assetIds.length; i++) {
+				const assetId = assetIds[i];
+				const status = uploadStatuses[i];
+				if (assetId && status) {
+					statuses[assetId] = status;
+				}
+			}
+
+			return statuses;
+		},
+	});
+}
+
+export function useLocalAssetIdsForEvent(sku?: string) {
+	const { data: incidents, isPending } = useEventIncidents(sku);
+	return useQuery({
+		queryKey: ["assets", "ids", sku],
+		queryFn: async () => {
+			return incidents?.flatMap((incident) => incident.assets ?? []) ?? [];
+		},
+		enabled: !!sku && !isPending,
+	});
+}
+
+export function useLocalAssetIdsToUploadForEvent(sku?: string) {
+	const { data: incidents } = useEventIncidents(sku);
+	const assets = useMemo(
+		() => incidents?.flatMap((incident) => incident.assets ?? []) ?? [],
+		[incidents],
+	);
+	const { data: statuses } = useLocalAssetUploadStatus(assets);
+
+	return assets.filter((assetId) => {
+		const status = statuses?.[assetId];
+		return status?.step !== "complete" || !status.success;
 	});
 }
 

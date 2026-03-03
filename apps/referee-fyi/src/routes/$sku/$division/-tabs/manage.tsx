@@ -36,6 +36,7 @@ import {
 	removeInvitation,
 } from "~utils/data/share";
 import { isWorldsBuild, WORLDS_EVENTS } from "~utils/data/state";
+import { useLocalAssetIdsToUploadForEvent } from "~utils/hooks/assets";
 import { useEventIncidents } from "~utils/hooks/incident";
 import { useEvent } from "~utils/hooks/robotevents";
 import {
@@ -438,6 +439,36 @@ export const ProfilePrompt: React.FC = () => {
 			</Button>
 			<Spinner show={isPendingSetNameContinue} />
 		</>
+	);
+};
+
+export const AssetReconciliation: React.FC<ManageTabProps> = ({ event }) => {
+	const { data: invitation } = useEventInvitation(event.sku);
+	const assetIdsToUpload = useLocalAssetIdsToUploadForEvent(event?.sku);
+
+	if (!invitation?.accepted) {
+		return null;
+	}
+
+	if (!assetIdsToUpload || assetIdsToUpload.length < 1) {
+		return null;
+	}
+
+	return (
+		<Info message="Upload Images" className="mb-4">
+			<p className="mt-2">
+				There are {assetIdsToUpload?.length} images on your device that have not
+				been uploaded.
+			</p>
+			<LinkButton
+				to="/$sku/assets"
+				params={{ sku: event.sku }}
+				className="w-full mt-2 flex items-center bg-zinc-900"
+			>
+				<span className="flex-1">Manage Images</span>
+				<ArrowRightIcon height={20} className="text-emerald-400" />
+			</LinkButton>
+		</Info>
 	);
 };
 
@@ -888,6 +919,7 @@ export const EventManageTab: React.FC<ManageTabProps> = ({ event }) => {
 		<section className="max-w-xl max-h-full w-full mx-auto flex-1 mb-12 overflow-y-auto">
 			<OfflineNotice />
 			<UpdatePrompt />
+			<AssetReconciliation event={event} />
 			<ShareManager event={event} />
 			<EventSummaryLink event={event} />
 			<IntegrationInfo event={event} />

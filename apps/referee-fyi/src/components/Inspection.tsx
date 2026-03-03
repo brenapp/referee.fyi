@@ -30,6 +30,10 @@ export const InspectionStatusDot: React.FC<{ status: InspectionStatus }> = ({
 export const InspectionStatusLabel: React.FC<{
 	status: InspectionStatus;
 }> = ({ status }) => {
+	if (status === "unknown") {
+		return null;
+	}
+
 	return (
 		<span className="flex items-center gap-2 text-sm text-zinc-300 flex-shrink-0">
 			<InspectionStatusDot status={status} />

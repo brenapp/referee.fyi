@@ -41,6 +41,7 @@ const DEFAULT_FILTERS: Filters = {
 		General: true,
 		Major: true,
 		Minor: true,
+		Inspection: false,
 		InspectionPassed: true,
 		InspectionFailed: true,
 	},

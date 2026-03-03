@@ -88,7 +88,7 @@ export const TeamListItem: React.FC<TeamListItemProps> = ({
 						}
 					>
 						<FlagIcon height={20} className="inline mr-2 " />
-						Inspection Failed
+						Inspection Failing
 					</Button>
 					<hr className="mt-4 border-zinc-600" />
 					<Button

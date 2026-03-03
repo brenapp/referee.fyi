@@ -76,11 +76,13 @@ export const EventAssets: React.FC = () => {
 					/>
 				)}
 				<Spinner show={isPendingUpload} />
-				{assetIdsToUpload?.map((assetId) => (
-					<div key={assetId} className="mb-2">
-						<AssetPreview asset={assetId} />
-					</div>
-				))}
+				<div className="grid lg:grid-cols-6 grid-cols-2 md:grid-cols-3 mt-4 gap-2 overflow-y-auto pb-24">
+					{assetIdsToUpload?.map((assetId) => (
+						<div key={assetId} className="mb-2">
+							<AssetPreview asset={assetId} />
+						</div>
+					))}
+				</div>
 			</section>
 		</div>
 	);

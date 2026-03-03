@@ -43,11 +43,11 @@ export function useLocalAssetUploadStatus(assetIds?: string[]) {
 	return useQuery({
 		queryKey: ["assets", "upload-status", assetIds],
 		queryFn: async () => {
-			if (!assetIds || assetIds.length === 0) {
-				return {};
-			}
-
 			const statuses: Record<string, AssetUploadStatus> = {};
+
+			if (!assetIds || assetIds.length === 0) {
+				return statuses;
+			}
 			const uploadStatuses = await getManyAssetUploadStatus(assetIds);
 
 			for (let i = 0; i < assetIds.length; i++) {

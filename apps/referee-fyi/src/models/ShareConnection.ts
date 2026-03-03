@@ -386,6 +386,9 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
 			queryClient.invalidateQueries({
 				queryKey: ["assets", "upload-status"],
 			});
+			queryClient.invalidateQueries({
+				queryKey: ["assets", "to-upload", sku],
+			});
 			return status;
 		}
 

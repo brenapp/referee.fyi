@@ -19,6 +19,7 @@ export const StatsRoute: React.FC = () => {
 			General: 0,
 			Minor: 0,
 			Major: 0,
+			Inspection: 0,
 			InspectionPassed: 0,
 			InspectionFailed: 0,
 			Disabled: 0,

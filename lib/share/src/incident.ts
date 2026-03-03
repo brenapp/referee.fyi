@@ -12,10 +12,21 @@ export const OUTCOMES = [
 	"General",
 	"Minor",
 	"Major",
+	"Inspection",
 	"InspectionPassed",
 	"InspectionFailed",
 	"Disabled",
 ] as const;
+
+export const IncidentOutcomeDisplayNames: Record<IncidentOutcome, string> = {
+	General: "General",
+	Minor: "Minor",
+	Major: "Major",
+	Inspection: "Inspection",
+	InspectionPassed: "Inspection Passing",
+	InspectionFailed: "Inspection Failing",
+	Disabled: "Disabled",
+};
 
 export const IncidentOutcomeSchema = z.enum(OUTCOMES).meta({
 	id: "IncidentOutcome",

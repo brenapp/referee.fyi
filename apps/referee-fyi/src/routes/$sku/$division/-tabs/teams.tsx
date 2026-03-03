@@ -9,7 +9,12 @@ import type { EventData, TeamData } from "robotevents";
 import { Button, LinkButton } from "~components/Button";
 import { DisconnectedWarning } from "~components/DisconnectedWarning";
 import { EventNewIncidentDialog } from "~components/dialogs/new";
+import { Incident as IncidentComponent } from "~components/Incident";
 import { IconLabel, Input } from "~components/Input";
+import {
+	InspectionStatusDot,
+	InspectionStatusLabel,
+} from "~components/Inspection";
 import { MenuButton } from "~components/MenuButton";
 import { RulesSummary } from "~components/RulesSummary";
 import { Spinner } from "~components/Spinner";
@@ -17,7 +22,7 @@ import { VirtualizedList } from "~components/VirtualizedList";
 import type { Incident, RichIncident } from "~utils/data/incident";
 import { useNewIncidentDialogState } from "~utils/dialogs/new";
 import { filterTeams } from "~utils/filterteams";
-import { useEventIncidents } from "~utils/hooks/incident";
+import { getInspectionStatus, useEventIncidents } from "~utils/hooks/incident";
 import { useDivisionTeams } from "~utils/hooks/robotevents";
 import { useCurrentDivision } from "~utils/hooks/state";
 
@@ -38,18 +43,31 @@ export const TeamListItem: React.FC<TeamListItemProps> = ({
 	minorCount,
 	onNewIncident,
 }) => {
+	const inspectionStatus = useMemo(
+		() => getInspectionStatus(incidents, team.number),
+		[incidents, team.number],
+	);
+
 	return (
 		<MenuButton
 			mode="transparent"
 			menu={
 				<nav className="mt-2">
-					<div className="flex items-center gap-4 mb-4">
+					<div className="flex items-center justify-between gap-4 mb-4">
 						<p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-full flex-1">
 							<span className="font-mono text-emerald-400">{team.number}</span>
 							{" • "}
 							<span>{team.team_name}</span>
 						</p>
+						<InspectionStatusLabel status={inspectionStatus.status} />
 					</div>
+					{inspectionStatus.status === "failed" && inspectionStatus.incident ? (
+						<IncidentComponent
+							readonly
+							incident={inspectionStatus.incident}
+							className="max-h-20 overflow-hidden mb-4"
+						/>
+					) : null}
 					<RulesSummary
 						className="break-all"
 						incidents={incidents}
@@ -136,7 +154,10 @@ export const TeamListItem: React.FC<TeamListItemProps> = ({
 			aria-label={`Team ${team.number} ${team.team_name}. ${majorCount} major violations. ${minorCount} minor violations`}
 		>
 			<div className="flex-1">
-				<p className="text-emerald-400 font-mono">{team.number}</p>
+				<p className="text-emerald-400 font-mono flex items-center gap-1.5">
+					{team.number}
+					<InspectionStatusDot status={inspectionStatus.status} />
+				</p>
 				<p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-[24ch] lg:max-w-prose">
 					{team.team_name}
 				</p>

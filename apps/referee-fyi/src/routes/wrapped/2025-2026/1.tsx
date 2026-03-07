@@ -15,6 +15,8 @@ const OutcomeBackgroundClasses: Record<IncidentOutcome, string> = {
 	Disabled: "bg-blue-400/20 border-blue-400/50 text-blue-300",
 	General: "bg-zinc-400/20 border-zinc-400/50 text-zinc-300",
 	Inspection: "bg-zinc-400/20 border-zinc-400/50 text-zinc-300",
+	InspectionPassed: "bg-zinc-400/20 border-zinc-400/50 text-zinc-300",
+	InspectionFailed: "bg-zinc-400/20 border-zinc-400/50 text-zinc-300",
 };
 
 type OutcomeStats = Record<IncidentOutcome, number>;
@@ -26,6 +28,8 @@ function computeOutcomeStats(incidents: Incident[]): OutcomeStats {
 		Minor: 0,
 		Major: 0,
 		Inspection: 0,
+		InspectionPassed: 0,
+		InspectionFailed: 0,
 		Disabled: 0,
 	};
 	for (const incident of incidents) {

@@ -24,6 +24,8 @@ const IncidentOutcomeBackgroundClasses: { [O in IncidentOutcome]: string } = {
 	Disabled: "bg-blue-400 text-blue-900",
 	General: "bg-zinc-300 text-zinc-900",
 	Inspection: "bg-zinc-300 text-zinc-900",
+	InspectionPassed: "bg-zinc-300 text-zinc-900",
+	InspectionFailed: "bg-red-400 text-zinc-900",
 };
 
 export type IncidentProps = {

@@ -348,6 +348,11 @@ const useShareConnectionInternal = create<ShareConnection>((set, get) => ({
 	},
 
 	uploadAsset: async (sku: string, asset: LocalAsset) => {
+		await setAssetUploadStatus(asset.id, {
+			success: false,
+			date: new Date().toISOString(),
+			step: "prepare",
+		});
 		const uploadURL = await getAssetUploadURL(sku, asset.id, asset.type);
 		if (!uploadURL.success) {
 			toast({ type: "warn", message: "Could not upload asset to server." });

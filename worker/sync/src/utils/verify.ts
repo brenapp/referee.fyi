@@ -13,6 +13,15 @@ import {
 } from "./data";
 
 const INTEGRATION_TOKEN_DELIMITER = ".";
+const INTEGRATION_TOKEN_LEGACY_DELIMITER = "|";
+
+function splitIntegrationToken(token: string): string[] {
+	const byNew = token.split(INTEGRATION_TOKEN_DELIMITER);
+	if (byNew.length === 2) {
+		return byNew;
+	}
+	return token.split(INTEGRATION_TOKEN_LEGACY_DELIMITER);
+}
 
 export const VerifySignatureHeadersSchema = z.object({
 	"X-Referee-Signature": z.string().optional(),
@@ -326,9 +335,7 @@ export const verifySystemToken = createMiddleware<AppArgs>(async (c, next) => {
 	 * 1. Public key of the system token
 	 * 2. Signed Message: <INSTANCE SECRET><SKU>
 	 **/
-	const [publicKeyRaw, signedMessage] = token.split(
-		INTEGRATION_TOKEN_DELIMITER,
-	);
+	const [publicKeyRaw, signedMessage] = splitIntegrationToken(token);
 
 	// Verify Key
 	const key = await importKey(publicKeyRaw);
@@ -444,9 +451,7 @@ export const verifyBearerToken = createMiddleware<AppArgs>(async (c, next) => {
 	 * 1. Public key of an admin user that is responsible for the integration
 	 * 2. Signed Message: <Invitation ID><SKU>
 	 **/
-	const [publicKeyRaw, signedMessage] = token.split(
-		INTEGRATION_TOKEN_DELIMITER,
-	);
+	const [publicKeyRaw, signedMessage] = splitIntegrationToken(token);
 
 	// Verify Key
 	const key = await importKey(publicKeyRaw);

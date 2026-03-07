@@ -12,6 +12,8 @@ import {
 	isSystemKey,
 } from "./data";
 
+const INTEGRATION_TOKEN_DELIMITER = ".";
+
 export const VerifySignatureHeadersSchema = z.object({
 	"X-Referee-Signature": z.string().optional(),
 	"X-Referee-Public-Key": z.string().optional(),
@@ -320,11 +322,13 @@ export const verifySystemToken = createMiddleware<AppArgs>(async (c, next) => {
 	}
 
 	/**
-	 * The format of the system token is a pipe delimited string:
+	 * The format of the system token is a period delimited string:
 	 * 1. Public key of the system token
 	 * 2. Signed Message: <INSTANCE SECRET><SKU>
 	 **/
-	const [publicKeyRaw, signedMessage] = token.split("|");
+	const [publicKeyRaw, signedMessage] = token.split(
+		INTEGRATION_TOKEN_DELIMITER,
+	);
 
 	// Verify Key
 	const key = await importKey(publicKeyRaw);
@@ -436,11 +440,13 @@ export const verifyBearerToken = createMiddleware<AppArgs>(async (c, next) => {
 	}
 
 	/**
-	 * The format of the bearer token is a pipe delimited string:
+	 * The format of the bearer token is a period delimited string:
 	 * 1. Public key of an admin user that is responsible for the integration
 	 * 2. Signed Message: <Invitation ID><SKU>
 	 **/
-	const [publicKeyRaw, signedMessage] = token.split("|");
+	const [publicKeyRaw, signedMessage] = token.split(
+		INTEGRATION_TOKEN_DELIMITER,
+	);
 
 	// Verify Key
 	const key = await importKey(publicKeyRaw);

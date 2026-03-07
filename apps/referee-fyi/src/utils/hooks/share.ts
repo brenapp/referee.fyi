@@ -14,6 +14,8 @@ import {
 } from "~utils/data/share";
 import type { HookQueryOptions } from "./robotevents";
 
+const INTEGRATION_TOKEN_DELIMITER = ".";
+
 export type UseCreateShareOptions = {
 	sku: string;
 };
@@ -67,7 +69,7 @@ export function useIntegrationBearer(sku: string) {
 			const message = await signMessage(`${invitation.id}${invitation.sku}`);
 			const keyHex = await exportPublicKey(true);
 
-			return [keyHex, message].join("|");
+			return [keyHex, message].join(INTEGRATION_TOKEN_DELIMITER);
 		},
 		enabled: isEventInvitationSuccess && !!invitation,
 	});
@@ -79,7 +81,7 @@ export function useSystemKeyIntegrationBearer(sku: string, instance: string) {
 		queryFn: async () => {
 			const message = await signMessage(instance + sku);
 			const keyHex = await exportPublicKey(true);
-			return [keyHex, message].join("|");
+			return [keyHex, message].join(INTEGRATION_TOKEN_DELIMITER);
 		},
 	});
 }

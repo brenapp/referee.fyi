@@ -12,15 +12,37 @@ import {
 	isSystemKey,
 } from "./data";
 
+export type IntegrationToken = {
+	publicKey: string;
+	signedMessage: string;
+};
+
 const INTEGRATION_TOKEN_DELIMITER = ".";
 const INTEGRATION_TOKEN_LEGACY_DELIMITER = "|";
 
-function splitIntegrationToken(token: string): string[] {
-	const byNew = token.split(INTEGRATION_TOKEN_DELIMITER);
-	if (byNew.length === 2) {
-		return byNew;
+/**
+ * Parses the integration token, which is a period delimited string containing
+ * the public key and the signed message. The legacy format uses a pipe
+ * delimiter.
+ **/
+function parseIntegrationToken(token: string): IntegrationToken | null {
+	const delimited = token.split(INTEGRATION_TOKEN_DELIMITER);
+	if (delimited.length === 2) {
+		return {
+			publicKey: delimited[0],
+			signedMessage: delimited[1],
+		};
 	}
-	return token.split(INTEGRATION_TOKEN_LEGACY_DELIMITER);
+
+	const legacyDelimited = token.split(INTEGRATION_TOKEN_LEGACY_DELIMITER);
+	if (legacyDelimited.length === 2) {
+		return {
+			publicKey: legacyDelimited[0],
+			signedMessage: legacyDelimited[1],
+		};
+	}
+
+	return null;
 }
 
 export const VerifySignatureHeadersSchema = z.object({
@@ -330,12 +352,22 @@ export const verifySystemToken = createMiddleware<AppArgs>(async (c, next) => {
 		return await next();
 	}
 
-	/**
-	 * The format of the system token is a period delimited string:
-	 * 1. Public key of the system token
-	 * 2. Signed Message: <INSTANCE SECRET><SKU>
-	 **/
-	const [publicKeyRaw, signedMessage] = splitIntegrationToken(token);
+	const integrationToken = parseIntegrationToken(token);
+	if (!integrationToken) {
+		return c.json(
+			{
+				success: false,
+				error: {
+					name: "ValidationError",
+					message: "Invalid Bearer Token: token format is invalid.",
+				},
+				code: "VerifyIntegrationTokenInvalidSignature",
+			} as const satisfies z.infer<typeof ErrorResponseSchema>,
+			401,
+		);
+	}
+
+	const { publicKey: publicKeyRaw, signedMessage } = integrationToken;
 
 	// Verify Key
 	const key = await importKey(publicKeyRaw);
@@ -446,12 +478,22 @@ export const verifyBearerToken = createMiddleware<AppArgs>(async (c, next) => {
 		);
 	}
 
-	/**
-	 * The format of the bearer token is a period delimited string:
-	 * 1. Public key of an admin user that is responsible for the integration
-	 * 2. Signed Message: <Invitation ID><SKU>
-	 **/
-	const [publicKeyRaw, signedMessage] = splitIntegrationToken(token);
+	const integrationToken = parseIntegrationToken(token);
+	if (!integrationToken) {
+		return c.json(
+			{
+				success: false,
+				error: {
+					name: "ValidationError",
+					message: "Invalid Bearer Token: token format is invalid.",
+				},
+				code: "VerifyIntegrationTokenInvalidSignature",
+			} as const satisfies z.infer<typeof ErrorResponseSchema>,
+			401,
+		);
+	}
+
+	const { publicKey: publicKeyRaw, signedMessage } = integrationToken;
 
 	// Verify Key
 	const key = await importKey(publicKeyRaw);

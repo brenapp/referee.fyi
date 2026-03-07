@@ -83,7 +83,11 @@ export function useLocalAssetIdsToUploadForEvent(sku?: string) {
 
 	return assets.filter((assetId) => {
 		const status = statuses?.[assetId];
-		return status?.step !== "complete" || !status.success;
+		if (!status) {
+			return false;
+		}
+
+		return !status.success;
 	});
 }
 

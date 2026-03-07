@@ -36,7 +36,7 @@ export function generateLocalAsset(type: LocalAssetType, data: Blob) {
 export type AssetUploadStatus = {
 	success: boolean;
 	date: string; // ISO
-	step: "get_upload_url" | "upload" | "complete";
+	step: "prepare" | "get_upload_url" | "upload" | "complete";
 };
 
 export function getAssetUploadStatus(id: string) {

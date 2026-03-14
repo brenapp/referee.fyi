@@ -77,11 +77,12 @@ export function useNewIncident() {
 	const connection = useShareConnection(["addIncident"]);
 	return useMutation({
 		mutationKey: ["newIncident"],
-		mutationFn: async (incident: NewIncident) => {
+		mutationFn: async (incident: Omit<NewIncident, "time">) => {
 			try {
+				const time = new Date().toISOString();
 				const { key: peer } = await getShareProfile();
 				const result = await newIncident({
-					data: incident,
+					data: { ...incident, time },
 					peer,
 					id: generateIncidentId(),
 				});

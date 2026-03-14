@@ -13,6 +13,7 @@ import { useRulesForEvent } from "~utils/hooks/rules";
 import { useCurrentEvent } from "~utils/hooks/state";
 import { AssetPreview } from "./Assets";
 import { Button, type ButtonProps } from "./Button";
+import { Chip, ChipGroup } from "./Chip";
 import { EditIncidentDialog } from "./dialogs/edit";
 import { RulesDisplay } from "./Input";
 import { MenuButton } from "./MenuButton";
@@ -176,19 +177,14 @@ export const IncidentMenu: React.FC<IncidentMenuProps> = ({
 					{" • "}
 					<span>{team?.team_name}</span>
 				</h2>
-				<div className="py-2 flex gap-x-2">
-					<span
-						className={twMerge(
-							IncidentOutcomeBackgroundClasses[incident.outcome],
-							"p-1 rounded-md px-2",
-						)}
-					>
+				<ChipGroup>
+					<Chip className={IncidentOutcomeBackgroundClasses[incident.outcome]}>
 						{incident.outcome}
-					</span>
-					<span className="p-1 rounded-md px-2 bg-zinc-300 text-zinc-900">
+					</Chip>
+					<Chip className="bg-zinc-300 text-zinc-900">
 						{incident.match ? matchToString(incident.match) : "Non-Match"}
-					</span>
-				</div>
+					</Chip>
+				</ChipGroup>
 				<div>{incident.notes}</div>
 				<div className="grid grid-cols-4 gap-4 mt-2">
 					{incident.assets.map((asset) => (

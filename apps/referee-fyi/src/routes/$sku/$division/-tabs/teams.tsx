@@ -11,10 +11,7 @@ import { DisconnectedWarning } from "~components/DisconnectedWarning";
 import { EventNewIncidentDialog } from "~components/dialogs/new";
 import { Incident as IncidentComponent } from "~components/Incident";
 import { IconLabel, Input } from "~components/Input";
-import {
-	InspectionStatusDot,
-	InspectionStatusLabel,
-} from "~components/Inspection";
+import { InspectionChip, InspectionStatusDot } from "~components/Inspection";
 import { MenuButton } from "~components/MenuButton";
 import { RulesSummary } from "~components/RulesSummary";
 import { Spinner } from "~components/Spinner";
@@ -59,7 +56,7 @@ export const TeamListItem: React.FC<TeamListItemProps> = ({
 							{" • "}
 							<span>{team.team_name}</span>
 						</p>
-						<InspectionStatusLabel status={inspectionStatus.status} />
+						<InspectionChip status={inspectionStatus.status} />
 					</div>
 					{inspectionStatus.status === "failed" && inspectionStatus.incident ? (
 						<IncidentComponent

@@ -41,7 +41,13 @@ export const RulesSummary: React.FC<RulesSummaryProps> = ({
 				continue;
 			}
 
-			if (incident.rules.length < 1) {
+			const inspection = [
+				"Inspection",
+				"InspectionPassed",
+				"InspectionFailed",
+			].includes(incident.outcome);
+
+			if (incident.rules.length < 1 && !inspection) {
 				if (rules.NA) {
 					rules.NA.push(incident);
 				} else {
@@ -70,7 +76,7 @@ export const RulesSummary: React.FC<RulesSummaryProps> = ({
 			)}
 		>
 			{counts.map(([rule, incidents]) => {
-				let outcome: IncidentOutcome = "Minor";
+				let outcome: IncidentOutcome = "InspectionPassed";
 				for (const incident of incidents) {
 					if (
 						OUTCOME_PRIORITY.indexOf(incident.outcome) <

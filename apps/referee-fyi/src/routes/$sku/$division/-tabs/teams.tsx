@@ -19,7 +19,10 @@ import { VirtualizedList } from "~components/VirtualizedList";
 import type { Incident, RichIncident } from "~utils/data/incident";
 import { useNewIncidentDialogState } from "~utils/dialogs/new";
 import { filterTeams } from "~utils/filterteams";
-import { getInspectionStatus, useEventIncidents } from "~utils/hooks/incident";
+import {
+	useEventIncidents,
+	useTeamInspectionStatus,
+} from "~utils/hooks/incident";
 import { useDivisionTeams } from "~utils/hooks/robotevents";
 import { useCurrentDivision } from "~utils/hooks/state";
 
@@ -40,10 +43,7 @@ export const TeamListItem: React.FC<TeamListItemProps> = ({
 	minorCount,
 	onNewIncident,
 }) => {
-	const inspectionStatus = useMemo(
-		() => getInspectionStatus(incidents, team.number),
-		[incidents, team.number],
-	);
+	const inspectionStatus = useTeamInspectionStatus(team.number, sku);
 
 	return (
 		<MenuButton

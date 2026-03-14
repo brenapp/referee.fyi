@@ -6,6 +6,7 @@ import {
 	useMutationState,
 	useQuery,
 } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { Match, type MatchData } from "robotevents";
 import { toast } from "~components/Toast";
 import { useShareConnection } from "~models/ShareConnection";
@@ -236,15 +237,11 @@ export type InspectionResult = {
 	incident: Incident | null;
 };
 
-export function getInspectionStatus(
-	incidents: Incident[],
-	team: string,
-): InspectionResult {
+export function getInspectionStatus(incidents: Incident[]): InspectionResult {
 	const inspectionIncidents = incidents
 		.filter(
 			(i) =>
-				i.team === team &&
-				(i.outcome === "InspectionPassed" || i.outcome === "InspectionFailed"),
+				i.outcome === "InspectionPassed" || i.outcome === "InspectionFailed",
 		)
 		.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
@@ -262,25 +259,10 @@ export function getInspectionStatus(
 export function useTeamInspectionStatus(
 	team: string | undefined | null,
 	sku: string | undefined | null,
-	options?: HookQueryOptions<InspectionResult>,
+	options?: HookQueryOptions<Incident[]>,
 ) {
-	return useQuery<InspectionResult>({
-		queryKey: ["incidents", "team", team, "event", sku, "inspectionStatus"],
-		queryFn: async () => {
-			if (!team || !sku) {
-				return { status: "unknown", incident: null } satisfies InspectionResult;
-			}
-
-			const incidents = await getIncidentsByTeam(team);
-			return getInspectionStatus(
-				incidents.filter((i) => i.event === sku),
-				team,
-			);
-		},
-		staleTime: 0,
-		refetchOnMount: "always",
-		...options,
-	});
+	const { data: incidents } = useTeamIncidentsByEvent(team, sku, options);
+	return useMemo(() => getInspectionStatus(incidents ?? []), [incidents]);
 }
 
 export type TeamIncidentsByMatch = {

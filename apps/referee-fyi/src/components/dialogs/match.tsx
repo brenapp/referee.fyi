@@ -34,8 +34,8 @@ import type {
 } from "~utils/data/incident";
 import { useNewIncidentDialogState } from "~utils/dialogs/new";
 import {
-	getInspectionStatus,
 	useTeamIncidentsByMatch,
+	useTeamInspectionStatus,
 } from "~utils/hooks/incident";
 import { EventNewIncidentDialog } from "./new";
 import { TeamIsolationDialog } from "./team";
@@ -70,6 +70,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
 	match,
 	incidents,
 }) => {
+	const { data: event } = useCurrentEvent();
 	const [open, setOpen] = useState(false);
 	const [isolationOpen, setIsolationOpen] = useState(false);
 
@@ -81,10 +82,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({
 		return incidents.some((incident) => incident.outcome === "General");
 	}, [incidents]);
 
-	const inspectionStatus = useMemo(
-		() => getInspectionStatus(incidents, number),
-		[incidents, number],
-	);
+	const inspectionStatus = useTeamInspectionStatus(number, event?.sku);
 
 	return (
 		<Details open={open} onToggle={(e) => setOpen(e.currentTarget.open)}>

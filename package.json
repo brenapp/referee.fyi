@@ -23,7 +23,8 @@
 	"main": "index.js",
 	"scripts": {
 		"build": "npm run --workspaces --if-present build",
-		"lint": "biome ci"
+		"lint": "biome ci",
+		"lint:fix": "biome check --fix"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.4"

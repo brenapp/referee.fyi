@@ -20,6 +20,8 @@ export const StatsRoute: React.FC = () => {
 			Minor: 0,
 			Major: 0,
 			Inspection: 0,
+			InspectionPassed: 0,
+			InspectionFailed: 0,
 			Disabled: 0,
 		};
 
@@ -100,7 +102,10 @@ export const StatsRoute: React.FC = () => {
 					General
 				</li>
 				<li className="p-2 bg-blue-500 rounded-md">
-					<span className="font-mono">{incidentsByOutcome.Inspection}</span>{" "}
+					<span className="font-mono">
+						{incidentsByOutcome.InspectionPassed +
+							incidentsByOutcome.InspectionFailed}
+					</span>{" "}
 					Inspection
 				</li>
 			</ul>

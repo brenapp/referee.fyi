@@ -4,6 +4,7 @@ import {
 	FlagIcon,
 	MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
+import { IncidentOutcomeDisplayNames } from "@referee-fyi/share";
 import { useCallback, useMemo, useState } from "react";
 import type { EventData, TeamData } from "robotevents";
 import { Button, LinkButton } from "~components/Button";
@@ -90,7 +91,7 @@ export const TeamListItem: React.FC<TeamListItemProps> = ({
 						}
 					>
 						<FlagIcon height={20} className="inline mr-2 " />
-						Inspection Passing
+						{IncidentOutcomeDisplayNames.InspectionPassed}
 					</Button>
 					<Button
 						mode="normal"
@@ -103,7 +104,7 @@ export const TeamListItem: React.FC<TeamListItemProps> = ({
 						}
 					>
 						<FlagIcon height={20} className="inline mr-2 " />
-						Inspection Failing
+						{IncidentOutcomeDisplayNames.InspectionFailed}
 					</Button>
 					<hr className="mt-4 border-zinc-600" />
 					<Button

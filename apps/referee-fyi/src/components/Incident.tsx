@@ -1,5 +1,6 @@
 import { EllipsisVerticalIcon } from "@heroicons/react/20/solid";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
+import { IncidentOutcomeDisplayNames } from "@referee-fyi/share";
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import {
@@ -69,7 +70,9 @@ export const IncidentHighlights: React.FC<IncidentHighlightProps> = ({
 				<span>+ {incident.rules.length - 1}</span>
 			) : null}
 			{incident.rules.length > 0 ? "•" : null}
-			<span key={`${incident.id}-outcome`}>{incident.outcome}</span>
+			<span key={`${incident.id}-outcome`}>
+				{IncidentOutcomeDisplayNames[incident.outcome]}
+			</span>
 		</>
 	);
 };
@@ -179,7 +182,7 @@ export const IncidentMenu: React.FC<IncidentMenuProps> = ({
 				</h2>
 				<ChipGroup>
 					<Chip className={IncidentOutcomeBackgroundClasses[incident.outcome]}>
-						{incident.outcome}
+						{IncidentOutcomeDisplayNames[incident.outcome]}
 					</Chip>
 					<Chip className="bg-zinc-300 text-zinc-900">
 						{incident.match ? matchToString(incident.match) : "Non-Match"}

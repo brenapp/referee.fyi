@@ -1,4 +1,8 @@
-import { type IncidentOutcome, OUTCOMES } from "@referee-fyi/share";
+import {
+	type IncidentOutcome,
+	IncidentOutcomeDisplayNames,
+	OUTCOMES,
+} from "@referee-fyi/share";
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, m } from "motion/react";
 import { twMerge } from "tailwind-merge";
@@ -65,7 +69,9 @@ const OutcomeStatCard: React.FC<{
 			animate={{ opacity: 1, x: 0 }}
 			transition={{ delay: 0.8 + index * 0.1, duration: 0.5 }}
 		>
-			<span className="font-medium">{outcome}</span>
+			<span className="font-medium">
+				{IncidentOutcomeDisplayNames[outcome]}
+			</span>
 			<span className="font-mono font-bold text-lg">{count}</span>
 		</m.div>
 	);

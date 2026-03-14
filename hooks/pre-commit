@@ -1,0 +1,11 @@
+#!/bin/sh
+
+echo "Running lint check..."
+npm run lint
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Lint failed. Commit aborted."
+  echo "Run 'npm run lint:fix' to auto-fix issues, then try again."
+  exit 1
+fi

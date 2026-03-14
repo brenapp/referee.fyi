@@ -107,6 +107,15 @@ cd referee.fyi
 npm i
 ```
 
+### Git Hooks
+
+This project uses a pre-commit hook to run the linter before each commit. To
+install the hooks, configure git to use the `hooks` directory:
+
+```
+git config core.hooksPath hooks
+```
+
 ### `.env` Setup
 
 Additionally, you'll want to create a `.env.local` file to populate environment

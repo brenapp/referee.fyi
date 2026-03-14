@@ -24,6 +24,7 @@
 	"scripts": {
 		"build": "npm run --workspaces --if-present build",
 		"lint": "biome ci",
+		"apps:referee-fyi:dev": "npm run --workspace=apps/referee-fyi dev",
 		"lint:fix": "biome check --fix"
 	},
 	"devDependencies": {

@@ -37,7 +37,9 @@ function computeOutcomeStats(incidents: Incident[]): OutcomeStats {
 		Disabled: 0,
 	};
 	for (const incident of incidents) {
-		stats[incident.outcome]++;
+		if (incident.outcome in stats) {
+			stats[incident.outcome]++;
+		}
 	}
 	return stats;
 }

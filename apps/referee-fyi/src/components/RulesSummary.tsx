@@ -18,6 +18,9 @@ const OUTCOME_PRIORITY: IncidentOutcome[] = [
 	"Disabled",
 	"Minor",
 	"General",
+	"Inspection",
+	"InspectionPassed",
+	"InspectionFailed",
 ];
 
 export type RulesSummaryProps = {

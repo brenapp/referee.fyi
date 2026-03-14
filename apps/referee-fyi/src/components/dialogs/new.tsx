@@ -8,6 +8,7 @@ import {
 	type IncidentMatchHeadToHeadPeriod,
 	IncidentMatchHeadToHeadPeriodDisplayNames,
 	type IncidentMatchSkills,
+	IncidentOutcomeDisplayNames,
 } from "@referee-fyi/share";
 import { type SetStateAction, useCallback, useId, useMemo } from "react";
 import { type MatchData, programs } from "robotevents";
@@ -528,12 +529,18 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 					onChange={onChangeIncidentOutcome}
 					className="max-w-full w-full"
 				>
-					<option value="General">General</option>
-					<option value="InspectionPassed">Inspection Passing</option>
-					<option value="InspectionFailed">Inspection Failing</option>
-					<option value="Minor">Minor</option>
-					<option value="Major">Major</option>
-					<option value="Disabled">Disabled</option>
+					<option value="General">{IncidentOutcomeDisplayNames.General}</option>
+					<option value="InspectionPassed">
+						{IncidentOutcomeDisplayNames.InspectionPassed}
+					</option>
+					<option value="InspectionFailed">
+						{IncidentOutcomeDisplayNames.InspectionFailed}
+					</option>
+					<option value="Minor">{IncidentOutcomeDisplayNames.Minor}</option>
+					<option value="Major">{IncidentOutcomeDisplayNames.Major}</option>
+					<option value="Disabled">
+						{IncidentOutcomeDisplayNames.Disabled}
+					</option>
 				</Select>
 				<div>
 					<p className="mt-4">Associated Rules</p>

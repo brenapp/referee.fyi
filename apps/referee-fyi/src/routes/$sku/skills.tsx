@@ -9,6 +9,7 @@ import {
 	Cog8ToothIcon as ManageIconSolid,
 	UserGroupIcon as TeamsIconSolid,
 } from "@heroicons/react/24/solid";
+import { IncidentOutcomeDisplayNames } from "@referee-fyi/share";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { EventData, Skill } from "robotevents";
@@ -163,7 +164,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
 										}
 									>
 										<FlagIcon height={20} className="inline mr-2 " />
-										Inspection Passed
+										{IncidentOutcomeDisplayNames.InspectionPassed}
 									</Button>
 									<Button
 										mode="normal"
@@ -178,7 +179,7 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
 										}
 									>
 										<FlagIcon height={20} className="inline mr-2 " />
-										Inspection Failed
+										{IncidentOutcomeDisplayNames.InspectionFailed}
 									</Button>
 									<Button
 										mode="normal"

@@ -26,7 +26,9 @@ export const StatsRoute: React.FC = () => {
 		};
 
 		for (const incident of incidents ?? []) {
-			outcome[incident.outcome]++;
+			if (incident.outcome in outcome) {
+				outcome[incident.outcome]++;
+			}
 		}
 
 		return outcome;

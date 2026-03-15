@@ -62,7 +62,7 @@ export const StatsRoute: React.FC = () => {
 
 	return (
 		<main className="max-w-md h-screen mx-auto grid grid-cols-2 grid-rows-8 p-4 gap-4">
-			<header className="bg-zinc-900 col-span-2 row-span-1 rounded-md p-4 flex flex-col justify-center align-middle">
+			<header className="bg-zinc-900 col-span-2 row-span-2 rounded-md p-4 flex flex-col justify-center align-middle">
 				<h1 className="text-lg leading-0.5 leading-1">{event?.name}</h1>
 				<h2 className="text-sm mt-1">
 					<span className="font-mono text-emerald-400">{event?.sku}</span> •{" "}

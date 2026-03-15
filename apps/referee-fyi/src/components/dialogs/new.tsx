@@ -1,7 +1,7 @@
 import {
-	ArrowUpTrayIcon,
-	CameraIcon,
+	PaperClipIcon,
 	TrashIcon,
+	VideoCameraIcon,
 } from "@heroicons/react/20/solid";
 import {
 	type IncidentFlag,
@@ -596,7 +596,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 						htmlFor={`${formId}-capture`}
 						className="bg-zinc-700 rounded-md flex gap-2 items-center justify-center active:bg-zinc-800 focus-within:bg-zinc-800 focus-within:ring-2 ring-zinc-200 cursor-pointer px-3 py-2 mt-4"
 					>
-						<CameraIcon className="w-8 h-8 text-zinc-50" />
+						<VideoCameraIcon className="w-6 h-6 text-zinc-50 inline" />
 						<span>Capture</span>
 						<AssetPicker
 							id={`${formId}-capture`}
@@ -611,7 +611,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 						htmlFor={`${formId}-upload`}
 						className="bg-zinc-700 rounded-md flex gap-2 items-center justify-center active:bg-zinc-800 focus-within:bg-zinc-800 focus-within:ring-2 ring-zinc-200 cursor-pointer px-3 py-2 mt-4"
 					>
-						<ArrowUpTrayIcon className="w-8 h-8 text-zinc-50" />
+						<PaperClipIcon className="w-6 h-6 text-zinc-50" />
 						<span>Upload</span>
 						<AssetPicker
 							id={`${formId}-upload`}

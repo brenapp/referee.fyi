@@ -12,6 +12,7 @@ import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import type { EventData } from "robotevents";
 import { twMerge } from "tailwind-merge";
 import { Button, IconButton, LinkButton } from "~components/Button";
+import { Chip, ChipGroup } from "~components/Chip";
 import { ClickToCopy, ClickToCopyIcon } from "~components/ClickToCopy";
 import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { OfflineNotice } from "~components/DisconnectedWarning";
@@ -379,10 +380,10 @@ export const LeaveMenu: React.FC<LeaveMenuProps> = ({ sku, ...props }) => {
 				Are you sure? If you leave, you will need an admin to invite you again.
 			</p>
 			{invitation?.admin && invitations.filter((i) => i.admin).length < 2 ? (
-				<Warning
-					className="mt-4"
-					message="Since you are the last admin, leaving will end this instance and remove all other users."
-				/>
+				<Warning className="mt-4" message="End Session">
+					Since you are the last admin, leaving will end this instance and
+					remove all other users.
+				</Warning>
 			) : null}
 			<Button mode="dangerous" className="mt-4" onClick={() => onClickLeave()}>
 				Leave
@@ -482,29 +483,29 @@ export const InstanceUserListItem: React.FC<InstanceUserListItemProps> = ({
 	active,
 }) => {
 	return (
-		<div className="flex gap-2 items-center flex-1">
+		<ChipGroup className="flex gap-2 items-center flex-1">
 			<UserCircleIcon height={24} />
 			<p>{user.user.name}</p>
 			{user.user.role === "system" ? (
-				<span className="text-xs bg-blue-700 px-2 py-0.5 rounded-md">
+				<Chip className="text-xs bg-blue-700 px-2 py-0.5 rounded-md">
 					System
-				</span>
+				</Chip>
 			) : null}
 			{user.admin ? (
-				<span className="text-xs bg-purple-600 px-2 py-0.5 rounded-md">
+				<Chip className="text-xs bg-purple-600 px-2 py-0.5 rounded-md">
 					Admin
-				</span>
+				</Chip>
 			) : null}
 			{active ? (
-				<span className="text-xs bg-emerald-600 px-2 py-0.5 rounded-md">
+				<Chip className="text-xs bg-emerald-600 px-2 py-0.5 rounded-md">
 					Connected
-				</span>
+				</Chip>
 			) : (
-				<span className="text-xs bg-zinc-700 px-2 py-0.5 rounded-md">
+				<Chip className="text-xs bg-zinc-700 px-2 py-0.5 rounded-md">
 					Offline
-				</span>
+				</Chip>
 			)}
-		</div>
+		</ChipGroup>
 	);
 };
 

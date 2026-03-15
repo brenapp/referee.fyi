@@ -61,7 +61,6 @@ export const TeamListItem: React.FC<TeamListItemProps> = ({
 					</div>
 					{inspectionStatus.status === "failed" && inspectionStatus.incident ? (
 						<IncidentComponent
-							readonly
 							incident={inspectionStatus.incident}
 							className="max-h-20 overflow-hidden mb-4"
 						/>

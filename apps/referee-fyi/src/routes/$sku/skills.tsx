@@ -91,7 +91,7 @@ const SkillsTeamListItem: React.FC<SkillsTeamListItemProps> = ({
 					<hr className="mt-4 border-zinc-600" />
 					<Button
 						mode="normal"
-						className="mt-4"
+						className="mt-4 bg-emerald-600"
 						onClick={() =>
 							onNewIncident({
 								team: team.number,
@@ -106,7 +106,7 @@ const SkillsTeamListItem: React.FC<SkillsTeamListItemProps> = ({
 					</Button>
 					<Button
 						mode="normal"
-						className="mt-4"
+						className="mt-4 bg-red-500"
 						onClick={() =>
 							onNewIncident({
 								team: team.number,
@@ -119,9 +119,10 @@ const SkillsTeamListItem: React.FC<SkillsTeamListItemProps> = ({
 						<FlagIcon height={20} className="inline mr-2 " />
 						{IncidentOutcomeDisplayNames.InspectionFailed}
 					</Button>
+					<hr className="mt-4 border-zinc-600" />
 					<Button
 						mode="normal"
-						className="mt-4"
+						className="mt-4 bg-blue-600"
 						onClick={() =>
 							onNewIncident({
 								team: team.number,
@@ -139,7 +140,7 @@ const SkillsTeamListItem: React.FC<SkillsTeamListItemProps> = ({
 					</Button>
 					<Button
 						mode="normal"
-						className="mt-4"
+						className="mt-4 bg-blue-600"
 						onClick={() =>
 							onNewIncident({
 								team: team.number,

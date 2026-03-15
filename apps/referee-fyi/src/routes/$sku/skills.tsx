@@ -9,25 +9,184 @@ import {
 	Cog8ToothIcon as ManageIconSolid,
 	UserGroupIcon as TeamsIconSolid,
 } from "@heroicons/react/24/solid";
+import { IncidentOutcomeDisplayNames } from "@referee-fyi/share";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { EventData, Skill } from "robotevents";
+import type { EventData, Skill, TeamData } from "robotevents";
 import { Button, LinkButton } from "~components/Button";
 import { EventNewIncidentDialog } from "~components/dialogs/new";
 import { IconLabel, Input } from "~components/Input";
+import { InspectionChip, InspectionStatusDot } from "~components/Inspection";
 import { MenuButton } from "~components/MenuButton";
 import { RulesSummary } from "~components/RulesSummary";
 import { Spinner } from "~components/Spinner";
 import { Tabs } from "~components/Tabs";
 import { VirtualizedList } from "~components/VirtualizedList";
-import type { RichIncident } from "~utils/data/incident";
+import type { Incident, RichIncident } from "~utils/data/incident";
 import { useNewIncidentDialogState } from "~utils/dialogs/new";
 import { filterTeams } from "~utils/filterteams";
 import { useAddEventVisited } from "~utils/hooks/history";
-import { useEventIncidents } from "~utils/hooks/incident";
+import {
+	useEventIncidents,
+	useTeamInspectionStatus,
+} from "~utils/hooks/incident";
 import { useEventSkills, useEventTeams } from "~utils/hooks/robotevents";
 import { useCurrentEvent } from "~utils/hooks/state";
 import { EventManageTab } from "./$division/-tabs/manage";
+
+type SkillsTeamListItemProps = {
+	team: TeamData;
+	sku: string;
+	incidents: Incident[];
+	driver: Skill | undefined;
+	programming: Skill | undefined;
+	onNewIncident: (initial: Partial<RichIncident>) => void;
+};
+
+const SkillsTeamListItem: React.FC<SkillsTeamListItemProps> = ({
+	team,
+	sku,
+	incidents,
+	driver,
+	programming,
+	onNewIncident,
+}) => {
+	const inspectionStatus = useTeamInspectionStatus(team.number, sku);
+
+	return (
+		<MenuButton
+			menu={
+				<nav className="mt-2">
+					<div className="flex items-center gap-4 mb-4">
+						<p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-full flex-1">
+							<span className="font-mono text-emerald-400">{team.number}</span>
+							{" • "}
+							<span>{team.team_name}</span>
+						</p>
+						<span className="mr-4">
+							<PlayIcon height={20} className="inline" />
+							<span className="font-mono ml-2">{driver?.attempts ?? 0}</span>
+						</span>
+						<span className="">
+							<CodeBracketIcon height={20} className="inline" />
+							<span className="font-mono ml-2">
+								{programming?.attempts ?? 0}
+							</span>
+						</span>
+					</div>
+					<InspectionChip status={inspectionStatus.status} />
+					<RulesSummary
+						className="break-all"
+						incidents={incidents}
+						filter={(i) => i.team === team.number && i.match?.type !== "match"}
+					/>
+					<LinkButton
+						to={"/$sku/team/$team"}
+						params={{ sku, team: team.number }}
+						className="w-full mt-4 flex items-center"
+					>
+						<span className="flex-1">Details</span>
+						<ArrowRightIcon height={20} className="text-emerald-400" />
+					</LinkButton>
+					<hr className="mt-4 border-zinc-600" />
+					<Button
+						mode="normal"
+						align="left"
+						className="mt-4 bg-emerald-600"
+						onClick={() =>
+							onNewIncident({
+								team: team.number,
+								match: undefined,
+								skills: undefined,
+								outcome: "InspectionPassed",
+							})
+						}
+					>
+						<FlagIcon height={20} className="inline mr-2 " />
+						{IncidentOutcomeDisplayNames.InspectionPassed}
+					</Button>
+					<Button
+						mode="normal"
+						align="left"
+						className="mt-4 bg-red-500"
+						onClick={() =>
+							onNewIncident({
+								team: team.number,
+								match: undefined,
+								skills: undefined,
+								outcome: "InspectionFailed",
+							})
+						}
+					>
+						<FlagIcon height={20} className="inline mr-2 " />
+						{IncidentOutcomeDisplayNames.InspectionFailed}
+					</Button>
+					<hr className="mt-4 border-zinc-600" />
+					<Button
+						mode="normal"
+						align="left"
+						className="mt-4 bg-blue-600"
+						onClick={() =>
+							onNewIncident({
+								team: team.number,
+								skills: {
+									type: "skills",
+									skillsType: "driver",
+									attempt: Math.min(3, (driver?.attempts ?? 0) + 1),
+								},
+								outcome: "Minor",
+							})
+						}
+					>
+						<FlagIcon height={20} className="inline mr-2 " />
+						Driver Skills
+					</Button>
+					<Button
+						mode="normal"
+						align="left"
+						className="mt-4 bg-blue-600"
+						onClick={() =>
+							onNewIncident({
+								team: team.number,
+								skills: {
+									type: "skills",
+									skillsType: "programming",
+									attempt: Math.min(3, (programming?.attempts ?? 0) + 1),
+								},
+								outcome: "Minor",
+							})
+						}
+					>
+						<FlagIcon height={20} className="inline mr-2 " />
+						Auto Skills
+					</Button>
+				</nav>
+			}
+			mode="transparent"
+			className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
+		>
+			<div className="flex-1">
+				<p className="text-emerald-400 font-mono flex items-center gap-1.5">
+					{team.number}
+					<InspectionStatusDot status={inspectionStatus.status} />
+				</p>
+				<p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose">
+					{team.team_name}
+				</p>
+			</div>
+			<div className="absolute right-0 bg-zinc-800 h-full pl-2 flex items-center">
+				<span className="mr-4">
+					<PlayIcon height={20} className="inline" />
+					<span className="font-mono ml-2">{driver?.attempts ?? 0}</span>
+				</span>
+				<span className="">
+					<CodeBracketIcon height={20} className="inline" />
+					<span className="font-mono ml-2">{programming?.attempts ?? 0}</span>
+				</span>
+			</div>
+		</MenuButton>
+	);
+};
 
 type TeamSkillsTabProps = {
 	event: EventData;
@@ -110,126 +269,14 @@ const TeamSkillsTab: React.FC<TeamSkillsTabProps> = ({ event }) => {
 					);
 
 					return (
-						<MenuButton
-							menu={
-								<nav className="mt-2">
-									<div className="flex items-center gap-4 mb-4">
-										<p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-full flex-1">
-											<span className="font-mono text-emerald-400">
-												{team.number}
-											</span>
-											{" • "}
-											<span>{team.team_name}</span>
-										</p>
-										<span className="mr-4">
-											<PlayIcon height={20} className="inline" />
-											<span className="font-mono ml-2">
-												{driver?.attempts ?? 0}
-											</span>
-										</span>
-										<span className="">
-											<CodeBracketIcon height={20} className="inline" />
-											<span className="font-mono ml-2">
-												{programming?.attempts ?? 0}
-											</span>
-										</span>
-									</div>
-									<RulesSummary
-										className="break-all"
-										incidents={incidents ?? []}
-										filter={(i) =>
-											i.team === team.number && i.match?.type !== "match"
-										}
-									/>
-									<LinkButton
-										to={"/$sku/team/$team"}
-										params={{ sku: event.sku, team: team.number }}
-										className="w-full mt-4 flex items-center"
-									>
-										<span className="flex-1">Details</span>
-										<ArrowRightIcon height={20} className="text-emerald-400" />
-									</LinkButton>
-									<hr className="mt-4 border-zinc-600" />
-									<Button
-										mode="normal"
-										className="mt-4"
-										onClick={() =>
-											openNewIncidentDialog({
-												team: team.number,
-												match: undefined,
-												skills: undefined,
-												outcome: "Inspection",
-											})
-										}
-									>
-										<FlagIcon height={20} className="inline mr-2 " />
-										Inspection
-									</Button>
-									<Button
-										mode="normal"
-										className="mt-4"
-										onClick={() =>
-											openNewIncidentDialog({
-												team: team.number,
-												skills: {
-													type: "skills",
-													skillsType: "driver",
-													attempt: Math.min(3, (driver?.attempts ?? 0) + 1),
-												},
-												outcome: "Minor",
-											})
-										}
-									>
-										<FlagIcon height={20} className="inline mr-2 " />
-										Driver Skills
-									</Button>
-									<Button
-										mode="normal"
-										className="mt-4"
-										onClick={() =>
-											openNewIncidentDialog({
-												team: team.number,
-												skills: {
-													type: "skills",
-													skillsType: "programming",
-													attempt: Math.min(
-														3,
-														(programming?.attempts ?? 0) + 1,
-													),
-												},
-												outcome: "Minor",
-											})
-										}
-									>
-										<FlagIcon height={20} className="inline mr-2 " />
-										Auto Skills
-									</Button>
-								</nav>
-							}
-							mode="transparent"
-							className="flex items-center gap-4 mt-4 h-12 text-zinc-50"
-						>
-							<div className="flex-1">
-								<p className="text-emerald-400 font-mono">{team.number}</p>
-								<p className="overflow-hidden whitespace-nowrap text-ellipsis max-w-[20ch] lg:max-w-prose">
-									{team.team_name}
-								</p>
-							</div>
-							<div className="absolute right-0 bg-zinc-800 h-full pl-2 flex items-center">
-								<span className="mr-4">
-									<PlayIcon height={20} className="inline" />
-									<span className="font-mono ml-2">
-										{driver?.attempts ?? 0}
-									</span>
-								</span>
-								<span className="">
-									<CodeBracketIcon height={20} className="inline" />
-									<span className="font-mono ml-2">
-										{programming?.attempts ?? 0}
-									</span>
-								</span>
-							</div>
-						</MenuButton>
+						<SkillsTeamListItem
+							team={team}
+							sku={event.sku}
+							incidents={incidents ?? []}
+							driver={driver}
+							programming={programming}
+							onNewIncident={openNewIncidentDialog}
+						/>
 					);
 				}}
 			</VirtualizedList>

@@ -42,10 +42,12 @@ const ButtonClasses: { [K in ButtonMode]: string } = {
 
 export type ButtonProps = BaseButtonProps & {
 	mode?: ButtonMode;
+	align?: "left" | "center";
 };
 
 export const Button: React.FC<ButtonProps> = ({
 	mode = "normal",
+	align,
 	...props
 }) => {
 	return (
@@ -55,6 +57,7 @@ export const Button: React.FC<ButtonProps> = ({
 				"rounded-md bg-zinc-700 text-zinc-100 text-left px-3 py-2",
 				" disabled:bg-zinc-300 disabled:cursor-not-allowed",
 				ButtonClasses[mode],
+				align === "left" && "text-left",
 				props.className,
 			)}
 		/>

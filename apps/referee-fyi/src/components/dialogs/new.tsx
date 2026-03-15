@@ -1,13 +1,14 @@
 import {
-	ArrowUpTrayIcon,
-	CameraIcon,
+	PaperClipIcon,
 	TrashIcon,
+	VideoCameraIcon,
 } from "@heroicons/react/20/solid";
 import {
 	type IncidentFlag,
 	type IncidentMatchHeadToHeadPeriod,
 	IncidentMatchHeadToHeadPeriodDisplayNames,
 	type IncidentMatchSkills,
+	IncidentOutcomeDisplayNames,
 } from "@referee-fyi/share";
 import { type SetStateAction, useCallback, useId, useMemo } from "react";
 import { type MatchData, programs } from "robotevents";
@@ -528,11 +529,18 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 					onChange={onChangeIncidentOutcome}
 					className="max-w-full w-full"
 				>
-					<option value="General">General</option>
-					<option value="Inspection">Inspection</option>
-					<option value="Minor">Minor</option>
-					<option value="Major">Major</option>
-					<option value="Disabled">Disabled</option>
+					<option value="General">{IncidentOutcomeDisplayNames.General}</option>
+					<option value="InspectionPassed">
+						{IncidentOutcomeDisplayNames.InspectionPassed}
+					</option>
+					<option value="InspectionFailed">
+						{IncidentOutcomeDisplayNames.InspectionFailed}
+					</option>
+					<option value="Minor">{IncidentOutcomeDisplayNames.Minor}</option>
+					<option value="Major">{IncidentOutcomeDisplayNames.Major}</option>
+					<option value="Disabled">
+						{IncidentOutcomeDisplayNames.Disabled}
+					</option>
 				</Select>
 				<div>
 					<p className="mt-4">Associated Rules</p>
@@ -588,7 +596,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 						htmlFor={`${formId}-capture`}
 						className="bg-zinc-700 rounded-md flex gap-2 items-center justify-center active:bg-zinc-800 focus-within:bg-zinc-800 focus-within:ring-2 ring-zinc-200 cursor-pointer px-3 py-2 mt-4"
 					>
-						<CameraIcon className="w-8 h-8 text-zinc-50" />
+						<VideoCameraIcon className="w-6 h-6 text-zinc-50 inline" />
 						<span>Capture</span>
 						<AssetPicker
 							id={`${formId}-capture`}
@@ -603,7 +611,7 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 						htmlFor={`${formId}-upload`}
 						className="bg-zinc-700 rounded-md flex gap-2 items-center justify-center active:bg-zinc-800 focus-within:bg-zinc-800 focus-within:ring-2 ring-zinc-200 cursor-pointer px-3 py-2 mt-4"
 					>
-						<ArrowUpTrayIcon className="w-8 h-8 text-zinc-50" />
+						<PaperClipIcon className="w-6 h-6 text-zinc-50" />
 						<span>Upload</span>
 						<AssetPicker
 							id={`${formId}-upload`}
@@ -636,7 +644,8 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 			</DialogBody>
 			<DialogFooter>
 				<Button
-					className="w-full text-center my-4 bg-emerald-400 text-black"
+					mode="primary"
+					className="w-full text-center my-4"
 					disabled={!canSave}
 					onClick={onSubmit}
 				>

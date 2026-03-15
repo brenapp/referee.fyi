@@ -1,4 +1,8 @@
-import { type IncidentOutcome, OUTCOMES } from "@referee-fyi/share";
+import {
+	type IncidentOutcome,
+	IncidentOutcomeDisplayNames,
+	OUTCOMES,
+} from "@referee-fyi/share";
 import { createFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, m } from "motion/react";
 import { twMerge } from "tailwind-merge";
@@ -15,6 +19,8 @@ const OutcomeBackgroundClasses: Record<IncidentOutcome, string> = {
 	Disabled: "bg-blue-400/20 border-blue-400/50 text-blue-300",
 	General: "bg-zinc-400/20 border-zinc-400/50 text-zinc-300",
 	Inspection: "bg-zinc-400/20 border-zinc-400/50 text-zinc-300",
+	InspectionPassed: "bg-zinc-400/20 border-zinc-400/50 text-zinc-300",
+	InspectionFailed: "bg-zinc-400/20 border-zinc-400/50 text-zinc-300",
 };
 
 type OutcomeStats = Record<IncidentOutcome, number>;
@@ -26,10 +32,14 @@ function computeOutcomeStats(incidents: Incident[]): OutcomeStats {
 		Minor: 0,
 		Major: 0,
 		Inspection: 0,
+		InspectionPassed: 0,
+		InspectionFailed: 0,
 		Disabled: 0,
 	};
 	for (const incident of incidents) {
-		stats[incident.outcome]++;
+		if (incident.outcome in stats) {
+			stats[incident.outcome]++;
+		}
 	}
 	return stats;
 }
@@ -61,7 +71,9 @@ const OutcomeStatCard: React.FC<{
 			animate={{ opacity: 1, x: 0 }}
 			transition={{ delay: 0.8 + index * 0.1, duration: 0.5 }}
 		>
-			<span className="font-medium">{outcome}</span>
+			<span className="font-medium">
+				{IncidentOutcomeDisplayNames[outcome]}
+			</span>
 			<span className="font-mono font-bold text-lg">{count}</span>
 		</m.div>
 	);

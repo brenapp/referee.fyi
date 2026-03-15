@@ -9,6 +9,7 @@ import {
 import {
 	type IncidentFlag,
 	type IncidentOutcome,
+	IncidentOutcomeDisplayNames,
 	OUTCOMES,
 } from "@referee-fyi/share";
 import { useMutation } from "@tanstack/react-query";
@@ -41,7 +42,9 @@ const DEFAULT_FILTERS: Filters = {
 		General: true,
 		Major: true,
 		Minor: true,
-		Inspection: true,
+		Inspection: false,
+		InspectionPassed: true,
+		InspectionFailed: true,
 	},
 	rules: [],
 	contact: new Set(),
@@ -114,7 +117,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({
 				{OUTCOMES.map((outcome) => (
 					<Checkbox
 						key={outcome}
-						label={outcome}
+						label={IncidentOutcomeDisplayNames[outcome]}
 						checked={filters.outcomes[outcome]}
 						onChange={(e) =>
 							setFiltersField("outcomes", {

@@ -28,7 +28,11 @@ export const Menu: React.FC<MenuProps> = ({
 	const props: Partial<DialogProps> = {};
 
 	if (persistence.type === "ephemeral") {
-		props.onClick = () => setShow(false);
+		props.onClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+			if (e.target === e.currentTarget) {
+				setShow(false);
+			}
+		};
 	}
 
 	return (

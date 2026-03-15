@@ -6,6 +6,7 @@ import {
 	useMutationState,
 	useQuery,
 } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { Match, type MatchData } from "robotevents";
 import { toast } from "~components/Toast";
 import { useShareConnection } from "~models/ShareConnection";
@@ -76,11 +77,12 @@ export function useNewIncident() {
 	const connection = useShareConnection(["addIncident"]);
 	return useMutation({
 		mutationKey: ["newIncident"],
-		mutationFn: async (incident: NewIncident) => {
+		mutationFn: async (incident: Omit<NewIncident, "time">) => {
 			try {
+				const time = new Date().toISOString();
 				const { key: peer } = await getShareProfile();
 				const result = await newIncident({
-					data: incident,
+					data: { ...incident, time },
 					peer,
 					id: generateIncidentId(),
 				});
@@ -227,6 +229,41 @@ export function useTeamIncidentsByEvent(
 		refetchOnMount: "always",
 		...options,
 	});
+}
+
+export type InspectionStatus = "passed" | "failed" | "unknown";
+
+export type InspectionResult = {
+	status: InspectionStatus;
+	incident: Incident | null;
+};
+
+export function getInspectionStatus(incidents: Incident[]): InspectionResult {
+	const inspectionIncidents = incidents
+		.filter(
+			(i) =>
+				i.outcome === "InspectionPassed" || i.outcome === "InspectionFailed",
+		)
+		.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+
+	if (inspectionIncidents.length === 0) {
+		return { status: "unknown", incident: null };
+	}
+
+	const latest = inspectionIncidents[0];
+	return {
+		status: latest.outcome === "InspectionPassed" ? "passed" : "failed",
+		incident: latest,
+	};
+}
+
+export function useTeamInspectionStatus(
+	team: string | undefined | null,
+	sku: string | undefined | null,
+	options?: HookQueryOptions<Incident[]>,
+) {
+	const { data: incidents } = useTeamIncidentsByEvent(team, sku, options);
+	return useMemo(() => getInspectionStatus(incidents ?? []), [incidents]);
 }
 
 export type TeamIncidentsByMatch = {

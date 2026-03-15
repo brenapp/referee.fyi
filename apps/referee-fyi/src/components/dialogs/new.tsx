@@ -644,7 +644,8 @@ export const EventNewIncidentDialog: React.FC<EventNewIncidentDialogProps> = ({
 			</DialogBody>
 			<DialogFooter>
 				<Button
-					className="w-full text-center my-4 bg-emerald-400 text-black"
+					mode="primary"
+					className="w-full text-center my-4"
 					disabled={!canSave}
 					onClick={onSubmit}
 				>

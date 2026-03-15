@@ -81,6 +81,7 @@ export const TeamListItem: React.FC<TeamListItemProps> = ({
 					<hr className="mt-4 border-zinc-600" />
 					<Button
 						mode="normal"
+						align="left"
 						className="mt-4 bg-emerald-600"
 						onClick={() =>
 							onNewIncident({
@@ -94,6 +95,7 @@ export const TeamListItem: React.FC<TeamListItemProps> = ({
 					</Button>
 					<Button
 						mode="normal"
+						align="left"
 						className="mt-4 bg-red-500"
 						onClick={() =>
 							onNewIncident({
@@ -108,6 +110,7 @@ export const TeamListItem: React.FC<TeamListItemProps> = ({
 					<hr className="mt-4 border-zinc-600" />
 					<Button
 						mode="normal"
+						align="left"
 						className="mt-4 bg-blue-600"
 						onClick={() =>
 							onNewIncident({
@@ -121,6 +124,7 @@ export const TeamListItem: React.FC<TeamListItemProps> = ({
 					</Button>
 					<Button
 						mode="normal"
+						align="left"
 						className="mt-4 bg-yellow-500"
 						onClick={() =>
 							onNewIncident({
@@ -134,6 +138,7 @@ export const TeamListItem: React.FC<TeamListItemProps> = ({
 					</Button>
 					<Button
 						mode="normal"
+						align="left"
 						className="mt-4 bg-red-500"
 						onClick={() =>
 							onNewIncident({

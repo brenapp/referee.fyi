@@ -7,6 +7,12 @@ const INSPECTION_STATUS_CLASSES: Record<InspectionStatus, string> = {
 	unknown: "bg-zinc-500",
 };
 
+const INSPECTION_STATUS_SYMBOLS: Record<InspectionStatus, string> = {
+	passed: "P",
+	failed: "F",
+	unknown: "",
+};
+
 const INSPECTION_STATUS_LABELS: Record<InspectionStatus, string> = {
 	passed: "Inspection Passing",
 	failed: "Inspection Failing",
@@ -35,8 +41,12 @@ export const InspectionStatusDot: React.FC<{ status: InspectionStatus }> = ({
 
 	return (
 		<span
-			className={`w-2 h-2 rounded-full flex-shrink-0 ${INSPECTION_STATUS_CLASSES[status]}`}
+			role="img"
+			className={`w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center text-[9px] font-bold ${INSPECTION_STATUS_CLASSES[status]}`}
 			title={INSPECTION_STATUS_LABELS[status]}
-		/>
+			aria-label={INSPECTION_STATUS_LABELS[status]}
+		>
+			{INSPECTION_STATUS_SYMBOLS[status]}
+		</span>
 	);
 };

@@ -2,6 +2,7 @@ import { type FallbackRender, sendFeedback } from "@sentry/react";
 import { getMany, isStoragePersisted, keys } from "~utils/data/keyval";
 import { KEY } from "./crypto";
 import { getShareProfile, getShareSessionID } from "./share";
+import { getProductFlags } from "./state";
 
 const TOKEN = import.meta.env.VITE_LOGSERVER_TOKEN;
 
@@ -26,6 +27,7 @@ export async function reportIssue(
 	sku: string | null,
 	metadata: IssueReportMetadata,
 ): Promise<IssueReportResponse> {
+	const flags = getProductFlags();
 	const profile = await getShareProfile();
 	const date = new Date().toISOString();
 	const frontmatter = [
@@ -40,6 +42,7 @@ export async function reportIssue(
 		[`SKU`, sku],
 		[`URL`, window.location.toString()],
 		[`Storage Persisted`, (await isStoragePersisted()) ? "Yes" : "No"],
+		[`Flags`, JSON.stringify(flags)],
 	];
 
 	const body: string[] = [];

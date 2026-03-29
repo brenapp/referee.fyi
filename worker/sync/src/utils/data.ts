@@ -399,3 +399,24 @@ export async function setAssetMeta(env: Env, meta: AssetMeta) {
 		.run();
 	log("setAssetMeta", response);
 }
+
+export type FlagRow = {
+	key: string;
+	value: string | null;
+	created_at: string;
+	updated_at: string;
+};
+
+/**
+ * Gets all flags
+ **/
+export async function getFlags(env: Env): Promise<FlagRow[]> {
+	const response = await env.DB.prepare("SELECT * FROM flags").run<FlagRow>();
+	log("getFlags", response);
+
+	if (!response.success) {
+		return [];
+	}
+
+	return response.results;
+}

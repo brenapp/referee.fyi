@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { isWorldsBuild, WORLDS_EVENTS } from "~utils/data/state";
-import { useGeolocation } from "~utils/hooks/meta";
+import { WORLDS_EVENTS } from "~utils/data/state";
+import { useGeolocation, useProductFlag } from "~utils/hooks/meta";
 import { useEventInvitation } from "~utils/hooks/share";
 import { useCurrentEvent } from "~utils/hooks/state";
 import { Info, Warning } from "./Warning";
@@ -31,6 +31,7 @@ export const OfflineNotice: React.FC = () => {
 };
 
 export const DisconnectedWarning: React.FC = () => {
+	const productMode = useProductFlag("mode");
 	const { data: event } = useCurrentEvent();
 	const { data: invitation } = useEventInvitation(event?.sku);
 	const isSharing = useMemo(
@@ -38,7 +39,7 @@ export const DisconnectedWarning: React.FC = () => {
 		[invitation],
 	);
 
-	return isWorldsBuild() &&
+	return productMode === "WC" &&
 		!isSharing &&
 		WORLDS_EVENTS.includes(event?.sku ?? "") ? (
 		<Warning message="Disconnected from Shared Instance." />

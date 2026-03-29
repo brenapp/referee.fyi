@@ -8,10 +8,11 @@ import { Input } from "~components/Input";
 import { toast } from "~components/Toast";
 import { Info } from "~components/Warning";
 import { useShareConnection } from "~models/ShareConnection";
-import { isWorldsBuild } from "~utils/data/state";
+import { useProductFlag } from "~utils/hooks/meta";
 import { clearCache } from "~utils/sentry";
 
 export const SettingsPage: React.FC = () => {
+	const productMode = useProductFlag("mode");
 	const { updateProfile, profile, userMetadata } = useShareConnection([
 		"updateProfile",
 		"profile",
@@ -36,7 +37,7 @@ export const SettingsPage: React.FC = () => {
 
 	return (
 		<main className="mt-4 overflow-y-auto">
-			{isWorldsBuild() ? (
+			{productMode === "WC" ? (
 				<p className="bg-purple-500 text-zinc-300 p-2 rounded-md flex items-center gap-2 mt-4">
 					<GlobeAmericasIcon height={20} />
 					Worlds Build

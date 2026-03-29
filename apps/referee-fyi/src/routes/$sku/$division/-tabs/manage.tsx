@@ -36,9 +36,10 @@ import {
 	putRequestCode,
 	removeInvitation,
 } from "~utils/data/share";
-import { isWorldsBuild, WORLDS_EVENTS } from "~utils/data/state";
+import { WORLDS_EVENTS } from "~utils/data/state";
 import { useLocalAssetIdsToUploadForEvent } from "~utils/hooks/assets";
 import { useEventIncidents } from "~utils/hooks/incident";
+import { useProductFlag } from "~utils/hooks/meta";
 import { useEvent } from "~utils/hooks/robotevents";
 import {
 	useCreateInstance,
@@ -510,6 +511,8 @@ export const InstanceUserListItem: React.FC<InstanceUserListItemProps> = ({
 };
 
 export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
+	const productMode = useProductFlag("mode");
+
 	// Dialogs
 	const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
 	const [joinCodeDialogOpen, setJoinCodeDialogOpen] = useState(false);
@@ -674,7 +677,7 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
 						Create or join a sharing instance to synchronize the anomaly log
 						between devices.
 					</p>
-					{isWorldsBuild() && WORLDS_EVENTS.includes(event.sku) ? (
+					{productMode === "WC" && WORLDS_EVENTS.includes(event.sku) ? (
 						<p className="mt-2">
 							New instances cannot be created for this event. Please reach out
 							to your group area supervisor to get access to the existing Worlds

@@ -744,6 +744,45 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/meta/flags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lists all active flags.
+         * @description Returns all active flags from the database.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description List of active flags */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GetMetaFlagsResponse"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/sync/register": {
         parameters: {
             query?: never;
@@ -2515,6 +2554,15 @@ export interface components {
                     continent: string;
                 } | null;
             };
+        };
+        /** @description Response for the /api/meta/flags endpoint */
+        GetMetaFlagsResponse: {
+            /** @enum {boolean} */
+            success: true;
+            data: {
+                key: string;
+                value: string | null;
+            }[];
         };
         /** @description Response body for user registration */
         PostUserResponse: {

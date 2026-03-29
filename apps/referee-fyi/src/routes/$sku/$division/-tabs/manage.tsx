@@ -527,6 +527,7 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
 		"readyState",
 		"forceSync",
 		"disconnect",
+		"userMetadata",
 	]);
 
 	// If we are not in the instance, force an invalidation
@@ -677,7 +678,9 @@ export const ShareManager: React.FC<ManageTabProps> = ({ event }) => {
 						Create or join a sharing instance to synchronize the anomaly log
 						between devices.
 					</p>
-					{productMode === "WC" && WORLDS_EVENTS.includes(event.sku) ? (
+					{productMode === "WC" &&
+					WORLDS_EVENTS.includes(event.sku) &&
+					!connection.userMetadata.isSystemKey ? (
 						<p className="mt-2">
 							New instances cannot be created for this event. Please reach out
 							to your group area supervisor to get access to the existing Worlds

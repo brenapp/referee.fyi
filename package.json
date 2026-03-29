@@ -28,6 +28,8 @@
 		"lint:fix": "biome check --fix"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.4.4"
+		"@biomejs/biome": "2.4.4",
+		"@types/dom-speech-recognition": "^0.0.8",
+		"typescript": "^6.0.2"
 	}
 }

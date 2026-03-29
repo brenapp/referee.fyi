@@ -19,7 +19,7 @@ export const Success: React.FC<SuccessProps> = ({
 		<section
 			{...props}
 			className={twMerge(
-				"bg-emerald-300 text-emerald-950 p-2 rounded-md",
+				"bg-emerald-500 text-emerald-950 p-2 rounded-md",
 				props.className,
 			)}
 		>

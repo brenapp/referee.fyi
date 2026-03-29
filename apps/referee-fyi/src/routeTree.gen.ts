@@ -22,6 +22,7 @@ import { Route as SkuSkillsRouteImport } from './routes/$sku/skills'
 import { Route as SkuDevtoolsRouteImport } from './routes/$sku/devtools'
 import { Route as SkuDeletedRouteImport } from './routes/$sku/deleted'
 import { Route as SkuAssetsRouteImport } from './routes/$sku/assets'
+import { Route as SkuAmbientRouteImport } from './routes/$sku/ambient'
 import { Route as SkuDivisionIndexRouteImport } from './routes/$sku/$division/index'
 import { Route as Wrapped20252026DoneRouteImport } from './routes/wrapped/2025-2026/done'
 import { Route as Wrapped202520263RouteImport } from './routes/wrapped/2025-2026/3'
@@ -95,6 +96,11 @@ const SkuAssetsRoute = SkuAssetsRouteImport.update({
   path: '/assets',
   getParentRoute: () => SkuRouteRoute,
 } as any)
+const SkuAmbientRoute = SkuAmbientRouteImport.update({
+  id: '/ambient',
+  path: '/ambient',
+  getParentRoute: () => SkuRouteRoute,
+} as any)
 const SkuDivisionIndexRoute = SkuDivisionIndexRouteImport.update({
   id: '/$division/',
   path: '/$division/',
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/wrapped': typeof WrappedRouteRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
+  '/$sku/ambient': typeof SkuAmbientRoute
   '/$sku/assets': typeof SkuAssetsRoute
   '/$sku/deleted': typeof SkuDeletedRoute
   '/$sku/devtools': typeof SkuDevtoolsRoute
@@ -157,6 +164,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
+  '/$sku/ambient': typeof SkuAmbientRoute
   '/$sku/assets': typeof SkuAssetsRoute
   '/$sku/deleted': typeof SkuDeletedRoute
   '/$sku/devtools': typeof SkuDevtoolsRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/wrapped': typeof WrappedRouteRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/settings': typeof SettingsRoute
+  '/$sku/ambient': typeof SkuAmbientRoute
   '/$sku/assets': typeof SkuAssetsRoute
   '/$sku/deleted': typeof SkuDeletedRoute
   '/$sku/devtools': typeof SkuDevtoolsRoute
@@ -204,6 +213,7 @@ export interface FileRouteTypes {
     | '/wrapped'
     | '/privacy'
     | '/settings'
+    | '/$sku/ambient'
     | '/$sku/assets'
     | '/$sku/deleted'
     | '/$sku/devtools'
@@ -224,6 +234,7 @@ export interface FileRouteTypes {
     | '/'
     | '/privacy'
     | '/settings'
+    | '/$sku/ambient'
     | '/$sku/assets'
     | '/$sku/deleted'
     | '/$sku/devtools'
@@ -246,6 +257,7 @@ export interface FileRouteTypes {
     | '/wrapped'
     | '/privacy'
     | '/settings'
+    | '/$sku/ambient'
     | '/$sku/assets'
     | '/$sku/deleted'
     | '/$sku/devtools'
@@ -365,6 +377,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SkuAssetsRouteImport
       parentRoute: typeof SkuRouteRoute
     }
+    '/$sku/ambient': {
+      id: '/$sku/ambient'
+      path: '/ambient'
+      fullPath: '/$sku/ambient'
+      preLoaderRoute: typeof SkuAmbientRouteImport
+      parentRoute: typeof SkuRouteRoute
+    }
     '/$sku/$division/': {
       id: '/$sku/$division/'
       path: '/$division'
@@ -418,6 +437,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface SkuRouteRouteChildren {
+  SkuAmbientRoute: typeof SkuAmbientRoute
   SkuAssetsRoute: typeof SkuAssetsRoute
   SkuDeletedRoute: typeof SkuDeletedRoute
   SkuDevtoolsRoute: typeof SkuDevtoolsRoute
@@ -430,6 +450,7 @@ interface SkuRouteRouteChildren {
 }
 
 const SkuRouteRouteChildren: SkuRouteRouteChildren = {
+  SkuAmbientRoute: SkuAmbientRoute,
   SkuAssetsRoute: SkuAssetsRoute,
   SkuDeletedRoute: SkuDeletedRoute,
   SkuDevtoolsRoute: SkuDevtoolsRoute,

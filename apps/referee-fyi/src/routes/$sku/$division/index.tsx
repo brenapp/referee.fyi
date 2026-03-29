@@ -6,16 +6,67 @@ import {
 import {
 	CloudIcon as ManageIconSolid,
 	ClipboardDocumentListIcon as MatchesIconSolid,
+	MicrophoneIcon,
+	StopIcon,
 	UserGroupIcon as TeamsIconSolid,
 } from "@heroicons/react/24/solid";
 import { createFileRoute } from "@tanstack/react-router";
+import { m, type Variants } from "motion/react";
 import { useEffect } from "react";
+import { IconButton } from "~components/Button";
 import { Tabs } from "~components/Tabs";
 import { useCurrentEvent } from "~hooks/state";
+import { useAmbientMode } from "~utils/hooks/ambient";
 import { useAddEventVisited } from "~utils/hooks/history";
 import { EventManageTab } from "./-tabs/manage";
 import { EventMatchesTab } from "./-tabs/matches";
 import { EventTeamsTab } from "./-tabs/teams";
+
+export const AmbientInterstitial: React.FC = () => {
+	const { listening, start, stop, results } = useAmbientMode();
+
+	const variants: Variants = {
+		inactive: { height: "3rem" },
+		listening: { height: "3rem" },
+		pending: { height: "8rem" },
+	};
+
+	const animate = listening ? "listening" : "inactive";
+
+	const lastResult = results.length > 0 ? results[results.length - 1] : null;
+
+	return (
+		<section className="flex gap-2 rounded-md mb-4">
+			<IconButton
+				className="rounded-md bg-emerald-600"
+				onClick={() => (listening ? stop() : start())}
+				icon={
+					listening ? (
+						<StopIcon className="h-6 aspect-square" />
+					) : (
+						<MicrophoneIcon className="h-6 aspect-square" />
+					)
+				}
+			/>
+			<m.div
+				className="bg-zinc-900 rounded-md flex-1"
+				variants={variants}
+				initial="inactive"
+				animate={animate}
+			>
+				<nav className="h-12 mx-2 flex items-center">
+					{listening ? (
+						JSON.stringify(lastResult)
+					) : (
+						<span className="text-sm text-emerald-400 font-bold">
+							Ambient Mode
+						</span>
+					)}
+				</nav>
+			</m.div>
+		</section>
+	);
+};
 
 export const EventHome: React.FC = () => {
 	const { data: event } = useCurrentEvent();
@@ -29,6 +80,7 @@ export const EventHome: React.FC = () => {
 
 	return event ? (
 		<section className="mt-4 flex flex-col">
+			<AmbientInterstitial />
 			<Tabs
 				id={["/$sku/$division", "EventHome"]}
 				className="flex-1"

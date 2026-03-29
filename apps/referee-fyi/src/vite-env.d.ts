@@ -19,16 +19,16 @@ declare module "*.md" {
 	const html: string;
 	const raw: string;
 
-	import React from "react";
+	import type React from "react";
 	const ReactComponent: React.VFC;
 
-	import { ComponentOptions, Component } from "vue";
+	import type { ComponentOptions, Component } from "vue";
 	const VueComponent: ComponentOptions;
 	const VueComponentWith: (
 		components: Record<string, Component>,
 	) => ComponentOptions;
 
-	export {
+	export type {
 		attributes,
 		toc,
 		html,

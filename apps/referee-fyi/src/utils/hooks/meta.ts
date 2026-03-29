@@ -1,4 +1,8 @@
-import { type UseQueryResult, useQuery } from "@tanstack/react-query";
+import {
+	keepPreviousData,
+	type UseQueryResult,
+	useQuery,
+} from "@tanstack/react-query";
 import type { Routes } from "~types/worker/sync";
 import { getGeolocation } from "~utils/data/meta";
 import {
@@ -29,8 +33,9 @@ export function useProductFlags(
 	return useQuery({
 		queryKey: ["@referee-fyi/useProductFlags"],
 		queryFn: getProductFlags,
-		staleTime: 1000 * 60 * 60,
-		networkMode: "offlineFirst",
+		staleTime: 1000 * 60,
+		gcTime: 1000 * 60 * 60,
+		placeholderData: keepPreviousData,
 		...options,
 	});
 }

@@ -14,16 +14,6 @@ export type UpcomingMatchProps = {
 	event: EventData;
 	onClickMatch: (e: React.MouseEvent<HTMLButtonElement>) => void;
 };
-
-/**
- * Determines if a match has started or has a non-zero score.
- * @param match Match to check.
- * @returns True if the match has started or any alliance has a non-zero score; otherwise false.
- */
-function isMatchStarted(match: Match): boolean {
-	return !!match.started || match.alliances.some((a) => a.score !== 0);
-}
-
 /**
  * Computes the next upcoming match from a list of matches. RobotEvents has a
  * bug where it will incorrectly report some matches are not started when they
@@ -37,24 +27,22 @@ function getUpcomingMatch(matches: Match[]): Match | null {
 	for (let i = 0; i < matches.length; i++) {
 		const match = matches[i];
 
-		if (isMatchStarted(match)) {
+		if (match.started) {
 			continue;
 		}
 
-		// Look ahead to see if any subsequent matches have started
-		let allLaterMatchesUnstarted = true;
-		for (let j = i + 1; j < matches.length; j++) {
-			if (isMatchStarted(matches[j])) {
-				allLaterMatchesUnstarted = false;
-				break;
-			}
-		}
-
-		if (allLaterMatchesUnstarted) {
+		if (match.alliances.some((a) => a.score !== 0)) {
 			continue;
 		}
 
-		return match;
+		const nextMatch = i < matches.length - 1 ? matches[i + 1] : null;
+		if (!nextMatch) {
+			return match;
+		}
+
+		if (!nextMatch.started && nextMatch.alliances.some((a) => a.score === 0)) {
+			return match;
+		}
 	}
 
 	return null;

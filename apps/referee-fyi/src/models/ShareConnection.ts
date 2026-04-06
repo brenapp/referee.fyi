@@ -77,7 +77,7 @@ export type ShareConnectionData = {
 	invitation: UserInvitation | null;
 	activeUsers: User[];
 	invitations: InvitationListItem[];
-	reconnectTimer: NodeJS.Timeout | null;
+	reconnectTimer: number | null;
 	assetUploads: Record<string, Promise<ShareResponse<null>>>;
 };
 

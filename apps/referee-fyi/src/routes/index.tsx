@@ -183,6 +183,7 @@ export const HomePage: React.FC = () => {
 					<section className="m-4 mt-0">
 						<p>Build Version</p>
 						<ClickToCopy message={__REFEREE_FYI_VERSION__} />
+						{/* @ts-expect-error vite nonsense */}
 						<UpdateNotes />
 					</section>
 				</DialogBody>

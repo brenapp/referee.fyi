@@ -8,10 +8,13 @@ import { Input } from "~components/Input";
 import { toast } from "~components/Toast";
 import { Info } from "~components/Warning";
 import { useShareConnection } from "~models/ShareConnection";
-import { isWorldsBuild } from "~utils/data/state";
+import { useProductFlag, useProductFlags } from "~utils/hooks/meta";
 import { clearCache } from "~utils/sentry";
 
 export const SettingsPage: React.FC = () => {
+	const { data: flags } = useProductFlags();
+	const productMode = useProductFlag("mode");
+
 	const { updateProfile, profile, userMetadata } = useShareConnection([
 		"updateProfile",
 		"profile",
@@ -36,7 +39,7 @@ export const SettingsPage: React.FC = () => {
 
 	return (
 		<main className="mt-4 overflow-y-auto">
-			{isWorldsBuild() ? (
+			{productMode === "WC" ? (
 				<p className="bg-purple-500 text-zinc-300 p-2 rounded-md flex items-center gap-2 mt-4">
 					<GlobeAmericasIcon height={20} />
 					Worlds Build
@@ -59,7 +62,19 @@ export const SettingsPage: React.FC = () => {
 				<ClickToCopy message={profile?.key ?? ""} />
 			</section>
 			{userMetadata.isSystemKey ? (
-				<Info message="System Key Enabled" className="mt-4" />
+				<>
+					<Info message="System Key Enabled" className="mt-4" />
+					<ul>
+						{flags?.map((flag) => (
+							<li key={flag.key} className="p-2 bg-zinc-900 rounded-md mt-2">
+								<span className="font-mono">{flag.key}</span>
+								<span className="ml-2 font-mono text-sm text-emerald-400">
+									{JSON.stringify(flag.value)}
+								</span>
+							</li>
+						))}
+					</ul>
+				</>
 			) : null}
 			<section className="mt-4">
 				<h2 className="font-bold">Report Issues with Referee FYI</h2>

@@ -16,11 +16,14 @@ import {
 	newManyIncidents,
 } from "~utils/data/incident";
 import { getShareProfile } from "~utils/data/share";
+import { useProductFlags } from "~utils/hooks/meta";
 import { useDivisionTeams, useEventMatches } from "~utils/hooks/robotevents";
 import { useRulesForEvent } from "~utils/hooks/rules";
 import { useCurrentEvent } from "~utils/hooks/state";
 
 export const EventDevTools: React.FC = () => {
+	const { data: flags } = useProductFlags();
+
 	const { data: event } = useCurrentEvent({
 		networkMode: "always",
 		refetchOnMount: "always",
@@ -265,6 +268,19 @@ export const EventDevTools: React.FC = () => {
 					Throw Error
 				</Button>
 				{errorChild as ReactNode}
+			</section>
+			<section className="mt-4">
+				<h2 className="font-bold">Product Flags</h2>
+				<ul>
+					{flags?.map((flag) => (
+						<li key={flag.key} className="p-2 bg-zinc-900 rounded-md mt-2">
+							<span className="font-mono">{flag.key}</span>
+							<span className="ml-2 font-mono text-sm text-emerald-400">
+								{JSON.stringify(flag.value)}
+							</span>
+						</li>
+					))}
+				</ul>
 			</section>
 		</section>
 	);

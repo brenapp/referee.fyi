@@ -7,8 +7,9 @@ import { Dialog, DialogBody, DialogHeader } from "~components/Dialog";
 import { UpdatePrompt } from "~components/UpdatePrompt";
 import { WrappedPrompt } from "~components/WrappedPrompt";
 import { getEventInvitation } from "~utils/data/share";
-import { isWorldsBuild, WORLDS_EVENTS } from "~utils/data/state";
+import { WORLDS_EVENTS } from "~utils/data/state";
 import { useRecentEvents } from "~utils/hooks/history";
+import { useProductFlag } from "~utils/hooks/meta";
 import { useDisplayMode, useInstallPrompt } from "~utils/hooks/pwa";
 import { useEventSearch } from "~utils/hooks/robotevents";
 
@@ -96,16 +97,17 @@ const InstallPrompt: React.FC = () => {
 };
 
 function useHomeEvents() {
+	const productMode = useProductFlag("mode");
 	const { data: worldsEvents } = useEventSearch(
 		{
 			"sku[]": WORLDS_EVENTS,
 		},
-		{ enabled: isWorldsBuild() },
+		{ enabled: productMode === "WC" },
 	);
 
 	const { data: recentUser } = useRecentEvents(5);
 
-	return isWorldsBuild() ? worldsEvents : recentUser;
+	return productMode === "WC" ? worldsEvents : recentUser;
 }
 
 export const HomePage: React.FC = () => {
